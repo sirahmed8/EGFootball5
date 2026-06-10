@@ -20,7 +20,7 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/50 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="text-2xl font-black tracking-tighter text-foreground hover:scale-105 active:scale-95 transition-all duration-200">
-          Kick<span className="text-primary drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]">Off</span>
+          EG<span className="text-primary drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]">Football5</span>
         </Link>
         <div className="flex items-center gap-6">
           <Link href="/book" className="text-sm font-semibold text-foreground/80 hover:text-foreground hover:scale-105 active:scale-95 transition-all duration-200">
