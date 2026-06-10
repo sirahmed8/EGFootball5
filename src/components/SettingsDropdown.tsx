@@ -21,10 +21,10 @@ export function SettingsDropdown() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const t = useTranslations('Navbar'); // We will add settings translations later or hardcode
 
   const toggleLanguage = () => {
     const nextLocale = locale === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('preferredLocale', nextLocale);
     window.location.href = `/${nextLocale}${pathname === '/' ? '' : pathname}`;
   };
 

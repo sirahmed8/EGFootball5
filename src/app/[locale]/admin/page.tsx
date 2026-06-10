@@ -337,11 +337,46 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <Label>Profile Picture URL</Label>
-                    <Input 
-                      value={editingPitch.imagePreviewUrl} 
-                      onChange={e => setEditingPitch({...editingPitch, imagePreviewUrl: e.target.value})} 
-                      className="bg-card text-foreground"
-                    />
+                    <div className="flex gap-4 items-center">
+                      <Input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          
+                          try {
+                            setSavingPitch(true);
+                            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+                            if (!cloudName) throw new Error("Cloudinary not configured");
+                            
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            formData.append('upload_preset', 'kickoff_preset');
+                            formData.append('folder', 'pitches');
+
+                            const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                              method: 'POST',
+                              body: formData
+                            });
+                            
+                            if (!res.ok) throw new Error("Upload failed");
+                            const data = await res.json();
+                            setEditingPitch({...editingPitch, imagePreviewUrl: data.secure_url});
+                            toast.success('Image uploaded successfully');
+                          } catch (err: any) {
+                            toast.error(err.message);
+                          } finally {
+                            setSavingPitch(false);
+                          }
+                        }}
+                        className="bg-card text-foreground flex-1 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
+                      />
+                      {editingPitch.imagePreviewUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={editingPitch.imagePreviewUrl} alt="Preview" className="w-12 h-12 rounded-lg object-cover" />
+                      )}
+                    </div>
                   </div>
                   <Button 
                     onClick={handleUpdatePitch} 

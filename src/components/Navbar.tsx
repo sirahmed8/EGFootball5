@@ -14,6 +14,7 @@ export function Navbar() {
 
   const handleLogout = async () => {
     await signOut(auth);
+    window.location.href = '/';
   };
 
   return (

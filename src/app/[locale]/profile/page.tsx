@@ -67,7 +67,7 @@ export default function ProfilePage() {
              </div>
              <div className="space-y-2">
                <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
-               <Input id="phone" type="tel" required placeholder="010XXXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} className="bg-background border-border text-foreground focus-visible:ring-primary" />
+               <Input id="phone" type="tel" required placeholder="01XXXXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} className="bg-background border-border text-foreground focus-visible:ring-primary" />
              </div>
           </CardContent>
           <CardFooter>

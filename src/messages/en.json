@@ -14,18 +14,33 @@
     "signInBtn": "Sign In",
     "features": {
       "turf": {
-        "title": "Premium Turf",
-        "desc": "FIFA-approved artificial grass designed for maximum performance and safety."
+        "title": "Seamless Booking",
+        "desc": "Book any pitch with a few taps. Secure your slot and ensure fairness for everyone."
       },
       "booking": {
-        "title": "Zero Overbooking",
-        "desc": "Our advanced booking engine guarantees your slot the moment you lock it."
+        "title": "Tournaments & Leagues",
+        "desc": "Join local leagues, track top scorers, and compete for glory. (Coming Soon)"
       },
       "payment": {
-        "title": "Easy Payments",
-        "desc": "Upload your Vodafone Cash or Instapay receipt in seconds to secure your match."
+        "title": "Fair & Transparent",
+        "desc": "Automated slot locking prevents double bookings. Pay exactly what is required based on group size."
       }
-    }
+    },
+    "heroSubtitle": "The Ultimate Football Booking Platform in Obour",
+    "heroDescription": "Book pitches, organize matches, and manage your stadiums with unparalleled ease and flawless design.",
+    "whyChooseUs": "Why Choose Us?",
+    "trustedBy": "Trusted by the Community",
+    "players": "Players",
+    "stadiums": "Stadiums",
+    "matches": "Matches Played",
+    "rating": "Rating",
+    "ready": "Ready to Kick Off?",
+    "readyDesc": "Join the best platform and start playing your favorite sport today.",
+    "getStarted": "Get Started / Login",
+    "footerPrivacy": "Privacy Policy",
+    "footerTerms": "Terms of Service",
+    "footerCookies": "Cookie Policy",
+    "footerRights": "© 2026 EGFootball5. All rights reserved."
   },
   "Login": {
     "signIn": "Sign In",
