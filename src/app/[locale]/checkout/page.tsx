@@ -143,8 +143,8 @@ function CheckoutForm() {
           <h3 className="text-foreground font-bold">{t('paymentDetails')}</h3>
           <p className="text-muted-foreground text-sm">{t('transferInfo')} <strong className="text-primary">{booking.depositAmount} EGP</strong> {t('secureInfo')}</p>
           <ul className="text-muted-foreground text-sm list-disc rtl:pr-4 ltr:pl-4 space-y-1 mt-2">
-            <li>فودافون كاش: 01012345678</li>
-            <li>إنستاباي: kickoff@instapay</li>
+            <li>{t('vodafoneCash')}</li>
+            <li>{t('instapay')}</li>
           </ul>
         </div>
 

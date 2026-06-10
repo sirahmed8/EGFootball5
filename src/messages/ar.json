@@ -30,7 +30,7 @@
   "Login": {
     "signIn": "تسجيل الدخول",
     "createAccount": "إنشاء حساب",
-    "welcomeBack": "مرحباً بك مجدداً في KickOff",
+    "welcomeBack": "مرحباً بك مجدداً في EGFootball5",
     "joinUs": "انضم لأفضل منصة لحجز الملاعب",
     "fullName": "الاسم الكامل",
     "phone": "رقم الموبايل",
@@ -39,7 +39,8 @@
     "processing": "جاري التحميل...",
     "signUp": "تسجيل جديد",
     "noAccount": "ليس لديك حساب؟ سجل الآن",
-    "hasAccount": "لديك حساب بالفعل؟ سجل دخول"
+    "hasAccount": "لديك حساب بالفعل؟ سجل دخول",
+    "continueWithGoogle": "المتابعة باستخدام Google"
   },
   "Book": {
     "title": "احجز ملعبك",
@@ -82,7 +83,9 @@
     "uploadLabel": "ارفع صورة الإيصال",
     "uploading": "جاري الرفع...",
     "submitBtn": "إرسال الإيصال",
-    "loading": "جاري تحميل تفاصيل الحجز..."
+    "loading": "جاري تحميل تفاصيل الحجز...",
+    "vodafoneCash": "فودافون كاش: 01012345678",
+    "instapay": "إنستاباي: egfootball5@instapay"
   },
   "Admin": {
     "title": "لوحة تحكم الملعب",

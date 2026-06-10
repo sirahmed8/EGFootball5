@@ -47,9 +47,9 @@ export default function LoginPage() {
           <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-2">
             <div className="w-8 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
           </div>
-          <CardTitle className="text-4xl font-black text-card-foreground tracking-tight">KickOff</CardTitle>
+          <CardTitle className="text-4xl font-black text-card-foreground tracking-tight">EGFootball5</CardTitle>
           <CardDescription className="text-muted-foreground text-lg">
-            Welcome back to KickOff
+            {t('welcomeBack')}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 mt-8 pb-8">
@@ -59,7 +59,7 @@ export default function LoginPage() {
             onClick={handleGoogleSignIn} 
             className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 text-lg h-14 rounded-xl"
           >
-            Continue with Google
+            {t('continueWithGoogle')}
           </Button>
         </CardContent>
       </Card>

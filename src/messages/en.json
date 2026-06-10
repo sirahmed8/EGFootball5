@@ -30,7 +30,7 @@
   "Login": {
     "signIn": "Sign In",
     "createAccount": "Create Account",
-    "welcomeBack": "Welcome back to KickOff",
+    "welcomeBack": "Welcome back to EGFootball5",
     "joinUs": "Join the ultimate booking platform",
     "fullName": "Full Name",
     "phone": "Phone Number",
@@ -39,7 +39,8 @@
     "processing": "Processing...",
     "signUp": "Sign Up",
     "noAccount": "Don't have an account? Sign Up",
-    "hasAccount": "Already have an account? Sign In"
+    "hasAccount": "Already have an account? Sign In",
+    "continueWithGoogle": "Continue with Google"
   },
   "Book": {
     "title": "Book Your Pitch",
@@ -82,11 +83,13 @@
     "uploadLabel": "Upload Receipt",
     "uploading": "Uploading...",
     "submitBtn": "Submit Receipt",
-    "loading": "Loading booking details..."
+    "loading": "Loading booking details...",
+    "vodafoneCash": "Vodafone Cash: 01012345678",
+    "instapay": "Instapay: egfootball5@instapay"
   },
   "Admin": {
     "title": "Pitch Dashboard",
-    "subtitle": "Operational Powerhouse for KickOff",
+    "subtitle": "Operational Powerhouse for EGFootball5",
     "revenue": "Total Revenue",
     "pending": "Pending Approvals",
     "pitches": "Active Pitches",
