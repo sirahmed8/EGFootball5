@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -38,16 +39,18 @@ export function SettingsDropdown() {
         <span className="sr-only">Settings</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-white/10 text-white">
-        <DropdownMenuLabel>Settings</DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-white/10" />
-        <DropdownMenuItem onClick={toggleLanguage} className="cursor-pointer hover:bg-zinc-800">
-          <Languages className="mr-2 h-4 w-4" />
-          <span>{locale === 'ar' ? 'English' : 'العربية'}</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer hover:bg-zinc-800">
-          {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-          <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Settings</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-white/10" />
+          <DropdownMenuItem onClick={toggleLanguage} className="cursor-pointer hover:bg-zinc-800">
+            <Languages className="mr-2 h-4 w-4" />
+            <span>{locale === 'ar' ? 'English' : 'العربية'}</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer hover:bg-zinc-800">
+            {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
