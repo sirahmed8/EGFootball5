@@ -28,6 +28,11 @@ export function Navbar() {
               {t('adminDashboard')}
             </Link>
           )}
+          {appUser?.role === 'owner' && (
+            <Link href="/owner" className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors drop-shadow-[0_0_5px_rgba(0,255,255,0.3)]">
+              Owner Dashboard
+            </Link>
+          )}
           {firebaseUser ? (
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground hidden sm:inline-block">

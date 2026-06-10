@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { doc, onSnapshot, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { useSearchParams } from 'next/navigation';
 import { Pitch } from '@/types';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,6 +12,8 @@ import { format, addDays, isBefore, startOfDay } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { lockSlot, OPENING_HOUR, CLOSING_HOUR } from '@/lib/firebase/booking';
 import { useTranslations, useLocale } from 'next-intl';
@@ -19,11 +22,16 @@ import { ar, enUS } from 'date-fns/locale';
 // Generate blocks from OPENING_HOUR to CLOSING_HOUR - 0.5
 const BLOCKS = Array.from({ length: (CLOSING_HOUR - OPENING_HOUR) * 2 }, (_, i) => OPENING_HOUR + (i * 0.5));
 
-export default function BookPage() {
+import { Suspense } from 'react';
+
+function BookContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pitchId = searchParams.get('pitchId');
   const { firebaseUser } = useAuthStore();
   const t = useTranslations('Book');
   const locale = useLocale();
+
   
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -31,6 +39,8 @@ export default function BookPage() {
   const [loadingLock, setLoadingLock] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'morning' | 'afternoon' | 'evening' | 'night'>('all');
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
+  const [bookingType, setBookingType] = useState<'private' | 'public'>('private');
+  const [numPeople, setNumPeople] = useState<number>(10);
 
   useEffect(() => {
     setSelectedRange(null);
@@ -38,13 +48,14 @@ export default function BookPage() {
 
   useEffect(() => {
     const fetchPitch = async () => {
-      const snap = await getDoc(doc(db, 'pitches', 'pitch_1'));
+      if (!pitchId) return;
+      const snap = await getDoc(doc(db, 'pitches', pitchId));
       if (snap.exists()) {
         setPitch(snap.data() as Pitch);
       }
     };
     fetchPitch();
-  }, []);
+  }, [pitchId]);
 
   useEffect(() => {
     if (!pitch || !date) return;
@@ -69,10 +80,7 @@ export default function BookPage() {
     let totalAmount = 0;
     
     for (let i = 0; i < numBlocks; i++) {
-      const currentBlock = selectedRange.start + (i * 0.5);
-      const hourFloor = Math.floor(currentBlock);
-      const isPeak = pitch.peakHours.includes(hourFloor);
-      totalAmount += isPeak ? (pitch.pricing.peak / 2) : (pitch.pricing.offPeak / 2);
+      totalAmount += (pitch.pricePerHour / 2);
     }
     
     return {
@@ -121,7 +129,9 @@ export default function BookPage() {
     setLoadingLock(selectedRange.start);
     try {
       const bookingId = await lockSlot(firebaseUser.uid, pitch.id, formattedDate, selectedRange.start, duration, totalAmount, depositAmount);
-      router.push(`/checkout?bookingId=${bookingId}`);
+      
+      // We would normally pass bookingType and numPeople to lockSlot, but we'll append it to the checkout URL or update later.
+      router.push(`/checkout?bookingId=${bookingId}&type=${bookingType}&people=${numPeople}`);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -183,7 +193,7 @@ export default function BookPage() {
           {pitch?.name || 'Our Pitch'}
         </h1>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl">
-          {pitch?.location || 'Select a date and slots to book'}
+          {pitch?.locationName || 'Select a date and slots to book'}
         </p>
       </div>
 
@@ -217,7 +227,7 @@ export default function BookPage() {
                 <span>{t('availableSlots', { date: date ? format(date, 'MMM d, yyyy', { locale: locale === 'ar' ? ar : enUS }) : '' })}</span>
               </CardTitle>
               <CardDescription className="text-muted-foreground text-sm">
-                {t('peakInfo')} <span className="text-destructive font-bold">{t('peakColor')}</span>.
+                Select a time slot that works for you.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -321,7 +331,6 @@ export default function BookPage() {
                 }).map((block, idx) => {
                   const status = getSlotStatus(block);
                   const hourFloor = Math.floor(block);
-                  const isPeak = pitch?.peakHours.includes(hourFloor);
 
                   let bgClass = 'bg-slate-50 dark:bg-white/5 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/5 hover:text-foreground hover:-translate-y-1 hover:shadow-md transition-all duration-300 rounded-xl';
                   let cursorClass = 'cursor-pointer';
@@ -345,9 +354,7 @@ export default function BookPage() {
                       text += t('endLabel');
                     }
                   } else {
-                    if (isPeak) {
-                      bgClass = 'bg-amber-50/80 dark:bg-destructive/10 border border-amber-200 dark:border-destructive/30 text-amber-900 dark:text-foreground hover:bg-amber-100 dark:hover:bg-destructive/20 hover:border-amber-400 dark:hover:border-destructive hover:-translate-y-1 hover:shadow-md transition-all duration-300 rounded-xl';
-                    }
+                    // Normal state (no peak highlighting anymore)
                   }
 
                   // Add staggered animation delay
@@ -357,8 +364,7 @@ export default function BookPage() {
                     <div
                       key={block}
                       onClick={() => !disabled && handleSlotClick(block)}
-                      style={{ animationDelay: animDelay }}
-                      className={`p-4 text-center font-bold relative flex items-center justify-center animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both ${bgClass} ${cursorClass}`}
+                      className={`p-4 text-center font-bold relative flex items-center justify-center transition-all duration-300 ${bgClass} ${cursorClass}`}
                     >
                       <span>{loadingLock === block ? t('locking') : text}</span>
                     </div>
@@ -401,6 +407,34 @@ export default function BookPage() {
                       </div>
                     </div>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border pt-4">
+                      <div className="space-y-2">
+                        <Label>Booking Type</Label>
+                        <Select value={bookingType} onValueChange={(v: any) => setBookingType(v)}>
+                          <SelectTrigger className="bg-card">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="private">Private (Only you & friends)</SelectItem>
+                            <SelectItem value="public">Public (Open for anyone to join)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Number of People (Min 10)</Label>
+                        <Input 
+                          type="number" 
+                          min={10} 
+                          value={numPeople} 
+                          onChange={(e) => setNumPeople(Math.max(10, parseInt(e.target.value) || 10))}
+                          className="bg-card"
+                        />
+                      </div>
+                    </div>
+                    <div className="text-sm text-center text-muted-foreground">
+                      Estimated Cost per Person: <strong className="text-foreground">{(totalAmount / Math.max(10, numPeople)).toFixed(2)} EGP</strong>
+                    </div>
+
                     <Button
                       onClick={handleConfirmBooking}
                       disabled={loadingLock !== null}
@@ -416,5 +450,13 @@ export default function BookPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BookPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center mt-16">Loading booking details...</div>}>
+      <BookContent />
+    </Suspense>
   );
 }

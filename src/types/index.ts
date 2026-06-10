@@ -1,4 +1,4 @@
-export type Role = 'player' | 'admin';
+export type Role = 'player' | 'admin' | 'owner';
 
 export interface User {
   uid: string;
@@ -17,9 +17,15 @@ export interface Pricing {
 export interface Pitch {
   id: string;
   name: string;
-  location: string;
-  pricing: Pricing;
-  peakHours: number[]; // Array of hours (0-23)
+  locationName: string;
+  mapLink: string;
+  imagePreviewUrl: string;
+  pricePerHour: number;
+  recipient: string;
+  managerName: string;
+  adminEmail: string;
+  adminPhone: string;
+  createdAt: number;
 }
 
 export type BookingStatus = 'locked_temporary' | 'pending_review' | 'confirmed' | 'rejected';

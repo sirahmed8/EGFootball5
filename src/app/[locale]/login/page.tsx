@@ -21,19 +21,56 @@ export default function LoginPage() {
       
       const userRef = doc(db, 'users', user.uid);
       const userSnap = await getDoc(userRef);
+      
+      const isOwner = user.email === 'a7medorabe7@gmail.com';
+      let defaultRole = isOwner ? 'owner' : 'player';
+
+      // Check if user is an admin by querying pitches
+      if (!isOwner && user.email) {
+        const { collection, query, where, getDocs } = await import('firebase/firestore');
+        const q = query(collection(db, 'pitches'), where('adminEmail', '==', user.email));
+        const qs = await getDocs(q);
+        if (!qs.empty) {
+          defaultRole = 'admin';
+        }
+      }
+
       if (!userSnap.exists()) {
         const appUser: AppUser = {
           uid: user.uid,
           name: user.displayName || 'Player',
           phone: user.phoneNumber || '',
-          role: 'player',
+          role: defaultRole as AppUser['role'],
           isBlacklisted: false,
           createdAt: Date.now()
         };
         await setDoc(userRef, appUser);
         router.push('/profile');
       } else {
-        router.push('/book');
+        const appUser = userSnap.data() as AppUser;
+        let roleUpdated = false;
+
+        // Auto upgrade owner if not set
+        if (isOwner && appUser.role !== 'owner') {
+          appUser.role = 'owner';
+          roleUpdated = true;
+        } else if (!isOwner && defaultRole === 'admin' && appUser.role !== 'admin') {
+          // Auto upgrade admin if matched pitch
+          appUser.role = 'admin';
+          roleUpdated = true;
+        }
+        
+        if (roleUpdated) {
+          await setDoc(userRef, { role: appUser.role }, { merge: true });
+        }
+        
+        if (appUser.role === 'owner') {
+          router.push('/owner');
+        } else if (appUser.role === 'admin') {
+          router.push('/admin');
+        } else {
+          router.push('/home');
+        }
       }
     } catch (error: any) {
       toast.error(error.message || 'Google sign-in failed');

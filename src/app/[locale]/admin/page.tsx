@@ -13,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { confirmBooking, rejectBooking } from '@/lib/firebase/booking';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import Image from 'next/image';
 
 const formatTime = (block: number) => {
@@ -25,11 +27,14 @@ const formatTime = (block: number) => {
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const { appUser, loading } = useAuthStore();
+  const { appUser, firebaseUser, loading } = useAuthStore();
   const t = useTranslations('Admin');
   
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [usersCache, setUsersCache] = useState<Record<string, AppUser>>({});
+  const [pitch, setPitch] = useState<any>(null);
+  const [editingPitch, setEditingPitch] = useState<any>(null);
+  const [savingPitch, setSavingPitch] = useState(false);
 
   useEffect(() => {
     if (!loading && appUser?.role !== 'admin') {
@@ -38,30 +43,52 @@ export default function AdminDashboard() {
   }, [appUser, loading, router]);
 
   useEffect(() => {
-    if (appUser?.role !== 'admin') return;
+    if (appUser?.role !== 'admin' || !firebaseUser?.email) return;
 
-    const q = query(collection(db, 'bookings'));
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const bks = snapshot.docs.map(doc => doc.data() as Booking);
-      setBookings(bks);
+    const fetchPitchAndBookings = async () => {
+      const { collection, query, where, getDocs } = await import('firebase/firestore');
+      const pitchQ = query(collection(db, 'pitches'), where('adminEmail', '==', firebaseUser.email));
+      const pitchSnap = await getDocs(pitchQ);
       
-      // Fetch user data for new users
-      const newUsers = { ...usersCache };
-      let updated = false;
-      for (const bk of bks) {
-        if (!newUsers[bk.userId]) {
-          const userSnap = await getDoc(doc(db, 'users', bk.userId));
-          if (userSnap.exists()) {
-            newUsers[bk.userId] = userSnap.data() as AppUser;
-            updated = true;
+      if (pitchSnap.empty) {
+        toast.error('No pitch assigned to this admin.');
+        return;
+      }
+      
+      const pitchData = pitchSnap.docs[0].data();
+      setPitch(pitchData);
+      setEditingPitch(pitchData);
+
+      const q = query(collection(db, 'bookings'), where('pitchId', '==', pitchData.id));
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const bks = snapshot.docs.map(doc => doc.data() as Booking);
+        setBookings(bks);
+        
+        // Fetch user data for new users
+        const newUsers = { ...usersCache };
+        let updated = false;
+        for (const bk of bks) {
+          if (!newUsers[bk.userId]) {
+            const userSnap = await getDoc(doc(db, 'users', bk.userId));
+            if (userSnap.exists()) {
+              newUsers[bk.userId] = userSnap.data() as AppUser;
+              updated = true;
+            }
           }
         }
-      }
-      if (updated) setUsersCache(newUsers);
-    });
+        if (updated) setUsersCache(newUsers);
+      });
 
-    return () => unsubscribe();
-  }, [appUser]);
+      return unsubscribe;
+    };
+
+    let unsub: any;
+    fetchPitchAndBookings().then(u => unsub = u);
+    
+    return () => {
+      if (typeof unsub === 'function') unsub();
+    };
+  }, [appUser, firebaseUser]);
 
   if (loading || appUser?.role !== 'admin') {
     return <div className="p-8 text-center text-white">Authenticating...</div>;
@@ -123,6 +150,26 @@ export default function AdminDashboard() {
     return bookings.filter(b => b.userId === userId && b.status === 'confirmed').length;
   };
 
+  const handleUpdatePitch = async () => {
+    if (!pitch) return;
+    setSavingPitch(true);
+    try {
+      await updateDoc(doc(db, 'pitches', pitch.id), {
+        name: editingPitch.name,
+        pricePerHour: Number(editingPitch.pricePerHour),
+        imagePreviewUrl: editingPitch.imagePreviewUrl,
+        locationName: editingPitch.locationName,
+        mapLink: editingPitch.mapLink
+      });
+      setPitch(editingPitch);
+      toast.success('Pitch details updated successfully');
+    } catch (e: any) {
+      toast.error('Failed to update: ' + e.message);
+    } finally {
+      setSavingPitch(false);
+    }
+  };
+
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8">
       <div>
@@ -153,6 +200,7 @@ export default function AdminDashboard() {
         <TabsList className="bg-muted/50 border border-border mb-4 p-1 rounded-xl">
           <TabsTrigger value="verification" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold rounded-lg">{t('verificationQueue')}</TabsTrigger>
           <TabsTrigger value="schedule" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">{t('liveSchedule')}</TabsTrigger>
+          <TabsTrigger value="settings" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">Pitch Settings</TabsTrigger>
         </TabsList>
         
         <TabsContent value="verification">
@@ -242,6 +290,68 @@ export default function AdminDashboard() {
                   )})}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <Card className="bg-card/50 border-border backdrop-blur-xl">
+            <CardHeader>
+              <CardTitle className="text-card-foreground">Edit Pitch Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {editingPitch && (
+                <div className="space-y-4 max-w-xl">
+                  <div>
+                    <Label>Pitch Name</Label>
+                    <Input 
+                      value={editingPitch.name} 
+                      onChange={e => setEditingPitch({...editingPitch, name: e.target.value})} 
+                      className="bg-card text-foreground"
+                    />
+                  </div>
+                  <div>
+                    <Label>Price Per Hour (EGP)</Label>
+                    <Input 
+                      type="number"
+                      value={editingPitch.pricePerHour} 
+                      onChange={e => setEditingPitch({...editingPitch, pricePerHour: e.target.value})} 
+                      className="bg-card text-foreground"
+                    />
+                  </div>
+                  <div>
+                    <Label>Location Name</Label>
+                    <Input 
+                      value={editingPitch.locationName} 
+                      onChange={e => setEditingPitch({...editingPitch, locationName: e.target.value})} 
+                      className="bg-card text-foreground"
+                    />
+                  </div>
+                  <div>
+                    <Label>Google Maps Link</Label>
+                    <Input 
+                      value={editingPitch.mapLink} 
+                      onChange={e => setEditingPitch({...editingPitch, mapLink: e.target.value})} 
+                      className="bg-card text-foreground"
+                    />
+                  </div>
+                  <div>
+                    <Label>Profile Picture URL</Label>
+                    <Input 
+                      value={editingPitch.imagePreviewUrl} 
+                      onChange={e => setEditingPitch({...editingPitch, imagePreviewUrl: e.target.value})} 
+                      className="bg-card text-foreground"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleUpdatePitch} 
+                    disabled={savingPitch}
+                    className="w-full font-bold bg-primary text-primary-foreground"
+                  >
+                    {savingPitch ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

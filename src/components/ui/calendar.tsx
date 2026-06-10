@@ -49,7 +49,7 @@ function Calendar({
       month={props.month !== undefined ? props.month : currentMonth}
       onMonthChange={handleMonthChange}
       className={cn(
-        "group/calendar w-full bg-background p-3 [--cell-radius:var(--radius-lg)] [--cell-size:2.75rem] sm:[--cell-size:3.5rem] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
+        "group/calendar w-full bg-background p-3 sm:p-6 [--cell-radius:var(--radius-lg)] [--cell-size:3.5rem] sm:[--cell-size:4.5rem] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -165,7 +165,7 @@ function Calendar({
           return (
             <div
               key={currentMonth.toISOString().slice(0, 7)}
-              className={cn("animate-in fade-in zoom-in-95 duration-300", className)}
+              className={cn("animate-in fade-in slide-in-from-left-4 duration-500", className)}
               {...props}
             />
           )
@@ -233,7 +233,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        "relative isolate z-10 flex aspect-square w-full h-full max-w-(--cell-size) max-h-(--cell-size) flex-col items-center justify-center gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70",
+        "relative isolate z-10 flex aspect-square w-full h-full max-w-(--cell-size) max-h-(--cell-size) flex-col items-center justify-center gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[selected-single=true]:hover:bg-primary/90 data-[selected-single=true]:hover:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70",
         className
       )}
       {...props}
