@@ -13,7 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { lockSlot, OPENING_HOUR, CLOSING_HOUR } from '@/lib/firebase/booking';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { ar, enUS } from 'date-fns/locale';
 
 // Generate blocks from OPENING_HOUR to CLOSING_HOUR - 0.5
 const BLOCKS = Array.from({ length: (CLOSING_HOUR - OPENING_HOUR) * 2 }, (_, i) => OPENING_HOUR + (i * 0.5));
@@ -22,6 +23,7 @@ export default function BookPage() {
   const router = useRouter();
   const { firebaseUser } = useAuthStore();
   const t = useTranslations('Book');
+  const locale = useLocale();
   
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -117,7 +119,7 @@ export default function BookPage() {
   const formatTime = (block: number) => {
     const hour = Math.floor(block);
     const mins = block % 1 === 0 ? '00' : '30';
-    const ampm = hour >= 12 && hour < 24 ? 'PM' : 'AM';
+    const ampm = hour >= 12 && hour < 24 ? t('pm') : t('am');
     const modHour = hour % 12 || 12;
     return `${modHour}:${mins} ${ampm}`;
   };
@@ -162,6 +164,7 @@ export default function BookPage() {
                 onSelect={setDate}
                 disabled={(d) => isBefore(d, startOfDay(new Date())) || isBefore(addDays(new Date(), 14), d)}
                 className="rounded-xl border border-border p-3"
+                locale={locale === 'ar' ? ar : enUS}
               />
             </CardContent>
           </Card>
@@ -170,7 +173,7 @@ export default function BookPage() {
         <div className="lg:col-span-2">
           <Card className="bg-card text-card-foreground border-border backdrop-blur-md min-h-[600px]">
             <CardHeader>
-              <CardTitle className="text-card-foreground">{t('availableSlots', { date: date ? format(date, 'MMM d, yyyy') : '' })}</CardTitle>
+              <CardTitle className="text-card-foreground">{t('availableSlots', { date: date ? format(date, 'MMM d, yyyy', { locale: locale === 'ar' ? ar : enUS }) : '' })}</CardTitle>
               <CardDescription className="text-muted-foreground">
                 {t('peakInfo')} <span className="text-destructive font-bold">{t('peakColor')}</span>.
               </CardDescription>
@@ -182,21 +185,21 @@ export default function BookPage() {
                   const hourFloor = Math.floor(block);
                   const isPeak = pitch?.peakHours.includes(hourFloor);
 
-                  let bgClass = 'bg-card text-card-foreground border border-border hover:border-primary/50 hover:bg-primary/5 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 rounded-xl';
+                  let bgClass = 'bg-slate-50 dark:bg-white/5 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/5 hover:text-foreground hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 rounded-xl';
                   let cursorClass = 'cursor-pointer';
                   let disabled = false;
                   let text = formatTime(block);
 
                   if (status === 'taken' || status === 'locked_by_other') {
-                    bgClass = 'bg-muted/50 text-muted-foreground border border-border opacity-50 rounded-xl';
+                    bgClass = 'bg-slate-200/50 dark:bg-muted/30 text-slate-400 dark:text-muted-foreground border border-dashed border-slate-300 dark:border-border opacity-50 rounded-xl';
                     cursorClass = 'cursor-not-allowed';
                     disabled = true;
                   } else if (status === 'locked_by_me') {
                     bgClass = 'bg-secondary text-secondary-foreground border border-transparent shadow-[0_0_15px_rgba(0,255,255,0.3)] ring-2 ring-secondary hover:-translate-y-0.5 transition-all duration-300 rounded-xl';
-                    text += ` (Finish)`;
+                    text += t('selectedSuffix');
                   } else {
                     if (isPeak) {
-                      bgClass = 'bg-destructive/5 border border-destructive/30 text-foreground hover:bg-destructive/10 hover:border-destructive hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 rounded-xl';
+                      bgClass = 'bg-amber-50/80 dark:bg-destructive/10 border border-amber-200 dark:border-destructive/30 text-amber-900 dark:text-foreground hover:bg-amber-100 dark:hover:bg-destructive/20 hover:border-amber-400 dark:hover:border-destructive hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 rounded-xl';
                     }
                   }
 

@@ -53,7 +53,10 @@
     "booked": "Booked",
     "finishBooking": "Finish Booking",
     "locking": "Locking...",
-    "egp": "EGP"
+    "egp": "EGP",
+    "am": "AM",
+    "pm": "PM",
+    "selectedSuffix": " (Finish)"
   },
   "Checkout": {
     "title": "Complete Your Booking",
@@ -88,5 +91,9 @@
     "addPitch": "Add Test Pitch",
     "tournamentsTitle": "Tournaments Engine",
     "tournamentsDesc": "Generate brackets, manage teams, and track scores automatically. This premium feature is currently under development."
+  },
+  "Metadata": {
+    "title": "KickOff | Book Your Pitch",
+    "description": "Book your 5-a-side pitch instantly and easily."
   }
 }
