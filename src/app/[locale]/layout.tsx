@@ -57,9 +57,9 @@ export default async function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
             <AuthProvider>
               <Navbar />
-              <div className="pt-16 min-h-screen flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <main className="pt-16 min-h-screen flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {children}
-              </div>
+              </main>
               <Toaster theme="dark" />
             </AuthProvider>
           </ThemeProvider>

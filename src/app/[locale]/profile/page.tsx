@@ -50,24 +50,24 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading || !appUser) return <div className="p-8 text-center text-white">Loading...</div>;
+  if (loading || !appUser) return <div className="p-8 text-center text-foreground">Loading...</div>;
 
   return (
     <div className="flex-1 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-zinc-900/80 border-white/10 backdrop-blur-xl">
+      <Card className="w-full max-w-md bg-card/80 border-border backdrop-blur-xl">
         <CardHeader>
-          <CardTitle className="text-2xl text-white">Your Profile</CardTitle>
-          <CardDescription className="text-zinc-400">Manage your details</CardDescription>
+          <CardTitle className="text-2xl text-card-foreground">Your Profile</CardTitle>
+          <CardDescription className="text-muted-foreground">Manage your details</CardDescription>
         </CardHeader>
         <form onSubmit={handleSave}>
           <CardContent className="space-y-4">
              <div className="space-y-2">
-               <Label htmlFor="name" className="text-zinc-300">Full Name</Label>
-               <Input id="name" required value={name} onChange={e => setName(e.target.value)} className="bg-zinc-800/50 border-white/10 text-white focus-visible:ring-primary" />
+               <Label htmlFor="name" className="text-foreground">Full Name</Label>
+               <Input id="name" required value={name} onChange={e => setName(e.target.value)} className="bg-background border-border text-foreground focus-visible:ring-primary" />
              </div>
              <div className="space-y-2">
-               <Label htmlFor="phone" className="text-zinc-300">Phone Number</Label>
-               <Input id="phone" type="tel" required placeholder="010XXXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} className="bg-zinc-800/50 border-white/10 text-white focus-visible:ring-primary" />
+               <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
+               <Input id="phone" type="tel" required placeholder="010XXXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} className="bg-background border-border text-foreground focus-visible:ring-primary" />
              </div>
           </CardContent>
           <CardFooter>

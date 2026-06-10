@@ -128,36 +128,36 @@ function CheckoutForm() {
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  if (!booking) return <div className="p-8 text-center text-white">{t('loading')}</div>;
+  if (!booking) return <div className="p-8 text-center text-foreground">{t('loading')}</div>;
 
   return (
-    <Card className="w-full max-w-lg bg-zinc-900/80 border-white/10 backdrop-blur-xl">
+    <Card className="w-full max-w-lg bg-card/80 border-border backdrop-blur-xl">
       <CardHeader>
-        <CardTitle className="text-2xl text-white text-center">{t('title')}</CardTitle>
-        <CardDescription className="text-zinc-400 text-center">
+        <CardTitle className="text-2xl text-card-foreground text-center">{t('title')}</CardTitle>
+        <CardDescription className="text-muted-foreground text-center">
           {t('timerInfo')} <span className="text-primary font-bold">{formatTime(timeLeft)}</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="bg-zinc-800/50 p-4 rounded-xl border border-white/5 space-y-2">
-          <h3 className="text-white font-bold">{t('paymentDetails')}</h3>
-          <p className="text-zinc-300 text-sm">{t('transferInfo')} <strong className="text-primary">{booking.depositAmount} EGP</strong> {t('secureInfo')}</p>
-          <ul className="text-zinc-400 text-sm list-disc rtl:pr-4 ltr:pl-4 space-y-1 mt-2">
+        <div className="bg-muted/50 p-4 rounded-xl border border-border space-y-2">
+          <h3 className="text-foreground font-bold">{t('paymentDetails')}</h3>
+          <p className="text-muted-foreground text-sm">{t('transferInfo')} <strong className="text-primary">{booking.depositAmount} EGP</strong> {t('secureInfo')}</p>
+          <ul className="text-muted-foreground text-sm list-disc rtl:pr-4 ltr:pl-4 space-y-1 mt-2">
             <li>فودافون كاش: 01012345678</li>
             <li>إنستاباي: kickoff@instapay</li>
           </ul>
         </div>
 
         <div className="space-y-4">
-          <label className="block text-zinc-300 font-medium">{t('uploadLabel')}</label>
+          <label className="block text-foreground font-medium">{t('uploadLabel')}</label>
           <input 
             type="file" 
             accept="image/*" 
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="w-full text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
+            className="w-full text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
           />
           {uploading && (
-            <div className="w-full bg-zinc-800 rounded-full h-2">
+            <div className="w-full bg-secondary rounded-full h-2">
               <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${progress}%` }}></div>
             </div>
           )}
@@ -179,7 +179,7 @@ function CheckoutForm() {
 export default function CheckoutPage() {
   return (
     <div className="flex-1 flex items-center justify-center p-4">
-      <Suspense fallback={<div className="text-white">Loading...</div>}>
+      <Suspense fallback={<div className="text-foreground">Loading...</div>}>
         <CheckoutForm />
       </Suspense>
     </div>

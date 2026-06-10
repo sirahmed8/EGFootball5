@@ -19,11 +19,11 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/50 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-black tracking-tighter text-white">
+        <Link href="/" className="text-2xl font-black tracking-tighter text-foreground">
           EG<span className="text-primary drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]">Football5</span>
         </Link>
         <div className="flex items-center gap-6">
-          <Link href="/book" className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">
+          <Link href="/book" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             {t('bookPitch')}
           </Link>
           {appUser?.role === 'admin' && (
@@ -33,10 +33,10 @@ export function Navbar() {
           )}
           {firebaseUser ? (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-zinc-400 hidden sm:inline-block">
+              <span className="text-sm text-muted-foreground hidden sm:inline-block">
                 {t('hi', { name: appUser?.name || 'Player' })}
               </span>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white">
+              <Button variant="outline" size="sm" onClick={handleLogout} className="border-border text-foreground hover:bg-accent hover:text-accent-foreground">
                 {t('logout')}
               </Button>
             </div>

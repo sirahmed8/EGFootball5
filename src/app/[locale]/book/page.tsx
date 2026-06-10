@@ -125,15 +125,15 @@ export default function BookPage() {
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8">
       <div>
-        <h1 className="text-4xl font-black text-white">{pitch?.name || 'Our Pitch'}</h1>
-        <p className="text-zinc-400 mt-2">{pitch?.location || 'Select a date and duration to book'}</p>
+        <h1 className="text-4xl font-black text-foreground">{pitch?.name || 'Our Pitch'}</h1>
+        <p className="text-muted-foreground mt-2">{pitch?.location || 'Select a date and duration to book'}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-8">
           <Card className="bg-card text-card-foreground border-border backdrop-blur-md">
             <CardHeader>
-              <CardTitle className="text-white">Duration</CardTitle>
+              <CardTitle className="text-card-foreground">Duration</CardTitle>
             </CardHeader>
             <CardContent>
               <Select value={duration.toString()} onValueChange={(v) => setDuration(v ? parseFloat(v) : 1)}>
@@ -153,7 +153,7 @@ export default function BookPage() {
 
           <Card className="bg-card text-card-foreground border-border backdrop-blur-md">
             <CardHeader>
-              <CardTitle className="text-white">{t('selectDate')}</CardTitle>
+              <CardTitle className="text-card-foreground">{t('selectDate')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Calendar
@@ -170,8 +170,8 @@ export default function BookPage() {
         <div className="lg:col-span-2">
           <Card className="bg-card text-card-foreground border-border backdrop-blur-md min-h-[600px]">
             <CardHeader>
-              <CardTitle className="text-white">{t('availableSlots', { date: date ? format(date, 'MMM d, yyyy') : '' })}</CardTitle>
-              <CardDescription className="text-zinc-400">
+              <CardTitle className="text-card-foreground">{t('availableSlots', { date: date ? format(date, 'MMM d, yyyy') : '' })}</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 {t('peakInfo')} <span className="text-destructive font-bold">{t('peakColor')}</span>.
               </CardDescription>
             </CardHeader>
@@ -182,34 +182,32 @@ export default function BookPage() {
                   const hourFloor = Math.floor(block);
                   const isPeak = pitch?.peakHours.includes(hourFloor);
 
-                  let bgClass = 'bg-zinc-800/50 text-white border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600';
+                  let bgClass = 'bg-card text-card-foreground border border-border hover:border-primary/50 hover:bg-primary/5 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 rounded-xl';
                   let cursorClass = 'cursor-pointer';
                   let disabled = false;
                   let text = formatTime(block);
 
                   if (status === 'taken' || status === 'locked_by_other') {
-                    bgClass = 'bg-zinc-900/30 text-zinc-600 border-zinc-800/50';
+                    bgClass = 'bg-muted/50 text-muted-foreground border border-border opacity-50 rounded-xl';
                     cursorClass = 'cursor-not-allowed';
                     disabled = true;
                   } else if (status === 'locked_by_me') {
-                    bgClass = 'bg-secondary text-black hover:bg-secondary/90 shadow-[0_0_15px_rgba(0,255,255,0.3)] border-transparent';
+                    bgClass = 'bg-secondary text-secondary-foreground border border-transparent shadow-[0_0_15px_rgba(0,255,255,0.3)] ring-2 ring-secondary hover:-translate-y-0.5 transition-all duration-300 rounded-xl';
                     text += ` (Finish)`;
                   } else {
                     if (isPeak) {
-                      bgClass = 'bg-zinc-800/50 border-s-4 border-s-destructive border-y-zinc-700 border-e-zinc-700 text-white hover:bg-zinc-700';
+                      bgClass = 'bg-destructive/5 border border-destructive/30 text-foreground hover:bg-destructive/10 hover:border-destructive hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 rounded-xl';
                     }
                   }
 
                   return (
-                    <Button
+                    <div
                       key={block}
-                      variant="outline"
-                      className={`h-16 flex-col gap-1 text-sm font-medium transition-all duration-200 ${bgClass} ${cursorClass} ${!disabled && 'hover:scale-[1.02] active:scale-95'}`}
-                      disabled={disabled || loadingLock === block}
-                      onClick={() => handleSlotClick(block)}
+                      onClick={() => !disabled && handleSlotClick(block)}
+                      className={`p-4 text-center font-bold relative flex items-center justify-center ${bgClass} ${cursorClass}`}
                     >
                       <span>{loadingLock === block ? t('locking') : text}</span>
-                    </Button>
+                    </div>
                   );
                 })}
               </div>

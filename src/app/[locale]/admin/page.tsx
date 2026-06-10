@@ -126,22 +126,22 @@ export default function AdminDashboard() {
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8">
       <div>
-        <h1 className="text-4xl font-black text-white">{t('title')}</h1>
-        <p className="text-zinc-400 mt-2">{t('subtitle')}</p>
+        <h1 className="text-4xl font-black text-foreground">{t('title')}</h1>
+        <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-zinc-900/50 border-white/10 backdrop-blur-xl">
+        <Card className="bg-card/50 border-border backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-zinc-400">{t('revenue')}</CardTitle>
+            <CardTitle className="text-muted-foreground">{t('revenue')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-primary drop-shadow-[0_0_10px_rgba(57,255,20,0.4)]">{revenue} EGP</p>
           </CardContent>
         </Card>
-        <Card className="bg-zinc-900/50 border-white/10 backdrop-blur-xl">
+        <Card className="bg-card/50 border-border backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-zinc-400">{t('pending')}</CardTitle>
+            <CardTitle className="text-muted-foreground">{t('pending')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.4)]">{pendingReview.length}</p>
@@ -150,49 +150,49 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="verification" className="w-full">
-        <TabsList className="bg-zinc-900/80 border border-white/10 mb-4 p-1 rounded-xl">
-          <TabsTrigger value="verification" className="data-[state=active]:bg-primary data-[state=active]:text-black font-semibold rounded-lg">{t('verificationQueue')}</TabsTrigger>
-          <TabsTrigger value="schedule" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white font-semibold rounded-lg">{t('liveSchedule')}</TabsTrigger>
+        <TabsList className="bg-muted/50 border border-border mb-4 p-1 rounded-xl">
+          <TabsTrigger value="verification" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold rounded-lg">{t('verificationQueue')}</TabsTrigger>
+          <TabsTrigger value="schedule" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">{t('liveSchedule')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="verification">
-          <Card className="bg-zinc-900/50 border-white/10 backdrop-blur-xl">
+          <Card className="bg-card/50 border-border backdrop-blur-xl">
             <CardHeader>
-              <CardTitle className="text-white">{t('pendingReceipts')}</CardTitle>
+              <CardTitle className="text-card-foreground">{t('pendingReceipts')}</CardTitle>
             </CardHeader>
             <CardContent>
               {pendingReview.length === 0 ? (
-                <p className="text-zinc-500">{t('noPending')}</p>
+                <p className="text-muted-foreground">{t('noPending')}</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {pendingReview.map(booking => {
                     const user = usersCache[booking.userId];
                     const loyalty = getUserLoyalty(booking.userId);
                     return (
-                    <div key={booking.id} className="border border-white/10 rounded-xl p-4 bg-zinc-800/30 flex flex-col gap-4">
+                    <div key={booking.id} className="border border-border rounded-xl p-4 bg-muted/30 flex flex-col gap-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="font-bold text-white text-lg">{booking.date}</p>
+                          <p className="font-bold text-foreground text-lg">{booking.date}</p>
                           <p className="text-sm text-primary font-medium">{formatTime(booking.timeSlot)} ({booking.duration} hr)</p>
-                          <p className="text-sm text-zinc-400 mt-1">{t('amount')} {booking.totalAmount} EGP</p>
+                          <p className="text-sm text-muted-foreground mt-1">{t('amount')} {booking.totalAmount} EGP</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-white">{user?.name || 'Unknown'}</p>
-                          <p className="text-xs text-zinc-400">{user?.phone || 'No phone'}</p>
+                          <p className="text-sm font-bold text-foreground">{user?.name || 'Unknown'}</p>
+                          <p className="text-xs text-muted-foreground">{user?.phone || 'No phone'}</p>
                           <p className="text-xs text-secondary font-bold mt-1">Loyalty: {loyalty} bookings</p>
                         </div>
                       </div>
                       {booking.receiptUrl ? (
-                        <div className="aspect-[3/4] w-full relative rounded-lg overflow-hidden border border-white/10">
+                        <div className="aspect-[3/4] w-full relative rounded-lg overflow-hidden border border-border">
                           {/* We use standard img to avoid next.config remotePattern issues if not configured, or if configured, Image */}
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={booking.receiptUrl} alt="Receipt" className="object-cover w-full h-full" />
                         </div>
                       ) : (
-                        <div className="h-48 bg-zinc-800 flex items-center justify-center rounded-lg text-zinc-500">{t('noImage')}</div>
+                        <div className="h-48 bg-muted flex items-center justify-center rounded-lg text-muted-foreground">{t('noImage')}</div>
                       )}
                       <div className="grid grid-cols-2 gap-2 mt-auto pt-4">
-                        <Button className="bg-primary text-black hover:bg-primary/90 font-bold" onClick={() => handleApprove(booking)}>{t('approve')}</Button>
+                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold" onClick={() => handleApprove(booking)}>{t('approve')}</Button>
                         <Button variant="destructive" onClick={() => handleReject(booking)} className="font-bold">{t('reject')}</Button>
                       </div>
                     </div>
@@ -204,28 +204,28 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="schedule">
-          <Card className="bg-zinc-900/50 border-white/10 backdrop-blur-xl">
+          <Card className="bg-card/50 border-border backdrop-blur-xl">
             <CardHeader>
-              <CardTitle className="text-white">{t('liveSchedule')}</CardTitle>
+              <CardTitle className="text-card-foreground">{t('liveSchedule')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
-                  <TableRow className="border-white/10 hover:bg-white/5">
-                    <TableHead className="text-zinc-400">Player</TableHead>
-                    <TableHead className="text-zinc-400">{t('date')}</TableHead>
-                    <TableHead className="text-zinc-400">{t('time')}</TableHead>
-                    <TableHead className="text-zinc-400">{t('status')}</TableHead>
+                  <TableRow className="border-border hover:bg-muted/50">
+                    <TableHead className="text-muted-foreground">Player</TableHead>
+                    <TableHead className="text-muted-foreground">{t('date')}</TableHead>
+                    <TableHead className="text-muted-foreground">{t('time')}</TableHead>
+                    <TableHead className="text-muted-foreground">{t('status')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bookings.map((booking) => {
                     const user = usersCache[booking.userId];
                     return (
-                    <TableRow key={booking.id} className="border-white/10 hover:bg-white/5 text-zinc-300">
+                    <TableRow key={booking.id} className="border-border hover:bg-muted/50 text-foreground">
                       <TableCell className="font-medium">
                         {user?.name || 'Player'}
-                        <div className="text-xs text-zinc-500">{user?.phone}</div>
+                        <div className="text-xs text-muted-foreground">{user?.phone}</div>
                       </TableCell>
                       <TableCell>{booking.date}</TableCell>
                       <TableCell>{formatTime(booking.timeSlot)} ({booking.duration}h)</TableCell>
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                           booking.status === 'confirmed' ? 'bg-primary/20 text-primary border border-primary/20' :
                           booking.status === 'pending_review' ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/20' :
-                          'bg-zinc-500/20 text-zinc-400 border border-zinc-500/20'
+                          'bg-muted text-muted-foreground border border-border'
                         }`}>
                           {booking.status}
                         </span>
