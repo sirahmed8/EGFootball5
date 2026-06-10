@@ -37,13 +37,13 @@ export default function AdminDashboard() {
   const [savingPitch, setSavingPitch] = useState(false);
 
   useEffect(() => {
-    if (!loading && appUser?.role !== 'admin') {
+    if (!loading && appUser?.role !== 'admin' && appUser?.role !== 'owner') {
       router.push('/');
     }
   }, [appUser, loading, router]);
 
   useEffect(() => {
-    if (appUser?.role !== 'admin' || !firebaseUser?.email) return;
+    if ((appUser?.role !== 'admin' && appUser?.role !== 'owner') || !firebaseUser?.email) return;
 
     const fetchPitchAndBookings = async () => {
       const { collection, query, where, getDocs } = await import('firebase/firestore');
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
     };
   }, [appUser, firebaseUser]);
 
-  if (loading || appUser?.role !== 'admin') {
+  if (loading || (appUser?.role !== 'admin' && appUser?.role !== 'owner')) {
     return <div className="p-8 text-center text-white">Authenticating...</div>;
   }
 
