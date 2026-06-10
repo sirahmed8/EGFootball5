@@ -74,25 +74,17 @@ function CheckoutForm() {
     setUploading(true);
 
     try {
-      // 1. Get Signature from our backend
-      const res = await fetch('/api/cloudinary/sign', { method: 'POST' });
-      const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.error || 'Failed to sign request');
-
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
       
       if (!cloudName || cloudName === 'your-cloud-name') {
          throw new Error("Please set your NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME in .env.local");
       }
 
       // 2. Upload to Cloudinary using FormData and XMLHttpRequest for progress
+      // USING UNSIGNED UPLOAD FOR STATIC SITE
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('api_key', apiKey!);
-      formData.append('timestamp', data.timestamp);
-      formData.append('signature', data.signature);
+      formData.append('upload_preset', 'kickoff_preset');
       formData.append('folder', 'receipts');
 
       const xhr = new XMLHttpRequest();
@@ -112,7 +104,7 @@ function CheckoutForm() {
           toast.success('Receipt uploaded successfully! Awaiting admin review.');
           router.push('/book');
         } else {
-          toast.error('Failed to upload to Cloudinary');
+          toast.error('Failed to upload to Cloudinary. Make sure "kickoff_preset" exists and is unsigned.');
           setUploading(false);
         }
       };

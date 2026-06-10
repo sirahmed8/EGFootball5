@@ -3,8 +3,12 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
-export default function Home() {
-  const t = useTranslations('Landing');
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+
+export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations('Landing');
 
   return (
     <main className="flex min-h-screen flex-col overflow-hidden">
