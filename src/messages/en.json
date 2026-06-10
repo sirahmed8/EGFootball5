@@ -1,0 +1,92 @@
+{
+  "Navbar": {
+    "bookPitch": "Book a Pitch",
+    "adminDashboard": "Pitch Dashboard",
+    "hi": "Hi, {name}",
+    "logout": "Logout",
+    "signIn": "Sign In"
+  },
+  "Landing": {
+    "title": "Dominate the Pitch.",
+    "highlight": "Book Instantly.",
+    "subtitle": "Experience the ultimate 5-a-side football arenas. Top-tier turf, seamless booking, and instant confirmation for your next match.",
+    "bookBtn": "Book a Pitch Now",
+    "signInBtn": "Sign In",
+    "features": {
+      "turf": {
+        "title": "Premium Turf",
+        "desc": "FIFA-approved artificial grass designed for maximum performance and safety."
+      },
+      "booking": {
+        "title": "Zero Overbooking",
+        "desc": "Our advanced booking engine guarantees your slot the moment you lock it."
+      },
+      "payment": {
+        "title": "Easy Payments",
+        "desc": "Upload your Vodafone Cash or Instapay receipt in seconds to secure your match."
+      }
+    }
+  },
+  "Login": {
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "welcomeBack": "Welcome back to KickOff",
+    "joinUs": "Join the ultimate booking platform",
+    "fullName": "Full Name",
+    "phone": "Phone Number",
+    "email": "Email",
+    "password": "Password",
+    "processing": "Processing...",
+    "signUp": "Sign Up",
+    "noAccount": "Don't have an account? Sign Up",
+    "hasAccount": "Already have an account? Sign In"
+  },
+  "Book": {
+    "title": "Book Your Pitch",
+    "subtitle": "Select a pitch, date, and time slot to secure your game.",
+    "selectPitch": "Select Pitch",
+    "noPitches": "No pitches available.",
+    "selectDate": "Select Date",
+    "availableSlots": "Available Slots for {date}",
+    "peakInfo": "Peak hours are marked in",
+    "peakColor": "red",
+    "booked": "Booked",
+    "finishBooking": "Finish Booking",
+    "locking": "Locking...",
+    "egp": "EGP"
+  },
+  "Checkout": {
+    "title": "Complete Your Booking",
+    "timerInfo": "Your slot is locked for",
+    "paymentDetails": "Payment Details",
+    "transferInfo": "Please transfer",
+    "secureInfo": "to secure your booking.",
+    "uploadLabel": "Upload Receipt",
+    "uploading": "Uploading...",
+    "submitBtn": "Submit Receipt",
+    "loading": "Loading booking details..."
+  },
+  "Admin": {
+    "title": "Pitch Dashboard",
+    "subtitle": "Operational Powerhouse for KickOff",
+    "revenue": "Total Revenue",
+    "pending": "Pending Approvals",
+    "pitches": "Active Pitches",
+    "verificationQueue": "Verification Queue",
+    "liveSchedule": "Live Schedule",
+    "tournaments": "Tournaments",
+    "comingSoon": "Coming Soon",
+    "pendingReceipts": "Pending Receipts",
+    "noPending": "No pending receipts to review.",
+    "amount": "Amount:",
+    "approve": "Approve",
+    "reject": "Reject",
+    "noImage": "No Image",
+    "date": "Date",
+    "time": "Time",
+    "status": "Status",
+    "addPitch": "Add Test Pitch",
+    "tournamentsTitle": "Tournaments Engine",
+    "tournamentsDesc": "Generate brackets, manage teams, and track scores automatically. This premium feature is currently under development."
+  }
+}

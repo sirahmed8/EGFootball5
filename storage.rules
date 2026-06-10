@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Admin check
+    function isAdmin() {
+      // Storage rules can't directly query firestore without a custom claim or the get() function.
+      // We will use the firestore.get() function available in storage rules v2.
+      return request.auth != null && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /receipts/{userId}/{imageId} {
+      // Users can only upload receipts to their own folder
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId 
+                   && request.resource.size < 5 * 1024 * 1024 
+                   && request.resource.contentType.matches('image/.*');
+      // Users can read their own receipts, Admins can read all
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+  }
+}

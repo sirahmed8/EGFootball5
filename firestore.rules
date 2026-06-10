@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Function to check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Users can read and write their own profile, Admins can read/write all
+      allow read: if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAuth() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Pitches collection
+    match /pitches/{pitchId} {
+      // Anyone can read pitches
+      allow read: if true;
+      // Only admins can write
+      allow write: if isAdmin();
+    }
+
+    // Bookings collection
+    match /bookings/{bookingId} {
+      allow read: if true;
+      allow create: if request.auth != null 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.status == 'locked_temporary';
+      allow update: if request.auth != null 
+                    && (isAdmin() || (request.resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['receiptUrl', 'status']) && request.resource.data.status == 'pending_review'));
+      allow delete: if isAdmin();
+    }
+
+    match /day_schedules/{dayId} {
+      allow read: if true;
+      allow write: if request.auth != null; // Managed via transaction
+    }
+
+    // Academies collection
+    match /academies/{academyId} {
+      // Anyone can read academies
+      allow read: if true;
+      // Only admins can write
+      allow write: if isAdmin();
+    }
+  }
+}
