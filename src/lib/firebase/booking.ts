@@ -1,8 +1,8 @@
 import { doc, runTransaction, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from './config';
 
-export const OPENING_HOUR = 8; // 8 AM
-export const CLOSING_HOUR = 24; // 12 AM (Midnight)
+export const OPENING_HOUR = 0; // 12 AM (Midnight)
+export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
 
 export async function lockSlot(
   userId: string, 

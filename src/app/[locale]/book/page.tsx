@@ -143,6 +143,31 @@ export default function BookPage() {
     return 'taken'; // 'confirmed' or 'pending_review'
   };
 
+  const getAvailableEndTimes = () => {
+    if (!selectedRange) return [];
+    const start = selectedRange.start;
+    const endTimes: number[] = [];
+    
+    for (let end = start + 0.5; end <= CLOSING_HOUR; end += 0.5) {
+      const blockToCheck = end - 0.5;
+      const status = getSlotStatus(blockToCheck);
+      if (status === 'taken' || status === 'locked_by_other') {
+        break;
+      }
+      endTimes.push(end);
+    }
+    return endTimes;
+  };
+
+  const handleStartDropdownChange = (start: number) => {
+    setSelectedRange({ start, end: start });
+  };
+
+  const handleEndDropdownChange = (end: number) => {
+    if (!selectedRange) return;
+    setSelectedRange({ start: selectedRange.start, end: end - 0.5 });
+  };
+
   const formatTime = (block: number) => {
     const hour = Math.floor(block);
     const mins = block % 1 === 0 ? '00' : '30';
@@ -196,6 +221,67 @@ export default function BookPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Dropdown selectors for Time (Another way to choose time) */}
+              <div className="p-4 rounded-xl border border-border bg-muted/10 space-y-4 animate-in fade-in duration-300">
+                <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                  <span>⏰</span> {t('quickSelectTitle')}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-foreground/80 uppercase tracking-wider">{t('startTimeLabel')}</label>
+                    <Select
+                      value={selectedRange ? selectedRange.start.toString() : ''}
+                      onValueChange={(val) => {
+                        const start = parseFloat(val || '0');
+                        handleStartDropdownChange(start);
+                      }}
+                    >
+                      <SelectTrigger className="w-full h-11 bg-card border-border hover:border-primary/50 transition-all rounded-xl text-left rtl:text-right">
+                        <SelectValue placeholder={t('selectStartTime')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BLOCKS.map(block => {
+                          const status = getSlotStatus(block);
+                          const isBooked = status === 'taken' || status === 'locked_by_other';
+                          return (
+                            <SelectItem 
+                              key={block} 
+                              value={block.toString()}
+                              disabled={isBooked}
+                            >
+                              {formatTime(block)} {isBooked ? `(${t('booked')})` : ''}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-foreground/80 uppercase tracking-wider">{t('endTimeLabel')}</label>
+                    <Select
+                      value={selectedRange ? (selectedRange.end + 0.5).toString() : ''}
+                      disabled={!selectedRange}
+                      onValueChange={(val) => {
+                        const end = parseFloat(val || '0');
+                        handleEndDropdownChange(end);
+                      }}
+                    >
+                      <SelectTrigger className="w-full h-11 bg-card border-border hover:border-primary/50 transition-all rounded-xl text-left rtl:text-right">
+                        <SelectValue placeholder={t('selectEndTime')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAvailableEndTimes().map(endVal => (
+                          <SelectItem key={endVal} value={endVal.toString()}>
+                            {formatTime(endVal)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
               {/* Tabs */}
               <div className="flex flex-wrap gap-2 border-b border-border pb-4">
                 {[
@@ -228,10 +314,10 @@ export default function BookPage() {
                 {BLOCKS.filter(block => {
                   if (activeTab === 'all') return true;
                   const hour = Math.floor(block);
-                  if (activeTab === 'morning') return hour >= 8 && hour < 12;
-                  if (activeTab === 'afternoon') return hour >= 12 && hour < 16;
-                  if (activeTab === 'evening') return hour >= 16 && hour < 20;
-                  return hour >= 20;
+                  if (activeTab === 'morning') return hour >= 6 && hour < 12;
+                  if (activeTab === 'afternoon') return hour >= 12 && hour < 18;
+                  if (activeTab === 'evening') return hour >= 18 && hour < 24;
+                  return hour >= 0 && hour < 6;
                 }).map((block, idx) => {
                   const status = getSlotStatus(block);
                   const hourFloor = Math.floor(block);

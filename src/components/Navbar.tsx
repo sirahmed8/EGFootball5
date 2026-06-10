@@ -23,9 +23,6 @@ export function Navbar() {
           EG<span className="text-primary drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]">Football5</span>
         </Link>
         <div className="flex items-center gap-6">
-          <Link href="/book" className="text-sm font-semibold text-foreground/80 hover:text-foreground hover:scale-105 active:scale-95 transition-all duration-200">
-            {t('bookPitch')}
-          </Link>
           {appUser?.role === 'admin' && (
             <Link href="/admin" className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors drop-shadow-[0_0_5px_rgba(0,255,255,0.3)]">
               {t('adminDashboard')}
