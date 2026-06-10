@@ -35,17 +35,22 @@ export default function LoginPage() {
         }
       }
 
-      if (!userSnap.exists()) {
-        const appUser: AppUser = {
-          uid: user.uid,
-          name: user.displayName || 'Player',
-          phone: user.phoneNumber || '',
-          role: defaultRole as AppUser['role'],
-          isBlacklisted: false,
-          createdAt: Date.now()
-        };
-        await setDoc(userRef, appUser);
-        router.push('/profile');
+        if (!userSnap.exists()) {
+          const appUser: AppUser = {
+            uid: user.uid,
+            name: user.displayName || 'Player',
+            phone: user.phoneNumber || '',
+            role: defaultRole as AppUser['role'],
+            isBlacklisted: false,
+            createdAt: Date.now()
+          };
+          await setDoc(userRef, appUser);
+          
+          // Increment global stats
+          const { increment } = await import('firebase/firestore');
+          await setDoc(doc(db, 'stats', 'global'), { users: increment(1) }, { merge: true });
+          
+          router.push('/profile');
       } else {
         const appUser = userSnap.data() as AppUser;
         let roleUpdated = false;

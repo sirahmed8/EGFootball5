@@ -114,6 +114,14 @@ export async function confirmBooking(bookingId: string) {
   await updateDoc(bookingRef, {
     status: 'confirmed'
   });
+  
+  // Increment global stats
+  try {
+    const { increment } = await import('firebase/firestore');
+    await setDoc(doc(db, 'stats', 'global'), { bookings: increment(1) }, { merge: true });
+  } catch (e) {
+    console.error("Failed to increment stats", e);
+  }
 }
 
 export async function rejectBooking(bookingId: string) {

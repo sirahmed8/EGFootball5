@@ -2,23 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
-import { collection, getCountFromServer } from 'firebase/firestore';
+import { doc, getDoc, collection, getCountFromServer } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useTranslations } from 'next-intl';
 
 export function LandingStats() {
   const t = useTranslations('Landing');
   
-  const [pitchesCount, setPitchesCount] = useState(45); // Fallback
-  const [usersCount, setUsersCount] = useState(12000);
-  const [matchesCount, setMatchesCount] = useState(8500);
+  const [pitchesCount, setPitchesCount] = useState(0); 
+  const [usersCount, setUsersCount] = useState(0);
+  const [matchesCount, setMatchesCount] = useState(0);
 
   useEffect(() => {
-    // Fetch real pitches count
     const fetchStats = async () => {
       try {
         const pSnap = await getCountFromServer(collection(db, 'pitches'));
-        setPitchesCount(pSnap.data().count || 2); // default to a few if low
+        setPitchesCount(pSnap.data().count || 0); 
+        
+        const statsSnap = await getDoc(doc(db, 'stats', 'global'));
+        if (statsSnap.exists()) {
+          const data = statsSnap.data();
+          setUsersCount(data.users || 0);
+          setMatchesCount(data.bookings || 0);
+        }
       } catch (e) {
         console.error("Could not fetch real stats", e);
       }
