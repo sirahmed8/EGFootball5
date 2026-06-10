@@ -44,7 +44,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             { title: t('features.booking.title'), desc: t('features.booking.desc') },
             { title: t('features.payment.title'), desc: t('features.payment.desc') }
           ].map((feature, i) => (
-            <div key={i} className="p-8 rounded-3xl bg-zinc-900/50 border border-white/10 backdrop-blur-xl hover:border-primary/50 transition-colors group">
+            <div key={i} className="p-8 rounded-3xl bg-card text-card-foreground border border-border backdrop-blur-xl hover:border-primary/50 transition-colors group animate-in fade-in zoom-in duration-700 delay-100 fill-mode-both">
               <div className="w-12 h-12 bg-primary/20 rounded-2xl mb-6 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <div className="w-6 h-6 bg-primary rounded-full shadow-[0_0_10px_rgba(57,255,20,1)]" />
               </div>

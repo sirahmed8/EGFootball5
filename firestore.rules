@@ -30,7 +30,7 @@ service cloud.firestore {
 
     // Bookings collection
     match /bookings/{bookingId} {
-      allow read: if true;
+      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
       allow create: if request.auth != null 
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.status == 'locked_temporary';

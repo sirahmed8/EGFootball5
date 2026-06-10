@@ -17,7 +17,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-md border-b border-white/10">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/50 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="text-2xl font-black tracking-tighter text-white">
           EG<span className="text-primary drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]">Football5</span>

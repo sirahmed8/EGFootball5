@@ -131,16 +131,16 @@ export default function BookPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-8">
-          <Card className="bg-zinc-900/50 border-white/10 backdrop-blur-md">
+          <Card className="bg-card text-card-foreground border-border backdrop-blur-md">
             <CardHeader>
               <CardTitle className="text-white">Duration</CardTitle>
             </CardHeader>
             <CardContent>
               <Select value={duration.toString()} onValueChange={(v) => setDuration(v ? parseFloat(v) : 1)}>
-                <SelectTrigger className="w-full bg-zinc-800 border-white/10 text-white">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Duration" />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-800 border-white/10 text-white">
+                <SelectContent>
                   <SelectItem value="1">1 Hour</SelectItem>
                   <SelectItem value="1.5">1.5 Hours</SelectItem>
                   <SelectItem value="2">2 Hours</SelectItem>
@@ -151,7 +151,7 @@ export default function BookPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-900/50 border-white/10 backdrop-blur-md">
+          <Card className="bg-card text-card-foreground border-border backdrop-blur-md">
             <CardHeader>
               <CardTitle className="text-white">{t('selectDate')}</CardTitle>
             </CardHeader>
@@ -161,14 +161,14 @@ export default function BookPage() {
                 selected={date}
                 onSelect={setDate}
                 disabled={(d) => isBefore(d, startOfDay(new Date())) || isBefore(addDays(new Date(), 14), d)}
-                className="bg-zinc-900/80 text-white rounded-xl border border-white/10 p-3"
+                className="rounded-xl border border-border p-3"
               />
             </CardContent>
           </Card>
         </div>
 
         <div className="lg:col-span-2">
-          <Card className="bg-zinc-900/50 border-white/10 backdrop-blur-md min-h-[600px]">
+          <Card className="bg-card text-card-foreground border-border backdrop-blur-md min-h-[600px]">
             <CardHeader>
               <CardTitle className="text-white">{t('availableSlots', { date: date ? format(date, 'MMM d, yyyy') : '' })}</CardTitle>
               <CardDescription className="text-zinc-400">
@@ -204,7 +204,7 @@ export default function BookPage() {
                     <Button
                       key={block}
                       variant="outline"
-                      className={`h-16 flex-col gap-1 text-sm font-medium transition-all ${bgClass} ${cursorClass} ${!disabled && 'hover:scale-[1.02]'}`}
+                      className={`h-16 flex-col gap-1 text-sm font-medium transition-all duration-200 ${bgClass} ${cursorClass} ${!disabled && 'hover:scale-[1.02] active:scale-95'}`}
                       disabled={disabled || loadingLock === block}
                       onClick={() => handleSlotClick(block)}
                     >

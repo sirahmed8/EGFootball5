@@ -25,7 +25,7 @@ export function SettingsDropdown() {
 
   const toggleLanguage = () => {
     const nextLocale = locale === 'ar' ? 'en' : 'ar';
-    router.replace(pathname, { locale: nextLocale });
+    window.location.href = `/${nextLocale}${pathname === '/' ? '' : pathname}`;
   };
 
   const toggleTheme = () => {
@@ -34,19 +34,19 @@ export function SettingsDropdown() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="text-zinc-400 hover:text-white rounded-full p-2 hover:bg-zinc-800/50 transition-colors focus:outline-none">
+      <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground rounded-full p-2 hover:bg-muted/50 transition-all active:scale-90 focus:outline-none">
         <Settings className="h-5 w-5" />
         <span className="sr-only">Settings</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-white/10 text-white">
+      <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Settings</DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-white/10" />
-          <DropdownMenuItem onClick={toggleLanguage} className="cursor-pointer hover:bg-zinc-800">
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={toggleLanguage} className="cursor-pointer">
             <Languages className="mr-2 h-4 w-4" />
             <span>{locale === 'ar' ? 'English' : 'العربية'}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer hover:bg-zinc-800">
+          <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
             {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
             <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
           </DropdownMenuItem>
