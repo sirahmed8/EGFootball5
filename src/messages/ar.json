@@ -56,7 +56,16 @@
     "egp": "ج.م",
     "am": "ص",
     "pm": "م",
-    "selectedSuffix": " (إنهاء)"
+    "selectedSuffix": " (إنهاء)",
+    "afternoon": "بعد الظهر (4 - 5 م)",
+    "evening": "المساء (5 - 9 م)",
+    "night": "الليل (9 - 12 م)",
+    "all": "الكل",
+    "timelineTitle": "المخطط الزمني التفاعلي لليوم",
+    "legendFree": "متاح",
+    "legendPeak": "ساعة ذروة",
+    "legendBooked": "محجوز",
+    "legendSelected": "محدد لك"
   },
   "Checkout": {
     "title": "إتمام الحجز",

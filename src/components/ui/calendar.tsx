@@ -30,8 +30,9 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      dir={locale?.code?.startsWith('ar') ? 'rtl' : 'ltr'}
       className={cn(
-        "group/calendar w-full max-w-sm mx-auto bg-background p-2 [--cell-radius:var(--radius-md)] [--cell-size:var(--spacing-9)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
+        "group/calendar w-full bg-background p-3 [--cell-radius:var(--radius-lg)] [--cell-size:2.75rem] sm:[--cell-size:3.5rem] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className

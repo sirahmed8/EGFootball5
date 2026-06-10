@@ -56,7 +56,16 @@
     "egp": "EGP",
     "am": "AM",
     "pm": "PM",
-    "selectedSuffix": " (Finish)"
+    "selectedSuffix": " (Finish)",
+    "afternoon": "Afternoon (4 - 5 PM)",
+    "evening": "Evening (5 - 9 PM)",
+    "night": "Night (9 - 12 PM)",
+    "all": "All",
+    "timelineTitle": "Interactive Day Timeline",
+    "legendFree": "Free",
+    "legendPeak": "Peak",
+    "legendBooked": "Booked",
+    "legendSelected": "Selected"
   },
   "Checkout": {
     "title": "Complete Your Booking",
