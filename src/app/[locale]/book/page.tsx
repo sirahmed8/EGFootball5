@@ -29,8 +29,12 @@ export default function BookPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [daySchedule, setDaySchedule] = useState<Record<string, any>>({});
   const [loadingLock, setLoadingLock] = useState<number | null>(null);
-  const [duration, setDuration] = useState<number>(1); // default 1 hour
-  const [activeTab, setActiveTab] = useState<'all' | 'afternoon' | 'evening' | 'night'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'morning' | 'afternoon' | 'evening' | 'night'>('all');
+  const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
+
+  useEffect(() => {
+    setSelectedRange(null);
+  }, [date]);
 
   useEffect(() => {
     const fetchPitch = async () => {
@@ -58,43 +62,65 @@ export default function BookPage() {
     return () => unsubscribe();
   }, [pitch, date]);
 
-  const handleSlotClick = async (startSlot: number) => {
-    if (!firebaseUser) {
-      router.push('/login');
-      return;
-    }
-    if (!pitch || !date) return;
-
-    // Verify if all required blocks are free
+  const getBookingDetails = () => {
+    if (!selectedRange || !pitch) return { duration: 0, totalAmount: 0, depositAmount: 0 };
+    const duration = (selectedRange.end - selectedRange.start) + 0.5;
     const numBlocks = duration * 2;
-    for (let i = 0; i < numBlocks; i++) {
-      const b = startSlot + (i * 0.5);
-      if (b >= CLOSING_HOUR) {
-        toast.error('Booking exceeds closing time.');
-        return;
-      }
-      if (getSlotStatus(b) !== 'free') {
-        toast.error('Selected duration overlaps with a booked slot.');
-        return;
-      }
-    }
-
-    const formattedDate = format(date, 'yyyy-MM-dd');
     let totalAmount = 0;
     
-    // Calculate price accurately handling peak and off-peak for half-hour blocks
     for (let i = 0; i < numBlocks; i++) {
-      const currentBlock = startSlot + (i * 0.5);
+      const currentBlock = selectedRange.start + (i * 0.5);
       const hourFloor = Math.floor(currentBlock);
       const isPeak = pitch.peakHours.includes(hourFloor);
       totalAmount += isPeak ? (pitch.pricing.peak / 2) : (pitch.pricing.offPeak / 2);
     }
     
-    const depositAmount = totalAmount / 2;
-    
-    setLoadingLock(startSlot);
+    return {
+      duration,
+      totalAmount,
+      depositAmount: totalAmount / 2
+    };
+  };
+
+  const handleSlotClick = (block: number) => {
+    if (!selectedRange) {
+      setSelectedRange({ start: block, end: block });
+    } else if (selectedRange.start === selectedRange.end && block === selectedRange.start) {
+      setSelectedRange(null);
+    } else if (block > selectedRange.start) {
+      // Check if there are booked/taken slots in the selected range
+      let hasConflict = false;
+      for (let b = selectedRange.start; b <= block; b += 0.5) {
+        const status = getSlotStatus(b);
+        if (status === 'taken' || status === 'locked_by_other') {
+          hasConflict = true;
+          break;
+        }
+      }
+      if (hasConflict) {
+        toast.error(locale === 'ar' ? 'يتعارض هذا النطاق مع حجز موجود.' : 'Selected range conflicts with an existing booking.');
+        setSelectedRange({ start: block, end: block });
+      } else {
+        setSelectedRange({ start: selectedRange.start, end: block });
+      }
+    } else {
+      setSelectedRange({ start: block, end: block });
+    }
+  };
+
+  const handleConfirmBooking = async () => {
+    if (!firebaseUser) {
+      router.push('/login');
+      return;
+    }
+    if (!pitch || !date || !selectedRange) return;
+
+    const { duration, totalAmount, depositAmount } = getBookingDetails();
+    const formattedDate = format(date, 'yyyy-MM-dd');
+
+    setLoadingLock(selectedRange.start);
     try {
-      const bookingId = await lockSlot(firebaseUser.uid, pitch.id, formattedDate, startSlot, duration, totalAmount, depositAmount);
+      const bookingId = await lockSlot(firebaseUser.uid, pitch.id, formattedDate, selectedRange.start, duration, totalAmount, depositAmount);
       router.push(`/checkout?bookingId=${bookingId}`);
     } catch (error: any) {
       toast.error(error.message);
@@ -132,34 +158,13 @@ export default function BookPage() {
           {pitch?.name || 'Our Pitch'}
         </h1>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl">
-          {pitch?.location || 'Select a date and duration to book'}
+          {pitch?.location || 'Select a date and slots to book'}
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-1 space-y-6">
-          <Card className="bg-card text-card-foreground border-border backdrop-blur-md shadow-lg transition-all duration-300 hover:border-primary/20">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-card-foreground text-lg flex items-center gap-2">
-                <span>⏱️</span> Duration
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Select value={duration.toString()} onValueChange={(v) => setDuration(v ? parseFloat(v) : 1)}>
-                <SelectTrigger className="w-full h-11 px-3.5 border-border rounded-xl bg-muted/20 hover:bg-muted/40 transition-colors">
-                  <SelectValue placeholder="Select Duration" />
-                </SelectTrigger>
-                <SelectContent alignItemWithTrigger={false} side="bottom">
-                  <SelectItem value="1">1 Hour</SelectItem>
-                  <SelectItem value="1.5">1.5 Hours</SelectItem>
-                  <SelectItem value="2">2 Hours</SelectItem>
-                  <SelectItem value="2.5">2.5 Hours</SelectItem>
-                  <SelectItem value="3">3 Hours</SelectItem>
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
-
+        {/* Left Column: Calendar */}
+        <div className="lg:col-span-1">
           <Card className="bg-card text-card-foreground border-border backdrop-blur-md shadow-lg overflow-hidden transition-all duration-300 hover:border-primary/20">
             <CardHeader className="pb-4">
               <CardTitle className="text-card-foreground text-lg flex items-center gap-2">
@@ -179,8 +184,9 @@ export default function BookPage() {
           </Card>
         </div>
 
-        <div className="lg:col-span-2">
-          <Card className="bg-card text-card-foreground border-border backdrop-blur-md shadow-lg min-h-[600px] transition-all duration-300 hover:border-primary/20">
+        {/* Right Column: Slots Picker */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="bg-card text-card-foreground border-border backdrop-blur-md shadow-lg min-h-[500px] transition-all duration-300 hover:border-primary/20">
             <CardHeader className="pb-4">
               <CardTitle className="text-card-foreground text-xl md:text-2xl font-bold flex items-center justify-between">
                 <span>{t('availableSlots', { date: date ? format(date, 'MMM d, yyyy', { locale: locale === 'ar' ? ar : enUS }) : '' })}</span>
@@ -189,90 +195,12 @@ export default function BookPage() {
                 {t('peakInfo')} <span className="text-destructive font-bold">{t('peakColor')}</span>.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-8">
-              {/* Timeline */}
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/40 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                    </span>
-                    {t('timelineTitle')}
-                  </h3>
-                  <div className="flex flex-wrap gap-3 text-[11px] font-semibold">
-                    <div className="flex items-center gap-1">
-                      <div className="w-3.5 h-3.5 rounded-sm bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10" />
-                      <span className="text-muted-foreground">{t('legendFree')}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-3.5 h-3.5 rounded-sm bg-amber-50/80 dark:bg-destructive/15 border border-amber-200 dark:border-destructive/30" />
-                      <span className="text-muted-foreground">{t('legendPeak')}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-3.5 h-3.5 rounded-sm bg-slate-200/50 dark:bg-muted/30 border border-dashed border-slate-300 dark:border-border opacity-50" />
-                      <span className="text-muted-foreground">{t('legendBooked')}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-3.5 h-3.5 rounded-sm bg-secondary shadow-[0_0_6px_rgba(0,255,255,0.4)]" />
-                      <span className="text-muted-foreground">{t('legendSelected')}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="relative bg-muted/20 border border-border p-3.5 rounded-xl">
-                  <div className="grid h-10 gap-0.5 rounded-lg overflow-hidden border border-border bg-background" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
-                    {BLOCKS.map(block => {
-                      const status = getSlotStatus(block);
-                      const hourFloor = Math.floor(block);
-                      const isPeak = pitch?.peakHours.includes(hourFloor);
-
-                      let bgStyle = 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10';
-                      let cursor = 'cursor-pointer';
-                      let hoverClass = 'hover:bg-primary/20 dark:hover:bg-primary/20 hover:scale-110';
-                      let clickable = true;
-
-                      if (status === 'taken' || status === 'locked_by_other') {
-                        bgStyle = 'bg-slate-200/50 dark:bg-muted/30 opacity-40 border-dashed border-slate-300 dark:border-border';
-                        cursor = 'cursor-not-allowed';
-                        hoverClass = '';
-                        clickable = false;
-                      } else if (status === 'locked_by_me') {
-                        bgStyle = 'bg-secondary text-secondary-foreground shadow-[0_0_12px_rgba(0,255,255,0.5)] scale-105 z-10 border-transparent';
-                        cursor = 'cursor-pointer';
-                        hoverClass = 'hover:scale-110';
-                      } else {
-                        if (isPeak) {
-                          bgStyle = 'bg-amber-50/80 dark:bg-destructive/15 border-amber-200 dark:border-destructive/30 text-amber-900 dark:text-foreground';
-                        }
-                      }
-
-                      return (
-                        <div
-                          key={block}
-                          onClick={() => clickable && handleSlotClick(block)}
-                          className={`h-full relative transition-all duration-300 border flex items-center justify-center text-[10px] font-bold ${bgStyle} ${cursor} ${hoverClass}`}
-                          title={`${formatTime(block)}`}
-                        >
-                          <span className="hidden sm:inline opacity-70">{block % 1 === 0 ? `${block % 12 || 12}` : ''}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="flex justify-between text-[10px] font-bold text-muted-foreground px-1 pt-2" dir="ltr">
-                    <span>4:00 PM</span>
-                    <span>6:00 PM</span>
-                    <span>8:00 PM</span>
-                    <span>10:00 PM</span>
-                    <span>12:00 AM</span>
-                  </div>
-                </div>
-              </div>
-
+            <CardContent className="space-y-6">
               {/* Tabs */}
               <div className="flex flex-wrap gap-2 border-b border-border pb-4">
                 {[
                   { id: 'all', label: t('all') },
+                  { id: 'morning', label: t('morning'), icon: '🌅' },
                   { id: 'afternoon', label: t('afternoon'), icon: '☀️' },
                   { id: 'evening', label: t('evening'), icon: '🌆' },
                   { id: 'night', label: t('night'), icon: '🌙' },
@@ -300,9 +228,10 @@ export default function BookPage() {
                 {BLOCKS.filter(block => {
                   if (activeTab === 'all') return true;
                   const hour = Math.floor(block);
-                  if (activeTab === 'afternoon') return hour >= 16 && hour < 17;
-                  if (activeTab === 'evening') return hour >= 17 && hour < 21;
-                  return hour >= 21;
+                  if (activeTab === 'morning') return hour >= 8 && hour < 12;
+                  if (activeTab === 'afternoon') return hour >= 12 && hour < 16;
+                  if (activeTab === 'evening') return hour >= 16 && hour < 20;
+                  return hour >= 20;
                 }).map((block, idx) => {
                   const status = getSlotStatus(block);
                   const hourFloor = Math.floor(block);
@@ -313,13 +242,22 @@ export default function BookPage() {
                   let disabled = false;
                   let text = formatTime(block);
 
+                  const isSelected = selectedRange && block >= selectedRange.start && block <= selectedRange.end;
+
                   if (status === 'taken' || status === 'locked_by_other') {
                     bgClass = 'bg-slate-200/50 dark:bg-muted/30 text-slate-400 dark:text-muted-foreground border border-dashed border-slate-300 dark:border-border opacity-50 rounded-xl';
                     cursorClass = 'cursor-not-allowed';
                     disabled = true;
-                  } else if (status === 'locked_by_me') {
+                  } else if (isSelected) {
                     bgClass = 'bg-secondary text-secondary-foreground border border-transparent shadow-[0_0_15px_rgba(0,255,255,0.3)] ring-2 ring-secondary hover:-translate-y-1 transition-all duration-300 rounded-xl';
-                    text += t('selectedSuffix');
+                    
+                    if (selectedRange.start === selectedRange.end) {
+                      text += t('selectedSuffix');
+                    } else if (block === selectedRange.start) {
+                      text += t('startLabel');
+                    } else if (block === selectedRange.end) {
+                      text += t('endLabel');
+                    }
                   } else {
                     if (isPeak) {
                       bgClass = 'bg-amber-50/80 dark:bg-destructive/10 border border-amber-200 dark:border-destructive/30 text-amber-900 dark:text-foreground hover:bg-amber-100 dark:hover:bg-destructive/20 hover:border-amber-400 dark:hover:border-destructive hover:-translate-y-1 hover:shadow-md transition-all duration-300 rounded-xl';
@@ -343,6 +281,52 @@ export default function BookPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Sticky Booking Range Summary Card */}
+          {selectedRange && (() => {
+            const { duration, totalAmount, depositAmount } = getBookingDetails();
+            return (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <Card className="bg-card text-card-foreground border-primary/40 shadow-[0_0_20px_rgba(57,255,20,0.15)] overflow-hidden">
+                  <div className="bg-primary/10 px-6 py-4 border-b border-primary/20">
+                    <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                      <span>⚽</span>
+                      {t('bookRangeSummary', {
+                        date: date ? format(date, 'MMM d, yyyy', { locale: locale === 'ar' ? ar : enUS }) : '',
+                        start: formatTime(selectedRange.start),
+                        end: formatTime(selectedRange.end + 0.5),
+                        duration
+                      })}
+                    </h3>
+                  </div>
+                  <CardContent className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                      <div className="p-4 rounded-xl bg-muted/20 border border-border">
+                        <span className="text-muted-foreground block text-xs font-semibold mb-1 uppercase tracking-wider">Duration</span>
+                        <span className="text-xl font-bold text-foreground">{duration} Hours</span>
+                      </div>
+                      <div className="p-4 rounded-xl bg-muted/20 border border-border">
+                        <span className="text-muted-foreground block text-xs font-semibold mb-1 uppercase tracking-wider">Total Price</span>
+                        <span className="text-xl font-bold text-foreground text-primary">{totalAmount} {t('egp')}</span>
+                      </div>
+                      <div className="p-4 rounded-xl bg-muted/20 border border-border">
+                        <span className="text-muted-foreground block text-xs font-semibold mb-1 uppercase tracking-wider">Required Deposit</span>
+                        <span className="text-xl font-bold text-foreground text-secondary">{depositAmount} {t('egp')}</span>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={handleConfirmBooking}
+                      disabled={loadingLock !== null}
+                      className="w-full py-6 text-lg font-bold bg-primary text-black hover:bg-primary/90 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] shadow-[0_0_25px_rgba(57,255,20,0.35)] cursor-pointer"
+                    >
+                      {loadingLock !== null ? t('locking') : t('confirmBookingBtn')}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
