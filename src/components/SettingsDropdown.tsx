@@ -33,11 +33,9 @@ export function SettingsDropdown() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white rounded-full">
-          <Settings className="h-5 w-5" />
-          <span className="sr-only">Settings</span>
-        </Button>
+      <DropdownMenuTrigger className="text-zinc-400 hover:text-white rounded-full p-2 hover:bg-zinc-800/50 transition-colors focus:outline-none">
+        <Settings className="h-5 w-5" />
+        <span className="sr-only">Settings</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-white/10 text-white">
         <DropdownMenuLabel>Settings</DropdownMenuLabel>

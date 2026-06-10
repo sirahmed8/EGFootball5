@@ -136,7 +136,7 @@ export default function BookPage() {
               <CardTitle className="text-white">Duration</CardTitle>
             </CardHeader>
             <CardContent>
-              <Select value={duration.toString()} onValueChange={(v) => setDuration(parseFloat(v))}>
+              <Select value={duration.toString()} onValueChange={(v) => setDuration(v ? parseFloat(v) : 1)}>
                 <SelectTrigger className="w-full bg-zinc-800 border-white/10 text-white">
                   <SelectValue placeholder="Select Duration" />
                 </SelectTrigger>

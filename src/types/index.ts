@@ -30,6 +30,7 @@ export interface Booking {
   pitchId: string;
   date: string; // YYYY-MM-DD
   timeSlot: number; // hour (0-23)
+  duration: number; // hours
   status: BookingStatus;
   receiptUrl?: string;
   totalAmount: number;
