@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from '@/i18n/routing';
 import { doc, updateDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

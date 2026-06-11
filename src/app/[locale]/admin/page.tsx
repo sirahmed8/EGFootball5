@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, storage } from '@/lib/firebase/config';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Booking, User as AppUser, Pitch } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,6 +16,7 @@ import { toast } from 'sonner';
 import { useTranslations, useLocale } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formatTime = (block: number) => {
   const hour = Math.floor(block);
@@ -36,6 +38,8 @@ export default function AdminDashboard() {
   const [editingPitch, setEditingPitch] = useState<Pitch | null>(null);
   const [savingPitch, setSavingPitch] = useState(false);
   const [playerSearch, setPlayerSearch] = useState('');
+  const [scheduleSearch, setScheduleSearch] = useState('');
+  const [scheduleFilter, setScheduleFilter] = useState<'all' | 'confirmed' | 'pending_review' | 'rejected'>('all');
 
   useEffect(() => {
     if (!loading && appUser?.role !== 'admin' && appUser?.role !== 'owner') {
@@ -248,11 +252,36 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="schedule">
-          <Card className="bg-card/50 border-border backdrop-blur-xl">
+          <Card className="bg-card border-border backdrop-blur-xl">
             <CardHeader>
               <CardTitle className="text-card-foreground">{t('liveSchedule')}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              {/* Filter controls */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Search by player name or phone..."
+                    value={scheduleSearch}
+                    onChange={(e) => setScheduleSearch(e.target.value)}
+                    className="bg-card text-foreground border-border"
+                  />
+                </div>
+                <div className="w-full sm:w-48">
+                  <Select value={scheduleFilter} onValueChange={(val) => setScheduleFilter(val as 'all' | 'confirmed' | 'pending_review' | 'rejected')}>
+                    <SelectTrigger className="bg-card text-foreground border-border">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="confirmed">Confirmed</SelectItem>
+                      <SelectItem value="pending_review">Pending Review</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <Table>
                 <TableHeader>
                   <TableRow className="border-border hover:bg-muted/50">
@@ -263,27 +292,46 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bookings.map((booking) => {
-                    const user = usersCache[booking.userId];
-                    return (
-                    <TableRow key={booking.id} className="border-border hover:bg-muted/50 text-foreground">
-                      <TableCell className="font-medium">
-                        {user?.name || 'Player'}
-                        <div className="text-xs text-muted-foreground">{user?.phone}</div>
-                      </TableCell>
-                      <TableCell>{booking.date}</TableCell>
-                      <TableCell>{formatTime(booking.timeSlot)} ({booking.duration}h)</TableCell>
-                      <TableCell>
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          booking.status === 'confirmed' ? 'bg-primary/20 text-primary border border-primary/20' :
-                          booking.status === 'pending_review' ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/20' :
-                          'bg-muted text-muted-foreground border border-border'
-                        }`}>
-                          {booking.status}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  )})}
+                  {[...bookings]
+                    .filter((booking) => {
+                      if (scheduleFilter !== 'all' && booking.status !== scheduleFilter) return false;
+                      if (scheduleSearch) {
+                        const user = usersCache[booking.userId];
+                        const name = user?.name?.toLowerCase() || '';
+                        const phone = user?.phone || '';
+                        const query = scheduleSearch.toLowerCase();
+                        return name.includes(query) || phone.includes(query);
+                      }
+                      return true;
+                    })
+                    .sort((a, b) => {
+                      if (a.date !== b.date) {
+                        return b.date.localeCompare(a.date);
+                      }
+                      return b.timeSlot - a.timeSlot;
+                    })
+                    .map((booking) => {
+                      const user = usersCache[booking.userId];
+                      return (
+                      <TableRow key={booking.id} className="border-border hover:bg-muted/50 text-foreground">
+                        <TableCell className="font-medium">
+                          {user?.name || 'Player'}
+                          <div className="text-xs text-muted-foreground">{user?.phone}</div>
+                        </TableCell>
+                        <TableCell>{booking.date}</TableCell>
+                        <TableCell>{formatTime(booking.timeSlot)} ({booking.duration}h)</TableCell>
+                        <TableCell>
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                            booking.status === 'confirmed' ? 'bg-primary/20 text-primary border border-primary/20' :
+                            booking.status === 'pending_review' ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/20' :
+                            booking.status === 'rejected' ? 'bg-destructive/20 text-destructive border border-destructive/20' :
+                            'bg-muted text-muted-foreground border border-border'
+                          }`}>
+                            {booking.status}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    )})}
                 </TableBody>
               </Table>
             </CardContent>
@@ -343,22 +391,10 @@ export default function AdminDashboard() {
                           
                           try {
                             setSavingPitch(true);
-                            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-                            if (!cloudName) throw new Error("Cloudinary not configured");
-                            
-                            const formData = new FormData();
-                            formData.append('file', file);
-                            formData.append('upload_preset', 'kickoff_preset');
-                            formData.append('folder', 'pitches');
-
-                            const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                              method: 'POST',
-                              body: formData
-                            });
-                            
-                            if (!res.ok) throw new Error("Upload failed");
-                            const data = await res.json();
-                            setEditingPitch({...editingPitch, imagePreviewUrl: data.secure_url});
+                            const storageRef = ref(storage, `pitches/${editingPitch.id}_${file.name}`);
+                            await uploadBytes(storageRef, file);
+                            const downloadUrl = await getDownloadURL(storageRef);
+                            setEditingPitch({...editingPitch, imagePreviewUrl: downloadUrl});
                             toast.success('Image uploaded successfully');
                           } catch (err: unknown) {
                             const error = err as Error;

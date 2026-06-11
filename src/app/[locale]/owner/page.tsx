@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { collection, query, onSnapshot, doc, setDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, storage } from '@/lib/firebase/config';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Pitch } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -131,22 +132,10 @@ export default function OwnerDashboard() {
                     const file = e.target.files?.[0];
                     if (!file) return;
                     try {
-                      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-                      if (!cloudName) throw new Error("Cloudinary not configured");
-                      
-                      const formData = new FormData();
-                      formData.append('file', file);
-                      formData.append('upload_preset', 'kickoff_preset');
-                      formData.append('folder', 'pitches');
-
-                      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                        method: 'POST',
-                        body: formData
-                      });
-                      
-                      if (!res.ok) throw new Error("Upload failed");
-                      const data = await res.json();
-                      setNewPitch({...newPitch, imagePreviewUrl: data.secure_url});
+                      const storageRef = ref(storage, `pitches/new_${Date.now()}_${file.name}`);
+                      await uploadBytes(storageRef, file);
+                      const downloadUrl = await getDownloadURL(storageRef);
+                      setNewPitch({...newPitch, imagePreviewUrl: downloadUrl});
                       toast.success('Image uploaded successfully');
                     } catch (err: unknown) {
                       const error = err as Error;
