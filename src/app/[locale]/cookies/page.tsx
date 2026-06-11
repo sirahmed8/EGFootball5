@@ -1,4 +1,3 @@
-import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,7 @@ export default async function CookiePolicyPage({ params }: { params: Promise<{ l
         <p>Some cookies are essential for the operation of our platform. For example, we use cookies to keep you logged in securely while you browse our site.</p>
         
         <h2 className="text-2xl font-bold text-foreground">4. Your Choices Regarding Cookies</h2>
-        <p>If you'd like to delete cookies or instruct your web browser to delete or refuse cookies, please visit the help pages of your web browser. Please note, however, that if you delete cookies or refuse to accept them, you might not be able to use all of the features we offer.</p>
+        <p>{"If you'd like to delete cookies or instruct your web browser to delete or refuse cookies, please visit the help pages of your web browser. Please note, however, that if you delete cookies or refuse to accept them, you might not be able to use all of the features we offer."}</p>
       </div>
     </div>
   );

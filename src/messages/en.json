@@ -128,7 +128,15 @@
     "status": "Status",
     "addPitch": "Add Test Pitch",
     "tournamentsTitle": "Tournaments Engine",
-    "tournamentsDesc": "Generate brackets, manage teams, and track scores automatically. This premium feature is currently under development."
+    "tournamentsDesc": "Generate brackets, manage teams, and track scores automatically. This premium feature is currently under development.",
+    "playersTab": "Players & Blacklist",
+    "playersList": "Player Directory",
+    "blacklistBtn": "Blacklist",
+    "unblacklistBtn": "Unblacklist",
+    "loyaltyBookings": "Confirmed Games",
+    "playerStatus": "Status",
+    "active": "Active",
+    "blacklisted": "Blacklisted"
   },
   "Metadata": {
     "title": "EGFootball5 | Book Your Pitch",

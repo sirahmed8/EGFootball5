@@ -128,7 +128,15 @@
     "status": "الحالة",
     "addPitch": "إضافة ملعب تجريبي",
     "tournamentsTitle": "نظام البطولات",
-    "tournamentsDesc": "قم بإنشاء قرعة البطولات، إدارة الفرق، ومتابعة النتائج تلقائياً. هذه الميزة المميزة قيد التطوير حالياً."
+    "tournamentsDesc": "قم بإنشاء قرعة البطولات، إدارة الفرق، ومتابعة النتائج تلقائياً. هذه الميزة المميزة قيد التطوير حالياً.",
+    "playersTab": "اللاعبين والحظر",
+    "playersList": "دليل اللاعبين",
+    "blacklistBtn": "حظر",
+    "unblacklistBtn": "إلغاء الحظر",
+    "loyaltyBookings": "المباريات المؤكدة",
+    "playerStatus": "الحالة",
+    "active": "نشط",
+    "blacklisted": "محظور"
   },
   "Metadata": {
     "title": "EGFootball5 | احجز ملعبك",

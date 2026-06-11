@@ -27,7 +27,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (appUser) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(appUser.name);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPhone(appUser.phone || '');
     }
   }, [appUser]);
@@ -42,9 +44,10 @@ export default function ProfilePage() {
         phone
       });
       toast.success('Profile updated successfully');
-      router.push('/book');
-    } catch (error: any) {
-      toast.error(error.message);
+      router.push('/home');
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(err.message);
     } finally {
       setIsSaving(false);
     }

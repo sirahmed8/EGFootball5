@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { collection, query, onSnapshot, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Pitch, User as AppUser } from '@/types';
+import { Pitch } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,8 +66,9 @@ export default function OwnerDashboard() {
       await setDoc(doc(db, 'pitches', pitchId), pitchData);
       toast.success('Pitch created successfully');
       setNewPitch({});
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message);
     }
   };
 
@@ -96,41 +97,51 @@ export default function OwnerDashboard() {
             <Input placeholder="Admin Phone" value={newPitch.adminPhone || ''} onChange={e => setNewPitch({...newPitch, adminPhone: e.target.value})} />
             <Input placeholder="Location Name" value={newPitch.locationName || ''} onChange={e => setNewPitch({...newPitch, locationName: e.target.value})} />
             <Input placeholder="Map Link (Google Maps)" value={newPitch.mapLink || ''} onChange={e => setNewPitch({...newPitch, mapLink: e.target.value})} />
-            <div className="flex gap-2">
-              <Input 
-                type="file" 
-                accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  try {
-                    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-                    if (!cloudName) throw new Error("Cloudinary not configured");
-                    
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('upload_preset', 'kickoff_preset');
-                    formData.append('folder', 'pitches');
+            <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-muted/10 md:col-span-2">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Pitch Image (Upload or Paste URL)</label>
+              <div className="flex flex-col sm:flex-row gap-3 items-center">
+                <Input 
+                  placeholder="Or paste direct image URL (https://...)" 
+                  value={newPitch.imagePreviewUrl || ''} 
+                  onChange={e => setNewPitch({...newPitch, imagePreviewUrl: e.target.value})}
+                  className="bg-card flex-1"
+                />
+                <Input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+                      if (!cloudName) throw new Error("Cloudinary not configured");
+                      
+                      const formData = new FormData();
+                      formData.append('file', file);
+                      formData.append('upload_preset', 'kickoff_preset');
+                      formData.append('folder', 'pitches');
 
-                    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                      method: 'POST',
-                      body: formData
-                    });
-                    
-                    if (!res.ok) throw new Error("Upload failed");
-                    const data = await res.json();
-                    setNewPitch({...newPitch, imagePreviewUrl: data.secure_url});
-                    toast.success('Image uploaded successfully');
-                  } catch (err: any) {
-                    toast.error(err.message);
-                  }
-                }}
-                className="bg-card text-foreground flex-1 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
-              />
-              {newPitch.imagePreviewUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={newPitch.imagePreviewUrl} alt="Preview" className="w-10 h-10 rounded-lg object-cover" />
-              )}
+                      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                        method: 'POST',
+                        body: formData
+                      });
+                      
+                      if (!res.ok) throw new Error("Upload failed");
+                      const data = await res.json();
+                      setNewPitch({...newPitch, imagePreviewUrl: data.secure_url});
+                      toast.success('Image uploaded successfully');
+                    } catch (err: unknown) {
+                      const error = err as Error;
+                      toast.error(error.message);
+                    }
+                  }}
+                  className="bg-card text-foreground flex-1 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
+                />
+                {newPitch.imagePreviewUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={newPitch.imagePreviewUrl} alt="Preview" className="w-10 h-10 rounded-lg object-cover border border-border" />
+                )}
+              </div>
             </div>
             <Input placeholder="Price Per Hour (EGP)" type="number" value={newPitch.pricePerHour || ''} onChange={e => setNewPitch({...newPitch, pricePerHour: Number(e.target.value)})} required />
             <Input placeholder="Payment Recipient Number (e.g. Vodafone Cash)" value={newPitch.recipient || ''} onChange={e => setNewPitch({...newPitch, recipient: e.target.value})} />

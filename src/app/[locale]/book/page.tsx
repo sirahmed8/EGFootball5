@@ -28,9 +28,16 @@ function BookContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pitchId = searchParams.get('pitchId');
-  const { firebaseUser } = useAuthStore();
+  const { firebaseUser, appUser } = useAuthStore();
   const t = useTranslations('Book');
   const locale = useLocale();
+
+  useEffect(() => {
+    if (!pitchId) {
+      toast.error(locale === 'ar' ? 'برجاء اختيار ملعب أولاً.' : 'Please select a pitch first.');
+      router.push('/home');
+    }
+  }, [pitchId, router, locale]);
 
   
   const [pitch, setPitch] = useState<Pitch | null>(null);
@@ -132,8 +139,9 @@ function BookContent() {
       
       // We would normally pass bookingType and numPeople to lockSlot, but we'll append it to the checkout URL or update later.
       router.push(`/checkout?bookingId=${bookingId}&type=${bookingType}&people=${numPeople}`);
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(err.message);
     } finally {
       setLoadingLock(null);
     }
@@ -196,6 +204,20 @@ function BookContent() {
           {pitch?.locationName || 'Select a date and slots to book'}
         </p>
       </div>
+
+      {appUser?.isBlacklisted && (
+        <div className="bg-destructive/15 border border-destructive/30 text-destructive-foreground p-4 rounded-xl flex items-center gap-3 animate-in fade-in duration-300">
+          <span className="text-xl">🚫</span>
+          <div>
+            <p className="font-bold">{locale === 'ar' ? 'حسابك محظور' : 'Account Blacklisted'}</p>
+            <p className="text-sm opacity-90">
+              {locale === 'ar' 
+                ? 'لقد تم حظر حسابك من قبل الإدارة. لا يمكنك إجراء أي حجوزات جديدة.' 
+                : 'Your account has been blacklisted by the administration. You cannot make any new bookings.'}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Left Column: Calendar */}
@@ -305,7 +327,7 @@ function BookContent() {
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id as any)}
+                      onClick={() => setActiveTab(tab.id as 'all' | 'morning' | 'afternoon' | 'evening' | 'night')}
                       className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-full border transition-all duration-300 hover:scale-[1.03] active:scale-95 cursor-pointer ${
                         active
                           ? 'bg-primary text-black border-transparent shadow-[0_0_12px_rgba(57,255,20,0.3)] font-bold'
@@ -358,13 +380,14 @@ function BookContent() {
                   }
 
                   // Add staggered animation delay
-                  const animDelay = `${idx * 40}ms`;
+                  const animDelay = `${idx * 25}ms`;
 
                   return (
                     <div
                       key={block}
                       onClick={() => !disabled && handleSlotClick(block)}
-                      className={`p-4 text-center font-bold relative flex items-center justify-center transition-all duration-300 ${bgClass} ${cursorClass}`}
+                      style={{ animationDelay: animDelay } as React.CSSProperties}
+                      className={`p-4 text-center font-bold relative flex items-center justify-center transition-all duration-300 ${bgClass} ${cursorClass} animate-in fade-in zoom-in-95 duration-500`}
                     >
                       <span>{loadingLock === block ? t('locking') : text}</span>
                     </div>
@@ -410,7 +433,7 @@ function BookContent() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border pt-4">
                       <div className="space-y-2">
                         <Label>Booking Type</Label>
-                        <Select value={bookingType} onValueChange={(v: any) => setBookingType(v)}>
+                        <Select value={bookingType} onValueChange={(v) => setBookingType(v as 'private' | 'public')}>
                           <SelectTrigger className="bg-card">
                             <SelectValue />
                           </SelectTrigger>
@@ -437,7 +460,7 @@ function BookContent() {
 
                     <Button
                       onClick={handleConfirmBooking}
-                      disabled={loadingLock !== null}
+                      disabled={loadingLock !== null || appUser?.isBlacklisted}
                       className="w-full py-6 text-lg font-bold bg-primary text-black hover:bg-primary/90 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] shadow-[0_0_25px_rgba(57,255,20,0.35)] cursor-pointer"
                     >
                       {loadingLock !== null ? t('locking') : t('confirmBookingBtn')}

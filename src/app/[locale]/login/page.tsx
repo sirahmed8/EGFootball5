@@ -77,8 +77,9 @@ export default function LoginPage() {
           router.push('/home');
         }
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Google sign-in failed');
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(err.message || 'Google sign-in failed');
     }
   };
 

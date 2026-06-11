@@ -5,14 +5,14 @@ import { useRouter } from '@/i18n/routing';
 import { collection, query, onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Booking, User as AppUser } from '@/types';
+import { Booking, User as AppUser, Pitch } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { confirmBooking, rejectBooking } from '@/lib/firebase/booking';
 import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Image from 'next/image';
@@ -29,12 +29,14 @@ export default function AdminDashboard() {
   const router = useRouter();
   const { appUser, firebaseUser, loading } = useAuthStore();
   const t = useTranslations('Admin');
+  const locale = useLocale();
   
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [usersCache, setUsersCache] = useState<Record<string, AppUser>>({});
-  const [pitch, setPitch] = useState<any>(null);
-  const [editingPitch, setEditingPitch] = useState<any>(null);
+  const [pitch, setPitch] = useState<Pitch | null>(null);
+  const [editingPitch, setEditingPitch] = useState<Pitch | null>(null);
   const [savingPitch, setSavingPitch] = useState(false);
+  const [playerSearch, setPlayerSearch] = useState('');
 
   useEffect(() => {
     if (!loading && appUser?.role !== 'admin' && appUser?.role !== 'owner') {
@@ -55,7 +57,7 @@ export default function AdminDashboard() {
         return;
       }
       
-      const pitchData = pitchSnap.docs[0].data();
+      const pitchData = pitchSnap.docs[0].data() as Pitch;
       setPitch(pitchData);
       setEditingPitch(pitchData);
 
@@ -82,13 +84,13 @@ export default function AdminDashboard() {
       return unsubscribe;
     };
 
-    let unsub: any;
+    let unsub: (() => void) | undefined;
     fetchPitchAndBookings().then(u => unsub = u);
     
     return () => {
       if (typeof unsub === 'function') unsub();
     };
-  }, [appUser, firebaseUser]);
+  }, [appUser, firebaseUser, usersCache]);
 
   if (loading || (appUser?.role !== 'admin' && appUser?.role !== 'owner')) {
     return <div className="p-8 text-center text-white">Authenticating...</div>;
@@ -116,8 +118,9 @@ export default function AdminDashboard() {
         await updateDoc(scheduleRef, { slots });
       }
       toast.success('Booking confirmed');
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error(err.message);
     }
   };
 
@@ -141,8 +144,9 @@ export default function AdminDashboard() {
       }
 
       toast.success('Booking rejected and slot freed');
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error(err.message);
     }
   };
 
@@ -151,7 +155,7 @@ export default function AdminDashboard() {
   };
 
   const handleUpdatePitch = async () => {
-    if (!pitch) return;
+    if (!pitch || !editingPitch) return;
     setSavingPitch(true);
     try {
       await updateDoc(doc(db, 'pitches', pitch.id), {
@@ -163,12 +167,35 @@ export default function AdminDashboard() {
       });
       setPitch(editingPitch);
       toast.success('Pitch details updated successfully');
-    } catch (e: any) {
-      toast.error('Failed to update: ' + e.message);
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error('Failed to update: ' + err.message);
     } finally {
       setSavingPitch(false);
     }
   };
+
+  const handleToggleBlacklist = async (userId: string, currentStatus: boolean) => {
+    try {
+      await updateDoc(doc(db, 'users', userId), {
+        isBlacklisted: !currentStatus
+      });
+      setUsersCache(prev => ({
+        ...prev,
+        [userId]: {
+          ...prev[userId],
+          isBlacklisted: !currentStatus
+        }
+      }));
+      toast.success(!currentStatus ? 'Player blacklisted successfully' : 'Player unblacklisted successfully');
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error('Failed to update player status: ' + error.message);
+    }
+  };
+
+  const uniquePlayerIds = Array.from(new Set(bookings.map(b => b.userId)));
+  const uniquePlayers = uniquePlayerIds.map(id => usersCache[id]).filter(Boolean);
 
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8">
@@ -200,6 +227,7 @@ export default function AdminDashboard() {
         <TabsList className="bg-muted/50 border border-border mb-4 p-1 rounded-xl">
           <TabsTrigger value="verification" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold rounded-lg">{t('verificationQueue')}</TabsTrigger>
           <TabsTrigger value="schedule" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">{t('liveSchedule')}</TabsTrigger>
+          <TabsTrigger value="players" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">{t('playersTab')}</TabsTrigger>
           <TabsTrigger value="settings" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">Pitch Settings</TabsTrigger>
         </TabsList>
         
@@ -315,7 +343,7 @@ export default function AdminDashboard() {
                     <Input 
                       type="number"
                       value={editingPitch.pricePerHour} 
-                      onChange={e => setEditingPitch({...editingPitch, pricePerHour: e.target.value})} 
+                      onChange={e => setEditingPitch({...editingPitch, pricePerHour: Number(e.target.value) || 0})} 
                       className="bg-card text-foreground"
                     />
                   </div>
@@ -364,8 +392,9 @@ export default function AdminDashboard() {
                             const data = await res.json();
                             setEditingPitch({...editingPitch, imagePreviewUrl: data.secure_url});
                             toast.success('Image uploaded successfully');
-                          } catch (err: any) {
-                            toast.error(err.message);
+                          } catch (err: unknown) {
+                            const error = err as Error;
+                            toast.error(error.message);
                           } finally {
                             setSavingPitch(false);
                           }
@@ -385,6 +414,85 @@ export default function AdminDashboard() {
                   >
                     {savingPitch ? 'Saving...' : 'Save Changes'}
                   </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="players">
+          <Card className="bg-card/50 border-border backdrop-blur-xl">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4">
+              <div>
+                <CardTitle className="text-card-foreground">{t('playersList')}</CardTitle>
+              </div>
+              <div className="w-full sm:w-72">
+                <Input
+                  placeholder={locale === 'ar' ? 'بحث بالاسم أو الهاتف...' : 'Search by name or phone...'}
+                  value={playerSearch}
+                  onChange={(e) => setPlayerSearch(e.target.value)}
+                  className="bg-card text-foreground border-border"
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {uniquePlayers.length === 0 ? (
+                <p className="text-muted-foreground text-center py-6">No players found.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-border hover:bg-muted/50">
+                        <TableHead className="text-muted-foreground">Player</TableHead>
+                        <TableHead className="text-muted-foreground">{t('loyaltyBookings')}</TableHead>
+                        <TableHead className="text-muted-foreground">{t('playerStatus')}</TableHead>
+                        <TableHead className="text-right text-muted-foreground">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {uniquePlayers
+                        .filter(user => {
+                          if (!playerSearch) return true;
+                          const term = playerSearch.toLowerCase();
+                          return (
+                            user.name?.toLowerCase().includes(term) ||
+                            user.phone?.includes(term)
+                          );
+                        })
+                        .map(user => {
+                          const loyalty = getUserLoyalty(user.uid);
+                          const isBlack = !!user.isBlacklisted;
+                          return (
+                            <TableRow key={user.uid} className="border-border hover:bg-muted/50 text-foreground">
+                              <TableCell className="font-medium">
+                                <div>{user.name || 'Unnamed'}</div>
+                                <div className="text-xs text-muted-foreground">{user.phone || 'No phone'}</div>
+                              </TableCell>
+                              <TableCell className="font-bold text-primary">{loyalty}</TableCell>
+                              <TableCell>
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                                  isBlack 
+                                    ? 'bg-destructive/20 text-destructive border border-destructive/20' 
+                                    : 'bg-primary/20 text-primary border border-primary/20'
+                                }`}>
+                                  {isBlack ? t('blacklisted') : t('active')}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button
+                                  variant={isBlack ? 'outline' : 'destructive'}
+                                  size="sm"
+                                  onClick={() => handleToggleBlacklist(user.uid, isBlack)}
+                                  className="font-bold transition-all hover:scale-105 active:scale-95"
+                                >
+                                  {isBlack ? t('unblacklistBtn') : t('blacklistBtn')}
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                    </TableBody>
+                  </Table>
                 </div>
               )}
             </CardContent>

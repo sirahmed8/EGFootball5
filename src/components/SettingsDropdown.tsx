@@ -2,9 +2,8 @@
 
 import * as React from 'react';
 import { useTheme } from 'next-themes';
-import { usePathname, useRouter } from '@/i18n/routing';
-import { useLocale, useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
+import { usePathname } from '@/i18n/routing';
+import { useLocale } from 'next-intl';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +18,6 @@ import { Settings, Moon, Sun, Languages } from 'lucide-react';
 export function SettingsDropdown() {
   const { setTheme, theme } = useTheme();
   const locale = useLocale();
-  const router = useRouter();
   const pathname = usePathname();
 
   const toggleLanguage = () => {

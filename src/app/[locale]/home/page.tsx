@@ -8,7 +8,6 @@ import { Pitch } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, ArrowRight } from 'lucide-react';
-import Image from 'next/image';
 
 export default function PlayerHome() {
   const router = useRouter();
