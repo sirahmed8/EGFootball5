@@ -8,6 +8,7 @@ import { Pitch } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 export default function PlayerHome() {
   const router = useRouter();
@@ -41,8 +42,7 @@ export default function PlayerHome() {
           <Card key={pitch.id} className="bg-card/80 border-border backdrop-blur-xl overflow-hidden hover:border-primary/50 transition-colors group flex flex-col">
             <div className="aspect-video relative w-full bg-muted overflow-hidden">
               {pitch.imagePreviewUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={pitch.imagePreviewUrl} alt={pitch.name} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" />
+                <Image src={pitch.imagePreviewUrl} alt={pitch.name} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
               ) : (
                 <div className="flex items-center justify-center w-full h-full text-muted-foreground">No Preview</div>
               )}

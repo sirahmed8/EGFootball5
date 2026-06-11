@@ -18,47 +18,47 @@ service cloud.firestore {
 
     // Users collection
     match /users/{userId} {
-      // Users can read and write their own profile, Admins can read/write all
       allow read: if isAuth() && (request.auth.uid == userId || isAdmin());
-      allow write: if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuth() && request.auth.uid == userId && request.resource.data.role == 'player' && request.resource.data.isBlacklisted == false;
+      allow update: if isAuth() && (
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBlacklisted'])) ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
     }
 
     // Pitches collection
     match /pitches/{pitchId} {
-      // Anyone can read pitches
       allow read: if true;
-      // Only admins can write
       allow write: if isAdmin();
     }
 
     // Bookings collection
     match /bookings/{bookingId} {
-      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
-      allow create: if request.auth != null 
+      allow read: if isAuth() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow create: if isAuth() 
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.status == 'locked_temporary';
-      allow update: if request.auth != null 
-                    && (isAdmin() || (request.resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['receiptUrl', 'status']) && request.resource.data.status == 'pending_review'));
+      allow update: if isAuth() 
+                    && (isAdmin() || (request.resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['receiptUrl', 'status']) && request.resource.data.status == 'pending_review' && resource.data.status == 'locked_temporary'));
       allow delete: if isAdmin();
     }
 
     match /day_schedules/{dayId} {
       allow read: if true;
-      allow write: if request.auth != null; // Managed via transaction
+      allow write: if isAuth(); // Requires a Cloud Function for full security, allowed for now due to client transactions
     }
 
     // Stats collection for public aggregation
     match /stats/{statId} {
       allow read: if true;
-      // Allow authenticated users to update stats
-      allow write: if isAuth();
+      allow update: if isAuth() && (isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usersCount', 'totalBookings', 'totalRevenue']));
+      allow create: if isAdmin();
     }
 
     // Academies collection
     match /academies/{academyId} {
-      // Anyone can read academies
       allow read: if true;
-      // Only admins can write
       allow write: if isAdmin();
     }
   }

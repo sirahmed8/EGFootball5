@@ -101,21 +101,6 @@ export default function AdminDashboard() {
   const handleApprove = async (booking: Booking) => {
     try {
       await confirmBooking(booking.id);
-      
-      // Update the day_schedule status
-      const scheduleRef = doc(db, 'day_schedules', `${booking.pitchId}_${booking.date}`);
-      const scheduleSnap = await getDoc(scheduleRef);
-      if (scheduleSnap.exists()) {
-        const slots = scheduleSnap.data().slots;
-        const numBlocks = booking.duration * 2;
-        for (let i = 0; i < numBlocks; i++) {
-          const b = booking.timeSlot + (i * 0.5);
-          if (slots[b.toString()]) {
-             slots[b.toString()].status = 'confirmed';
-          }
-        }
-        await updateDoc(scheduleRef, { slots });
-      }
       toast.success('Booking confirmed');
     } catch (e: unknown) {
       const err = e as Error;
@@ -126,22 +111,6 @@ export default function AdminDashboard() {
   const handleReject = async (booking: Booking) => {
     try {
       await rejectBooking(booking.id);
-
-      // Free the slot in day_schedule
-      const scheduleRef = doc(db, 'day_schedules', `${booking.pitchId}_${booking.date}`);
-      const scheduleSnap = await getDoc(scheduleRef);
-      if (scheduleSnap.exists()) {
-        const slots = scheduleSnap.data().slots;
-        const numBlocks = booking.duration * 2;
-        for (let i = 0; i < numBlocks; i++) {
-          const b = booking.timeSlot + (i * 0.5);
-          if (slots[b.toString()] && slots[b.toString()].bookingId === booking.id) {
-             delete slots[b.toString()];
-          }
-        }
-        await updateDoc(scheduleRef, { slots });
-      }
-
       toast.success('Booking rejected and slot freed');
     } catch (e: unknown) {
       const err = e as Error;

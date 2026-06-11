@@ -48,8 +48,12 @@ function BookContent() {
   }
 
   const [pitch, setPitch] = useState<Pitch | null>(null);
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [daySchedule, setDaySchedule] = useState<Record<string, SlotData>>({});
+  
+  useEffect(() => {
+    setDate(new Date());
+  }, []);
   const [loadingLock, setLoadingLock] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'morning' | 'afternoon' | 'evening' | 'night'>('all');
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
@@ -359,7 +363,6 @@ function BookContent() {
                   return hour >= 0 && hour < 6;
                 }).map((block, idx) => {
                   const status = getSlotStatus(block);
-                  const hourFloor = Math.floor(block);
 
                   let bgClass = 'bg-slate-50 dark:bg-white/5 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/5 hover:text-foreground hover:-translate-y-1 hover:shadow-md transition-all duration-300 rounded-xl';
                   let cursorClass = 'cursor-pointer';
