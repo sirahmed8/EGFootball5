@@ -40,18 +40,21 @@ function BookContent() {
   }, [pitchId, router, locale]);
 
   
+  interface SlotData {
+    status: 'free' | 'locked_temporary' | 'confirmed' | 'pending_review' | 'rejected';
+    userId?: string;
+    bookingId?: string;
+    lockedUntil?: number;
+  }
+
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [daySchedule, setDaySchedule] = useState<Record<string, any>>({});
+  const [daySchedule, setDaySchedule] = useState<Record<string, SlotData>>({});
   const [loadingLock, setLoadingLock] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'morning' | 'afternoon' | 'evening' | 'night'>('all');
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
   const [bookingType, setBookingType] = useState<'private' | 'public'>('private');
   const [numPeople, setNumPeople] = useState<number>(10);
-
-  useEffect(() => {
-    setSelectedRange(null);
-  }, [date]);
 
   useEffect(() => {
     const fetchPitch = async () => {
@@ -151,6 +154,7 @@ function BookContent() {
     const slotData = daySchedule[block.toString()];
     if (!slotData) return 'free';
     
+    // eslint-disable-next-line react-hooks/purity
     const now = Date.now();
     if (slotData.status === 'locked_temporary') {
       if (slotData.lockedUntil && slotData.lockedUntil > now) {
@@ -232,7 +236,10 @@ function BookContent() {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={setDate}
+                onSelect={(d) => {
+                  setDate(d);
+                  setSelectedRange(null);
+                }}
                 disabled={(d) => isBefore(d, startOfDay(new Date())) || isBefore(addDays(new Date(), 14), d)}
                 className="w-full max-w-full"
                 locale={locale === 'ar' ? ar : enUS}

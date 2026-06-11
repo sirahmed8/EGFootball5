@@ -116,8 +116,9 @@ function CheckoutForm() {
 
       xhr.send(formData);
 
-    } catch (error: any) {
-      toast.error('Failed to submit receipt: ' + error.message);
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error('Failed to submit receipt: ' + err.message);
       setUploading(false);
     }
   };

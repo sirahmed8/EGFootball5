@@ -33,6 +33,7 @@ function Calendar({
 
   React.useEffect(() => {
     if (props.month) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentMonth(props.month);
     }
   }, [props.month]);

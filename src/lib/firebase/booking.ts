@@ -1,4 +1,4 @@
-import { doc, runTransaction, updateDoc, setDoc, getDoc, increment } from 'firebase/firestore';
+import { doc, runTransaction, increment } from 'firebase/firestore';
 import { db } from './config';
 
 export const OPENING_HOUR = 0; // 12 AM (Midnight)
