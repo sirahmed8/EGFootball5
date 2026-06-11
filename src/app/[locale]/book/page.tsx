@@ -52,8 +52,10 @@ function BookContent() {
   const [daySchedule, setDaySchedule] = useState<Record<string, SlotData>>({});
   
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDate(new Date());
   }, []);
+
   const [loadingLock, setLoadingLock] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'morning' | 'afternoon' | 'evening' | 'night'>('all');
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number } | null>(null);
