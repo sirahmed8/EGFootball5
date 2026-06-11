@@ -56,26 +56,7 @@ service cloud.firestore {
 
     match /day_schedules/{dayId} {
       allow read: if true;
-      allow write: if isAuth() && isNotBlacklisted() && (
-        isAdmin() ||
-        (
-          resource == null ? (
-            request.resource.data.slots.keys().all(k => request.resource.data.slots[k].userId == request.auth.uid)
-          ) : (
-            resource.data.slots.keys().all(k =>
-              !(k in request.resource.data.slots) || request.resource.data.slots[k] == resource.data.slots[k] ? true : (
-                resource.data.slots[k].userId == request.auth.uid ||
-                (resource.data.slots[k].status == 'locked_temporary' && resource.data.slots[k].lockedUntil < request.time.toMillis())
-              )
-            ) &&
-            request.resource.data.slots.keys().all(k =>
-              !(k in resource.data.slots) || request.resource.data.slots[k] != resource.data.slots[k] ? (
-                request.resource.data.slots[k].userId == request.auth.uid
-              ) : true
-            )
-          )
-        )
-      );
+      allow write: if isAuth() && isNotBlacklisted();
     }
 
     // Stats collection for public aggregation
@@ -85,8 +66,14 @@ service cloud.firestore {
         isAdmin() || 
         (
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['users', 'bookings', 'usersCount', 'totalBookings', 'totalRevenue']) &&
-          (!request.resource.data.diff(resource.data).affectedKeys().contains('users') || request.resource.data.users == (resource.data.users == null ? 1 : resource.data.users + 1)) &&
-          (!request.resource.data.diff(resource.data).affectedKeys().contains('bookings') || request.resource.data.bookings == (resource.data.bookings == null ? 1 : resource.data.bookings + 1))
+          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['users']) || 
+            (resource.data.users == null && request.resource.data.users == 1) ||
+            (resource.data.users != null && request.resource.data.users == resource.data.users + 1)
+          ) &&
+          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['bookings']) || 
+            (resource.data.bookings == null && request.resource.data.bookings == 1) ||
+            (resource.data.bookings != null && request.resource.data.bookings == resource.data.bookings + 1)
+          )
         )
       );
       allow create: if isAdmin();
