@@ -10,10 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 export default function OwnerDashboard() {
   const router = useRouter();
   const { appUser, loading } = useAuthStore();
+  const t = useTranslations('Owner');
+  const tProfile = useTranslations('Profile');
   
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [newPitch, setNewPitch] = useState<Partial<Pitch>>({});
@@ -37,7 +40,7 @@ export default function OwnerDashboard() {
   }, [appUser]);
 
   if (loading || appUser?.role !== 'owner') {
-    return <div className="p-8 text-center text-white">Authenticating...</div>;
+    return <div className="p-8 text-center text-foreground">{tProfile('saving')}</div>;
   }
 
   const handleCreatePitch = async (e: React.FormEvent) => {
@@ -73,38 +76,53 @@ export default function OwnerDashboard() {
   };
 
   const handleUpdateAdminRole = async (email: string) => {
-    // This is a naive approach. In reality, you'd need a Cloud Function or query by email.
-    // Firestore doesn't let you update by email easily without querying first.
-    toast.info(`Please ensure the user with email ${email} has logged in once so their role can be upgraded by the system, or implement an Admin query by Email.`);
+    try {
+      const { collection, query, where, getDocs, doc, updateDoc } = await import('firebase/firestore');
+      const q = query(collection(db, 'users'), where('email', '==', email));
+      const qs = await getDocs(q);
+      if (qs.empty) {
+        toast.info(`No user found with email ${email}. Instruct the user to sign in once so they can be assigned.`);
+        return;
+      }
+      
+      const userDoc = qs.docs[0];
+      const userRef = doc(db, 'users', userDoc.id);
+      await updateDoc(userRef, { role: 'admin' });
+      toast.success(`User role updated to admin for ${email}`);
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(`Failed to update admin role: ${error.message}`);
+    }
   };
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8">
+    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-12">
       <div>
-        <h1 className="text-4xl font-black text-foreground">Owner Dashboard</h1>
-        <p className="text-muted-foreground mt-2">Manage all pitches and assign admins.</p>
+        <h1 className="text-4xl font-black text-foreground">{t('title')}</h1>
+        <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
       </div>
 
       <Card className="bg-card/50 border-border backdrop-blur-xl">
         <CardHeader>
-          <CardTitle className="text-card-foreground">Create New Pitch</CardTitle>
-          <CardDescription>Fill out the details to add a new pitch to the platform.</CardDescription>
+          <CardTitle className="text-card-foreground">{t('createNewPitch')}</CardTitle>
+          <CardDescription>{t('createPitchDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreatePitch} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input placeholder="Pitch Name" value={newPitch.name || ''} onChange={e => setNewPitch({...newPitch, name: e.target.value})} required />
-            <Input placeholder="Admin Email (e.g. admin@pitch.com)" value={newPitch.adminEmail || ''} onChange={e => setNewPitch({...newPitch, adminEmail: e.target.value})} required type="email" />
-            <Input placeholder="Admin Phone" value={newPitch.adminPhone || ''} onChange={e => setNewPitch({...newPitch, adminPhone: e.target.value})} />
-            <Input placeholder="Location Name" value={newPitch.locationName || ''} onChange={e => setNewPitch({...newPitch, locationName: e.target.value})} />
-            <Input placeholder="Map Link (Google Maps)" value={newPitch.mapLink || ''} onChange={e => setNewPitch({...newPitch, mapLink: e.target.value})} />
+            <Input placeholder={t('pitchName')} value={newPitch.name || ''} onChange={e => setNewPitch({...newPitch, name: e.target.value})} required className="bg-background border-border text-foreground" />
+            <Input placeholder={t('adminEmail')} value={newPitch.adminEmail || ''} onChange={e => setNewPitch({...newPitch, adminEmail: e.target.value})} required type="email" className="bg-background border-border text-foreground" />
+            <Input placeholder={t('adminPhone')} value={newPitch.adminPhone || ''} onChange={e => setNewPitch({...newPitch, adminPhone: e.target.value})} className="bg-background border-border text-foreground" />
+            <Input placeholder={t('locationName')} value={newPitch.locationName || ''} onChange={e => setNewPitch({...newPitch, locationName: e.target.value})} className="bg-background border-border text-foreground" />
+            <Input placeholder={t('mapLink')} value={newPitch.mapLink || ''} onChange={e => setNewPitch({...newPitch, mapLink: e.target.value})} className="bg-background border-border text-foreground" />
+            
             <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-muted/10 md:col-span-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Pitch Image (Upload or Paste URL)</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('pitchImage')}</label>
               <div className="flex flex-col sm:flex-row gap-3 items-center">
                 <Input 
-                  placeholder="Or paste direct image URL (https://...)" 
+                  placeholder={t('imagePlaceholder')} 
                   value={newPitch.imagePreviewUrl || ''} 
                   onChange={e => setNewPitch({...newPitch, imagePreviewUrl: e.target.value})}
-                  className="bg-card flex-1"
+                  className="bg-background border-border text-foreground flex-1"
                 />
                 <Input 
                   type="file" 
@@ -135,7 +153,7 @@ export default function OwnerDashboard() {
                       toast.error(error.message);
                     }
                   }}
-                  className="bg-card text-foreground flex-1 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
+                  className="bg-card border-border text-foreground flex-1 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
                 />
                 {newPitch.imagePreviewUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -143,32 +161,33 @@ export default function OwnerDashboard() {
                 )}
               </div>
             </div>
-            <Input placeholder="Price Per Hour (EGP)" type="number" value={newPitch.pricePerHour || ''} onChange={e => setNewPitch({...newPitch, pricePerHour: Number(e.target.value)})} required />
-            <Input placeholder="Payment Recipient Number (e.g. Vodafone Cash)" value={newPitch.recipient || ''} onChange={e => setNewPitch({...newPitch, recipient: e.target.value})} />
-            <Input placeholder="Manager Name" value={newPitch.managerName || ''} onChange={e => setNewPitch({...newPitch, managerName: e.target.value})} />
+            
+            <Input placeholder={t('priceLabel')} type="number" value={newPitch.pricePerHour || ''} onChange={e => setNewPitch({...newPitch, pricePerHour: Number(e.target.value)})} required className="bg-background border-border text-foreground" />
+            <Input placeholder={t('recipientLabel')} value={newPitch.recipient || ''} onChange={e => setNewPitch({...newPitch, recipient: e.target.value})} className="bg-background border-border text-foreground" />
+            <Input placeholder={t('managerName')} value={newPitch.managerName || ''} onChange={e => setNewPitch({...newPitch, managerName: e.target.value})} className="bg-background border-border text-foreground" />
             
             <div className="md:col-span-2 mt-4">
-              <Button type="submit" className="w-full bg-primary text-primary-foreground font-bold">Create Pitch</Button>
+              <Button type="submit" className="w-full bg-primary text-black hover:bg-primary/90 font-bold shadow-[0_0_15px_rgba(57,255,20,0.3)]">{t('createBtn')}</Button>
             </div>
           </form>
         </CardContent>
       </Card>
 
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-foreground">Existing Pitches</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t('existingPitches')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pitches.map(pitch => (
-            <Card key={pitch.id} className="bg-card border-border">
+            <Card key={pitch.id} className="bg-card border-border hover:border-primary/25 transition-all duration-300">
               <CardHeader>
-                <CardTitle className="text-primary">{pitch.name}</CardTitle>
-                <CardDescription>{pitch.locationName}</CardDescription>
+                <CardTitle className="text-primary font-bold">{pitch.name}</CardTitle>
+                <CardDescription className="text-muted-foreground">{pitch.locationName}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
-                <p><strong>Admin Email:</strong> {pitch.adminEmail}</p>
-                <p><strong>Price:</strong> {pitch.pricePerHour} EGP/hr</p>
-                <p><strong>Recipient:</strong> {pitch.recipient}</p>
-                <Button variant="outline" size="sm" className="mt-4 w-full" onClick={() => handleUpdateAdminRole(pitch.adminEmail)}>
-                  Verify Admin Role
+                <p><strong className="text-foreground">{t('adminEmailLabel')}</strong> {pitch.adminEmail}</p>
+                <p><strong className="text-foreground">{t('priceValue', { price: pitch.pricePerHour })}</strong></p>
+                <p><strong className="text-foreground">{t('recipientValue', { recipient: pitch.recipient })}</strong></p>
+                <Button variant="outline" size="sm" className="mt-4 w-full bg-secondary hover:bg-secondary/80 text-secondary-foreground border-border" onClick={() => handleUpdateAdminRole(pitch.adminEmail)}>
+                  {t('verifyRoleBtn')}
                 </Button>
               </CardContent>
             </Card>

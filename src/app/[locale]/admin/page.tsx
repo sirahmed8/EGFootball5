@@ -196,7 +196,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="verification" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold rounded-lg">{t('verificationQueue')}</TabsTrigger>
           <TabsTrigger value="schedule" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">{t('liveSchedule')}</TabsTrigger>
           <TabsTrigger value="players" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">{t('playersTab')}</TabsTrigger>
-          <TabsTrigger value="settings" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">Pitch Settings</TabsTrigger>
+          <TabsTrigger value="settings" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">{t('settingsTab')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="verification">
@@ -293,13 +293,13 @@ export default function AdminDashboard() {
         <TabsContent value="settings">
           <Card className="bg-card/50 border-border backdrop-blur-xl">
             <CardHeader>
-              <CardTitle className="text-card-foreground">Edit Pitch Details</CardTitle>
+              <CardTitle className="text-card-foreground">{t('editPitch')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {editingPitch && (
                 <div className="space-y-4 max-w-xl">
                   <div>
-                    <Label>Pitch Name</Label>
+                    <Label>{t('pitchName')}</Label>
                     <Input 
                       value={editingPitch.name} 
                       onChange={e => setEditingPitch({...editingPitch, name: e.target.value})} 
@@ -307,7 +307,7 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div>
-                    <Label>Price Per Hour (EGP)</Label>
+                    <Label>{t('pricePerHour')}</Label>
                     <Input 
                       type="number"
                       value={editingPitch.pricePerHour} 
@@ -316,7 +316,7 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div>
-                    <Label>Location Name</Label>
+                    <Label>{t('locationName')}</Label>
                     <Input 
                       value={editingPitch.locationName} 
                       onChange={e => setEditingPitch({...editingPitch, locationName: e.target.value})} 
@@ -324,7 +324,7 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div>
-                    <Label>Google Maps Link</Label>
+                    <Label>{t('mapLink')}</Label>
                     <Input 
                       value={editingPitch.mapLink} 
                       onChange={e => setEditingPitch({...editingPitch, mapLink: e.target.value})} 
@@ -332,7 +332,7 @@ export default function AdminDashboard() {
                     />
                   </div>
                   <div>
-                    <Label>Profile Picture URL</Label>
+                    <Label>{t('imagePreviewUrl')}</Label>
                     <div className="flex gap-4 items-center">
                       <Input 
                         type="file" 
@@ -378,9 +378,9 @@ export default function AdminDashboard() {
                   <Button 
                     onClick={handleUpdatePitch} 
                     disabled={savingPitch}
-                    className="w-full font-bold bg-primary text-primary-foreground"
+                    className="w-full font-bold bg-primary text-black"
                   >
-                    {savingPitch ? 'Saving...' : 'Save Changes'}
+                    {savingPitch ? t('saving') : t('saveChanges')}
                   </Button>
                 </div>
               )}

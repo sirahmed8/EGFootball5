@@ -11,23 +11,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setAuth = useAuthStore((state) => state.setAuth);
 
   useEffect(() => {
+    let unsubscribeDoc: (() => void) | undefined;
+
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      // Clean up previous Firestore document listener if any exists
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+        unsubscribeDoc = undefined;
+      }
+
       if (firebaseUser) {
         // Subscribe to user profile changes (e.g. role update, blacklisting)
-        const unsubscribeDoc = onSnapshot(doc(db, 'users', firebaseUser.uid), (userDoc) => {
+        unsubscribeDoc = onSnapshot(doc(db, 'users', firebaseUser.uid), (userDoc) => {
           if (userDoc.exists()) {
             setAuth(firebaseUser, userDoc.data() as AppUser);
           } else {
             setAuth(firebaseUser, null);
           }
         });
-        return () => unsubscribeDoc();
       } else {
         setAuth(null, null);
       }
     });
 
-    return () => unsubscribeAuth();
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+      }
+    };
   }, [setAuth]);
 
   return <>{children}</>;

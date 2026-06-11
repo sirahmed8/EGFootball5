@@ -120,6 +120,25 @@ export async function submitReceipt(bookingId: string, receiptUrl: string) {
     const startSlot = bookingData.timeSlot;
     const durationHours = bookingData.duration;
 
+    // Check if the schedule exists
+    const scheduleRef = doc(db, 'day_schedules', `${pitchId}_${date}`);
+    const scheduleSnap = await transaction.get(scheduleRef);
+    if (!scheduleSnap.exists()) {
+      throw new Error('Booking session expired. Please book again.');
+    }
+
+    const slots = scheduleSnap.data().slots || {};
+    const numBlocks = durationHours * 2;
+    
+    // Verify all blocks are still locked by this booking
+    for (let i = 0; i < numBlocks; i++) {
+      const block = startSlot + (i * 0.5);
+      const slot = slots[block.toString()];
+      if (!slot || slot.bookingId !== bookingId) {
+        throw new Error('Your temporary lock has expired and the slots have been released or taken by another player.');
+      }
+    }
+
     // Update booking status
     transaction.update(bookingRef, {
       receiptUrl,
@@ -127,22 +146,14 @@ export async function submitReceipt(bookingId: string, receiptUrl: string) {
     });
 
     // Update corresponding day schedule slots status
-    const scheduleRef = doc(db, 'day_schedules', `${pitchId}_${date}`);
-    const scheduleSnap = await transaction.get(scheduleRef);
-    if (scheduleSnap.exists()) {
-      const slots = scheduleSnap.data().slots || {};
-      const numBlocks = durationHours * 2;
-      for (let i = 0; i < numBlocks; i++) {
-        const block = startSlot + (i * 0.5);
-        if (slots[block.toString()] && slots[block.toString()].bookingId === bookingId) {
-          slots[block.toString()].status = 'pending_review';
-          if ('lockedUntil' in slots[block.toString()]) {
-            delete slots[block.toString()].lockedUntil;
-          }
-        }
+    for (let i = 0; i < numBlocks; i++) {
+      const block = startSlot + (i * 0.5);
+      slots[block.toString()].status = 'pending_review';
+      if ('lockedUntil' in slots[block.toString()]) {
+        delete slots[block.toString()].lockedUntil;
       }
-      transaction.update(scheduleRef, { slots });
     }
+    transaction.update(scheduleRef, { slots });
   });
 }
 

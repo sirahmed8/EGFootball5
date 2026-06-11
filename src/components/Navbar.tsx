@@ -31,7 +31,7 @@ export function Navbar() {
           )}
           {appUser?.role === 'owner' && (
             <Link href="/owner" className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors drop-shadow-[0_0_5px_rgba(0,255,255,0.3)]">
-              Owner Dashboard
+              {t('ownerDashboard')}
             </Link>
           )}
           {firebaseUser ? (
