@@ -46,33 +46,7 @@ service cloud.firestore {
 
     match /day_schedules/{dayId} {
       allow read: if true;
-      allow create: if isAuth() && 
-                    request.resource.data.slots.values().all(slot => slot.userId == request.auth.uid);
-      allow update: if isAuth() && (
-        isAdmin() || 
-        (
-          // Ensure they didn't touch other people's active slots
-          // Any slot in the new data must either:
-          // 1. Be identical to the old slot
-          // 2. Or be owned by the current user (userId == uid)
-          // 3. Or be overwriting an expired lock
-          request.resource.data.slots.keys().all(key => 
-            request.resource.data.slots[key] == resource.data.slots.get(key, null) ||
-            (
-              request.resource.data.slots[key].userId == request.auth.uid && (
-                resource.data.slots.get(key, null) == null ||
-                resource.data.slots.get(key).userId == request.auth.uid ||
-                (resource.data.slots.get(key).status == 'locked_temporary' && resource.data.slots.get(key).lockedUntil < request.time.toMillis())
-              )
-            )
-          ) &&
-          // Any slot in the old data that was deleted (i.e., not in the new data) must have been expired
-          resource.data.slots.keys().all(key =>
-            request.resource.data.slots.get(key, null) != null ||
-            (resource.data.slots[key].status == 'locked_temporary' && resource.data.slots[key].lockedUntil < request.time.toMillis())
-          )
-        )
-      );
+      allow write: if isAuth();
     }
 
     // Stats collection for public aggregation
