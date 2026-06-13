@@ -223,6 +223,7 @@ export default function AdminDashboard() {
                           <p className="font-bold text-foreground text-lg">{booking.date}</p>
                           <p className="text-sm text-primary font-medium">{formatTime(booking.timeSlot)} ({booking.duration} hr)</p>
                           <p className="text-sm text-muted-foreground mt-1">{t('amount')} {booking.totalAmount} EGP</p>
+                          <p className="text-xs text-muted-foreground mt-1.5 capitalize font-semibold bg-primary/10 px-2 py-0.5 rounded border border-primary/20 inline-block">👥 {booking.bookingType || 'private'} ({booking.numPeople || 10} players)</p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-bold text-foreground">{user?.name || 'Unknown'}</p>
@@ -288,6 +289,7 @@ export default function AdminDashboard() {
                     <TableHead className="text-muted-foreground">Player</TableHead>
                     <TableHead className="text-muted-foreground">{t('date')}</TableHead>
                     <TableHead className="text-muted-foreground">{t('time')}</TableHead>
+                    <TableHead className="text-muted-foreground">Type & Size</TableHead>
                     <TableHead className="text-muted-foreground">{t('status')}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -320,6 +322,10 @@ export default function AdminDashboard() {
                         </TableCell>
                         <TableCell>{booking.date}</TableCell>
                         <TableCell>{formatTime(booking.timeSlot)} ({booking.duration}h)</TableCell>
+                        <TableCell>
+                          <div className="text-sm font-semibold capitalize">{booking.bookingType || 'private'}</div>
+                          <div className="text-xs text-muted-foreground">{booking.numPeople || 10} players</div>
+                        </TableCell>
                         <TableCell>
                           <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                             booking.status === 'confirmed' ? 'bg-primary/20 text-primary border border-primary/20' :

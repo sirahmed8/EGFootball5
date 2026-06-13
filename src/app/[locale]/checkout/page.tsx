@@ -29,6 +29,8 @@ function CheckoutForm() {
   const locale = useLocale();
   
   const [booking, setBooking] = useState<Booking | null>(null);
+  const bookingType = booking?.bookingType || typeParam;
+  const numPeople = booking?.numPeople || peopleParam;
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -206,7 +208,7 @@ function CheckoutForm() {
                   <span>Booking Type</span>
                 </div>
                 <strong className="text-foreground capitalize">
-                  {typeParam} ({peopleParam} Players)
+                  {bookingType} ({numPeople} Players)
                 </strong>
               </div>
 
@@ -216,7 +218,7 @@ function CheckoutForm() {
                   <span>Estimated / Player</span>
                 </div>
                 <strong className="text-primary font-black">
-                  {(booking.totalAmount / peopleParam).toFixed(2)} EGP
+                  {(booking.totalAmount / numPeople).toFixed(2)} EGP
                 </strong>
               </div>
             </div>

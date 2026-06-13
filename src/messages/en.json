@@ -213,7 +213,11 @@
     "pending_review": "Pending Review",
     "confirmed": "Confirmed",
     "rejected": "Rejected",
-    "timerLeft": "Expires in: {time}"
+    "timerLeft": "Expires in: {time}",
+    "bookingType": "Booking Type",
+    "private": "Private",
+    "public": "Public",
+    "playersCount": "{count} Players"
   },
   "Owner": {
     "title": "Owner Dashboard",

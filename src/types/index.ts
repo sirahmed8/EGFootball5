@@ -44,6 +44,8 @@ export interface Booking {
   depositAmount: number;
   lockedUntil?: number | null; // timestamp in milliseconds
   createdAt: number;
+  bookingType: 'private' | 'public';
+  numPeople: number;
 }
 
 export interface Academy {

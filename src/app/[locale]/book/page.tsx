@@ -144,9 +144,18 @@ function BookContent() {
 
     setLoadingLock(selectedRange.start);
     try {
-      const bookingId = await lockSlot(firebaseUser.uid, pitch.id, formattedDate, selectedRange.start, duration, totalAmount, depositAmount);
+      const bookingId = await lockSlot(
+        firebaseUser.uid, 
+        pitch.id, 
+        formattedDate, 
+        selectedRange.start, 
+        duration, 
+        totalAmount, 
+        depositAmount,
+        bookingType,
+        numPeople
+      );
       
-      // We would normally pass bookingType and numPeople to lockSlot, but we'll append it to the checkout URL or update later.
       router.push(`/checkout?bookingId=${bookingId}&type=${bookingType}&people=${numPeople}`);
     } catch (error: unknown) {
       const err = error as Error;

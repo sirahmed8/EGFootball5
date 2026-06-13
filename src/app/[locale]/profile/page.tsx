@@ -101,6 +101,12 @@ function BookingCard({ booking, pitch }: { booking: Booking; pitch?: Pitch }) {
             <p className="text-muted-foreground font-medium">
               ⏰ <span className="text-foreground">{formatTimeSlot(booking.timeSlot)} ({booking.duration} hr)</span>
             </p>
+            <p className="text-muted-foreground font-medium">
+              👥 {t('bookingType')}: <span className="text-foreground capitalize">{booking.bookingType ? t(booking.bookingType) : t('private')}</span>
+            </p>
+            <p className="text-muted-foreground font-medium">
+              🏃 {t('playersCount', { count: booking.numPeople || 10 })}
+            </p>
             <p className="text-muted-foreground font-medium col-span-2 mt-1">
               💸 {t('amount')}: <strong className="text-primary">{booking.totalAmount} EGP</strong> (Deposit: {booking.depositAmount} EGP)
             </p>

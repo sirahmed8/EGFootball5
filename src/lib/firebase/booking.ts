@@ -11,7 +11,9 @@ export async function lockSlot(
   startSlot: number, 
   durationHours: number,
   totalAmount: number, 
-  depositAmount: number
+  depositAmount: number,
+  bookingType: 'private' | 'public',
+  numPeople: number
 ): Promise<string> {
   const bookingId = `bk_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
   const scheduleRef = doc(db, 'day_schedules', `${pitchId}_${date}`);
@@ -99,7 +101,9 @@ export async function lockSlot(
       depositAmount,
       status: 'locked_temporary',
       lockedUntil,
-      createdAt: now
+      createdAt: now,
+      bookingType,
+      numPeople
     });
   });
 

@@ -214,7 +214,11 @@
     "pending_review": "قيد المراجعة",
     "confirmed": "مؤكد",
     "rejected": "مرفوض",
-    "timerLeft": "ينتهي خلال: {time}"
+    "timerLeft": "ينتهي خلال: {time}",
+    "bookingType": "نوع الحجز",
+    "private": "خاص",
+    "public": "عام",
+    "playersCount": "{count} لاعبين"
   },
   "Owner": {
     "title": "لوحة تحكم المالك",
