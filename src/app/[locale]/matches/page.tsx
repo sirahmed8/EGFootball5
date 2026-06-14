@@ -116,8 +116,9 @@ export default function MatchesPage() {
         });
       });
       toast.success(t('joinedSuccess'));
-    } catch (error: any) {
-      toast.error(error.message || t('errorGeneric'));
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(err.message || t('errorGeneric'));
     } finally {
       setLoadingAction(null);
     }
@@ -168,8 +169,9 @@ export default function MatchesPage() {
         });
       });
       toast.success(t('leftSuccess'));
-    } catch (error: any) {
-      toast.error(error.message || t('errorGeneric'));
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(err.message || t('errorGeneric'));
     } finally {
       setLoadingAction(null);
     }

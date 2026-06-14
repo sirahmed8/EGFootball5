@@ -1,4 +1,4 @@
-import { doc, runTransaction, increment } from 'firebase/firestore';
+import { doc, runTransaction, increment, collection, query, where, getDocs, writeBatch, getDoc, DocumentReference } from 'firebase/firestore';
 import { db } from './config';
 
 export const OPENING_HOUR = 0; // 12 AM (Midnight)
@@ -269,5 +269,66 @@ export async function cancelBooking(bookingId: string, userId: string) {
       transaction.update(scheduleRef, { slots });
     }
   });
+}
+
+export async function cleanupExpiredBookings(pitchId: string) {
+  const now = Date.now();
+  const bookingsRef = collection(db, 'bookings');
+  const q = query(
+    bookingsRef,
+    where('pitchId', '==', pitchId),
+    where('status', '==', 'locked_temporary')
+  );
+  
+  try {
+    const querySnapshot = await getDocs(q);
+    const expiredBookings = querySnapshot.docs.filter(docSnap => {
+      const data = docSnap.data();
+      return data.lockedUntil && data.lockedUntil < now;
+    });
+
+    if (expiredBookings.length === 0) return;
+
+    const batch = writeBatch(db);
+    const scheduleUpdates: Record<string, { ref: DocumentReference; slots: Record<string, { bookingId: string; status: string }> }> = {};
+
+    for (const bookingDoc of expiredBookings) {
+      const booking = bookingDoc.data();
+      batch.delete(bookingDoc.ref);
+
+      const scheduleId = `${pitchId}_${booking.date}`;
+      if (!scheduleUpdates[scheduleId]) {
+        const scheduleRef = doc(db, 'day_schedules', scheduleId);
+        const scheduleSnap = await getDoc(scheduleRef);
+        if (scheduleSnap.exists()) {
+          scheduleUpdates[scheduleId] = {
+            ref: scheduleRef,
+            slots: scheduleSnap.data().slots || {}
+          };
+        }
+      }
+
+      if (scheduleUpdates[scheduleId]) {
+        const slots = scheduleUpdates[scheduleId].slots;
+        const numBlocks = booking.duration * 2;
+        for (let i = 0; i < numBlocks; i++) {
+          const block = booking.timeSlot + (i * 0.5);
+          const slot = slots[block.toString()];
+          if (slot && slot.bookingId === booking.id) {
+            delete slots[block.toString()];
+          }
+        }
+      }
+    }
+
+    for (const scheduleId in scheduleUpdates) {
+      const { ref, slots } = scheduleUpdates[scheduleId];
+      batch.update(ref, { slots });
+    }
+
+    await batch.commit();
+  } catch (error) {
+    console.error('Error during cleanupExpiredBookings:', error);
+  }
 }
 

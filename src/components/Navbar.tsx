@@ -1,6 +1,6 @@
 'use client';
 
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button, buttonVariants } from './ui/button';
 import { auth } from '@/lib/firebase/config';
@@ -11,11 +11,14 @@ import { SettingsDropdown } from './SettingsDropdown';
 export function Navbar() {
   const { firebaseUser, appUser } = useAuthStore();
   const t = useTranslations('Navbar');
+  const router = useRouter();
 
   const handleLogout = async () => {
     await signOut(auth);
-    window.location.href = '/';
+    router.push('/');
   };
+
+
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/50 backdrop-blur-md border-b border-border">

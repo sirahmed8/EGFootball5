@@ -223,7 +223,18 @@
     "cancelBookingBtn": "إلغاء الحجز",
     "confirmCancelPrompt": "هل أنت متأكد من رغبتك في إلغاء هذا الحجز وتحرير الموعد؟",
     "cancelledSuccess": "تم إلغاء الحجز وتحرير الموعد بنجاح.",
-    "cancelError": "فشل إلغاء الحجز. قد يكون قد تم معالجته بالفعل أو انتهت صلاحيته."
+    "cancelError": "فشل إلغاء الحجز. قد يكون قد تم معالجته بالفعل أو انتهت صلاحيته.",
+    "statsTitle": "إحصائيات اللاعب",
+    "totalBookings": "إجمالي الحجوزات",
+    "matchesPlayed": "المباريات الملعوبة",
+    "preferredPitch": "الملعب المفضل",
+    "loyaltyLevel": "مستوى الولاء",
+    "totalSpend": "إجمالي الإنفاق",
+    "loyaltyRookie": "مبتدئ",
+    "loyaltyAmateur": "هاوٍ",
+    "loyaltySemiPro": "شبه محترف",
+    "loyaltyPro": "لاعب محترف",
+    "loyaltyVeteran": "أسطورة الكيك أوف"
   },
   "Owner": {
     "title": "لوحة تحكم المالك",

@@ -56,8 +56,9 @@ function BookingCard({ booking, pitch }: { booking: Booking; pitch?: Pitch }) {
     try {
       await cancelBooking(booking.id, firebaseUser.uid);
       toast.success(t('cancelledSuccess'));
-    } catch (error: any) {
-      let errMsg = error.message;
+    } catch (error: unknown) {
+      const err = error as Error;
+      let errMsg = err.message;
       if (errMsg && errMsg.startsWith('ERROR_')) {
         try {
           errMsg = tErrors(errMsg);
@@ -282,14 +283,94 @@ export default function ProfilePage() {
       unsubscribePitches();
     };
   }, [firebaseUser]);
-
   if (loading || !appUser || !firebaseUser) return <div className="p-8 text-center text-foreground">{t('saving') || 'Loading...'}</div>;
+
+  // Stats calculations
+  const totalBookings = bookings.length;
+  const confirmedMatches = bookings.filter(b => b.status === 'confirmed').length;
+
+  // Preferred Pitch logic
+  const pitchCounts: Record<string, number> = {};
+  bookings.forEach(b => {
+    pitchCounts[b.pitchId] = (pitchCounts[b.pitchId] || 0) + 1;
+  });
+  let maxCount = 0;
+  let preferredPitchId = '';
+  for (const id in pitchCounts) {
+    if (pitchCounts[id] > maxCount) {
+      maxCount = pitchCounts[id];
+      preferredPitchId = id;
+    }
+  }
+  const preferredPitchName = preferredPitchId ? (pitchesCache[preferredPitchId]?.name || 'N/A') : 'N/A';
+
+  // Loyalty Level logic
+  const getLoyaltyBadge = (count: number) => {
+    if (count === 0) return t('loyaltyRookie');
+    if (count <= 3) return t('loyaltyAmateur');
+    if (count <= 8) return t('loyaltySemiPro');
+    if (count <= 15) return t('loyaltyPro');
+    return t('loyaltyVeteran');
+  };
+
+  const getLoyaltyColor = (count: number) => {
+    if (count === 0) return 'text-muted-foreground bg-muted/20 border-border';
+    if (count <= 3) return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
+    if (count <= 8) return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+    if (count <= 15) return 'text-primary bg-primary/10 border-primary/20';
+    return 'text-purple-500 bg-purple-500/10 border-purple-500/20 animate-pulse';
+  };
+
+  const loyaltyBadge = getLoyaltyBadge(confirmedMatches);
+  const loyaltyColorClass = getLoyaltyColor(confirmedMatches);
 
   return (
     <div className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-8 mt-12">
       <div>
         <h1 className="text-4xl font-black text-foreground">{t('title')}</h1>
         <p className="text-muted-foreground mt-2">{t('description')}</p>
+      </div>
+
+      {/* Player Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="bg-card/30 border-border backdrop-blur-md hover:border-primary/20 transition-all duration-300">
+          <CardContent className="p-4 flex flex-col justify-between h-full min-h-[100px]">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('totalBookings')}</span>
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-3xl font-black text-foreground">{totalBookings}</span>
+              <span className="text-xs text-muted-foreground">({bookings.filter(b => b.status === 'locked_temporary').length} locked)</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/30 border-border backdrop-blur-md hover:border-primary/20 transition-all duration-300">
+          <CardContent className="p-4 flex flex-col justify-between h-full min-h-[100px]">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('matchesPlayed')}</span>
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-3xl font-black text-primary drop-shadow-[0_0_10px_rgba(57,255,20,0.2)]">{confirmedMatches}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/30 border-border backdrop-blur-md hover:border-primary/20 transition-all duration-300">
+          <CardContent className="p-4 flex flex-col justify-between h-full min-h-[100px]">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('preferredPitch')}</span>
+            <span className="text-sm font-bold text-foreground mt-2 truncate max-w-full block" title={preferredPitchName}>
+              ⚽ {preferredPitchName}
+            </span>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/30 border-border backdrop-blur-md hover:border-primary/20 transition-all duration-300">
+          <CardContent className="p-4 flex flex-col justify-between h-full min-h-[100px]">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('loyaltyLevel')}</span>
+            <div className="mt-2">
+              <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold border ${loyaltyColorClass}`}>
+                {loyaltyBadge}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="bookings" className="w-full">

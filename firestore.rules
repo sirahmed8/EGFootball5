@@ -57,7 +57,27 @@ service cloud.firestore {
                       (
                         resource.data.bookingType == 'public' &&
                         resource.data.status == 'confirmed' &&
-                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joinedPlayers', 'joinedPlayerNames'])
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joinedPlayers', 'joinedPlayerNames']) &&
+                        (
+                          // Join match: user adds themselves
+                          (
+                            request.resource.data.joinedPlayers.size() == resource.data.joinedPlayers.size() + 1 &&
+                            request.resource.data.joinedPlayers.hasAll(resource.data.joinedPlayers) &&
+                            request.resource.data.joinedPlayers.hasAll([request.auth.uid]) &&
+                            request.resource.data.joinedPlayerNames.size() == resource.data.joinedPlayerNames.size() + 1 &&
+                            request.resource.data.joinedPlayerNames.hasAll(resource.data.joinedPlayerNames) &&
+                            request.resource.data.joinedPlayerNames.hasAll([get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name])
+                          ) ||
+                          // Leave match: user removes themselves
+                          (
+                            request.resource.data.joinedPlayers.size() == resource.data.joinedPlayers.size() - 1 &&
+                            resource.data.joinedPlayers.hasAll(request.resource.data.joinedPlayers) &&
+                            resource.data.joinedPlayers.hasAll([request.auth.uid]) &&
+                            !request.resource.data.joinedPlayers.hasAll([request.auth.uid]) &&
+                            request.resource.data.joinedPlayerNames.size() == resource.data.joinedPlayerNames.size() - 1 &&
+                            resource.data.joinedPlayerNames.hasAll(request.resource.data.joinedPlayerNames)
+                          )
+                        )
                       )
                     );
       allow delete: if isAdmin();

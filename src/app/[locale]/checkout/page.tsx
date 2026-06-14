@@ -69,7 +69,7 @@ function CheckoutForm() {
     });
 
     return () => unsubscribe();
-  }, [bookingId, router, firebaseUser]);
+  }, [bookingId, router, firebaseUser, locale]);
 
   useEffect(() => {
     if (!booking) return;
@@ -110,7 +110,7 @@ function CheckoutForm() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [booking, router]);
+  }, [booking, router, locale]);
 
   const handleUpload = async () => {
     if (!file || !firebaseUser || !bookingId) return;

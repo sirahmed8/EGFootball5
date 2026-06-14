@@ -223,7 +223,18 @@
     "cancelBookingBtn": "Cancel Booking",
     "confirmCancelPrompt": "Are you sure you want to cancel this booking and release the slot?",
     "cancelledSuccess": "Booking cancelled successfully and slot released.",
-    "cancelError": "Failed to cancel booking. It may have already been processed or expired."
+    "cancelError": "Failed to cancel booking. It may have already been processed or expired.",
+    "statsTitle": "Player Statistics",
+    "totalBookings": "Total Bookings",
+    "matchesPlayed": "Matches Played",
+    "preferredPitch": "Preferred Pitch",
+    "loyaltyLevel": "Loyalty Level",
+    "totalSpend": "Total Spend",
+    "loyaltyRookie": "Rookie",
+    "loyaltyAmateur": "Amateur",
+    "loyaltySemiPro": "Semi-Pro",
+    "loyaltyPro": "Pro Player",
+    "loyaltyVeteran": "Kickoff Legend"
   },
   "Owner": {
     "title": "Owner Dashboard",

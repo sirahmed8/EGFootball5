@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { onSnapshot, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db, storage } from '@/lib/firebase/config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { confirmBooking, rejectBooking } from '@/lib/firebase/booking';
+import { confirmBooking, rejectBooking, cleanupExpiredBookings } from '@/lib/firebase/booking';
 import { toast } from 'sonner';
 import { useTranslations, useLocale } from 'next-intl';
 import { Input } from '@/components/ui/input';
@@ -52,7 +52,6 @@ export default function AdminDashboard() {
     if ((appUser?.role !== 'admin' && appUser?.role !== 'owner') || !firebaseUser?.email) return;
 
     const fetchPitchAndBookings = async () => {
-      const { collection, query, where, getDocs } = await import('firebase/firestore');
       const pitchQ = query(collection(db, 'pitches'), where('adminEmail', '==', firebaseUser.email));
       const pitchSnap = await getDocs(pitchQ);
       
@@ -64,6 +63,9 @@ export default function AdminDashboard() {
       const pitchData = pitchSnap.docs[0].data() as Pitch;
       setPitch(pitchData);
       setEditingPitch(pitchData);
+
+      // Trigger automatic background cleanup of expired locks for this pitch
+      cleanupExpiredBookings(pitchData.id);
 
       const q = query(collection(db, 'bookings'), where('pitchId', '==', pitchData.id));
       const unsubscribe = onSnapshot(q, async (snapshot) => {
