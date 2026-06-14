@@ -43,14 +43,23 @@ service cloud.firestore {
 
     // Bookings collection
     match /bookings/{bookingId} {
-      allow read: if isAuth() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow read: if isAuth() && (request.auth.uid == resource.data.userId || isAdmin() || (resource.data.bookingType == 'public' && resource.data.status == 'confirmed'));
       allow create: if isAuth() 
                     && isNotBlacklisted()
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.status == 'locked_temporary';
       allow update: if isAuth() 
                     && isNotBlacklisted()
-                    && (isAdmin() || (request.resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['receiptUrl', 'status']) && request.resource.data.status == 'pending_review' && resource.data.status == 'locked_temporary'));
+                    && (
+                      isAdmin() || 
+                      (request.resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['receiptUrl', 'status']) && request.resource.data.status == 'pending_review' && resource.data.status == 'locked_temporary') ||
+                      // Allow players to join or leave public matches
+                      (
+                        resource.data.bookingType == 'public' &&
+                        resource.data.status == 'confirmed' &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joinedPlayers', 'joinedPlayerNames'])
+                      )
+                    );
       allow delete: if isAdmin();
     }
 
@@ -77,12 +86,6 @@ service cloud.firestore {
         )
       );
       allow create: if isAdmin();
-    }
-
-    // Academies collection
-    match /academies/{academyId} {
-      allow read: if true;
-      allow write: if isAdmin();
     }
   }
 }

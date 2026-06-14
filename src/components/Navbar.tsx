@@ -24,6 +24,9 @@ export function Navbar() {
           EG<span className="text-primary drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]">Football5</span>
         </Link>
         <div className="flex items-center gap-6">
+          <Link href="/matches" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            {t('publicMatches')}
+          </Link>
           {(appUser?.role === 'admin' || appUser?.role === 'owner') && (
             <Link href="/admin" className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors drop-shadow-[0_0_5px_rgba(0,255,255,0.3)]">
               {t('adminDashboard')}

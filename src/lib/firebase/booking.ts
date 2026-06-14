@@ -90,6 +90,7 @@ export async function lockSlot(
     transaction.set(scheduleRef, { slots: bookedSlots }, { merge: true });
 
     // Create the booking document
+    const userName = userSnap.exists() ? (userSnap.data()?.name || 'Player') : 'Player';
     transaction.set(bookingRef, {
       id: bookingId,
       userId,
@@ -103,7 +104,9 @@ export async function lockSlot(
       lockedUntil,
       createdAt: now,
       bookingType,
-      numPeople
+      numPeople,
+      joinedPlayers: bookingType === 'public' ? [userId] : [],
+      joinedPlayerNames: bookingType === 'public' ? [userName] : []
     });
   });
 

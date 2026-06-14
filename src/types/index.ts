@@ -10,11 +10,6 @@ export interface User {
   createdAt: number;
 }
 
-export interface Pricing {
-  peak: number;
-  offPeak: number;
-}
-
 export interface Pitch {
   id: string;
   name: string;
@@ -46,13 +41,7 @@ export interface Booking {
   createdAt: number;
   bookingType: 'private' | 'public';
   numPeople: number;
+  joinedPlayers?: string[]; // Array of UIDs who joined the public match
+  joinedPlayerNames?: string[]; // Array of display names who joined
 }
 
-export interface Academy {
-  id: string;
-  name: string;
-  coachName: string;
-  recurringSchedule: { day: number; timeSlot: number }[]; // day (0-6)
-  monthlyFee: number;
-  nextPaymentDueDate: number;
-}

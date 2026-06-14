@@ -2,6 +2,8 @@
   "Navbar": {
     "bookPitch": "Book a Pitch",
     "adminDashboard": "Pitch Dashboard",
+    "ownerDashboard": "Owner Dashboard",
+    "publicMatches": "Public Matches",
     "hi": "Hi, {name}",
     "logout": "Logout",
     "signIn": "Sign In"
@@ -260,5 +262,29 @@
     "contact": "Contact",
     "bookNow": "Book Now",
     "noPitches": "No pitches are available on the platform yet. Check back soon!"
+  },
+  "Matches": {
+    "title": "Community Matches Board",
+    "subtitle": "Join active 5-a-side matches, meet new players, and fill up the arena.",
+    "joinGame": "Join Game",
+    "leaveGame": "Leave Game",
+    "spotsLeft": "{count} spots left",
+    "matchFull": "Match Full",
+    "organizer": "Organizer",
+    "joinedPlayers": "Joined Players",
+    "loading": "Loading matches...",
+    "noMatches": "No public matches currently looking for players. Host one by booking a pitch and setting it to public!",
+    "joinedSuccess": "Successfully joined the match!",
+    "leftSuccess": "Successfully left the match!",
+    "errorAuth": "You must be signed in to join a match.",
+    "errorBlacklisted": "You are blacklisted and cannot join matches.",
+    "errorFull": "This match is already full.",
+    "errorGeneric": "Failed to update match status.",
+    "playersList": "Players list:",
+    "spots": "spots available",
+    "date": "Date",
+    "time": "Time",
+    "pitch": "Pitch",
+    "spotsSummary": "{joined} / {total} Players"
   }
 }
