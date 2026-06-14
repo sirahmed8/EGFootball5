@@ -40,6 +40,7 @@ export default function AdminDashboard() {
   const [playerSearch, setPlayerSearch] = useState('');
   const [scheduleSearch, setScheduleSearch] = useState('');
   const [scheduleFilter, setScheduleFilter] = useState<'all' | 'confirmed' | 'pending_review' | 'rejected'>('all');
+  const [activeReceiptUrl, setActiveReceiptUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && appUser?.role !== 'admin' && appUser?.role !== 'owner') {
@@ -232,7 +233,10 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       {booking.receiptUrl ? (
-                        <div className="aspect-[3/4] w-full relative rounded-lg overflow-hidden border border-border">
+                        <div 
+                          className="aspect-[3/4] w-full relative rounded-lg overflow-hidden border border-border cursor-zoom-in hover:scale-[1.01] hover:brightness-90 transition-all duration-200"
+                          onClick={() => setActiveReceiptUrl(booking.receiptUrl || null)}
+                        >
                           {/* We use standard img to avoid next.config remotePattern issues if not configured, or if configured, Image */}
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={booking.receiptUrl} alt="Receipt" className="object-cover w-full h-full" />
@@ -510,6 +514,30 @@ export default function AdminDashboard() {
         </TabsContent>
 
       </Tabs>
+
+      {/* Receipt Lightbox Modal */}
+      {activeReceiptUrl && (
+        <div 
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-zoom-out"
+          onClick={() => setActiveReceiptUrl(null)}
+        >
+          <div className="relative max-w-3xl max-h-[85vh] w-full flex flex-col justify-center items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src={activeReceiptUrl} 
+              alt="Receipt Zoom" 
+              className="object-contain rounded-lg max-h-[75vh] max-w-full shadow-2xl border border-white/10" 
+              onClick={(e) => e.stopPropagation()} 
+            />
+            <Button 
+              className="mt-6 bg-primary text-black font-extrabold hover:bg-primary/90 rounded-full px-8 py-2 h-auto cursor-pointer"
+              onClick={() => setActiveReceiptUrl(null)}
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

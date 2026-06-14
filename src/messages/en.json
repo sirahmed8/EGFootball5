@@ -219,7 +219,11 @@
     "bookingType": "Booking Type",
     "private": "Private",
     "public": "Public",
-    "playersCount": "{count} Players"
+    "playersCount": "{count} Players",
+    "cancelBookingBtn": "Cancel Booking",
+    "confirmCancelPrompt": "Are you sure you want to cancel this booking and release the slot?",
+    "cancelledSuccess": "Booking cancelled successfully and slot released.",
+    "cancelError": "Failed to cancel booking. It may have already been processed or expired."
   },
   "Owner": {
     "title": "Owner Dashboard",

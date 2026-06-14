@@ -219,7 +219,11 @@
     "bookingType": "نوع الحجز",
     "private": "خاص",
     "public": "عام",
-    "playersCount": "{count} لاعبين"
+    "playersCount": "{count} لاعبين",
+    "cancelBookingBtn": "إلغاء الحجز",
+    "confirmCancelPrompt": "هل أنت متأكد من رغبتك في إلغاء هذا الحجز وتحرير الموعد؟",
+    "cancelledSuccess": "تم إلغاء الحجز وتحرير الموعد بنجاح.",
+    "cancelError": "فشل إلغاء الحجز. قد يكون قد تم معالجته بالفعل أو انتهت صلاحيته."
   },
   "Owner": {
     "title": "لوحة تحكم المالك",

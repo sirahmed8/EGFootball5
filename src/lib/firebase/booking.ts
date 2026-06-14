@@ -230,3 +230,44 @@ export async function rejectBooking(bookingId: string) {
     }
   });
 }
+
+export async function cancelBooking(bookingId: string, userId: string) {
+  const bookingRef = doc(db, 'bookings', bookingId);
+  
+  await runTransaction(db, async (transaction) => {
+    const bookingSnap = await transaction.get(bookingRef);
+    if (!bookingSnap.exists()) {
+      throw new Error('Booking not found');
+    }
+    const booking = bookingSnap.data();
+    
+    // Security check: ensure the booking belongs to this user
+    if (booking.userId !== userId) {
+      throw new Error('Unauthorized: You can only cancel your own bookings.');
+    }
+    
+    // Only allow canceling if status is locked_temporary or pending_review
+    if (booking.status !== 'locked_temporary' && booking.status !== 'pending_review') {
+      throw new Error('Cannot cancel a confirmed or already processed booking.');
+    }
+    
+    // Update booking status
+    transaction.update(bookingRef, { status: 'rejected' });
+    
+    // Free slots in schedule
+    const scheduleRef = doc(db, 'day_schedules', `${booking.pitchId}_${booking.date}`);
+    const scheduleSnap = await transaction.get(scheduleRef);
+    if (scheduleSnap.exists()) {
+      const slots = scheduleSnap.data().slots || {};
+      const numBlocks = booking.duration * 2;
+      for (let i = 0; i < numBlocks; i++) {
+        const block = booking.timeSlot + (i * 0.5);
+        if (slots[block.toString()] && slots[block.toString()].bookingId === booking.id) {
+          delete slots[block.toString()];
+        }
+      }
+      transaction.update(scheduleRef, { slots });
+    }
+  });
+}
+

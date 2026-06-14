@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { useTranslations, useLocale } from 'next-intl';
 import { User as AppUser, Booking, Pitch } from '@/types';
+import { cancelBooking } from '@/lib/firebase/booking';
 
 function BookingCountdown({ lockedUntil }: { lockedUntil: number }) {
   const [timeLeft, setTimeLeft] = useState(0);
@@ -42,6 +43,24 @@ function BookingCard({ booking, pitch }: { booking: Booking; pitch?: Pitch }) {
   const t = useTranslations('Profile');
   const locale = useLocale();
   const router = useRouter();
+  const { firebaseUser } = useAuthStore();
+  const [canceling, setCanceling] = useState(false);
+
+  const handleCancel = async () => {
+    if (!firebaseUser) return;
+    const confirmMessage = t('confirmCancelPrompt');
+    if (!window.confirm(confirmMessage)) return;
+
+    setCanceling(true);
+    try {
+      await cancelBooking(booking.id, firebaseUser.uid);
+      toast.success(t('cancelledSuccess'));
+    } catch (error: any) {
+      toast.error(error.message || t('cancelError'));
+    } finally {
+      setCanceling(false);
+    }
+  };
 
   const getStatusBadge = () => {
     switch (booking.status) {
@@ -124,11 +143,22 @@ function BookingCard({ booking, pitch }: { booking: Booking; pitch?: Pitch }) {
           {getStatusBadge()}
 
           <div className="flex gap-2 w-full sm:w-auto">
+            {(booking.status === 'locked_temporary' || booking.status === 'pending_review') && (
+              <Button 
+                onClick={handleCancel}
+                disabled={canceling}
+                variant="destructive"
+                size="sm"
+                className="text-xs py-2 h-auto font-bold border-destructive/40 hover:bg-destructive/10 cursor-pointer"
+              >
+                {t('cancelBookingBtn')}
+              </Button>
+            )}
             {booking.status === 'locked_temporary' && (
               <Button 
                 onClick={() => router.push(`/checkout?bookingId=${booking.id}`)}
                 size="sm"
-                className="bg-primary text-black font-bold hover:bg-primary/90 text-xs py-2 h-auto"
+                className="bg-primary text-black font-bold hover:bg-primary/90 text-xs py-2 h-auto cursor-pointer"
               >
                 {t('completePayment')}
               </Button>

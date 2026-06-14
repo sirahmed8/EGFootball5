@@ -24,7 +24,8 @@ export function SettingsDropdown() {
   const toggleLanguage = () => {
     const nextLocale = locale === 'ar' ? 'en' : 'ar';
     localStorage.setItem('preferredLocale', nextLocale);
-    window.location.href = `/${nextLocale}${pathname === '/' ? '' : pathname}`;
+    const search = window.location.search;
+    window.location.href = `/${nextLocale}${pathname === '/' ? '' : pathname}${search}`;
   };
 
   const toggleTheme = () => {
