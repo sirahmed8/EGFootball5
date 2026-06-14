@@ -30,6 +30,7 @@ function BookContent() {
   const pitchId = searchParams.get('pitchId');
   const { firebaseUser, appUser } = useAuthStore();
   const t = useTranslations('Book');
+  const tErrors = useTranslations('Errors');
   const locale = useLocale();
 
   useEffect(() => {
@@ -159,7 +160,15 @@ function BookContent() {
       router.push(`/checkout?bookingId=${bookingId}&type=${bookingType}&people=${numPeople}`);
     } catch (error: unknown) {
       const err = error as Error;
-      toast.error(err.message);
+      let errMsg = err.message;
+      if (err.message && err.message.startsWith('ERROR_')) {
+        try {
+          errMsg = tErrors(err.message);
+        } catch {
+          // fallback
+        }
+      }
+      toast.error(errMsg);
     } finally {
       setLoadingLock(null);
     }

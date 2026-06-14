@@ -4,13 +4,13 @@ import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAlvtmVyUiVLLaYkeZiCveKvPwmHLKYQ2o",
-  authDomain: "football1fc1.firebaseapp.com",
-  projectId: "football1fc1",
-  storageBucket: "football1fc1.firebasestorage.app",
-  messagingSenderId: "389913644938",
-  appId: "1:389913644938:web:c5dd35e3d97606b9ce0273",
-  measurementId: "G-RCEP5H0L81"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAlvtmVyUiVLLaYkeZiCveKvPwmHLKYQ2o",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "football1fc1.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "football1fc1",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "football1fc1.firebasestorage.app",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "389913644938",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:389913644938:web:c5dd35e3d97606b9ce0273",
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-RCEP5H0L81"
 };
 
 // Initialize Firebase

@@ -65,7 +65,12 @@ service cloud.firestore {
 
     match /day_schedules/{dayId} {
       allow read: if true;
-      allow write: if isAuth() && isNotBlacklisted();
+      allow write: if isAuth() && isNotBlacklisted() && (
+        isAdmin() || (
+          // Only allowed to modify the slots field
+          (resource == null || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['slots']))
+        )
+      );
     }
 
     // Stats collection for public aggregation

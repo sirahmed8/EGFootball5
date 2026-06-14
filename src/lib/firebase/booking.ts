@@ -28,7 +28,7 @@ export async function lockSlot(
     const userRef = doc(db, 'users', userId);
     const userSnap = await transaction.get(userRef);
     if (userSnap.exists() && userSnap.data()?.isBlacklisted) {
-      throw new Error('Your account has been blacklisted. You cannot book pitches.');
+      throw new Error('ERROR_BLACKLISTED');
     }
 
     const scheduleSnap = await transaction.get(scheduleRef);
@@ -51,7 +51,7 @@ export async function lockSlot(
     // 1. Check Availability
     for (const block of blocks) {
       if (bookedSlots[block.toString()]) {
-        throw new Error(`Slot ${block} is already booked or locked.`);
+        throw new Error('ERROR_SLOT_TAKEN');
       }
     }
 
@@ -61,7 +61,7 @@ export async function lockSlot(
     if (beforeSlot >= OPENING_HOUR && !bookedSlots[beforeSlot.toString()]) {
       const twoBeforeSlot = startSlot - 1.0;
       if (beforeSlot === OPENING_HOUR || bookedSlots[twoBeforeSlot.toString()]) {
-        throw new Error(`Booking creates an unbookable 30-minute gap before your start time (${beforeSlot}:00 / ${beforeSlot}:30). Please extend your booking or move it 30 mins earlier.`);
+        throw new Error('ERROR_GAP_BEFORE');
       }
     }
 
@@ -70,7 +70,7 @@ export async function lockSlot(
     if (afterSlot < CLOSING_HOUR && !bookedSlots[afterSlot.toString()]) {
       const twoAfterSlot = endSlot + 1.0;
       if (afterSlot === CLOSING_HOUR - 0.5 || bookedSlots[twoAfterSlot.toString()]) {
-         throw new Error(`Booking creates an unbookable 30-minute gap after your end time. Please extend your booking or move it 30 mins later.`);
+         throw new Error('ERROR_GAP_AFTER');
       }
     }
 
@@ -131,7 +131,7 @@ export async function submitReceipt(bookingId: string, receiptUrl: string) {
     const scheduleRef = doc(db, 'day_schedules', `${pitchId}_${date}`);
     const scheduleSnap = await transaction.get(scheduleRef);
     if (!scheduleSnap.exists()) {
-      throw new Error('Booking session expired. Please book again.');
+      throw new Error('ERROR_LOCK_EXPIRED');
     }
 
     const slots = scheduleSnap.data().slots || {};
@@ -142,7 +142,7 @@ export async function submitReceipt(bookingId: string, receiptUrl: string) {
       const block = startSlot + (i * 0.5);
       const slot = slots[block.toString()];
       if (!slot || slot.bookingId !== bookingId) {
-        throw new Error('Your temporary lock has expired and the slots have been released or taken by another player.');
+        throw new Error('ERROR_LOCK_EXPIRED');
       }
     }
 
@@ -243,12 +243,12 @@ export async function cancelBooking(bookingId: string, userId: string) {
     
     // Security check: ensure the booking belongs to this user
     if (booking.userId !== userId) {
-      throw new Error('Unauthorized: You can only cancel your own bookings.');
+      throw new Error('ERROR_CANCEL_NOT_ALLOWED');
     }
     
     // Only allow canceling if status is locked_temporary or pending_review
     if (booking.status !== 'locked_temporary' && booking.status !== 'pending_review') {
-      throw new Error('Cannot cancel a confirmed or already processed booking.');
+      throw new Error('ERROR_CANCEL_NOT_ALLOWED');
     }
     
     // Update booking status

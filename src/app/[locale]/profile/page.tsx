@@ -41,6 +41,7 @@ function BookingCountdown({ lockedUntil }: { lockedUntil: number }) {
 
 function BookingCard({ booking, pitch }: { booking: Booking; pitch?: Pitch }) {
   const t = useTranslations('Profile');
+  const tErrors = useTranslations('Errors');
   const locale = useLocale();
   const router = useRouter();
   const { firebaseUser } = useAuthStore();
@@ -56,7 +57,17 @@ function BookingCard({ booking, pitch }: { booking: Booking; pitch?: Pitch }) {
       await cancelBooking(booking.id, firebaseUser.uid);
       toast.success(t('cancelledSuccess'));
     } catch (error: any) {
-      toast.error(error.message || t('cancelError'));
+      let errMsg = error.message;
+      if (errMsg && errMsg.startsWith('ERROR_')) {
+        try {
+          errMsg = tErrors(errMsg);
+        } catch {
+          // fallback
+        }
+      } else {
+        errMsg = errMsg || t('cancelError');
+      }
+      toast.error(errMsg);
     } finally {
       setCanceling(false);
     }

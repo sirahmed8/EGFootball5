@@ -26,6 +26,7 @@ function CheckoutForm() {
   const { firebaseUser, loading: authLoading } = useAuthStore();
   const t = useTranslations('Checkout');
   const tBook = useTranslations('Book');
+  const tErrors = useTranslations('Errors');
   const locale = useLocale();
   
   const [booking, setBooking] = useState<Booking | null>(null);
@@ -50,7 +51,7 @@ function CheckoutForm() {
         
         // Security Check: Ensure booking belongs to the current logged-in user
         if (firebaseUser && data.userId !== firebaseUser.uid) {
-          toast.error('Unauthorized access to this booking');
+          toast.error(locale === 'ar' ? 'وصول غير مصرح به لهذا الحجز' : 'Unauthorized access to this booking');
           router.push('/book');
           return;
         }
@@ -62,7 +63,7 @@ function CheckoutForm() {
           }
         }
       } else {
-        toast.error('Booking not found or expired');
+        toast.error(locale === 'ar' ? 'الحجز غير موجود أو منتهي الصلاحية' : 'Booking not found or expired');
         router.push('/book');
       }
     });
@@ -101,7 +102,7 @@ function CheckoutForm() {
       const diff = Math.floor((booking.lockedUntil! - now) / 1000);
       if (diff <= 0) {
         clearInterval(timer);
-        toast.error('Your temporary lock has expired.');
+        toast.error(locale === 'ar' ? 'انتهت صلاحية الحجز المؤقت الخاص بك.' : 'Your temporary lock has expired.');
         router.push('/book');
       } else {
         setTimeLeft(diff);
@@ -130,7 +131,7 @@ function CheckoutForm() {
           setProgress(prog);
         }, 
         (error) => {
-          toast.error('Upload failed: ' + error.message);
+          toast.error((locale === 'ar' ? 'فشل الرفع: ' : 'Upload failed: ') + error.message);
           setUploading(false);
         }, 
         async () => {
@@ -143,7 +144,17 @@ function CheckoutForm() {
       );
     } catch (error: unknown) {
       const err = error as Error;
-      toast.error('Failed to submit receipt: ' + err.message);
+      let errMsg = err.message;
+      if (err.message && err.message.startsWith('ERROR_')) {
+        try {
+          errMsg = tErrors(err.message);
+        } catch {
+          // fallback
+        }
+      } else {
+        errMsg = (locale === 'ar' ? 'فشل إرسال الإيصال: ' : 'Failed to submit receipt: ') + err.message;
+      }
+      toast.error(errMsg);
       setUploading(false);
     }
   };
