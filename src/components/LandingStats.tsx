@@ -12,6 +12,7 @@ export function LandingStats() {
   const [pitchesCount, setPitchesCount] = useState(0); 
   const [usersCount, setUsersCount] = useState(0);
   const [matchesCount, setMatchesCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -27,10 +28,25 @@ export function LandingStats() {
         }
       } catch (e) {
         console.error("Could not fetch real stats", e);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchStats();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="space-y-4 flex flex-col items-center">
+            <div className="w-24 h-12 bg-primary/20 animate-pulse rounded-md"></div>
+            <div className="w-16 h-4 bg-muted animate-pulse rounded-md"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">

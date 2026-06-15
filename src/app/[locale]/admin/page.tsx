@@ -3,28 +3,20 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { onSnapshot, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { db, storage } from '@/lib/firebase/config';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Booking, User as AppUser, Pitch } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { confirmBooking, rejectBooking, cleanupExpiredBookings } from '@/lib/firebase/booking';
 import { toast } from 'sonner';
 import { useTranslations, useLocale } from 'next-intl';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
-const formatTime = (block: number) => {
-  const hour = Math.floor(block);
-  const mins = block % 1 === 0 ? '00' : '30';
-  const ampm = hour >= 12 && hour < 24 ? 'PM' : 'AM';
-  const modHour = hour % 12 || 12;
-  return `${modHour}:${mins} ${ampm}`;
-};
+import { AdminOverviewCards } from './components/AdminOverviewCards';
+import { VerificationQueue } from './components/VerificationQueue';
+import { LiveSchedule } from './components/LiveSchedule';
+import { PitchSettings } from './components/PitchSettings';
+import { PlayersList } from './components/PlayersList';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -96,7 +88,8 @@ export default function AdminDashboard() {
     return () => {
       if (typeof unsub === 'function') unsub();
     };
-  }, [appUser, firebaseUser, usersCache]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appUser, firebaseUser]);
 
   if (loading || (appUser?.role !== 'admin' && appUser?.role !== 'owner')) {
     return <div className="p-8 text-center text-white">Authenticating...</div>;
@@ -179,24 +172,7 @@ export default function AdminDashboard() {
         <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-card/50 border-border backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-muted-foreground">{t('revenue')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-primary drop-shadow-[0_0_10px_rgba(57,255,20,0.4)]">{revenue} EGP</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/50 border-border backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-muted-foreground">{t('pending')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.4)]">{pendingReview.length}</p>
-          </CardContent>
-        </Card>
-      </div>
+      <AdminOverviewCards revenue={revenue} pendingCount={pendingReview.length} t={t} />
 
       <Tabs defaultValue="verification" className="w-full">
         <TabsList className="bg-muted/50 border border-border mb-4 p-1 rounded-xl">
@@ -207,312 +183,50 @@ export default function AdminDashboard() {
         </TabsList>
         
         <TabsContent value="verification">
-          <Card className="bg-card/50 border-border backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="text-card-foreground">{t('pendingReceipts')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {pendingReview.length === 0 ? (
-                <p className="text-muted-foreground">{t('noPending')}</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {pendingReview.map(booking => {
-                    const user = usersCache[booking.userId];
-                    const loyalty = getUserLoyalty(booking.userId);
-                    return (
-                    <div key={booking.id} className="border border-border rounded-xl p-4 bg-muted/30 flex flex-col gap-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-bold text-foreground text-lg">{booking.date}</p>
-                          <p className="text-sm text-primary font-medium">{formatTime(booking.timeSlot)} ({booking.duration} hr)</p>
-                          <p className="text-sm text-muted-foreground mt-1">{t('amount')} {booking.totalAmount} EGP</p>
-                          <p className="text-xs text-muted-foreground mt-1.5 capitalize font-semibold bg-primary/10 px-2 py-0.5 rounded border border-primary/20 inline-block">👥 {booking.bookingType || 'private'} ({booking.numPeople || 10} players)</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-foreground">{user?.name || 'Unknown'}</p>
-                          <p className="text-xs text-muted-foreground">{user?.phone || 'No phone'}</p>
-                          <p className="text-xs text-secondary font-bold mt-1">Loyalty: {loyalty} bookings</p>
-                        </div>
-                      </div>
-                      {booking.receiptUrl ? (
-                        <div 
-                          className="aspect-[3/4] w-full relative rounded-lg overflow-hidden border border-border cursor-zoom-in hover:scale-[1.01] hover:brightness-90 transition-all duration-200"
-                          onClick={() => setActiveReceiptUrl(booking.receiptUrl || null)}
-                        >
-                          {/* We use standard img to avoid next.config remotePattern issues if not configured, or if configured, Image */}
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={booking.receiptUrl} alt="Receipt" className="object-cover w-full h-full" />
-                        </div>
-                      ) : (
-                        <div className="h-48 bg-muted flex items-center justify-center rounded-lg text-muted-foreground">{t('noImage')}</div>
-                      )}
-                      <div className="grid grid-cols-2 gap-2 mt-auto pt-4">
-                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold" onClick={() => handleApprove(booking)}>{t('approve')}</Button>
-                        <Button variant="destructive" onClick={() => handleReject(booking)} className="font-bold">{t('reject')}</Button>
-                      </div>
-                    </div>
-                  )})}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <VerificationQueue 
+            pendingReview={pendingReview}
+            usersCache={usersCache}
+            getUserLoyalty={getUserLoyalty}
+            handleApprove={handleApprove}
+            handleReject={handleReject}
+            setActiveReceiptUrl={setActiveReceiptUrl}
+            t={t}
+          />
         </TabsContent>
 
         <TabsContent value="schedule">
-          <Card className="bg-card border-border backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="text-card-foreground">{t('liveSchedule')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Filter controls */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                <div className="flex-1">
-                  <Input
-                    placeholder="Search by player name or phone..."
-                    value={scheduleSearch}
-                    onChange={(e) => setScheduleSearch(e.target.value)}
-                    className="bg-card text-foreground border-border"
-                  />
-                </div>
-                <div className="w-full sm:w-48">
-                  <Select value={scheduleFilter} onValueChange={(val) => setScheduleFilter(val as 'all' | 'confirmed' | 'pending_review' | 'rejected')}>
-                    <SelectTrigger className="bg-card text-foreground border-border">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="confirmed">Confirmed</SelectItem>
-                      <SelectItem value="pending_review">Pending Review</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-border hover:bg-muted/50">
-                    <TableHead className="text-muted-foreground">Player</TableHead>
-                    <TableHead className="text-muted-foreground">{t('date')}</TableHead>
-                    <TableHead className="text-muted-foreground">{t('time')}</TableHead>
-                    <TableHead className="text-muted-foreground">Type & Size</TableHead>
-                    <TableHead className="text-muted-foreground">{t('status')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[...bookings]
-                    .filter((booking) => {
-                      if (scheduleFilter !== 'all' && booking.status !== scheduleFilter) return false;
-                      if (scheduleSearch) {
-                        const user = usersCache[booking.userId];
-                        const name = user?.name?.toLowerCase() || '';
-                        const phone = user?.phone || '';
-                        const query = scheduleSearch.toLowerCase();
-                        return name.includes(query) || phone.includes(query);
-                      }
-                      return true;
-                    })
-                    .sort((a, b) => {
-                      if (a.date !== b.date) {
-                        return b.date.localeCompare(a.date);
-                      }
-                      return b.timeSlot - a.timeSlot;
-                    })
-                    .map((booking) => {
-                      const user = usersCache[booking.userId];
-                      return (
-                      <TableRow key={booking.id} className="border-border hover:bg-muted/50 text-foreground">
-                        <TableCell className="font-medium">
-                          {user?.name || 'Player'}
-                          <div className="text-xs text-muted-foreground">{user?.phone}</div>
-                        </TableCell>
-                        <TableCell>{booking.date}</TableCell>
-                        <TableCell>{formatTime(booking.timeSlot)} ({booking.duration}h)</TableCell>
-                        <TableCell>
-                          <div className="text-sm font-semibold capitalize">{booking.bookingType || 'private'}</div>
-                          <div className="text-xs text-muted-foreground">{booking.numPeople || 10} players</div>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                            booking.status === 'confirmed' ? 'bg-primary/20 text-primary border border-primary/20' :
-                            booking.status === 'pending_review' ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/20' :
-                            booking.status === 'rejected' ? 'bg-destructive/20 text-destructive border border-destructive/20' :
-                            'bg-muted text-muted-foreground border border-border'
-                          }`}>
-                            {booking.status}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    )})}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <LiveSchedule 
+            bookings={bookings}
+            usersCache={usersCache}
+            scheduleSearch={scheduleSearch}
+            setScheduleSearch={setScheduleSearch}
+            scheduleFilter={scheduleFilter}
+            setScheduleFilter={setScheduleFilter}
+            t={t}
+          />
         </TabsContent>
 
         <TabsContent value="settings">
-          <Card className="bg-card/50 border-border backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="text-card-foreground">{t('editPitch')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {editingPitch && (
-                <div className="space-y-4 max-w-xl">
-                  <div>
-                    <Label>{t('pitchName')}</Label>
-                    <Input 
-                      value={editingPitch.name} 
-                      onChange={e => setEditingPitch({...editingPitch, name: e.target.value})} 
-                      className="bg-card text-foreground"
-                    />
-                  </div>
-                  <div>
-                    <Label>{t('pricePerHour')}</Label>
-                    <Input 
-                      type="number"
-                      value={editingPitch.pricePerHour} 
-                      onChange={e => setEditingPitch({...editingPitch, pricePerHour: Number(e.target.value) || 0})} 
-                      className="bg-card text-foreground"
-                    />
-                  </div>
-                  <div>
-                    <Label>{t('locationName')}</Label>
-                    <Input 
-                      value={editingPitch.locationName} 
-                      onChange={e => setEditingPitch({...editingPitch, locationName: e.target.value})} 
-                      className="bg-card text-foreground"
-                    />
-                  </div>
-                  <div>
-                    <Label>{t('mapLink')}</Label>
-                    <Input 
-                      value={editingPitch.mapLink} 
-                      onChange={e => setEditingPitch({...editingPitch, mapLink: e.target.value})} 
-                      className="bg-card text-foreground"
-                    />
-                  </div>
-                  <div>
-                    <Label>{t('imagePreviewUrl')}</Label>
-                    <div className="flex gap-4 items-center">
-                      <Input 
-                        type="file" 
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          
-                          try {
-                            setSavingPitch(true);
-                            const storageRef = ref(storage, `pitches/${editingPitch.id}_${file.name}`);
-                            await uploadBytes(storageRef, file);
-                            const downloadUrl = await getDownloadURL(storageRef);
-                            setEditingPitch({...editingPitch, imagePreviewUrl: downloadUrl});
-                            toast.success('Image uploaded successfully');
-                          } catch (err: unknown) {
-                            const error = err as Error;
-                            toast.error(error.message);
-                          } finally {
-                            setSavingPitch(false);
-                          }
-                        }}
-                        className="bg-card text-foreground flex-1 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
-                      />
-                      {editingPitch.imagePreviewUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={editingPitch.imagePreviewUrl} alt="Preview" className="w-12 h-12 rounded-lg object-cover" />
-                      )}
-                    </div>
-                  </div>
-                  <Button 
-                    onClick={handleUpdatePitch} 
-                    disabled={savingPitch}
-                    className="w-full font-bold bg-primary text-black"
-                  >
-                    {savingPitch ? t('saving') : t('saveChanges')}
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <PitchSettings 
+            editingPitch={editingPitch}
+            setEditingPitch={setEditingPitch}
+            handleUpdatePitch={handleUpdatePitch}
+            savingPitch={savingPitch}
+            setSavingPitch={setSavingPitch}
+            t={t}
+          />
         </TabsContent>
 
         <TabsContent value="players">
-          <Card className="bg-card/50 border-border backdrop-blur-xl">
-            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4">
-              <div>
-                <CardTitle className="text-card-foreground">{t('playersList')}</CardTitle>
-              </div>
-              <div className="w-full sm:w-72">
-                <Input
-                  placeholder={locale === 'ar' ? 'بحث بالاسم أو الهاتف...' : 'Search by name or phone...'}
-                  value={playerSearch}
-                  onChange={(e) => setPlayerSearch(e.target.value)}
-                  className="bg-card text-foreground border-border"
-                />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {uniquePlayers.length === 0 ? (
-                <p className="text-muted-foreground text-center py-6">No players found.</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-border hover:bg-muted/50">
-                        <TableHead className="text-muted-foreground">Player</TableHead>
-                        <TableHead className="text-muted-foreground">{t('loyaltyBookings')}</TableHead>
-                        <TableHead className="text-muted-foreground">{t('playerStatus')}</TableHead>
-                        <TableHead className="text-right text-muted-foreground">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {uniquePlayers
-                        .filter(user => {
-                          if (!playerSearch) return true;
-                          const term = playerSearch.toLowerCase();
-                          return (
-                            user.name?.toLowerCase().includes(term) ||
-                            user.phone?.includes(term)
-                          );
-                        })
-                        .map(user => {
-                          const loyalty = getUserLoyalty(user.uid);
-                          const isBlack = !!user.isBlacklisted;
-                          return (
-                            <TableRow key={user.uid} className="border-border hover:bg-muted/50 text-foreground">
-                              <TableCell className="font-medium">
-                                <div>{user.name || 'Unnamed'}</div>
-                                <div className="text-xs text-muted-foreground">{user.phone || 'No phone'}</div>
-                              </TableCell>
-                              <TableCell className="font-bold text-primary">{loyalty}</TableCell>
-                              <TableCell>
-                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                  isBlack 
-                                    ? 'bg-destructive/20 text-destructive border border-destructive/20' 
-                                    : 'bg-primary/20 text-primary border border-primary/20'
-                                }`}>
-                                  {isBlack ? t('blacklisted') : t('active')}
-                                </span>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <Button
-                                  variant={isBlack ? 'outline' : 'destructive'}
-                                  size="sm"
-                                  onClick={() => handleToggleBlacklist(user.uid, isBlack)}
-                                  className="font-bold transition-all hover:scale-105 active:scale-95"
-                                >
-                                  {isBlack ? t('unblacklistBtn') : t('blacklistBtn')}
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <PlayersList 
+            uniquePlayers={uniquePlayers}
+            playerSearch={playerSearch}
+            setPlayerSearch={setPlayerSearch}
+            getUserLoyalty={getUserLoyalty}
+            handleToggleBlacklist={handleToggleBlacklist}
+            t={t}
+            locale={locale}
+          />
         </TabsContent>
 
       </Tabs>
