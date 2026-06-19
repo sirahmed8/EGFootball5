@@ -96,20 +96,7 @@ service cloud.firestore {
     // Stats collection for public aggregation
     match /stats/{statId} {
       allow read: if true;
-      allow update: if isAuth() && (
-        isAdmin() || 
-        (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['users', 'bookings', 'usersCount', 'totalBookings', 'totalRevenue']) &&
-          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['users']) || 
-            (resource.data.users == null && request.resource.data.users == 1) ||
-            (resource.data.users != null && request.resource.data.users == resource.data.users + 1)
-          ) &&
-          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['bookings']) || 
-            (resource.data.bookings == null && request.resource.data.bookings == 1) ||
-            (resource.data.bookings != null && request.resource.data.bookings == resource.data.bookings + 1)
-          )
-        )
-      );
+      allow update: if isAdmin();
       allow create: if isAdmin();
     }
   }

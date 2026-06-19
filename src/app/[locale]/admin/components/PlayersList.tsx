@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { User as AppUser } from '@/types';
+import React from 'react';
 
 interface PlayersListProps {
   uniquePlayers: AppUser[];
@@ -14,7 +15,7 @@ interface PlayersListProps {
   locale: string;
 }
 
-export function PlayersList({
+export const PlayersList = React.memo(function PlayersList({
   uniquePlayers,
   playerSearch,
   setPlayerSearch,
@@ -101,4 +102,4 @@ export function PlayersList({
       </CardContent>
     </Card>
   );
-}
+});

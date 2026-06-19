@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useTheme } from 'next-themes';
-import { usePathname } from '@/i18n/routing';
+import { usePathname, useRouter } from '@/i18n/routing';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   DropdownMenu,
@@ -16,25 +16,39 @@ import {
 import { Settings, Moon, Sun, Languages } from 'lucide-react';
 
 export function SettingsDropdown() {
-  const { setTheme, theme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
   const locale = useLocale();
   const pathname = usePathname();
+  const router = useRouter();
   const t = useTranslations('Settings');
+
+  React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   const toggleLanguage = () => {
     const nextLocale = locale === 'ar' ? 'en' : 'ar';
     localStorage.setItem('preferredLocale', nextLocale);
-    const search = window.location.search;
-    window.location.href = `/${nextLocale}${pathname === '/' ? '' : pathname}${search}`;
+    router.replace(pathname, { locale: nextLocale });
   };
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
+
+  if (!mounted) {
+    return (
+      <div className="text-muted-foreground rounded-full p-2">
+        <Settings className="h-5 w-5 opacity-50" />
+      </div>
+    );
+  }
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground rounded-full p-2 hover:bg-muted/50 transition-all active:scale-90 focus:outline-none">
+      <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground rounded-full p-2 hover:bg-muted/50 transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
         <Settings className="h-5 w-5" />
         <span className="sr-only">{t('title')}</span>
       </DropdownMenuTrigger>
@@ -47,8 +61,8 @@ export function SettingsDropdown() {
             <span>{locale === 'ar' ? t('english') : t('arabic')}</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
-            {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-            <span>{theme === 'dark' ? t('lightMode') : t('darkMode')}</span>
+            {resolvedTheme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+            <span>{resolvedTheme === 'dark' ? t('lightMode') : t('darkMode')}</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

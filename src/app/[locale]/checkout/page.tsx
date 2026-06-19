@@ -137,7 +137,7 @@ function CheckoutForm() {
         async () => {
           // 3. Get download URL and update booking
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          await submitReceipt(bookingId, downloadURL);
+          await submitReceipt(bookingId, downloadURL, firebaseUser.uid);
           toast.success('Receipt uploaded successfully! Awaiting admin review.');
           router.push('/profile');
         }

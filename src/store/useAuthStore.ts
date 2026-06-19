@@ -8,6 +8,7 @@ interface AuthState {
   loading: boolean;
   setAuth: (firebaseUser: FirebaseUser | null, appUser: AppUser | null) => void;
   setLoading: (loading: boolean) => void;
+  clearAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -16,4 +17,5 @@ export const useAuthStore = create<AuthState>((set) => ({
   loading: true,
   setAuth: (firebaseUser, appUser) => set({ firebaseUser, appUser, loading: false }),
   setLoading: (loading) => set({ loading }),
+  clearAuth: () => set({ firebaseUser: null, appUser: null, loading: false }),
 }));

@@ -31,7 +31,7 @@ export interface Booking {
   userId: string;
   pitchId: string;
   date: string; // YYYY-MM-DD
-  timeSlot: number; // hour (0-23)
+  timeSlot: number; // hour (0-23.5, supporting 30-min intervals)
   duration: number; // hours
   status: BookingStatus;
   receiptUrl?: string;

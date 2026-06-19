@@ -42,7 +42,14 @@
     "footerPrivacy": "Privacy Policy",
     "footerTerms": "Terms of Service",
     "footerCookies": "Cookie Policy",
-    "footerRights": "© 2026 EGFootball5. All rights reserved."
+    "footerRights": "© 2026 EGFootball5. All rights reserved.",
+    "faqTitle": "Frequently Asked Questions",
+    "faq1Q": "How do I book a pitch?",
+    "faq1A": "Sign up for an account, choose your preferred pitch, select a date and an available time slot, and confirm your booking by uploading your deposit receipt.",
+    "faq2Q": "What is the cancellation policy?",
+    "faq2A": "You can cancel your booking from your profile before the admin confirms it. Once confirmed, you must contact the pitch manager directly.",
+    "faq3Q": "How do public matches work?",
+    "faq3A": "Public matches allow you to book a slot and open it for others to join. You can split the cost among the joined players."
   },
   "Login": {
     "signIn": "Sign In",

@@ -4,6 +4,22 @@ import { db } from './config';
 export const OPENING_HOUR = 0; // 12 AM (Midnight)
 export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
 
+// Helper: generate blocks for a given start slot and duration
+function getBlocks(startSlot: number, durationHours: number): number[] {
+  const numBlocks = durationHours * 2;
+  return Array.from({ length: numBlocks }, (_, i) => startSlot + (i * 0.5));
+}
+
+// Helper: Free up slots in the day schedule
+function freeSlots(slots: Record<string, { bookingId: string; status: string }>, bookingId: string, blocks: number[]) {
+  for (const block of blocks) {
+    const slotStr = block.toString();
+    if (slots[slotStr] && slots[slotStr].bookingId === bookingId) {
+      delete slots[slotStr];
+    }
+  }
+}
+
 export async function lockSlot(
   userId: string, 
   pitchId: string, 
@@ -15,13 +31,21 @@ export async function lockSlot(
   bookingType: 'private' | 'public',
   numPeople: number
 ): Promise<string> {
-  const bookingId = `bk_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+  // Validate inputs
+  if (startSlot < OPENING_HOUR || startSlot >= CLOSING_HOUR || durationHours <= 0) {
+    throw new Error('Invalid start slot or duration');
+  }
+
+  const bookingId = crypto.randomUUID();
   const scheduleRef = doc(db, 'day_schedules', `${pitchId}_${date}`);
   const bookingRef = doc(db, 'bookings', bookingId);
 
-  const numBlocks = durationHours * 2; // 1 hr = 2 blocks of 30 mins
-  const blocks = Array.from({ length: numBlocks }, (_, i) => startSlot + (i * 0.5));
+  const blocks = getBlocks(startSlot, durationHours);
   const endSlot = blocks[blocks.length - 1];
+
+  if (endSlot >= CLOSING_HOUR) {
+    throw new Error('Booking exceeds closing hour');
+  }
 
   await runTransaction(db, async (transaction) => {
     // Check if the user is blacklisted
@@ -113,7 +137,7 @@ export async function lockSlot(
   return bookingId;
 }
 
-export async function submitReceipt(bookingId: string, receiptUrl: string) {
+export async function submitReceipt(bookingId: string, receiptUrl: string, currentUserId: string) {
   const bookingRef = doc(db, 'bookings', bookingId);
   
   await runTransaction(db, async (transaction) => {
@@ -122,6 +146,12 @@ export async function submitReceipt(bookingId: string, receiptUrl: string) {
       throw new Error('Booking not found');
     }
     const bookingData = bookingSnap.data();
+    
+    // Authorization check
+    if (bookingData.userId !== currentUserId) {
+      throw new Error('Unauthorized to submit receipt for this booking');
+    }
+
     const pitchId = bookingData.pitchId;
     const date = bookingData.date;
     const startSlot = bookingData.timeSlot;
@@ -135,11 +165,10 @@ export async function submitReceipt(bookingId: string, receiptUrl: string) {
     }
 
     const slots = scheduleSnap.data().slots || {};
-    const numBlocks = durationHours * 2;
+    const blocks = getBlocks(startSlot, durationHours);
     
     // Verify all blocks are still locked by this booking
-    for (let i = 0; i < numBlocks; i++) {
-      const block = startSlot + (i * 0.5);
+    for (const block of blocks) {
       const slot = slots[block.toString()];
       if (!slot || slot.bookingId !== bookingId) {
         throw new Error('ERROR_LOCK_EXPIRED');
@@ -153,11 +182,11 @@ export async function submitReceipt(bookingId: string, receiptUrl: string) {
     });
 
     // Update corresponding day schedule slots status
-    for (let i = 0; i < numBlocks; i++) {
-      const block = startSlot + (i * 0.5);
-      slots[block.toString()].status = 'pending_review';
-      if ('lockedUntil' in slots[block.toString()]) {
-        delete slots[block.toString()].lockedUntil;
+    for (const block of blocks) {
+      const slotStr = block.toString();
+      slots[slotStr].status = 'pending_review';
+      if ('lockedUntil' in slots[slotStr]) {
+        delete slots[slotStr].lockedUntil;
       }
     }
     transaction.update(scheduleRef, { slots });
@@ -182,13 +211,14 @@ export async function confirmBooking(bookingId: string) {
     const scheduleSnap = await transaction.get(scheduleRef);
     if (scheduleSnap.exists()) {
       const slots = scheduleSnap.data().slots || {};
-      const numBlocks = booking.duration * 2;
-      for (let i = 0; i < numBlocks; i++) {
-        const block = booking.timeSlot + (i * 0.5);
-        if (slots[block.toString()]) {
-          slots[block.toString()].status = 'confirmed';
-          if ('lockedUntil' in slots[block.toString()]) {
-            delete slots[block.toString()].lockedUntil;
+      const blocks = getBlocks(booking.timeSlot, booking.duration);
+      
+      for (const block of blocks) {
+        const slotStr = block.toString();
+        if (slots[slotStr]) {
+          slots[slotStr].status = 'confirmed';
+          if ('lockedUntil' in slots[slotStr]) {
+            delete slots[slotStr].lockedUntil;
           }
         }
       }
@@ -219,13 +249,8 @@ export async function rejectBooking(bookingId: string) {
     const scheduleSnap = await transaction.get(scheduleRef);
     if (scheduleSnap.exists()) {
       const slots = scheduleSnap.data().slots || {};
-      const numBlocks = booking.duration * 2;
-      for (let i = 0; i < numBlocks; i++) {
-        const block = booking.timeSlot + (i * 0.5);
-        if (slots[block.toString()] && slots[block.toString()].bookingId === booking.id) {
-          delete slots[block.toString()];
-        }
-      }
+      const blocks = getBlocks(booking.timeSlot, booking.duration);
+      freeSlots(slots, bookingId, blocks);
       transaction.update(scheduleRef, { slots });
     }
   });
@@ -259,13 +284,8 @@ export async function cancelBooking(bookingId: string, userId: string) {
     const scheduleSnap = await transaction.get(scheduleRef);
     if (scheduleSnap.exists()) {
       const slots = scheduleSnap.data().slots || {};
-      const numBlocks = booking.duration * 2;
-      for (let i = 0; i < numBlocks; i++) {
-        const block = booking.timeSlot + (i * 0.5);
-        if (slots[block.toString()] && slots[block.toString()].bookingId === booking.id) {
-          delete slots[block.toString()];
-        }
-      }
+      const blocks = getBlocks(booking.timeSlot, booking.duration);
+      freeSlots(slots, bookingId, blocks);
       transaction.update(scheduleRef, { slots });
     }
   });
@@ -277,15 +297,13 @@ export async function cleanupExpiredBookings(pitchId: string) {
   const q = query(
     bookingsRef,
     where('pitchId', '==', pitchId),
-    where('status', '==', 'locked_temporary')
+    where('status', '==', 'locked_temporary'),
+    where('lockedUntil', '<', now)
   );
   
   try {
     const querySnapshot = await getDocs(q);
-    const expiredBookings = querySnapshot.docs.filter(docSnap => {
-      const data = docSnap.data();
-      return data.lockedUntil && data.lockedUntil < now;
-    });
+    const expiredBookings = querySnapshot.docs;
 
     if (expiredBookings.length === 0) return;
 
@@ -294,6 +312,7 @@ export async function cleanupExpiredBookings(pitchId: string) {
 
     for (const bookingDoc of expiredBookings) {
       const booking = bookingDoc.data();
+      const bookingId = bookingDoc.id;
       batch.delete(bookingDoc.ref);
 
       const scheduleId = `${pitchId}_${booking.date}`;
@@ -310,14 +329,8 @@ export async function cleanupExpiredBookings(pitchId: string) {
 
       if (scheduleUpdates[scheduleId]) {
         const slots = scheduleUpdates[scheduleId].slots;
-        const numBlocks = booking.duration * 2;
-        for (let i = 0; i < numBlocks; i++) {
-          const block = booking.timeSlot + (i * 0.5);
-          const slot = slots[block.toString()];
-          if (slot && slot.bookingId === booking.id) {
-            delete slots[block.toString()];
-          }
-        }
+        const blocks = getBlocks(booking.timeSlot, booking.duration);
+        freeSlots(slots, bookingId, blocks);
       }
     }
 
@@ -331,4 +344,3 @@ export async function cleanupExpiredBookings(pitchId: string) {
     console.error('Error during cleanupExpiredBookings:', error);
   }
 }
-

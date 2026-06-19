@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Booking, User as AppUser } from '@/types';
+import React from 'react';
 
 interface VerificationQueueProps {
   pendingReview: Booking[];
@@ -20,7 +21,7 @@ const formatTime = (block: number) => {
   return `${modHour}:${mins} ${ampm}`;
 };
 
-export function VerificationQueue({
+export const VerificationQueue = React.memo(function VerificationQueue({
   pendingReview,
   usersCache,
   getUserLoyalty,
@@ -79,4 +80,4 @@ export function VerificationQueue({
       </CardContent>
     </Card>
   );
-}
+});
