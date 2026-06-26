@@ -4,6 +4,7 @@ import { ArrowDown, CheckCircle, Trophy, Globe, LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { LandingStats } from '@/components/LandingStats';
+import { LandingRedirect } from '@/components/LandingRedirect';
 
 function FeatureCard({ title, desc, Icon }: { title: string, desc: string, Icon: LucideIcon }) {
   return (
@@ -37,6 +38,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
+      <LandingRedirect />
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center min-h-[90vh] text-center px-4 relative overflow-hidden">
         {/* Refined subtle background glow instead of harsh gradients */}

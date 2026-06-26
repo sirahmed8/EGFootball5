@@ -7,6 +7,13 @@
     "site": "egfootball5",
     "public": "out",
     "cleanUrls": true,
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "/en",
+        "type": 301
+      }
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",

@@ -10,7 +10,9 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useTranslations, useLocale } from 'next-intl';
 import { Booking, Pitch } from '@/types';
-import { Users, Calendar as CalendarIcon, Clock, MapPin, Trophy, Plus } from 'lucide-react';
+import { Users, Calendar as CalendarIcon, Clock, MapPin, Trophy, Plus, MessageCircle } from 'lucide-react';
+import MatchChat from '@/components/MatchChat';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 export default function MatchesPage() {
   const { appUser, firebaseUser, loading: authLoading } = useAuthStore();
@@ -358,18 +360,29 @@ export default function MatchesPage() {
 
                 <div className="p-5 pt-0">
                   {isUserJoined ? (
-                    <Button
-                      onClick={() => handleLeaveMatch(match.id)}
-                      disabled={loadingAction === match.id}
-                      variant="outline"
-                      className="w-full py-5 font-bold border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-xl cursor-pointer"
-                    >
-                      {loadingAction === match.id ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-destructive"></div>
-                      ) : (
-                        t('leaveGame')
-                      )}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Dialog>
+                        <DialogTrigger render={<Button className="flex-1 py-5 font-bold bg-primary text-black hover:bg-primary/90 rounded-xl cursor-pointer" />}>
+                          <MessageCircle className="w-5 h-5 mr-2" />
+                          {locale === 'ar' ? 'دردشة' : 'Chat'}
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-none bg-transparent shadow-none [&>button]:hidden">
+                           <MatchChat matchId={match.id} />
+                        </DialogContent>
+                      </Dialog>
+                      <Button
+                        onClick={() => handleLeaveMatch(match.id)}
+                        disabled={loadingAction === match.id}
+                        variant="outline"
+                        className="flex-1 py-5 font-bold border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-xl cursor-pointer"
+                      >
+                        {loadingAction === match.id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-destructive"></div>
+                        ) : (
+                          t('leaveGame')
+                        )}
+                      </Button>
+                    </div>
                   ) : (
                     <Button
                       onClick={() => handleJoinMatch(match.id)}

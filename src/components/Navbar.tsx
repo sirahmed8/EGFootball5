@@ -10,6 +10,7 @@ import { useTranslations } from 'next-intl';
 import { SettingsDropdown } from './SettingsDropdown';
 import { Menu, X } from 'lucide-react';
 import { toast } from 'sonner';
+import PresenceIndicator from './PresenceIndicator';
 
 export function Navbar() {
   const firebaseUser = useAuthStore(s => s.firebaseUser);
@@ -40,6 +41,7 @@ export function Navbar() {
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6">
+          <PresenceIndicator />
           <Link href="/matches" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             {t('publicMatches')}
           </Link>
@@ -72,6 +74,7 @@ export function Navbar() {
 
         {/* Mobile Navigation Toggle */}
         <div className="flex md:hidden items-center gap-4">
+          <PresenceIndicator />
           <SettingsDropdown />
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
