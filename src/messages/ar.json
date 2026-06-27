@@ -270,7 +270,28 @@
     "english": "English",
     "arabic": "العربية",
     "lightMode": "الوضع المضيء",
-    "darkMode": "الوضع المظلم"
+    "darkMode": "الوضع المظلم",
+    "users": "المستخدمين"
+  },
+  "OwnerUsers": {
+    "title": "دليل المستخدمين",
+    "subtitle": "إدارة جميع مستخدمي المنصة، الأدوار، وقوائم الحظر.",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "role": "الدور",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "owner": "مالك",
+    "admin": "مشرف",
+    "player": "لاعب",
+    "active": "نشط",
+    "blacklisted": "محظور",
+    "makeAdmin": "ترقية لمشرف",
+    "makePlayer": "تخفيض للاعب",
+    "blacklist": "حظر",
+    "unblacklist": "إلغاء الحظر",
+    "loading": "جاري تحميل المستخدمين...",
+    "noUsers": "لا يوجد مستخدمين."
   },
   "Home": {
     "title": "اختر ملعبك",

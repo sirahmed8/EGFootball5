@@ -41,6 +41,7 @@ export default function LoginPage() {
             name: user.displayName || 'Player',
             email: user.email || '',
             phone: user.phoneNumber || '',
+            photoURL: user.photoURL || undefined,
             role: defaultRole as AppUser['role'],
             isBlacklisted: false,
             createdAt: Date.now()
@@ -56,10 +57,16 @@ export default function LoginPage() {
         const appUser = userSnap.data() as AppUser;
         let roleUpdated = false;
         let emailUpdated = false;
+        let photoUpdated = false;
 
         if (!appUser.email && user.email) {
           appUser.email = user.email;
           emailUpdated = true;
+        }
+
+        if (user.photoURL && appUser.photoURL !== user.photoURL) {
+          appUser.photoURL = user.photoURL;
+          photoUpdated = true;
         }
 
         // Auto upgrade owner if not set
@@ -72,10 +79,11 @@ export default function LoginPage() {
           roleUpdated = true;
         }
         
-        if (roleUpdated || emailUpdated) {
+        if (roleUpdated || emailUpdated || photoUpdated) {
           await setDoc(userRef, { 
             role: appUser.role,
-            email: appUser.email || ''
+            email: appUser.email || '',
+            ...(appUser.photoURL && { photoURL: appUser.photoURL })
           }, { merge: true });
         }
         

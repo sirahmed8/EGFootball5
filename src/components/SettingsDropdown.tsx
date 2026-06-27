@@ -13,7 +13,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, Moon, Sun, Languages } from 'lucide-react';
+import { Settings, Moon, Sun, Languages, LogOut, LayoutDashboard, Users, Trophy } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { Link } from '@/i18n/routing';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase/config';
+import { toast } from 'sonner';
 
 export function SettingsDropdown() {
   const { setTheme, resolvedTheme } = useTheme();
@@ -22,6 +27,9 @@ export function SettingsDropdown() {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations('Settings');
+  const tNav = useTranslations('Navbar');
+  const appUser = useAuthStore(s => s.appUser);
+  const firebaseUser = useAuthStore(s => s.firebaseUser);
 
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -38,6 +46,15 @@ export function SettingsDropdown() {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch {
+      toast.error('Failed to logout');
+    }
+  };
+
   if (!mounted) {
     return (
       <div className="text-muted-foreground rounded-full p-2">
@@ -52,7 +69,35 @@ export function SettingsDropdown() {
         <Settings className="h-5 w-5" />
         <span className="sr-only">{t('title')}</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-56">
+        {firebaseUser && appUser?.role === 'owner' && (
+          <>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{appUser.name}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {appUser.email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => router.push('/matches')} className="cursor-pointer">
+                <Trophy className="mr-2 h-4 w-4" />
+                <span>{tNav('publicMatches')}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/owner')} className="cursor-pointer">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                <span>{tNav('ownerDashboard')}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/owner/users')} className="cursor-pointer">
+                <Users className="mr-2 h-4 w-4" />
+                <span>{t('users')}</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuGroup>
           <DropdownMenuLabel>{t('title')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -65,6 +110,15 @@ export function SettingsDropdown() {
             <span>{resolvedTheme === 'dark' ? t('lightMode') : t('darkMode')}</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
+        {firebaseUser && appUser?.role === 'owner' && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-500 focus:text-red-500">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>{tNav('logout')}</span>
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

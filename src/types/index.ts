@@ -5,6 +5,7 @@ export interface User {
   name: string;
   email?: string;
   phone: string;
+  photoURL?: string;
   role: Role;
   isBlacklisted: boolean;
   createdAt: number;

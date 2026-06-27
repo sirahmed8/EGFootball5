@@ -270,7 +270,28 @@
     "english": "English",
     "arabic": "Arabic",
     "lightMode": "Light Mode",
-    "darkMode": "Dark Mode"
+    "darkMode": "Dark Mode",
+    "users": "Users"
+  },
+  "OwnerUsers": {
+    "title": "Users Directory",
+    "subtitle": "Manage all platform users, roles, and blacklists.",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions",
+    "owner": "Owner",
+    "admin": "Admin",
+    "player": "Player",
+    "active": "Active",
+    "blacklisted": "Blacklisted",
+    "makeAdmin": "Make Admin",
+    "makePlayer": "Make Player",
+    "blacklist": "Blacklist",
+    "unblacklist": "Unblacklist",
+    "loading": "Loading users...",
+    "noUsers": "No users found."
   },
   "Home": {
     "title": "Choose Your Arena",

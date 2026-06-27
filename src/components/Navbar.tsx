@@ -42,20 +42,17 @@ export function Navbar() {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6">
           <PresenceIndicator />
-          <Link href="/matches" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            {t('publicMatches')}
-          </Link>
-          {(appUser?.role === 'admin' || appUser?.role === 'owner') && (
+          {appUser?.role !== 'owner' && (
+            <Link href="/matches" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              {t('publicMatches')}
+            </Link>
+          )}
+          {appUser?.role === 'admin' && (
             <Link href="/admin" className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors drop-shadow-[0_0_5px_rgba(0,255,255,0.3)]">
               {t('adminDashboard')}
             </Link>
           )}
-          {appUser?.role === 'owner' && (
-            <Link href="/owner" className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors drop-shadow-[0_0_5px_rgba(0,255,255,0.3)]">
-              {t('ownerDashboard')}
-            </Link>
-          )}
-          {firebaseUser ? (
+          {firebaseUser && appUser?.role !== 'owner' ? (
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground">
                 {t('hi', { name: appUser?.name || 'Player' })}
@@ -64,11 +61,11 @@ export function Navbar() {
                 {t('logout')}
               </Button>
             </div>
-          ) : (
+          ) : !firebaseUser ? (
             <Link href="/login" className={buttonVariants({ variant: 'default', size: 'sm', className: "bg-primary text-black hover:bg-primary/90 font-bold" })}>
               {t('signIn')}
             </Link>
-          )}
+          ) : null}
           <SettingsDropdown />
         </div>
 
@@ -76,46 +73,45 @@ export function Navbar() {
         <div className="flex md:hidden items-center gap-4">
           <PresenceIndicator />
           <SettingsDropdown />
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-            className="text-foreground p-2"
-            aria-label="Toggle mobile menu"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {appUser?.role !== 'owner' && (
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+              className="text-foreground p-2"
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-background border-b border-border p-4 flex flex-col gap-4 shadow-lg animate-in slide-in-from-top-2">
-          {firebaseUser && (
+          {firebaseUser && appUser?.role !== 'owner' && (
             <div className="text-sm text-muted-foreground pb-2 border-b border-border/50">
               {t('hi', { name: appUser?.name || 'Player' })}
             </div>
           )}
-          <Link href="/matches" onClick={closeMenu} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            {t('publicMatches')}
-          </Link>
-          {(appUser?.role === 'admin' || appUser?.role === 'owner') && (
+          {appUser?.role !== 'owner' && (
+            <Link href="/matches" onClick={closeMenu} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              {t('publicMatches')}
+            </Link>
+          )}
+          {appUser?.role === 'admin' && (
             <Link href="/admin" onClick={closeMenu} className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors">
               {t('adminDashboard')}
             </Link>
           )}
-          {appUser?.role === 'owner' && (
-            <Link href="/owner" onClick={closeMenu} className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors">
-              {t('ownerDashboard')}
-            </Link>
-          )}
-          {firebaseUser ? (
+          {firebaseUser && appUser?.role !== 'owner' ? (
             <Button variant="outline" className="w-full justify-center mt-2 border-border" onClick={handleLogout}>
               {t('logout')}
             </Button>
-          ) : (
+          ) : !firebaseUser ? (
             <Link href="/login" onClick={closeMenu} className={buttonVariants({ variant: 'default', className: "w-full bg-primary text-black hover:bg-primary/90 font-bold mt-2" })}>
               {t('signIn')}
             </Link>
-          )}
+          ) : null}
         </div>
       )}
     </nav>
