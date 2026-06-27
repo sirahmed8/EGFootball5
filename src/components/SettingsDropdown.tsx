@@ -82,17 +82,23 @@ export function SettingsDropdown() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push('/matches')} className="cursor-pointer">
-                <Trophy className="mr-2 h-4 w-4" />
-                <span>{tNav('publicMatches')}</span>
+              <DropdownMenuItem className="cursor-pointer p-0">
+                <Link href="/matches" className="flex items-center w-full px-1.5 py-1">
+                  <Trophy className="mr-2 h-4 w-4" />
+                  <span>{tNav('publicMatches')}</span>
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push('/owner')} className="cursor-pointer">
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                <span>{tNav('ownerDashboard')}</span>
+              <DropdownMenuItem className="cursor-pointer p-0">
+                <Link href="/owner" className="flex items-center w-full px-1.5 py-1">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  <span>{tNav('ownerDashboard')}</span>
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push('/owner/users')} className="cursor-pointer">
-                <Users className="mr-2 h-4 w-4" />
-                <span>{t('users')}</span>
+              <DropdownMenuItem className="cursor-pointer p-0">
+                <Link href="/owner/users" className="flex items-center w-full px-1.5 py-1">
+                  <Users className="mr-2 h-4 w-4" />
+                  <span>{t('users')}</span>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
