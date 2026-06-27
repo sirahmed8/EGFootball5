@@ -72,16 +72,16 @@ export function SettingsDropdown() {
       <DropdownMenuContent align="end" className="w-56">
         {firebaseUser && appUser?.role === 'owner' && (
           <>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{appUser.name}</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {appUser.email}
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{appUser.name}</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {appUser.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer p-0">
                 <Link href="/matches" className="flex items-center w-full px-1.5 py-1">
                   <Trophy className="mr-2 h-4 w-4" />
