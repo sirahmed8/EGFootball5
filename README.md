@@ -20,35 +20,6 @@ EGFootball5 is a modern, high-performance web application built to streamline th
 *   **Language Support**: next-intl
 *   **Deployment**: Firebase Hosting / Vercel
 
-## 🚀 Getting Started
-
-To get a local copy up and running, follow these simple steps.
-
-### Prerequisites
-
-Make sure you have Node.js installed on your machine.
-
-### Installation
-
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/sirahmed8/EGFootball5.git
-    ```
-2.  Navigate to the project directory:
-    ```bash
-    cd EGFootball5
-    ```
-3.  Install NPM packages:
-    ```bash
-    npm install
-    ```
-4.  Set up your Firebase configuration in your environment variables.
-5.  Run the development server:
-    ```bash
-    npm run dev
-    ```
-6.  Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
 ## 🔒 Private Project
 
 This project is closed-source and strictly private. Unauthorized copying, distribution, or use of this repository is strictly prohibited.
