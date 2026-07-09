@@ -36,10 +36,6 @@ export function Navbar() {
   const closeMenu = () => {
     if (isMobileMenuOpen) {
       setIsMobileMenuClosing(true);
-      setTimeout(() => {
-        setIsMobileMenuOpen(false);
-        setIsMobileMenuClosing(false);
-      }, 200);
     }
   };
 
@@ -48,6 +44,7 @@ export function Navbar() {
       closeMenu();
     } else {
       setIsMobileMenuOpen(true);
+      setIsMobileMenuClosing(false);
     }
   };
 
@@ -109,9 +106,17 @@ export function Navbar() {
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className={`md:hidden absolute top-16 left-0 right-0 bg-background border-b border-border p-4 flex flex-col gap-4 shadow-lg ${
-          isMobileMenuClosing ? 'animate-out slide-out-to-top-2 fade-out duration-200' : 'animate-in slide-in-from-top-2 fade-in duration-200'
-        }`}>
+        <div 
+          className={`md:hidden absolute top-16 left-0 right-0 bg-background border-b border-border p-4 flex flex-col gap-4 shadow-lg ${
+            isMobileMenuClosing ? 'animate-out slide-out-to-top-2 fade-out duration-200 fill-forwards' : 'animate-in slide-in-from-top-2 fade-in duration-200'
+          }`}
+          onAnimationEnd={() => {
+            if (isMobileMenuClosing) {
+              setIsMobileMenuOpen(false);
+              setIsMobileMenuClosing(false);
+            }
+          }}
+        >
           {firebaseUser && appUser?.role !== 'owner' && (
             <div className="text-sm text-muted-foreground pb-2 border-b border-border/50">
               {t('hi', { name: appUser?.name || 'Player' })}
