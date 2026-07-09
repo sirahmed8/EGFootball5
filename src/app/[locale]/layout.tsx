@@ -26,9 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: t('title'),
     description: t('description'),
     manifest: '/manifest.json',
-    icons: {
-      icon: '/favicon.jpg',
-    },
+    icons: { icon: '/favicon.jpg' },
   };
 }
 
@@ -47,29 +45,40 @@ export default async function RootLayout({
   if (!routing.locales.includes(locale as 'ar' | 'en')) {
     notFound();
   }
-  
+
   setRequestLocale(locale);
- 
   const messages = await getMessages();
   const isRTL = locale === 'ar';
 
   return (
     <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} antialiased bg-background text-foreground transition-colors duration-300`}
-      >
+      <head>
+        {/* Prevent white flash on theme/language change by applying dark bg before paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');document.documentElement.style.backgroundColor='oklch(0.12 0.01 250)';}else{document.documentElement.style.backgroundColor='oklch(0.985 0 0)';}}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className={`${geistSans.variable} antialiased bg-background text-foreground`}>
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
             <AuthProvider>
-              {/* Desktop sidebar — always visible on md+ */}
+              {/* Always-visible desktop sidebar */}
               <DesktopSidebar />
 
-              {/* Mobile top navbar */}
+              {/* Top navbar (mobile bar + desktop bell bar) */}
               <Navbar />
 
-              {/* Main content — on desktop, offset by sidebar width */}
-              <main className={`pt-14 md:pt-0 min-h-screen flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500
-                ${isRTL ? 'md:mr-64' : 'md:ml-64'}`}>
+              {/* Main content area:
+                  - Mobile: below 56px (h-14) top bar
+                  - Desktop: shifted right/left by sidebar (16rem) AND below 56px top bar */}
+              <main
+                className={`min-h-screen flex flex-col
+                  pt-14
+                  ${isRTL ? 'md:mr-64' : 'md:ml-64'}
+                  md:pt-14`}
+              >
                 {children}
                 <Footer />
               </main>

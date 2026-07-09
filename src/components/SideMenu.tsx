@@ -13,9 +13,8 @@ import {
   LayoutDashboard, Users, Trophy, Home, CalendarDays, UserCircle, Menu,
 } from 'lucide-react';
 import Image from 'next/image';
-import { NotificationBell } from './NotificationBell';
 
-// ── The actual sidebar panel content ─────────────────────────────────────────
+// ── Sidebar content (shared between desktop & mobile) ─────────────────────────
 function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile: boolean }) {
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
@@ -34,19 +33,18 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   const toggleLanguage = () => {
     const nextLocale = locale === 'ar' ? 'en' : 'ar';
     localStorage.setItem('preferredLocale', nextLocale);
-    router.replace(pathname, { locale: nextLocale });
+    // Close menu first for snappier feel
     onClose?.();
+    router.replace(pathname, { locale: nextLocale });
   };
 
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-  };
+  const toggleTheme = () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.push('/');
       onClose?.();
+      router.push('/');
     } catch {
       toast.error('Failed to logout');
     }
@@ -54,7 +52,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
 
   const handleNav = (href: string) => {
     onClose?.();
-    setTimeout(() => router.push(href as '/'), isMobile ? 220 : 0);
+    router.push(href as '/');
   };
 
   const navLinks = [
@@ -65,13 +63,11 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
     ...(appUser?.role === 'owner' ? [{ href: '/owner', label: tNav('ownerDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
     ...(appUser?.role === 'owner' ? [{ href: '/owner/users', label: t('users'), icon: <Users size={18} /> }] : []),
     ...(firebaseUser && appUser?.role !== 'owner' ? [{ href: '/profile', label: 'Profile', icon: <UserCircle size={18} /> }] : []),
-  ];
-
-  const uniqueLinks = navLinks.filter((link, idx, arr) => arr.findIndex(l => l.href === link.href) === idx);
+  ].filter((link, idx, arr) => arr.findIndex(l => l.href === link.href) === idx);
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
+      {/* Logo header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-border flex-shrink-0">
         <Link href="/" onClick={() => onClose?.()} className="flex items-center gap-2">
           <Image src="/favicon.jpg" alt="Logo" width={28} height={28} className="rounded-full object-cover" />
@@ -79,7 +75,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
             EG<span className="text-primary drop-shadow-[0_0_6px_rgba(57,255,20,0.5)]">Football5</span>
           </span>
         </Link>
-        {isMobile && onClose && (
+        {isMobile && (
           <button onClick={onClose} className="p-1.5 rounded-full hover:bg-muted transition-colors">
             <X size={20} className="text-muted-foreground" />
           </button>
@@ -94,17 +90,9 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
         </div>
       )}
 
-      {/* Notification bell on desktop sidebar */}
-      {!isMobile && (
-        <div className="px-4 py-2 border-b border-border flex-shrink-0 flex items-center gap-2">
-          <NotificationBell />
-          <span className="text-xs text-muted-foreground">Notifications</span>
-        </div>
-      )}
-
       {/* Nav links — scrollable */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-        {uniqueLinks.map(link => (
+        {navLinks.map(link => (
           <button
             key={link.href}
             onClick={() => handleNav(link.href)}
@@ -125,12 +113,13 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
         )}
       </nav>
 
-      {/* Settings pinned at bottom */}
+      {/* Settings — pinned bottom */}
       <div className="flex-shrink-0 border-t border-border px-2 py-3 space-y-0.5">
         <p className="px-3 py-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
           <Settings size={11} />{t('title')}
         </p>
 
+        {/* Language */}
         <button
           onClick={toggleLanguage}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-start"
@@ -139,18 +128,18 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
           {locale === 'ar' ? t('english') : t('arabic')}
         </button>
 
+        {/* Theme */}
         {mounted && (
           <button
             onClick={toggleTheme}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-start"
           >
-            {isDark
-              ? <Sun size={18} className="text-primary flex-shrink-0" />
-              : <Moon size={18} className="text-primary flex-shrink-0" />}
+            {isDark ? <Sun size={18} className="text-primary flex-shrink-0" /> : <Moon size={18} className="text-primary flex-shrink-0" />}
             {isDark ? t('lightMode') : t('darkMode')}
           </button>
         )}
 
+        {/* Logout */}
         {firebaseUser && (
           <button
             onClick={handleLogout}
@@ -165,41 +154,36 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   );
 }
 
-// ── Mobile drawer (CSS transition — no flicker) ───────────────────────────────
+// ── Mobile drawer — always mounted (CSS transform, no flicker) ────────────────
+// Drawer ALWAYS opens from the RIGHT (same side as hamburger button)
 function MobileDrawer() {
   const [isOpen, setIsOpen] = React.useState(false);
-  const locale = useLocale();
-  const isRTL = locale === 'ar';
 
   return (
     <>
-      {/* Hamburger button */}
+      {/* Hamburger */}
       <button
         onClick={() => setIsOpen(true)}
-        className="relative p-2 rounded-full hover:bg-muted transition-colors text-foreground"
+        className="p-2 rounded-full hover:bg-muted transition-colors text-foreground"
         aria-label="Open menu"
       >
         <Menu className="w-6 h-6" />
       </button>
 
-      {/* Backdrop — CSS opacity transition only, rendered always */}
+      {/* Backdrop — CSS opacity, always rendered */}
       <div
         className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
         style={{ opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? 'auto' : 'none' }}
         onClick={() => setIsOpen(false)}
       />
 
-      {/* Drawer — CSS transform transition, always rendered to avoid mount flicker */}
+      {/* Drawer — slides from the RIGHT always (matches button position) */}
       <div
-        dir={isRTL ? 'rtl' : 'ltr'}
-        className={`fixed top-0 z-[60] h-full w-72 max-w-[85vw]
-          bg-background border-border overflow-hidden shadow-2xl
-          transition-transform duration-200 ease-in-out
-          ${isRTL
-            ? 'right-0 border-l rounded-l-2xl outline outline-1 outline-border'
-            : 'left-0 border-r rounded-r-2xl outline outline-1 outline-border'
-          }`}
-        style={{ transform: isOpen ? 'translateX(0)' : isRTL ? 'translateX(110%)' : 'translateX(-110%)' }}
+        className="fixed top-0 right-0 z-[60] h-full w-72 max-w-[85vw]
+          bg-background border-l border-border overflow-hidden shadow-2xl
+          rounded-l-2xl outline outline-1 outline-border
+          transition-transform duration-200 ease-in-out"
+        style={{ transform: isOpen ? 'translateX(0)' : 'translateX(110%)' }}
       >
         <SidebarContent onClose={() => setIsOpen(false)} isMobile={true} />
       </div>
@@ -207,7 +191,7 @@ function MobileDrawer() {
   );
 }
 
-// ── Desktop persistent sidebar (always visible, no toggle) ────────────────────
+// ── Desktop persistent sidebar ────────────────────────────────────────────────
 export function DesktopSidebar() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
@@ -227,7 +211,7 @@ export function DesktopSidebar() {
   );
 }
 
-// ── Mobile hamburger trigger (used in Navbar) ────────────────────────────────
+// ── Mobile trigger export ─────────────────────────────────────────────────────
 export function SideMenu() {
   return <MobileDrawer />;
 }
