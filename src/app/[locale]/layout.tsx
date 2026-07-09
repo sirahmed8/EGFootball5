@@ -5,6 +5,7 @@ import "../globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { NextIntlClientProvider } from 'next-intl';
@@ -62,6 +63,7 @@ export default async function RootLayout({
               <main className="pt-16 min-h-screen flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {children}
               </main>
+              <Footer />
               <Toaster theme="system" />
               <ScrollToTop />
             </AuthProvider>

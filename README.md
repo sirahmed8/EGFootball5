@@ -49,10 +49,6 @@ Make sure you have Node.js installed on your machine.
     ```
 6.  Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-## 📄 License
+## 🔒 Private Project
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## 🛡 Security
-
-Please see the `SECURITY.md` file for details on our security policies and how to report vulnerabilities.
+This project is closed-source and strictly private. Unauthorized copying, distribution, or use of this repository is strictly prohibited.
