@@ -263,7 +263,8 @@
     "adminEmailLabel": "Admin Email:",
     "priceValue": "Price: {price} EGP/hr",
     "recipientValue": "Recipient: {recipient}",
-    "verifyRoleBtn": "Verify Admin Role"
+    "verifyRoleBtn": "Verify Admin Role",
+    "noPitchesFound": "No existing pitches yet."
   },
   "Settings": {
     "title": "Settings",

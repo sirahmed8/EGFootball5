@@ -263,7 +263,8 @@
     "adminEmailLabel": "بريد المشرف الإلكتروني:",
     "priceValue": "السعر: {price} ج.م/ساعة",
     "recipientValue": "مستقبل الدفع: {recipient}",
-    "verifyRoleBtn": "التحقق من دور المشرف"
+    "verifyRoleBtn": "التحقق من دور المشرف",
+    "noPitchesFound": "لا توجد ملاعب حالياً."
   },
   "Settings": {
     "title": "الإعدادات",
