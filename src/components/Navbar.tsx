@@ -21,6 +21,7 @@ export function Navbar() {
   const router = useRouter();
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -32,7 +33,23 @@ export function Navbar() {
     }
   };
 
-  const closeMenu = () => setIsMobileMenuOpen(false);
+  const closeMenu = () => {
+    if (isMobileMenuOpen) {
+      setIsMobileMenuClosing(true);
+      setTimeout(() => {
+        setIsMobileMenuOpen(false);
+        setIsMobileMenuClosing(false);
+      }, 200);
+    }
+  };
+
+  const toggleMobileMenu = () => {
+    if (isMobileMenuOpen) {
+      closeMenu();
+    } else {
+      setIsMobileMenuOpen(true);
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
@@ -80,7 +97,7 @@ export function Navbar() {
           <SettingsDropdown />
           {appUser?.role !== 'owner' && (
             <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+              onClick={toggleMobileMenu} 
               className="text-foreground p-2"
               aria-label="Toggle mobile menu"
             >
@@ -92,7 +109,9 @@ export function Navbar() {
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 right-0 bg-background border-b border-border p-4 flex flex-col gap-4 shadow-lg animate-in slide-in-from-top-2">
+        <div className={`md:hidden absolute top-16 left-0 right-0 bg-background border-b border-border p-4 flex flex-col gap-4 shadow-lg ${
+          isMobileMenuClosing ? 'animate-out slide-out-to-top-2 fade-out duration-200' : 'animate-in slide-in-from-top-2 fade-in duration-200'
+        }`}>
           {firebaseUser && appUser?.role !== 'owner' && (
             <div className="text-sm text-muted-foreground pb-2 border-b border-border/50">
               {t('hi', { name: appUser?.name || 'Player' })}
