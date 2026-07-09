@@ -24,6 +24,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: t('title'),
     description: t('description'),
     manifest: '/manifest.json',
+    icons: {
+      icon: '/favicon.jpg',
+    },
   };
 }
 
