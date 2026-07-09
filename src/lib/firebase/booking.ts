@@ -228,6 +228,18 @@ export async function confirmBooking(bookingId: string) {
     // Increment global stats
     const statsRef = doc(db, 'stats', 'global');
     transaction.set(statsRef, { bookings: increment(1) }, { merge: true });
+
+    // Create Notification
+    const notificationRef = doc(collection(db, 'notifications'));
+    transaction.set(notificationRef, {
+      id: notificationRef.id,
+      userId: booking.userId,
+      title: 'Booking Confirmed!',
+      message: `Your booking for ${booking.date} has been confirmed. Enjoy your match!`,
+      read: false,
+      createdAt: Date.now(),
+      type: 'booking_confirmed'
+    });
   });
 }
 
@@ -253,6 +265,18 @@ export async function rejectBooking(bookingId: string) {
       freeSlots(slots, bookingId, blocks);
       transaction.update(scheduleRef, { slots });
     }
+
+    // Create Notification
+    const notificationRef = doc(collection(db, 'notifications'));
+    transaction.set(notificationRef, {
+      id: notificationRef.id,
+      userId: booking.userId,
+      title: 'Booking Rejected',
+      message: `Your booking for ${booking.date} was rejected. Please contact support.`,
+      read: false,
+      createdAt: Date.now(),
+      type: 'booking_rejected'
+    });
   });
 }
 
@@ -288,6 +312,18 @@ export async function cancelBooking(bookingId: string, userId: string) {
       freeSlots(slots, bookingId, blocks);
       transaction.update(scheduleRef, { slots });
     }
+
+    // Create Notification
+    const notificationRef = doc(collection(db, 'notifications'));
+    transaction.set(notificationRef, {
+      id: notificationRef.id,
+      userId: booking.userId,
+      title: 'Booking Cancelled',
+      message: `You have successfully cancelled your booking for ${booking.date}.`,
+      read: false,
+      createdAt: Date.now(),
+      type: 'booking_cancelled'
+    });
   });
 }
 

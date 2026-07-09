@@ -12,11 +12,11 @@ import { toast } from 'sonner';
 import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
-import { AdminOverviewCards } from './components/AdminOverviewCards';
-import { VerificationQueue } from './components/VerificationQueue';
-import { LiveSchedule } from './components/LiveSchedule';
-import { PitchSettings } from './components/PitchSettings';
-import { PlayersList } from './components/PlayersList';
+import { AdminOverviewCards } from '../components/AdminOverviewCards';
+import { VerificationQueue } from '../components/VerificationQueue';
+import { LiveSchedule } from '../components/LiveSchedule';
+import { PitchSettings } from '../components/PitchSettings';
+import { PlayersList } from '../components/PlayersList';
 
 export default function AdminDashboard() {
   const router = useRouter();

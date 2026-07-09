@@ -102,5 +102,13 @@ service cloud.firestore {
       allow update: if isAdmin();
       allow create: if isAdmin();
     }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isAuth() && resource.data.userId == request.auth.uid;
+      allow create: if isAuth() && isAdmin();
+      allow update: if isAuth() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow delete: if isAuth() && resource.data.userId == request.auth.uid;
+    }
   }
 }

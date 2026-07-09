@@ -23,6 +23,7 @@ import { ar, enUS } from 'date-fns/locale';
 const BLOCKS = Array.from({ length: (CLOSING_HOUR - OPENING_HOUR) * 2 }, (_, i) => OPENING_HOUR + (i * 0.5));
 
 import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function BookContent() {
   const router = useRouter();
@@ -508,7 +509,22 @@ function BookContent() {
 
 export default function BookPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center mt-16">Loading booking details...</div>}>
+    <Suspense fallback={
+      <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-16">
+        <div className="space-y-4 text-center md:text-left mb-12">
+          <Skeleton className="h-12 w-1/2" />
+          <Skeleton className="h-6 w-1/3" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <Skeleton className="h-[400px] w-full rounded-xl" />
+          </div>
+          <div className="lg:col-span-2">
+            <Skeleton className="h-[600px] w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    }>
       <BookContent />
     </Suspense>
   );

@@ -8,6 +8,7 @@ import { auth } from '@/lib/firebase/config';
 import { signOut } from 'firebase/auth';
 import { useTranslations } from 'next-intl';
 import { SettingsDropdown } from './SettingsDropdown';
+import { NotificationBell } from './NotificationBell';
 import { Menu, X } from 'lucide-react';
 import { toast } from 'sonner';
 import PresenceIndicator from './PresenceIndicator';
@@ -48,7 +49,7 @@ export function Navbar() {
             </Link>
           )}
           {appUser?.role === 'admin' && (
-            <Link href="/admin" className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors drop-shadow-[0_0_5px_rgba(0,255,255,0.3)]">
+            <Link href="/admin/dashboard" className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors drop-shadow-[0_0_5px_rgba(0,255,255,0.3)]">
               {t('adminDashboard')}
             </Link>
           )}
@@ -66,12 +67,14 @@ export function Navbar() {
               {t('signIn')}
             </Link>
           ) : null}
+          {firebaseUser && <NotificationBell />}
           <SettingsDropdown />
         </div>
 
         {/* Mobile Navigation Toggle */}
         <div className="flex md:hidden items-center gap-4">
           <PresenceIndicator />
+          {firebaseUser && <NotificationBell />}
           <SettingsDropdown />
           {appUser?.role !== 'owner' && (
             <button 
@@ -99,7 +102,7 @@ export function Navbar() {
             </Link>
           )}
           {appUser?.role === 'admin' && (
-            <Link href="/admin" onClick={closeMenu} className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors">
+            <Link href="/admin/dashboard" onClick={closeMenu} className="text-sm font-medium text-secondary hover:text-secondary/80 transition-colors">
               {t('adminDashboard')}
             </Link>
           )}
