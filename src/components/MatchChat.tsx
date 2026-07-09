@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { rtdb } from '@/lib/firebase/config';
-import { ref, push, serverTimestamp, onChildAdded, onValue, off, query, orderByChild, limitToLast } from 'firebase/database';
+import { ref, push, serverTimestamp, onChildAdded, onValue, off, query, orderByChild, limitToLast, DataSnapshot } from 'firebase/database';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +31,7 @@ export default function MatchChat({ matchId }: { matchId: string }) {
     // Reference to the match's chat messages (fetching last 50)
     const messagesRef = query(ref(rtdb, `chats/${matchId}/messages`), orderByChild('timestamp'), limitToLast(50));
     
-    const handleNewMessage = (snapshot: any) => {
+    const handleNewMessage = (snapshot: DataSnapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         setMessages((prev) => {

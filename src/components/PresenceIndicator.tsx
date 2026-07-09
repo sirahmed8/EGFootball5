@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { rtdb } from '@/lib/firebase/config';
-import { ref, onValue, onDisconnect, set, serverTimestamp } from 'firebase/database';
+import { ref, onValue, onDisconnect, set, serverTimestamp, DatabaseReference } from 'firebase/database';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Users } from 'lucide-react';
 import { useLocale } from 'next-intl';
 
 export default function PresenceIndicator() {
-  const { firebaseUser } = useAuthStore();
+  const { firebaseUser, appUser } = useAuthStore();
   const [onlineCount, setOnlineCount] = useState<number>(0);
   const locale = useLocale();
 
@@ -17,7 +17,7 @@ export default function PresenceIndicator() {
     const connectionsRef = ref(rtdb, 'presence');
     const connectedRef = ref(rtdb, '.info/connected');
 
-    let userPresenceRef: any = null;
+    let userPresenceRef: DatabaseReference | null = null;
 
     const unsubscribeConnected = onValue(connectedRef, (snap) => {
       if (snap.val() === true) {
@@ -32,14 +32,19 @@ export default function PresenceIndicator() {
         }
 
         // When I disconnect, remove this device
-        onDisconnect(userPresenceRef).remove().then(() => {
-          // Add this device to my connections list
-          set(userPresenceRef, {
-            online: true,
-            lastActive: serverTimestamp(),
-            isUser: !!firebaseUser
+        if (userPresenceRef) {
+          onDisconnect(userPresenceRef).remove().then(() => {
+            // Set user to online
+            if (userPresenceRef) { // Ensure TS knows it's defined inside the callback
+              set(userPresenceRef, {
+                status: 'online',
+                lastChanged: serverTimestamp(),
+                role: appUser?.role || 'user',
+                name: appUser?.name || firebaseUser?.displayName || 'Anonymous',
+              });
+            }
           });
-        });
+        }
       }
     });
 

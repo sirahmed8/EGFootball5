@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl';
 import { User, Shield, ShieldAlert, Ban, CheckCircle, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import Image from 'next/image';
 
 export default function OwnerUsersPage() {
   const router = useRouter();
@@ -47,8 +48,9 @@ export default function OwnerUsersPage() {
     try {
       await updateDoc(doc(db, 'users', userId), { role: newRole });
       toast.success('Role updated successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update role');
+    } catch (error) {
+      const err = error as Error;
+      toast.error(err.message || 'Failed to update role');
     }
   };
 
@@ -56,8 +58,9 @@ export default function OwnerUsersPage() {
     try {
       await updateDoc(doc(db, 'users', userId), { isBlacklisted });
       toast.success(isBlacklisted ? 'User blacklisted' : 'User unblacklisted');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update blacklist status');
+    } catch (error) {
+      const err = error as Error;
+      toast.error(err.message || 'Failed to update blacklist status');
     }
   };
 
@@ -100,7 +103,7 @@ export default function OwnerUsersPage() {
                     <tr key={user.uid} className="hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-4 font-medium text-foreground flex items-center gap-3">
                         {user.photoURL ? (
-                          <img src={user.photoURL} alt={user.name} className="w-8 h-8 rounded-full border border-border" />
+                          <Image src={user.photoURL} alt={user.name} width={32} height={32} className="w-8 h-8 rounded-full border border-border" />
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center border border-border">
                             <User className="w-4 h-4 text-muted-foreground" />

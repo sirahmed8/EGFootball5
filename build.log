@@ -1,0 +1,513 @@
+
+> kickoff@0.1.0 build
+> next build
+
+▲ Next.js 16.2.9 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Error: Can't resolve 'tw-animate-css' in 'D:\football\kickoff\src\app'
+    [at finishWithoutResolve (D:\football\kickoff\node_modules\enhanced-resolve\lib\Resolver.js:943:18)]
+    [at D:\football\kickoff\node_modules\enhanced-resolve\lib\Resolver.js:1035:14]
+    [at D:\football\kickoff\node_modules\enhanced-resolve\lib\Resolver.js:1112:5]
+    [at eval (eval at create (D:\football\kickoff\node_modules\tapable\lib\HookCodeFactory.js:31:10), <anonymous>:15:1)]
+    [at D:\football\kickoff\node_modules\enhanced-resolve\lib\Resolver.js:1112:5]
+    [at eval (eval at create (D:\football\kickoff\node_modules\tapable\lib\HookCodeFactory.js:31:10), <anonymous>:27:1)]
+    [at D:\football\kickoff\node_modules\enhanced-resolve\lib\DescriptionFilePlugin.js:94:43]
+    [at D:\football\kickoff\node_modules\enhanced-resolve\lib\Resolver.js:1112:5]
+    [at eval (eval at create (D:\football\kickoff\node_modules\tapable\lib\HookCodeFactory.js:31:10), <anonymous>:15:1)]
+    [at D:\football\kickoff\node_modules\enhanced-resolve\lib\Resolver.js:1112:5] {
+  details: "resolve 'tw-animate-css' in 'D:\\football\\kickoff\\src\\app'\n" +
+    '  Parsed request is a module\n' +
+    '  using description file: D:\\football\\kickoff\\package.json (relative path: ./src/app)\n' +
+    '    resolve as module\n' +
+    "      D:\\football\\kickoff\\src\\app\\node_modules doesn't exist or is not a directory\n" +
+    "      D:\\football\\kickoff\\src\\node_modules doesn't exist or is not a directory\n" +
+    '      looking for modules in D:\\football\\kickoff\\node_modules\n' +
+    '        single file module\n' +
+    '          using description file: D:\\football\\kickoff\\package.json (relative path: ./node_modules/tw-animate-css)\n' +
+    '            no extension\n' +
+    "              D:\\football\\kickoff\\node_modules\\tw-animate-css doesn't exist\n" +
+    '            .css\n' +
+    "              D:\\football\\kickoff\\node_modules\\tw-animate-css.css doesn't exist\n" +
+    "        D:\\football\\kickoff\\node_modules\\tw-animate-css doesn't exist\n" +
+    "      D:\\football\\node_modules doesn't exist or is not a directory\n" +
+    "      D:\\node_modules doesn't exist or is not a directory"
+}
+
+> Build error occurred
+Error: Turbopack build failed with 14 errors:
+./src/app/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: D:\football\kickoff\src\app\globals.css:1:1: Can't resolve 'tw-animate-css' in 'D:\football\kickoff\src\app'
+    at Input.error (node_modules/postcss/lib/input.js:135:16) [D:\football\kickoff\.next\build\chunks\node_modules_20v-8wl._.js:4692:22]
+    at error (node_modules/postcss/lib/node.js:146:32) [D:\football\kickoff\.next\build\chunks\node_modules_20v-8wl._.js:954:38]
+    [at Object.Once (D:\football\kickoff\node_modules\@tailwindcss\postcss\dist\index.js:10:6917)]
+    [at process.processTicksAndRejections (node:internal/process/task_queues:103:5)]
+    at async LazyResult.runAsync (node_modules/postcss/lib/lazy-result.js:293:11) [D:\football\kickoff\.next\build\chunks\node_modules_20v-8wl._.js:6264:21]
+    at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34) [D:\football\kickoff\.next\build\chunks\[root-of-the-server]__0oj80bi._.js:146:36]
+    at async run (turbopack:///[turbopack-node]/child_process/evaluate.ts:89:23) [D:\football\kickoff\.next\build\chunks\[root-of-the-server]__1f933tp._.js:443:31]
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/[locale]/layout.tsx [Server Component]
+
+
+./src/app/actions/booking.ts:5:1
+Only async functions are allowed to be exported in a "use server" file.
+  3 | import { adminDb, adminAuth } from '@/lib/firebase/admin';
+  4 |
+> 5 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+  7 |
+  8 | function getBlocks(startSlot: number, durationHours: number): number[] {
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/app/actions/booking.ts [Client Component Browser]
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/actions/booking.ts [Client Component SSR]
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:2:1
+Export cancelBookingAction doesn't exist in target module
+   1 | import { auth } from './config';
+>  2 | import { 
+     | ^^^^^^^^
+>  3 |   lockSlotAction, 
+     | ^^^^^^^^^^^^^^^^^^
+>  4 |   submitReceiptAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  5 |   confirmBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  6 |   rejectBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  7 |   cancelBookingAction 
+     | ^^^^^^^^^^^^^^^^^^^^^^
+>  8 | } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+  11 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+
+The export cancelBookingAction was not found in module [project]/src/app/actions/booking.ts [app-client] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:2:1
+Export cancelBookingAction doesn't exist in target module
+   1 | import { auth } from './config';
+>  2 | import { 
+     | ^^^^^^^^
+>  3 |   lockSlotAction, 
+     | ^^^^^^^^^^^^^^^^^^
+>  4 |   submitReceiptAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  5 |   confirmBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  6 |   rejectBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  7 |   cancelBookingAction 
+     | ^^^^^^^^^^^^^^^^^^^^^^
+>  8 | } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+  11 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+
+The export cancelBookingAction was not found in module [project]/src/app/actions/booking.ts [app-ssr] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:54:1
+Export cleanupExpiredBookingsAction doesn't exist in target module
+  52 | }
+  53 |
+> 54 | import { cleanupExpiredBookingsAction } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  55 |
+  56 | export async function cleanupExpiredBookings(pitchId: string) {
+  57 |   return cleanupExpiredBookingsAction(pitchId);
+
+The export cleanupExpiredBookingsAction was not found in module [project]/src/app/actions/booking.ts [app-client] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:54:1
+Export cleanupExpiredBookingsAction doesn't exist in target module
+  52 | }
+  53 |
+> 54 | import { cleanupExpiredBookingsAction } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  55 |
+  56 | export async function cleanupExpiredBookings(pitchId: string) {
+  57 |   return cleanupExpiredBookingsAction(pitchId);
+
+The export cleanupExpiredBookingsAction was not found in module [project]/src/app/actions/booking.ts [app-ssr] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:2:1
+Export confirmBookingAction doesn't exist in target module
+   1 | import { auth } from './config';
+>  2 | import { 
+     | ^^^^^^^^
+>  3 |   lockSlotAction, 
+     | ^^^^^^^^^^^^^^^^^^
+>  4 |   submitReceiptAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  5 |   confirmBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  6 |   rejectBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  7 |   cancelBookingAction 
+     | ^^^^^^^^^^^^^^^^^^^^^^
+>  8 | } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+  11 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+
+The export confirmBookingAction was not found in module [project]/src/app/actions/booking.ts [app-client] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:2:1
+Export confirmBookingAction doesn't exist in target module
+   1 | import { auth } from './config';
+>  2 | import { 
+     | ^^^^^^^^
+>  3 |   lockSlotAction, 
+     | ^^^^^^^^^^^^^^^^^^
+>  4 |   submitReceiptAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  5 |   confirmBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  6 |   rejectBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  7 |   cancelBookingAction 
+     | ^^^^^^^^^^^^^^^^^^^^^^
+>  8 | } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+  11 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+
+The export confirmBookingAction was not found in module [project]/src/app/actions/booking.ts [app-ssr] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:2:1
+Export lockSlotAction doesn't exist in target module
+   1 | import { auth } from './config';
+>  2 | import { 
+     | ^^^^^^^^
+>  3 |   lockSlotAction, 
+     | ^^^^^^^^^^^^^^^^^^
+>  4 |   submitReceiptAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  5 |   confirmBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  6 |   rejectBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  7 |   cancelBookingAction 
+     | ^^^^^^^^^^^^^^^^^^^^^^
+>  8 | } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+  11 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+
+The export lockSlotAction was not found in module [project]/src/app/actions/booking.ts [app-client] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:2:1
+Export lockSlotAction doesn't exist in target module
+   1 | import { auth } from './config';
+>  2 | import { 
+     | ^^^^^^^^
+>  3 |   lockSlotAction, 
+     | ^^^^^^^^^^^^^^^^^^
+>  4 |   submitReceiptAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  5 |   confirmBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  6 |   rejectBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  7 |   cancelBookingAction 
+     | ^^^^^^^^^^^^^^^^^^^^^^
+>  8 | } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+  11 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+
+The export lockSlotAction was not found in module [project]/src/app/actions/booking.ts [app-ssr] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:2:1
+Export rejectBookingAction doesn't exist in target module
+   1 | import { auth } from './config';
+>  2 | import { 
+     | ^^^^^^^^
+>  3 |   lockSlotAction, 
+     | ^^^^^^^^^^^^^^^^^^
+>  4 |   submitReceiptAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  5 |   confirmBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  6 |   rejectBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  7 |   cancelBookingAction 
+     | ^^^^^^^^^^^^^^^^^^^^^^
+>  8 | } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+  11 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+
+The export rejectBookingAction was not found in module [project]/src/app/actions/booking.ts [app-client] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:2:1
+Export rejectBookingAction doesn't exist in target module
+   1 | import { auth } from './config';
+>  2 | import { 
+     | ^^^^^^^^
+>  3 |   lockSlotAction, 
+     | ^^^^^^^^^^^^^^^^^^
+>  4 |   submitReceiptAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  5 |   confirmBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  6 |   rejectBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  7 |   cancelBookingAction 
+     | ^^^^^^^^^^^^^^^^^^^^^^
+>  8 | } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+  11 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+
+The export rejectBookingAction was not found in module [project]/src/app/actions/booking.ts [app-ssr] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:2:1
+Export submitReceiptAction doesn't exist in target module
+   1 | import { auth } from './config';
+>  2 | import { 
+     | ^^^^^^^^
+>  3 |   lockSlotAction, 
+     | ^^^^^^^^^^^^^^^^^^
+>  4 |   submitReceiptAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  5 |   confirmBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  6 |   rejectBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  7 |   cancelBookingAction 
+     | ^^^^^^^^^^^^^^^^^^^^^^
+>  8 | } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+  11 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+
+The export submitReceiptAction was not found in module [project]/src/app/actions/booking.ts [app-client] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+./src/lib/firebase/booking.ts:2:1
+Export submitReceiptAction doesn't exist in target module
+   1 | import { auth } from './config';
+>  2 | import { 
+     | ^^^^^^^^
+>  3 |   lockSlotAction, 
+     | ^^^^^^^^^^^^^^^^^^
+>  4 |   submitReceiptAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  5 |   confirmBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^^
+>  6 |   rejectBookingAction, 
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+>  7 |   cancelBookingAction 
+     | ^^^^^^^^^^^^^^^^^^^^^^
+>  8 | } from '@/app/actions/booking';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   9 |
+  10 | export const OPENING_HOUR = 0; // 12 AM (Midnight)
+  11 | export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
+
+The export submitReceiptAction was not found in module [project]/src/app/actions/booking.ts [app-ssr] (ecmascript).
+The module has no exports at all.
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/firebase/booking.ts [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Client Component Browser]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/firebase/booking.ts [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Client Component SSR]
+    ./src/app/[locale]/profile/page.tsx [Server Component]
+
+
+    at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34) [D:\football\kickoff\.next\build\chunks\[root-of-the-server]__0oj80bi._.js:146:36])
+    at async run (turbopack:///[turbopack-node]/child_process/evaluate.ts:89:23) [D:\football\kickoff\.next\build\chunks\[root-of-the-server]__1f933tp._.js:443:31])
+    at <unknown> (./src/app/actions/booking.ts:5:1)
+    at <unknown> (./src/lib/firebase/booking.ts:2:1)
+    at <unknown> (./src/lib/firebase/booking.ts:2:1)
+    at <unknown> (./src/lib/firebase/booking.ts:54:1)
+    at <unknown> (./src/lib/firebase/booking.ts:54:1)
+    at <unknown> (./src/lib/firebase/booking.ts:2:1)
+    ... collapsed 7 duplicate lines matching above 1 lines 7 times...

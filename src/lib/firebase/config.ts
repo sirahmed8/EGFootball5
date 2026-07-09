@@ -2,7 +2,7 @@ import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-import { getAnalytics, isSupported } from "firebase/analytics";
+import { getAnalytics, isSupported, Analytics } from "firebase/analytics";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
@@ -29,7 +29,7 @@ export const storage = getStorage(app);
 export const rtdb = getDatabase(app);
 
 // Initialize Analytics safely on the client side only
-let analytics: any = null;
+let analytics: Analytics | null = null;
 if (typeof window !== "undefined") {
   isSupported().then((supported) => {
     if (supported) {
