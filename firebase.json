@@ -5,7 +5,7 @@
   },
   "hosting": {
     "site": "egfootball5",
-    "source": ".",
+    "public": "out",
     "cleanUrls": true,
     "redirects": [
       {

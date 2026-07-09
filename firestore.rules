@@ -44,11 +44,18 @@ service cloud.firestore {
     // Bookings collection
     match /bookings/{bookingId} {
       allow read: if isAuth() && (request.auth.uid == resource.data.userId || isAdmin() || (resource.data.bookingType == 'public' && resource.data.status == 'confirmed'));
-      allow create: if false; // Only Admin SDK (Server Actions) can create bookings now
+      allow create: if isAuth() 
+                    && isNotBlacklisted()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.status == 'locked_temporary'
+                    && request.resource.data.totalAmount >= 0
+                    && request.resource.data.depositAmount >= 0
+                    && request.resource.data.duration > 0;
       allow update: if isAuth() 
                     && isNotBlacklisted()
                     && (
                       isAdmin() || 
+                      (request.resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['receiptUrl', 'status']) && request.resource.data.status == 'pending_review' && resource.data.status == 'locked_temporary') ||
                       // Allow players to join or leave public matches
                       (
                         resource.data.bookingType == 'public' &&
@@ -81,7 +88,12 @@ service cloud.firestore {
 
     match /day_schedules/{dayId} {
       allow read: if true;
-      allow write: if isAdmin(); // Server actions handle day schedule updates now
+      allow write: if isAuth() && isNotBlacklisted() && (
+        isAdmin() || (
+          // Only allowed to modify the slots field
+          (resource == null || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['slots']))
+        )
+      );
     }
 
     // Stats collection for public aggregation
