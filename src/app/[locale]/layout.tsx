@@ -5,6 +5,7 @@ import "../globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
+import { DesktopSidebar } from "@/components/SideMenu";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import { ScrollToTop } from "@/components/ScrollToTop";
@@ -50,20 +51,29 @@ export default async function RootLayout({
   setRequestLocale(locale);
  
   const messages = await getMessages();
+  const isRTL = locale === 'ar';
 
   return (
-    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
+    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} antialiased bg-background text-foreground transition-colors duration-300`}
       >
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
             <AuthProvider>
+              {/* Desktop sidebar — always visible on md+ */}
+              <DesktopSidebar />
+
+              {/* Mobile top navbar */}
               <Navbar />
-              <main className="pt-16 min-h-screen flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+              {/* Main content — on desktop, offset by sidebar width */}
+              <main className={`pt-14 md:pt-0 min-h-screen flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500
+                ${isRTL ? 'md:mr-64' : 'md:ml-64'}`}>
                 {children}
+                <Footer />
               </main>
-              <Footer />
+
               <Toaster theme="system" />
               <ScrollToTop />
             </AuthProvider>
