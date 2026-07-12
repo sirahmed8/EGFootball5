@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { onSnapshot, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
@@ -26,6 +26,7 @@ export default function AdminDashboard() {
   
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [usersCache, setUsersCache] = useState<Record<string, AppUser>>({});
+  const usersCacheRef = useRef<Record<string, AppUser>>({});
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [editingPitch, setEditingPitch] = useState<Pitch | null>(null);
   const [savingPitch, setSavingPitch] = useState(false);
@@ -64,8 +65,8 @@ export default function AdminDashboard() {
         const bks = snapshot.docs.map(doc => doc.data() as Booking);
         setBookings(bks);
         
-        // Fetch user data for new users
-        const newUsers = { ...usersCache };
+        // Fetch user data for new users using current ref
+        const newUsers = { ...usersCacheRef.current };
         let updated = false;
         for (const bk of bks) {
           if (!newUsers[bk.userId]) {
@@ -76,16 +77,24 @@ export default function AdminDashboard() {
             }
           }
         }
-        if (updated) setUsersCache(newUsers);
+        if (updated) {
+          usersCacheRef.current = newUsers;
+          setUsersCache(newUsers);
+        }
       });
 
       return unsubscribe;
     };
 
+    let isMounted = true;
     let unsub: (() => void) | undefined;
-    fetchPitchAndBookings().then(u => unsub = u);
+    fetchPitchAndBookings().then(u => {
+      if (!isMounted && u) u();
+      else unsub = u;
+    });
     
     return () => {
+      isMounted = false;
       if (typeof unsub === 'function') unsub();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps

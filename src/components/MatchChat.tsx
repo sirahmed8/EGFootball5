@@ -42,8 +42,11 @@ export default function MatchChat({ matchId }: { matchId: string }) {
       }
     };
 
+    let isMounted = true;
+
     // First load event to turn off loading state
     onValue(messagesRef, (snapshot) => {
+      if (!isMounted) return;
       setLoading(false);
       if (snapshot.exists()) {
         const msgs: Message[] = [];
@@ -56,10 +59,13 @@ export default function MatchChat({ matchId }: { matchId: string }) {
       }
       
       // Then listen for new children added
-      onChildAdded(messagesRef, handleNewMessage);
+      if (isMounted) {
+        onChildAdded(messagesRef, handleNewMessage);
+      }
     }, { onlyOnce: true });
 
     return () => {
+      isMounted = false;
       off(messagesRef);
     };
   }, [matchId]);

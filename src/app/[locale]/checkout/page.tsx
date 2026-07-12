@@ -97,9 +97,10 @@ function CheckoutForm() {
   useEffect(() => {
     if (!booking || !booking.lockedUntil) return;
     
+    const lockedUntil = booking.lockedUntil;
     const timer = setInterval(() => {
       const now = Date.now();
-      const diff = Math.floor((booking.lockedUntil! - now) / 1000);
+      const diff = Math.floor((lockedUntil - now) / 1000);
       if (diff <= 0) {
         clearInterval(timer);
         toast.error(locale === 'ar' ? 'انتهت صلاحية الحجز المؤقت الخاص بك.' : 'Your temporary lock has expired.');
@@ -110,7 +111,7 @@ function CheckoutForm() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [booking, router, locale]);
+  }, [booking?.lockedUntil, router, locale]);
 
   const handleUpload = async () => {
     if (!file || !firebaseUser || !bookingId) return;
@@ -135,11 +136,17 @@ function CheckoutForm() {
           setUploading(false);
         }, 
         async () => {
-          // 3. Get download URL and update booking
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          await submitReceipt(bookingId, downloadURL, firebaseUser.uid);
-          toast.success('Receipt uploaded successfully! Awaiting admin review.');
-          router.push('/profile');
+          try {
+            // 3. Get download URL and update booking
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            await submitReceipt(bookingId, downloadURL, firebaseUser.uid);
+            toast.success(locale === 'ar' ? 'تم رفع الإيصال بنجاح! بانتظار مراجعة المسؤول.' : 'Receipt uploaded successfully! Awaiting admin review.');
+            router.push('/profile');
+          } catch (compErr: unknown) {
+            const err = compErr as Error;
+            toast.error((locale === 'ar' ? 'خطأ في حفظ الإيصال: ' : 'Error saving receipt: ') + err.message);
+            setUploading(false);
+          }
         }
       );
     } catch (error: unknown) {

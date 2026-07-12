@@ -114,20 +114,6 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           </div>
         </div>
       </section>
-
-      {/* Legal Footer */}
-      <footer className="py-12 px-4 bg-background text-center">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground font-medium">
-            <Link href="/privacy" className="hover:text-primary transition-colors">{t('footerPrivacy')}</Link>
-            <Link href="/terms" className="hover:text-primary transition-colors">{t('footerTerms')}</Link>
-            <Link href="/cookies" className="hover:text-primary transition-colors">{t('footerCookies')}</Link>
-          </div>
-          <p className="text-sm text-muted-foreground/50 font-medium">
-            {t('footerRights')}
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

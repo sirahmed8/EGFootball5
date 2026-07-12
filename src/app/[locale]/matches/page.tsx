@@ -154,21 +154,20 @@ export default function MatchesPage() {
         }
 
         const index = joinedPlayers.indexOf(firebaseUser.uid);
-        const newPlayers = [...joinedPlayers];
-        newPlayers.splice(index, 1);
+        if (index > -1) {
+          const newPlayers = [...joinedPlayers];
+          newPlayers.splice(index, 1);
 
-        const newPlayerNames = [...joinedPlayerNames];
-        const nameIndex = newPlayerNames.indexOf(appUser.name);
-        if (nameIndex > -1) {
-          newPlayerNames.splice(nameIndex, 1);
-        } else {
-          newPlayerNames.splice(index, 1);
+          const newPlayerNames = [...joinedPlayerNames];
+          if (index < newPlayerNames.length) {
+            newPlayerNames.splice(index, 1);
+          }
+
+          transaction.update(bookingRef, {
+            joinedPlayers: newPlayers,
+            joinedPlayerNames: newPlayerNames
+          });
         }
-
-        transaction.update(bookingRef, {
-          joinedPlayers: newPlayers,
-          joinedPlayerNames: newPlayerNames
-        });
       });
       toast.success(t('leftSuccess'));
     } catch (error: unknown) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { collection, query, where, onSnapshot, orderBy, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, updateDoc, doc, writeBatch } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Bell } from 'lucide-react';
@@ -58,8 +58,18 @@ export function NotificationBell() {
     }
   };
 
-  const handleMarkAllAsRead = () => {
-    notifications.filter(n => !n.read).forEach(n => handleMarkAsRead(n.id));
+  const handleMarkAllAsRead = async () => {
+    const unread = notifications.filter(n => !n.read);
+    if (unread.length === 0) return;
+    try {
+      const batch = writeBatch(db);
+      unread.forEach(n => {
+        batch.update(doc(db, 'notifications', n.id), { read: true });
+      });
+      await batch.commit();
+    } catch (err) {
+      console.error('Error batch marking notifications as read', err);
+    }
   };
 
   if (!appUser) return null;

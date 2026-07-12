@@ -61,6 +61,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
     ...(appUser?.role !== 'owner' ? [{ href: '/book', label: 'Book a Pitch', icon: <CalendarDays size={18} /> }] : []),
     ...(appUser?.role === 'admin' ? [{ href: '/admin/dashboard', label: tNav('adminDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
     ...(appUser?.role === 'owner' ? [{ href: '/owner', label: tNav('ownerDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
+    ...(appUser?.role === 'owner' ? [{ href: '/owner/dashboard', label: 'Analytics Dashboard', icon: <Trophy size={18} /> }] : []),
     ...(appUser?.role === 'owner' ? [{ href: '/owner/users', label: t('users'), icon: <Users size={18} /> }] : []),
     ...(firebaseUser && appUser?.role !== 'owner' ? [{ href: '/profile', label: 'Profile', icon: <UserCircle size={18} /> }] : []),
   ].filter((link, idx, arr) => arr.findIndex(l => l.href === link.href) === idx);
@@ -158,6 +159,17 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
 // Drawer ALWAYS opens from the RIGHT (same side as hamburger button)
 function MobileDrawer() {
   const [isOpen, setIsOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.setAttribute('data-mobile-menu-open', 'true');
+    } else {
+      document.body.removeAttribute('data-mobile-menu-open');
+    }
+    return () => {
+      document.body.removeAttribute('data-mobile-menu-open');
+    };
+  }, [isOpen]);
 
   return (
     <>
