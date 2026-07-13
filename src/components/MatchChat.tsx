@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, Loader2 } from 'lucide-react';
 import { useLocale } from 'next-intl';
+import { ChatMessagesSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface Message {
   id: string;
@@ -105,12 +106,9 @@ export default function MatchChat({ matchId }: { matchId: string }) {
         </h3>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {loading ? (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            <Loader2 className="w-6 h-6 animate-spin" />
-          </div>
+          <ChatMessagesSkeleton />
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
             {locale === 'ar' ? 'لا توجد رسائل بعد. كن أول من يكتب!' : 'No messages yet. Be the first to say hi!'}

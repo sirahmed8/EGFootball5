@@ -12,6 +12,7 @@ import { User, Shield, ShieldAlert, Ban, CheckCircle, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Image from 'next/image';
+import { UsersPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 export default function OwnerUsersPage() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function OwnerUsersPage() {
   }, [appUser]);
 
   if (loading || appUser?.role !== 'owner' || fetching) {
-    return <div className="p-8 text-center text-foreground">{t('loading')}</div>;
+    return <UsersPageSkeleton />;
   }
 
   const handleUpdateRole = async (userId: string, newRole: AppUser['role']) => {

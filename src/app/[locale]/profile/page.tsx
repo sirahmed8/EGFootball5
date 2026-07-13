@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { useTranslations, useLocale } from 'next-intl';
 import { User as AppUser, Booking, Pitch } from '@/types';
 import { cancelBooking } from '@/lib/firebase/booking';
+import { ProfilePageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 function BookingCountdown({ lockedUntil }: { lockedUntil: number }) {
   const [timeLeft, setTimeLeft] = useState(0);
@@ -283,7 +284,7 @@ export default function ProfilePage() {
       unsubscribePitches();
     };
   }, [firebaseUser]);
-  if (loading || !appUser || !firebaseUser) return <div className="p-8 text-center text-foreground">{t('saving') || 'Loading...'}</div>;
+  if (loading || !appUser || !firebaseUser) return <ProfilePageSkeleton />;
 
   // Stats calculations
   const totalBookings = bookings.length;

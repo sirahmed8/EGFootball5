@@ -15,6 +15,7 @@ import { submitReceipt } from '@/lib/firebase/booking';
 import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import { MapPin, Calendar, Clock, CreditCard, Shield, Users, FileText } from 'lucide-react';
+import { CheckoutPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 function CheckoutForm() {
   const router = useRouter();
@@ -181,7 +182,7 @@ function CheckoutForm() {
   };
 
   if (authLoading || !booking) {
-    return <div className="p-8 text-center text-foreground">{t('loading')}</div>;
+    return <CheckoutPageSkeleton />;
   }
 
   return (
@@ -367,7 +368,7 @@ function CheckoutForm() {
 export default function CheckoutPage() {
   return (
     <div className="flex-1 flex items-center justify-center p-4 md:p-8 mt-12">
-      <Suspense fallback={<div className="text-foreground text-center p-8">Loading checkout...</div>}>
+      <Suspense fallback={<CheckoutPageSkeleton />}>
         <CheckoutForm />
       </Suspense>
     </div>

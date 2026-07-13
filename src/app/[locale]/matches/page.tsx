@@ -13,6 +13,7 @@ import { Booking, Pitch } from '@/types';
 import { Users, Calendar as CalendarIcon, Clock, MapPin, Trophy, Plus, MessageCircle } from 'lucide-react';
 import MatchChat from '@/components/MatchChat';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { MatchesPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 export default function MatchesPage() {
   const { appUser, firebaseUser, loading: authLoading } = useAuthStore();
@@ -190,12 +191,7 @@ export default function MatchesPage() {
   });
 
   if (loadingData || authLoading) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 mt-16 min-h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
-        <p className="text-muted-foreground mt-4 font-semibold">{t('loading')}</p>
-      </div>
-    );
+    return <MatchesPageSkeleton />;
   }
 
   return (

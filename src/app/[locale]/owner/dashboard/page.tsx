@@ -9,6 +9,7 @@ import { Booking, Pitch, User as AppUser } from '@/types';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Activity, DollarSign, Users, CalendarCheck, MapPin } from 'lucide-react';
+import { DashboardPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 export default function OwnerDashboardPage() {
   const router = useRouter();
@@ -50,7 +51,7 @@ export default function OwnerDashboardPage() {
   }, [appUser]);
 
   if (loading || appUser?.role !== 'owner' || fetching) {
-    return <div className="p-8 text-center text-foreground">Loading...</div>;
+    return <DashboardPageSkeleton />;
   }
 
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed');
