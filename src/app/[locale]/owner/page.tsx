@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl';
 
 import { PitchCreationForm } from './components/PitchCreationForm';
 import { ExistingPitchesList } from './components/ExistingPitchesList';
+import { DashboardPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 export default function OwnerDashboard() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function OwnerDashboard() {
   }, [appUser]);
 
   if (loading || appUser?.role !== 'owner') {
-    return <div className="p-8 text-center text-foreground">{tProfile('saving')}</div>;
+    return <DashboardPageSkeleton />;
   }
 
   const handleCreatePitch = async (e: React.FormEvent) => {

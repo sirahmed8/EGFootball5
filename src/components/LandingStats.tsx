@@ -49,11 +49,11 @@ export function LandingStats() {
 
   if (stats.isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="space-y-4 flex flex-col items-center">
-            <div className="w-24 h-12 bg-primary/20 animate-pulse rounded-md"></div>
-            <div className="w-16 h-4 bg-muted animate-pulse rounded-md"></div>
+          <div key={i} className="p-6 rounded-2xl bg-card/40 border border-border/50 backdrop-blur-xl flex flex-col items-center justify-center space-y-3 relative overflow-hidden">
+            <div className="w-20 h-10 rounded-xl bg-primary/15 animate-shimmer" />
+            <div className="w-16 h-3 rounded-md bg-muted/30 animate-shimmer" />
           </div>
         ))}
       </div>

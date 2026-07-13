@@ -6,7 +6,7 @@ import { ref, push, serverTimestamp, onChildAdded, onValue, off, query, orderByC
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Loader2 } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { ChatMessagesSkeleton } from '@/components/skeletons/PageSkeletons';
 

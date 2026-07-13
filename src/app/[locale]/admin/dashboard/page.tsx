@@ -6,6 +6,8 @@ import { onSnapshot, doc, getDoc, updateDoc, collection, query, where, getDocs }
 import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Booking, User as AppUser, Pitch } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { DashboardPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { confirmBooking, rejectBooking, cleanupExpiredBookings } from '@/lib/firebase/booking';
 import { toast } from 'sonner';
@@ -101,7 +103,7 @@ export default function AdminDashboard() {
   }, [appUser, firebaseUser]);
 
   if (loading || (appUser?.role !== 'admin' && appUser?.role !== 'owner')) {
-    return <div className="p-8 text-center text-white">Authenticating...</div>;
+    return <DashboardPageSkeleton />;
   }
 
   const pendingReview = bookings.filter(b => b.status === 'pending_review');
