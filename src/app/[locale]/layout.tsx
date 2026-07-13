@@ -51,18 +51,17 @@ export default async function RootLayout({
   const isRTL = locale === 'ar';
 
   return (
-    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning>
+    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} className="dark" style={{ backgroundColor: '#090d10', colorScheme: 'dark' }} suppressHydrationWarning>
       <head>
-        {/* Prevent white flash on theme/language change by applying dark bg before paint */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');document.documentElement.style.backgroundColor='oklch(0.12 0.01 250)';}else{document.documentElement.style.backgroundColor='oklch(0.985 0 0)';}}catch(e){}})();`,
+            __html: `(function(){try{document.documentElement.classList.add('dark');document.documentElement.style.backgroundColor='#090d10';}catch(e){}})();`,
           }}
         />
       </head>
-      <body className={`${geistSans.variable} antialiased bg-background text-foreground`}>
+      <body className={`${geistSans.variable} antialiased bg-background text-foreground`} style={{ backgroundColor: '#090d10' }}>
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
             <AuthProvider>
               {/* Always-visible desktop sidebar */}
               <DesktopSidebar />
@@ -70,14 +69,12 @@ export default async function RootLayout({
               {/* Top navbar (mobile bar + desktop bell bar) */}
               <Navbar />
 
-              {/* Main content area:
-                  - Mobile: below 56px (h-14) top bar
-                  - Desktop: shifted right/left by sidebar (16rem) AND below 56px top bar */}
+              {/* Main content area: below 64px (h-16) top bar */}
               <main
                 className={`min-h-screen flex flex-col
-                  pt-14
+                  pt-16
                   ${isRTL ? 'md:mr-64' : 'md:ml-64'}
-                  md:pt-14`}
+                  md:pt-16`}
               >
                 {children}
                 <Footer />

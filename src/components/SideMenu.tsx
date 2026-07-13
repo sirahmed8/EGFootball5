@@ -33,9 +33,8 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   const toggleLanguage = () => {
     const nextLocale = locale === 'ar' ? 'en' : 'ar';
     localStorage.setItem('preferredLocale', nextLocale);
-    // Close menu first for snappier feel
     onClose?.();
-    router.replace(pathname, { locale: nextLocale });
+    router.replace(pathname, { locale: nextLocale, scroll: false });
   };
 
   const toggleTheme = () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
@@ -69,7 +68,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   return (
     <div className="flex flex-col h-full">
       {/* Logo header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-border flex-shrink-0">
+      <div className="h-16 flex items-center justify-between px-6 border-b border-border flex-shrink-0">
         <Link href="/" onClick={() => onClose?.()} className="flex items-center gap-2">
           <Image src="/favicon.jpg" alt="Logo" width={28} height={28} className="rounded-full object-cover" />
           <span className="font-black text-base tracking-tight">

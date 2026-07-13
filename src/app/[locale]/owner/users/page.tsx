@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { collection, query, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
 import { User as AppUser } from '@/types';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
-import { User, Shield, ShieldAlert, Ban, CheckCircle, Mail } from 'lucide-react';
+import { User, Shield, ShieldAlert, Ban, CheckCircle, Mail, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Image from 'next/image';
@@ -62,6 +62,19 @@ export default function OwnerUsersPage() {
     } catch (error) {
       const err = error as Error;
       toast.error(err.message || 'Failed to update blacklist status');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete user "${userName}"?`)) {
+      return;
+    }
+    try {
+      await deleteDoc(doc(db, 'users', userId));
+      toast.success(`User "${userName}" deleted successfully`);
+    } catch (error) {
+      const err = error as Error;
+      toast.error(err.message || 'Failed to delete user');
     }
   };
 
@@ -173,6 +186,17 @@ export default function OwnerUsersPage() {
                                 className="font-semibold"
                               >
                                 {user.isBlacklisted ? t('unblacklist') : t('blacklist')}
+                              </Button>
+
+                              <Button 
+                                variant="destructive"
+                                size="sm" 
+                                onClick={() => handleDeleteUser(user.uid, user.name)}
+                                className="font-semibold bg-red-600/80 hover:bg-red-600 text-white flex items-center"
+                                title="Delete User"
+                              >
+                                <Trash2 className="w-4 h-4 mr-1" />
+                                Delete
                               </Button>
                             </>
                           )}
