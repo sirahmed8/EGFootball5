@@ -52,15 +52,8 @@ export default async function RootLayout({
   const isRTL = locale === 'ar';
 
   return (
-    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} className="dark" style={{ backgroundColor: '#090d10', colorScheme: 'dark' }} suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{document.documentElement.classList.add('dark');document.documentElement.style.backgroundColor='#090d10';}catch(e){}})();`,
-          }}
-        />
-      </head>
-      <body className={`${geistSans.variable} antialiased bg-background text-foreground`} style={{ backgroundColor: '#090d10' }}>
+    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning>
+      <body className={`${geistSans.variable} antialiased bg-background text-foreground`}>
         <NextIntlClientProvider messages={messages}>
           <ReactQueryProvider>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>

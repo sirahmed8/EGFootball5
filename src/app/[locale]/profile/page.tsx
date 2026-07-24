@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useTranslations, useLocale } from 'next-intl';
 import { User as AppUser, Booking, Pitch } from '@/types';
@@ -48,16 +49,15 @@ function BookingCard({ booking, pitch }: { booking: Booking; pitch?: Pitch }) {
   const router = useRouter();
   const { firebaseUser } = useAuthStore();
   const [canceling, setCanceling] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const handleCancel = async () => {
     if (!firebaseUser) return;
-    const confirmMessage = t('confirmCancelPrompt');
-    if (!window.confirm(confirmMessage)) return;
-
     setCanceling(true);
     try {
       await cancelBooking(booking.id, firebaseUser.uid);
       toast.success(t('cancelledSuccess'));
+      setShowCancelDialog(false);
     } catch (error: unknown) {
       const err = error as Error;
       let errMsg = err.message;
@@ -159,7 +159,7 @@ function BookingCard({ booking, pitch }: { booking: Booking; pitch?: Pitch }) {
           <div className="flex gap-2 w-full sm:w-auto">
             {(booking.status === 'locked_temporary' || booking.status === 'pending_review') && (
               <Button 
-                onClick={handleCancel}
+                onClick={() => setShowCancelDialog(true)}
                 disabled={canceling}
                 variant="destructive"
                 size="sm"
@@ -190,6 +190,25 @@ function BookingCard({ booking, pitch }: { booking: Booking; pitch?: Pitch }) {
           </div>
         </div>
       </CardContent>
+
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Booking</DialogTitle>
+            <DialogDescription>
+              {t('confirmCancelPrompt')}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowCancelDialog(false)} disabled={canceling}>
+              Close
+            </Button>
+            <Button variant="destructive" onClick={handleCancel} disabled={canceling}>
+              {canceling ? 'Canceling...' : 'Confirm'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

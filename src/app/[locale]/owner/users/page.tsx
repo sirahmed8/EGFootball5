@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl';
 import { User, Shield, ShieldAlert, Ban, CheckCircle, Mail, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { UsersPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
@@ -21,6 +22,7 @@ export default function OwnerUsersPage() {
   
   const [users, setUsers] = useState<AppUser[]>([]);
   const [fetching, setFetching] = useState(true);
+  const [userToDelete, setUserToDelete] = useState<{ id: string, name: string } | null>(null);
 
   useEffect(() => {
     if (!loading && appUser?.role !== 'owner') {
@@ -65,16 +67,16 @@ export default function OwnerUsersPage() {
     }
   };
 
-  const handleDeleteUser = async (userId: string, userName: string) => {
-    if (!window.confirm(`Are you sure you want to permanently delete user "${userName}"?`)) {
-      return;
-    }
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
     try {
-      await deleteDoc(doc(db, 'users', userId));
-      toast.success(`User "${userName}" deleted successfully`);
+      await deleteDoc(doc(db, 'users', userToDelete.id));
+      toast.success(`User "${userToDelete.name}" deleted successfully`);
     } catch (error) {
       const err = error as Error;
       toast.error(err.message || 'Failed to delete user');
+    } finally {
+      setUserToDelete(null);
     }
   };
 
@@ -188,16 +190,16 @@ export default function OwnerUsersPage() {
                                 {user.isBlacklisted ? t('unblacklist') : t('blacklist')}
                               </Button>
 
-                              <Button 
-                                variant="destructive"
-                                size="sm" 
-                                onClick={() => handleDeleteUser(user.uid, user.name)}
-                                className="font-semibold bg-red-600/80 hover:bg-red-600 text-white flex items-center"
-                                title="Delete User"
-                              >
-                                <Trash2 className="w-4 h-4 mr-1" />
-                                Delete
-                              </Button>
+                                <Button 
+                                  variant="destructive"
+                                  size="sm" 
+                                  onClick={() => setUserToDelete({ id: user.uid, name: user.name })}
+                                  className="font-semibold bg-red-600/80 hover:bg-red-600 text-white flex items-center"
+                                  title="Delete User"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-1" />
+                                  Delete
+                                </Button>
                             </>
                           )}
                         </div>
@@ -210,6 +212,25 @@ export default function OwnerUsersPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete User</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to permanently delete user &quot;{userToDelete?.name}&quot;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setUserToDelete(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteUser}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
