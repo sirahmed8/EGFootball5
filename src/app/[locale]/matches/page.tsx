@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from '@/i18n/routing';
-import { doc, collection, query, where, onSnapshot, runTransaction } from 'firebase/firestore';
+import { doc, collection, query, where, onSnapshot, runTransaction, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -22,7 +23,6 @@ export default function MatchesPage() {
   const locale = useLocale();
 
   const [matches, setMatches] = useState<Booking[]>([]);
-  const [pitchesCache, setPitchesCache] = useState<Record<string, Pitch>>({});
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [filter, setFilter] = useState<'all' | 'joined' | 'open'>('all');
@@ -54,22 +54,21 @@ export default function MatchesPage() {
       setLoadingData(false);
     });
 
-    // 2. Fetch all pitches to cache metadata
-    const pitchesQ = query(collection(db, 'pitches'));
-    const unsubscribePitches = onSnapshot(pitchesQ, (snapshot) => {
+    return () => unsubscribeMatches();
+  }, []);
+
+  const { data: pitchesCache = {}, isLoading: pitchesLoading } = useQuery({
+    queryKey: ['pitches_dict'],
+    queryFn: async () => {
+      const q = query(collection(db, 'pitches'));
+      const snapshot = await getDocs(q);
       const cache: Record<string, Pitch> = {};
       snapshot.docs.forEach((doc) => {
-        const pitch = doc.data() as Pitch;
-        cache[pitch.id] = pitch;
+        cache[doc.id] = doc.data() as Pitch;
       });
-      setPitchesCache(cache);
-    });
-
-    return () => {
-      unsubscribeMatches();
-      unsubscribePitches();
-    };
-  }, []);
+      return cache;
+    },
+  });
 
   const formatTimeSlot = (slot: number) => {
     const hour = Math.floor(slot);
@@ -100,22 +99,19 @@ export default function MatchesPage() {
         }
         const data = bookingSnap.data() as Booking;
         const joinedPlayers = data.joinedPlayers || [];
-        const joinedPlayerNames = data.joinedPlayerNames || [];
         const numPeople = data.numPeople || 10;
 
-        if (joinedPlayers.includes(firebaseUser.uid)) {
+        if (joinedPlayers.some(p => p.uid === firebaseUser.uid)) {
           throw new Error('Already joined');
         }
         if (joinedPlayers.length >= numPeople) {
           throw new Error(t('errorFull'));
         }
 
-        const newPlayers = [...joinedPlayers, firebaseUser.uid];
-        const newPlayerNames = [...joinedPlayerNames, appUser.name];
+        const newPlayers = [...joinedPlayers, { uid: firebaseUser.uid, name: appUser.name || 'Player' }];
 
         transaction.update(bookingRef, {
-          joinedPlayers: newPlayers,
-          joinedPlayerNames: newPlayerNames
+          joinedPlayers: newPlayers
         });
       });
       toast.success(t('joinedSuccess'));
@@ -140,9 +136,8 @@ export default function MatchesPage() {
         }
         const data = bookingSnap.data() as Booking;
         const joinedPlayers = data.joinedPlayers || [];
-        const joinedPlayerNames = data.joinedPlayerNames || [];
 
-        if (!joinedPlayers.includes(firebaseUser.uid)) {
+        if (!joinedPlayers.some(p => p.uid === firebaseUser.uid)) {
           throw new Error('Not in this match');
         }
 
@@ -154,19 +149,13 @@ export default function MatchesPage() {
           );
         }
 
-        const index = joinedPlayers.indexOf(firebaseUser.uid);
+        const index = joinedPlayers.findIndex(p => p.uid === firebaseUser.uid);
         if (index > -1) {
           const newPlayers = [...joinedPlayers];
           newPlayers.splice(index, 1);
 
-          const newPlayerNames = [...joinedPlayerNames];
-          if (index < newPlayerNames.length) {
-            newPlayerNames.splice(index, 1);
-          }
-
           transaction.update(bookingRef, {
-            joinedPlayers: newPlayers,
-            joinedPlayerNames: newPlayerNames
+            joinedPlayers: newPlayers
           });
         }
       });
@@ -181,7 +170,7 @@ export default function MatchesPage() {
 
   const filteredMatches = matches.filter((match) => {
     if (filter === 'joined') {
-      return firebaseUser && match.joinedPlayers?.includes(firebaseUser.uid);
+      return firebaseUser && match.joinedPlayers?.some(p => p.uid === firebaseUser.uid);
     }
     if (filter === 'open') {
       const currentCount = match.joinedPlayers?.length || 1;
@@ -190,7 +179,7 @@ export default function MatchesPage() {
     return true;
   });
 
-  if (loadingData || authLoading) {
+  if (loadingData || pitchesLoading || authLoading) {
     return <MatchesPageSkeleton />;
   }
 
@@ -257,7 +246,7 @@ export default function MatchesPage() {
             const pitch = pitchesCache[match.pitchId];
             const currentPlayers = match.joinedPlayers?.length || 1;
             const spotsRemaining = match.numPeople - currentPlayers;
-            const isUserJoined = firebaseUser && match.joinedPlayers?.includes(firebaseUser.uid);
+            const isUserJoined = firebaseUser && match.joinedPlayers?.some(p => p.uid === firebaseUser.uid);
             const isFull = currentPlayers >= match.numPeople;
 
             return (
@@ -335,16 +324,16 @@ export default function MatchesPage() {
                     </div>
 
                     {/* Joined Player Names Bubble List */}
-                    {match.joinedPlayerNames && match.joinedPlayerNames.length > 0 && (
+                    {match.joinedPlayers && match.joinedPlayers.length > 0 && (
                       <div className="space-y-1.5 pt-1">
                         <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold">{t('playersList')}</span>
                         <div className="flex flex-wrap gap-1.5">
-                          {match.joinedPlayerNames.map((name, i) => (
+                          {match.joinedPlayers.map((player, i) => (
                             <span
                               key={i}
                               className="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-background border border-border text-foreground hover:border-primary/30 transition-colors"
                             >
-                              {name}
+                              {player.name}
                             </span>
                           ))}
                         </div>

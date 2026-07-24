@@ -7,8 +7,9 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send } from 'lucide-react';
-import { useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { ChatMessagesSkeleton } from '@/components/skeletons/PageSkeletons';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -24,7 +25,7 @@ export default function MatchChat({ matchId }: { matchId: string }) {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const locale = useLocale();
+  const t = useTranslations('MatchChat');
 
   useEffect(() => {
     if (!matchId) return;
@@ -84,17 +85,24 @@ export default function MatchChat({ matchId }: { matchId: string }) {
     setNewMessage(''); // optimistic clear
 
     const messagesRef = ref(rtdb, `chats/${matchId}/messages`);
-    await push(messagesRef, {
-      text: messageText,
-      senderId: firebaseUser.uid,
-      senderName: appUser.name || 'Player',
-      timestamp: serverTimestamp()
-    });
+    
+    try {
+      await push(messagesRef, {
+        text: messageText,
+        senderId: firebaseUser.uid,
+        senderName: appUser.name || 'Player',
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Failed to send message', error);
+      toast.error(t('errorSend'));
+      setNewMessage(messageText); // restore input on failure
+    }
   };
 
   const formatTime = (ts: number | null) => {
     if (!ts) return '';
-    return new Date(ts).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+    return new Date(ts).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -102,7 +110,7 @@ export default function MatchChat({ matchId }: { matchId: string }) {
       {/* Header */}
       <div className="p-4 border-b border-border bg-muted/20">
         <h3 className="font-bold text-foreground">
-          {locale === 'ar' ? 'دردشة المباراة' : 'Match Chat'}
+          {t('title')}
         </h3>
       </div>
 
@@ -111,7 +119,7 @@ export default function MatchChat({ matchId }: { matchId: string }) {
           <ChatMessagesSkeleton />
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-            {locale === 'ar' ? 'لا توجد رسائل بعد. كن أول من يكتب!' : 'No messages yet. Be the first to say hi!'}
+            {t('noMessages')}
           </div>
         ) : (
           messages.map((msg) => {
@@ -139,7 +147,7 @@ export default function MatchChat({ matchId }: { matchId: string }) {
         <Input
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          placeholder={locale === 'ar' ? 'اكتب رسالة...' : 'Type a message...'}
+          placeholder={t('placeholder')}
           className="flex-1 rounded-full bg-muted/50 border-transparent focus-visible:ring-primary"
           autoFocus
         />

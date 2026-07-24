@@ -70,7 +70,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
       {/* Logo header */}
       <div className="h-16 flex items-center justify-between px-6 border-b border-border flex-shrink-0">
         <Link href="/" onClick={() => onClose?.()} className="flex items-center gap-2">
-          <Image src="/favicon.jpg" alt="Logo" width={28} height={28} className="rounded-full object-cover" />
+          <Image src="/favicon.jpg" alt="Logo" width={28} height={28} className="rounded-full object-cover" priority={true} />
           <span className="font-black text-base tracking-tight">
             EG<span className="text-primary drop-shadow-[0_0_6px_rgba(57,255,20,0.5)]">Football5</span>
           </span>

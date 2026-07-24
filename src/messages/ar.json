@@ -343,7 +343,13 @@
     "connectDeveloper": "تواصل مع المطور",
     "privacyPolicy": "سياسة الخصوصية",
     "termsOfService": "شروط الخدمة",
-    "cookiePolicy": "سياسة ملفات الارتباط",
+    "cookiePolicy": "سياسة ملفات تعريف الارتباط",
     "rightsReserved": "© 2026 EGFootball5. جميع الحقوق محفوظة."
+  },
+  "MatchChat": {
+    "title": "دردشة المباراة",
+    "noMessages": "لا توجد رسائل بعد. كن أول من يكتب!",
+    "placeholder": "اكتب رسالة...",
+    "errorSend": "فشل إرسال الرسالة."
   }
 }

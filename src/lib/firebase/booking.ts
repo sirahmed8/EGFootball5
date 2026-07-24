@@ -1,5 +1,6 @@
-import { doc, runTransaction, increment, collection, query, where, getDocs, writeBatch, getDoc, DocumentReference } from 'firebase/firestore';
+import { doc, runTransaction, increment, collection, query, where, getDocs, writeBatch, getDoc, DocumentReference, deleteField } from 'firebase/firestore';
 import { db } from './config';
+import { BookingStatus } from '@/types';
 
 export const OPENING_HOUR = 0; // 12 AM (Midnight)
 export const CLOSING_HOUR = 24; // 12 AM (Midnight of next day)
@@ -67,8 +68,9 @@ export async function lockSlot(
     // Clean up expired temporary locks in memory before checking availability
     for (const key in bookedSlots) {
       const slot = bookedSlots[key];
-      if (slot.status === 'locked_temporary' && slot.lockedUntil && slot.lockedUntil < now) {
-        delete bookedSlots[key];
+      if (slot.status === BookingStatus.LOCKED_TEMPORARY && slot.lockedUntil && slot.lockedUntil < now) {
+        // Use deleteField() so the transaction actually deletes the field from Firestore
+        bookedSlots[key] = deleteField() as any;
       }
     }
 
@@ -104,7 +106,7 @@ export async function lockSlot(
     for (const block of blocks) {
       bookedSlots[block.toString()] = {
         bookingId,
-        status: 'locked_temporary',
+        status: BookingStatus.LOCKED_TEMPORARY,
         lockedUntil,
         userId
       };
@@ -124,13 +126,12 @@ export async function lockSlot(
       duration: durationHours,
       totalAmount,
       depositAmount,
-      status: 'locked_temporary',
+      status: BookingStatus.LOCKED_TEMPORARY,
       lockedUntil,
       createdAt: now,
       bookingType,
       numPeople,
-      joinedPlayers: bookingType === 'public' ? [userId] : [],
-      joinedPlayerNames: bookingType === 'public' ? [userName] : []
+      joinedPlayers: bookingType === 'public' ? [{ uid: userId, name: userName }] : [],
     });
   });
 
@@ -178,15 +179,15 @@ export async function submitReceipt(bookingId: string, receiptUrl: string, curre
     // Update booking status
     transaction.update(bookingRef, {
       receiptUrl,
-      status: 'pending_review'
+      status: BookingStatus.PENDING_REVIEW
     });
 
     // Update corresponding day schedule slots status
     for (const block of blocks) {
       const slotStr = block.toString();
-      slots[slotStr].status = 'pending_review';
+      slots[slotStr].status = BookingStatus.PENDING_REVIEW;
       if ('lockedUntil' in slots[slotStr]) {
-        delete slots[slotStr].lockedUntil;
+        slots[slotStr].lockedUntil = deleteField() as any;
       }
     }
     transaction.update(scheduleRef, { slots });
@@ -204,26 +205,28 @@ export async function confirmBooking(bookingId: string) {
     const booking = bookingSnap.data();
     
     // Update booking status
-    transaction.update(bookingRef, { status: 'confirmed' });
+    transaction.update(bookingRef, { status: BookingStatus.CONFIRMED });
     
     // Update corresponding day schedule slots status
     const scheduleRef = doc(db, 'day_schedules', `${booking.pitchId}_${booking.date}`);
     const scheduleSnap = await transaction.get(scheduleRef);
-    if (scheduleSnap.exists()) {
-      const slots = scheduleSnap.data().slots || {};
-      const blocks = getBlocks(booking.timeSlot, booking.duration);
-      
-      for (const block of blocks) {
-        const slotStr = block.toString();
-        if (slots[slotStr]) {
-          slots[slotStr].status = 'confirmed';
-          if ('lockedUntil' in slots[slotStr]) {
-            delete slots[slotStr].lockedUntil;
-          }
+    if (!scheduleSnap.exists()) {
+      throw new Error('Schedule not found for confirmation');
+    }
+    
+    const slots = scheduleSnap.data().slots || {};
+    const blocks = getBlocks(booking.timeSlot, booking.duration);
+    
+    for (const block of blocks) {
+      const slotStr = block.toString();
+      if (slots[slotStr]) {
+        slots[slotStr].status = BookingStatus.CONFIRMED;
+        if ('lockedUntil' in slots[slotStr]) {
+          slots[slotStr].lockedUntil = deleteField() as any;
         }
       }
-      transaction.update(scheduleRef, { slots });
     }
+    transaction.update(scheduleRef, { slots });
     
     // Increment global stats
     const statsRef = doc(db, 'stats', 'global');
@@ -254,17 +257,19 @@ export async function rejectBooking(bookingId: string) {
     const booking = bookingSnap.data();
     
     // Update booking status
-    transaction.update(bookingRef, { status: 'rejected' });
+    transaction.update(bookingRef, { status: BookingStatus.REJECTED });
     
     // Free slot in schedule
     const scheduleRef = doc(db, 'day_schedules', `${booking.pitchId}_${booking.date}`);
     const scheduleSnap = await transaction.get(scheduleRef);
-    if (scheduleSnap.exists()) {
-      const slots = scheduleSnap.data().slots || {};
-      const blocks = getBlocks(booking.timeSlot, booking.duration);
-      freeSlots(slots, bookingId, blocks);
-      transaction.update(scheduleRef, { slots });
+    if (!scheduleSnap.exists()) {
+       throw new Error('Schedule not found for rejection');
     }
+    
+    const slots = scheduleSnap.data().slots || {};
+    const blocks = getBlocks(booking.timeSlot, booking.duration);
+    freeSlots(slots, bookingId, blocks);
+    transaction.update(scheduleRef, { slots });
 
     // Create Notification
     const notificationRef = doc(collection(db, 'notifications'));
@@ -296,22 +301,24 @@ export async function cancelBooking(bookingId: string, userId: string) {
     }
     
     // Only allow canceling if status is locked_temporary or pending_review
-    if (booking.status !== 'locked_temporary' && booking.status !== 'pending_review') {
+    if (booking.status !== BookingStatus.LOCKED_TEMPORARY && booking.status !== BookingStatus.PENDING_REVIEW) {
       throw new Error('ERROR_CANCEL_NOT_ALLOWED');
     }
     
     // Update booking status
-    transaction.update(bookingRef, { status: 'rejected' });
+    transaction.update(bookingRef, { status: BookingStatus.REJECTED });
     
     // Free slots in schedule
     const scheduleRef = doc(db, 'day_schedules', `${booking.pitchId}_${booking.date}`);
     const scheduleSnap = await transaction.get(scheduleRef);
-    if (scheduleSnap.exists()) {
-      const slots = scheduleSnap.data().slots || {};
-      const blocks = getBlocks(booking.timeSlot, booking.duration);
-      freeSlots(slots, bookingId, blocks);
-      transaction.update(scheduleRef, { slots });
+    if (!scheduleSnap.exists()) {
+      throw new Error('Schedule not found for cancellation');
     }
+    
+    const slots = scheduleSnap.data().slots || {};
+    const blocks = getBlocks(booking.timeSlot, booking.duration);
+    freeSlots(slots, bookingId, blocks);
+    transaction.update(scheduleRef, { slots });
 
     // Create Notification
     const notificationRef = doc(collection(db, 'notifications'));
@@ -333,7 +340,7 @@ export async function cleanupExpiredBookings(pitchId: string) {
   const q = query(
     bookingsRef,
     where('pitchId', '==', pitchId),
-    where('status', '==', 'locked_temporary'),
+    where('status', '==', BookingStatus.LOCKED_TEMPORARY),
     where('lockedUntil', '<', now)
   );
   
@@ -343,39 +350,39 @@ export async function cleanupExpiredBookings(pitchId: string) {
 
     if (expiredBookings.length === 0) return;
 
-    const batch = writeBatch(db);
-    const scheduleUpdates: Record<string, { ref: DocumentReference; slots: Record<string, { bookingId: string; status: string }> }> = {};
-
-    for (const bookingDoc of expiredBookings) {
+    // Use transactions to safely clean up each expired booking
+    await Promise.all(expiredBookings.map(async (bookingDoc) => {
       const booking = bookingDoc.data();
       const bookingId = bookingDoc.id;
-      batch.delete(bookingDoc.ref);
-
       const scheduleId = `${pitchId}_${booking.date}`;
-      if (!scheduleUpdates[scheduleId]) {
-        const scheduleRef = doc(db, 'day_schedules', scheduleId);
-        const scheduleSnap = await getDoc(scheduleRef);
+      const scheduleRef = doc(db, 'day_schedules', scheduleId);
+
+      await runTransaction(db, async (transaction) => {
+        const scheduleSnap = await transaction.get(scheduleRef);
+        
+        // Delete the booking
+        transaction.delete(bookingDoc.ref);
+
         if (scheduleSnap.exists()) {
-          scheduleUpdates[scheduleId] = {
-            ref: scheduleRef,
-            slots: scheduleSnap.data().slots || {}
-          };
+          const slots = scheduleSnap.data().slots || {};
+          const blocks = getBlocks(booking.timeSlot, booking.duration);
+          let modified = false;
+
+          for (const block of blocks) {
+            const slotStr = block.toString();
+            if (slots[slotStr] && slots[slotStr].bookingId === bookingId) {
+              slots[slotStr] = deleteField() as any;
+              modified = true;
+            }
+          }
+
+          if (modified) {
+            transaction.update(scheduleRef, { slots });
+          }
         }
-      }
+      });
+    }));
 
-      if (scheduleUpdates[scheduleId]) {
-        const slots = scheduleUpdates[scheduleId].slots;
-        const blocks = getBlocks(booking.timeSlot, booking.duration);
-        freeSlots(slots, bookingId, blocks);
-      }
-    }
-
-    for (const scheduleId in scheduleUpdates) {
-      const { ref, slots } = scheduleUpdates[scheduleId];
-      batch.update(ref, { slots });
-    }
-
-    await batch.commit();
   } catch (error) {
     console.error('Error during cleanupExpiredBookings:', error);
   }

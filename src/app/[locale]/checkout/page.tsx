@@ -16,6 +16,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import { MapPin, Calendar, Clock, CreditCard, Shield, Users, FileText } from 'lucide-react';
 import { CheckoutPageSkeleton } from '@/components/skeletons/PageSkeletons';
+import imageCompression from 'browser-image-compression';
+import { CountdownTimer } from '@/components/CountdownTimer';
 
 function CheckoutForm() {
   const router = useRouter();
@@ -38,7 +40,6 @@ function CheckoutForm() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(600); 
 
   useEffect(() => {
     if (!bookingId) {
@@ -95,25 +96,6 @@ function CheckoutForm() {
     };
   }, [previewUrl]);
 
-  useEffect(() => {
-    if (!booking || !booking.lockedUntil) return;
-    
-    const lockedUntil = booking.lockedUntil;
-    const timer = setInterval(() => {
-      const now = Date.now();
-      const diff = Math.floor((lockedUntil - now) / 1000);
-      if (diff <= 0) {
-        clearInterval(timer);
-        toast.error(locale === 'ar' ? 'انتهت صلاحية الحجز المؤقت الخاص بك.' : 'Your temporary lock has expired.');
-        router.push('/book');
-      } else {
-        setTimeLeft(diff);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [booking?.lockedUntil, router, locale]);
-
   const handleUpload = async () => {
     if (!file || !firebaseUser || !bookingId) return;
 
@@ -124,8 +106,17 @@ function CheckoutForm() {
       // 1. Create a unique path in Firebase Storage
       const storageRef = ref(storage, `receipts/${bookingId}_${file.name}`);
       
+      // Compress the image before uploading
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true
+      };
+      
+      const compressedFile = await imageCompression(file, options);
+
       // 2. Start upload task
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const uploadTask = uploadBytesResumable(storageRef, compressedFile);
 
       uploadTask.on('state_changed', 
         (snapshot) => {
@@ -165,12 +156,6 @@ function CheckoutForm() {
       toast.error(errMsg);
       setUploading(false);
     }
-  };
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
   const formatTimeSlot = (slot: number) => {
@@ -273,7 +258,7 @@ function CheckoutForm() {
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl text-card-foreground font-black">{t('title')}</CardTitle>
             <CardDescription className="text-muted-foreground text-sm mt-1">
-              {t('timerInfo')} <span className="text-primary font-black text-lg bg-primary/10 px-3 py-1 rounded-full ml-1 border border-primary/20 shadow-[0_0_15px_rgba(57,255,20,0.15)]">{formatTime(timeLeft)}</span>
+              {t('timerInfo')} <CountdownTimer lockedUntil={booking.lockedUntil} />
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6 space-y-6">

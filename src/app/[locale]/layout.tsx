@@ -13,6 +13,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { notFound } from 'next/navigation';
+import ReactQueryProvider from '@/providers/ReactQueryProvider';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,8 +62,9 @@ export default async function RootLayout({
       </head>
       <body className={`${geistSans.variable} antialiased bg-background text-foreground`} style={{ backgroundColor: '#090d10' }}>
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-            <AuthProvider>
+          <ReactQueryProvider>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+              <AuthProvider>
               {/* Always-visible desktop sidebar */}
               <DesktopSidebar />
 
@@ -84,6 +86,7 @@ export default async function RootLayout({
               <ScrollToTop />
             </AuthProvider>
           </ThemeProvider>
+          </ReactQueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>

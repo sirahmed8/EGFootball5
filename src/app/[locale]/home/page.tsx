@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { collection, query, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { useQuery } from '@tanstack/react-query';
 import { Pitch } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,19 +16,14 @@ import { HomePageSkeleton } from '@/components/skeletons/PageSkeletons';
 export default function PlayerHome() {
   const router = useRouter();
   const t = useTranslations('Home');
-  const [pitches, setPitches] = useState<Pitch[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const q = query(collection(db, 'pitches'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const pts = snapshot.docs.map(doc => doc.data() as Pitch);
-      setPitches(pts);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { data: pitches = [], isLoading: loading } = useQuery({
+    queryKey: ['pitches'],
+    queryFn: async () => {
+      const q = query(collection(db, 'pitches'));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map((doc) => doc.data() as Pitch);
+    },
+  });
 
   if (loading) {
     return <HomePageSkeleton />;

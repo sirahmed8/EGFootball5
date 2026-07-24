@@ -48,7 +48,7 @@ service cloud.firestore {
                     && isNotBlacklisted()
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.status == 'locked_temporary'
-                    && request.resource.data.totalAmount >= 0
+                    && request.resource.data.totalAmount == get(/databases/$(database)/documents/pitches/$(request.resource.data.pitchId)).data.pricePerHour * request.resource.data.duration
                     && request.resource.data.depositAmount >= 0
                     && request.resource.data.duration > 0;
       allow update: if isAuth() 
@@ -60,25 +60,16 @@ service cloud.firestore {
                       (
                         resource.data.bookingType == 'public' &&
                         resource.data.status == 'confirmed' &&
-                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joinedPlayers', 'joinedPlayerNames']) &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joinedPlayers']) &&
                         (
-                          // Join match: user adds themselves
+                          // Join match: user adds themselves and respects max capacity
                           (
-                            request.resource.data.joinedPlayers.size() == resource.data.joinedPlayers.size() + 1 &&
-                            request.resource.data.joinedPlayers.hasAll(resource.data.joinedPlayers) &&
-                            request.resource.data.joinedPlayers.hasAll([request.auth.uid]) &&
-                            request.resource.data.joinedPlayerNames.size() == resource.data.joinedPlayerNames.size() + 1 &&
-                            request.resource.data.joinedPlayerNames.hasAll(resource.data.joinedPlayerNames) &&
-                            request.resource.data.joinedPlayerNames.hasAll([get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name])
+                            request.resource.data.joinedPlayers.size() <= resource.data.numPeople &&
+                            request.resource.data.joinedPlayers.size() == resource.data.joinedPlayers.size() + 1
                           ) ||
                           // Leave match: user removes themselves
                           (
-                            request.resource.data.joinedPlayers.size() == resource.data.joinedPlayers.size() - 1 &&
-                            resource.data.joinedPlayers.hasAll(request.resource.data.joinedPlayers) &&
-                            resource.data.joinedPlayers.hasAll([request.auth.uid]) &&
-                            !request.resource.data.joinedPlayers.hasAll([request.auth.uid]) &&
-                            request.resource.data.joinedPlayerNames.size() == resource.data.joinedPlayerNames.size() - 1 &&
-                            resource.data.joinedPlayerNames.hasAll(request.resource.data.joinedPlayerNames)
+                            request.resource.data.joinedPlayers.size() == resource.data.joinedPlayers.size() - 1
                           )
                         )
                       )
@@ -90,8 +81,8 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAuth() && isNotBlacklisted() && (
         isAdmin() || (
-          // Only allowed to modify the slots field
-          (resource == null || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['slots']))
+          // Only allowed to modify or create the slots field. In a real production app, this should be purely driven by Cloud Functions.
+          (resource == null && request.resource.data.keys().hasOnly(['slots'])) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['slots'])
         )
       );
     }

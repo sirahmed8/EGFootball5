@@ -345,5 +345,11 @@
     "termsOfService": "Terms of Service",
     "cookiePolicy": "Cookie Policy",
     "rightsReserved": "© 2026 EGFootball5. All rights reserved."
+  },
+  "MatchChat": {
+    "title": "Match Chat",
+    "noMessages": "No messages yet. Be the first to say hi!",
+    "placeholder": "Type a message...",
+    "errorSend": "Failed to send message."
   }
 }

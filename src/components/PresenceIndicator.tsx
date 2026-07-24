@@ -26,8 +26,12 @@ export default function PresenceIndicator() {
           // If logged in, use their UID to avoid duplicate connections counting twice if they have multiple tabs
           userPresenceRef = ref(rtdb, `presence/${firebaseUser.uid}`);
         } else {
-          // If anonymous/not logged in, generate a random temporary ID for this session
-          const sessionId = Math.random().toString(36).substring(2, 15);
+          // If anonymous/not logged in, generate or retrieve a random temporary ID for this session
+          let sessionId = sessionStorage.getItem('anon_session_id');
+          if (!sessionId) {
+            sessionId = Math.random().toString(36).substring(2, 15);
+            sessionStorage.setItem('anon_session_id', sessionId);
+          }
           userPresenceRef = ref(rtdb, `presence/anon_${sessionId}`);
         }
 

@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from '@/i18n/routing';
-import { doc, updateDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, updateDoc, collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -245,7 +246,6 @@ export default function ProfilePage() {
   const t = useTranslations('Profile');
 
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [pitchesCache, setPitchesCache] = useState<Record<string, Pitch>>({});
 
   useEffect(() => {
     if (!loading && !firebaseUser) {
@@ -268,23 +268,23 @@ export default function ProfilePage() {
       setBookings(bks);
     });
 
-    // Fetch all pitches to cache metadata
-    const pitchesQ = query(collection(db, 'pitches'));
-    const unsubscribePitches = onSnapshot(pitchesQ, (snapshot) => {
-      const cache: Record<string, Pitch> = {};
-      snapshot.docs.forEach(doc => {
-        const pitch = doc.data() as Pitch;
-        cache[pitch.id] = pitch;
-      });
-      setPitchesCache(cache);
-    });
-
-    return () => {
-      unsubscribeBookings();
-      unsubscribePitches();
-    };
+    return () => unsubscribeBookings();
   }, [firebaseUser]);
-  if (loading || !appUser || !firebaseUser) return <ProfilePageSkeleton />;
+
+  const { data: pitchesCache = {}, isLoading: pitchesLoading } = useQuery({
+    queryKey: ['pitches_dict'],
+    queryFn: async () => {
+      const q = query(collection(db, 'pitches'));
+      const snapshot = await getDocs(q);
+      const cache: Record<string, Pitch> = {};
+      snapshot.docs.forEach((doc) => {
+        cache[doc.id] = doc.data() as Pitch;
+      });
+      return cache;
+    },
+  });
+
+  if (loading || pitchesLoading || !appUser || !firebaseUser) return <ProfilePageSkeleton />;
 
   // Stats calculations
   const totalBookings = bookings.length;

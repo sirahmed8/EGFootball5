@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
-import { doc, getDoc, collection, getCountFromServer } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useTranslations } from 'next-intl';
 
@@ -19,22 +19,21 @@ export function LandingStats() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [pSnap, statsSnap] = await Promise.all([
-          getCountFromServer(collection(db, 'pitches')),
-          getDoc(doc(db, 'stats', 'global'))
-        ]);
+        const statsSnap = await getDoc(doc(db, 'stats', 'global'));
         
         let usersCount = 0;
         let matchesCount = 0;
+        let pitchesCount = 0;
 
         if (statsSnap.exists()) {
           const data = statsSnap.data();
           usersCount = data.users || 0;
           matchesCount = data.bookings || 0;
+          pitchesCount = data.pitches || 0;
         }
 
         setStats({
-          pitches: pSnap.data().count || 0,
+          pitches: pitchesCount,
           users: usersCount,
           matches: matchesCount,
           isLoading: false

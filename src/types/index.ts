@@ -25,7 +25,12 @@ export interface Pitch {
   createdAt: number;
 }
 
-export type BookingStatus = 'locked_temporary' | 'pending_review' | 'confirmed' | 'rejected';
+export enum BookingStatus {
+  LOCKED_TEMPORARY = 'locked_temporary',
+  PENDING_REVIEW = 'pending_review',
+  CONFIRMED = 'confirmed',
+  REJECTED = 'rejected'
+}
 
 export interface Booking {
   id: string;
@@ -42,7 +47,6 @@ export interface Booking {
   createdAt: number;
   bookingType: 'private' | 'public';
   numPeople: number;
-  joinedPlayers?: string[]; // Array of UIDs who joined the public match
-  joinedPlayerNames?: string[]; // Array of display names who joined
+  joinedPlayers?: { uid: string; name: string }[];
 }
 

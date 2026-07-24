@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { collection, query, where, onSnapshot, orderBy, updateDoc, doc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, updateDoc, doc, writeBatch, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Bell } from 'lucide-react';
@@ -39,7 +39,8 @@ export function NotificationBell() {
     const q = query(
       collection(db, 'notifications'),
       where('userId', '==', appUser.uid),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(50)
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const notifs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Notification));

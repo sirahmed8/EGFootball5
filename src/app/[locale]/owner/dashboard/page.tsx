@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { collection, query, onSnapshot } from 'firebase/firestore';
+import { collection, query, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Booking, Pitch, User as AppUser } from '@/types';
 import { useTranslations } from 'next-intl';
@@ -16,10 +17,7 @@ export default function OwnerDashboardPage() {
   const { appUser, loading } = useAuthStore();
   const t = useTranslations('OwnerUsers'); // Fallback to OwnerUsers translations for now
 
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [pitches, setPitches] = useState<Pitch[]>([]);
-  const [users, setUsers] = useState<AppUser[]>([]);
-  const [fetching, setFetching] = useState(true);
+
 
   useEffect(() => {
     if (!loading && appUser?.role !== 'owner') {
@@ -27,30 +25,34 @@ export default function OwnerDashboardPage() {
     }
   }, [appUser, loading, router]);
 
-  useEffect(() => {
-    if (appUser?.role !== 'owner') return;
+  const { data: bookings = [], isLoading: bookingsLoading } = useQuery({
+    queryKey: ['owner_bookings'],
+    queryFn: async () => {
+      const snap = await getDocs(collection(db, 'bookings'));
+      return snap.docs.map(doc => doc.data() as Booking);
+    },
+    enabled: appUser?.role === 'owner'
+  });
 
-    const unsubBookings = onSnapshot(collection(db, 'bookings'), (snapshot) => {
-      setBookings(snapshot.docs.map(doc => doc.data() as Booking));
-    });
+  const { data: pitches = [], isLoading: pitchesLoading } = useQuery({
+    queryKey: ['owner_pitches'],
+    queryFn: async () => {
+      const snap = await getDocs(collection(db, 'pitches'));
+      return snap.docs.map(doc => doc.data() as Pitch);
+    },
+    enabled: appUser?.role === 'owner'
+  });
 
-    const unsubPitches = onSnapshot(collection(db, 'pitches'), (snapshot) => {
-      setPitches(snapshot.docs.map(doc => doc.data() as Pitch));
-    });
+  const { data: users = [], isLoading: usersLoading } = useQuery({
+    queryKey: ['owner_users'],
+    queryFn: async () => {
+      const snap = await getDocs(collection(db, 'users'));
+      return snap.docs.map(doc => doc.data() as AppUser);
+    },
+    enabled: appUser?.role === 'owner'
+  });
 
-    const unsubUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
-      setUsers(snapshot.docs.map(doc => doc.data() as AppUser));
-      setFetching(false);
-    });
-
-    return () => {
-      unsubBookings();
-      unsubPitches();
-      unsubUsers();
-    };
-  }, [appUser]);
-
-  if (loading || appUser?.role !== 'owner' || fetching) {
+  if (loading || appUser?.role !== 'owner' || bookingsLoading || pitchesLoading || usersLoading) {
     return <DashboardPageSkeleton />;
   }
 

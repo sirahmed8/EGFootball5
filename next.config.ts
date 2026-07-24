@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   output: process.env.VERCEL === '1' ? undefined : 'export',
   trailingSlash: true,
   images: {
-    unoptimized: true
+    unoptimized: process.env.VERCEL !== '1'
   }
 };
 
