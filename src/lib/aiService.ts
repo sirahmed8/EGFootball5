@@ -29,6 +29,15 @@ function cleanExpiredCache() {
   }
 }
 
+function detectIsArabic(prompt: string, locale?: string): boolean {
+  const arabicRegex = /[\u0600-\u06FF]/;
+  const englishRegex = /[a-zA-Z]/;
+
+  if (arabicRegex.test(prompt)) return true;
+  if (englishRegex.test(prompt)) return false;
+  return locale === 'ar';
+}
+
 export async function generateAIResponse(
   prompt: string,
   options?: {
@@ -40,7 +49,7 @@ export async function generateAIResponse(
 ): Promise<AIResponseResult> {
   cleanExpiredCache();
 
-  const isArabic = options?.locale === 'ar' || /[\u0600-\u06FF]/.test(prompt);
+  const isArabic = detectIsArabic(prompt, options?.locale);
   const cacheKey = getCacheKey(prompt, options?.imageBase64, options?.systemContext);
   const cached = memoryCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
@@ -69,7 +78,7 @@ export async function generateAIResponse(
 
     if (response.ok) {
       const json = await response.json();
-      if (json.success) {
+      if (json.success && json.text) {
         const result: AIResponseResult = {
           text: json.text,
           chips: json.chips || [],
@@ -83,17 +92,17 @@ export async function generateAIResponse(
     console.warn('Error fetching AI response from server endpoint:', err);
   }
 
-  // Fallback response if endpoint fails or network offline
+  // Graceful fallback response matching user language if network offline or server error
   const fallbackText = isArabic
-    ? 'مرحباً بك! أنا مساعد EGFootball5 الذكي. كيف يمكنني مساعدتك اليوم في حجز الملاعب، استعراض المباريات القادمة، أو موقع الملاعب؟'
-    : "Welcome! I am your EGFootball5 AI Assistant ⚽ How can I help you today with pitches, bookings, or matches?";
+    ? 'مرحباً بك! أنا مساعد EGFootball5 الذكي ⚽ كيف يمكنني مساعدتك اليوم في حجز الملاعب بالعبور، استعراض المباريات، أو دفع العربون؟'
+    : 'Welcome! I am your EGFootball5 AI Assistant ⚽ How can I help you today with pitches, bookings, or matches?';
 
   const fallbackResult: AIResponseResult = {
     text: fallbackText,
     chips: isArabic
       ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '📍 أماكن الملاعب']
       : ['⚽ How to book a pitch?', '🏆 Available matches', '📍 Find pitch locations'],
-    modelUsed: 'fallback-rules',
+    modelUsed: 'fallback-resilient',
   };
 
   return fallbackResult;
