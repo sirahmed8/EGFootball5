@@ -146,15 +146,15 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
 
     // Fallback response if API key is unconfigured or rate limited
     const fallbackText = isArabic
-      ? 'مرحباً بك! أنا مساعد Kickoff الذكي. يبدو أن هناك ضغطاً مؤقتاً على خوادم الذكاء الاصطناعي، ولكن يمكنني مساعدتك في حجز الملاعب، استعراض المباريات القادمة، أو التواصل مع الدعم الفني.'
-      : "Welcome! I'm your Kickoff AI Assistant. The AI servers are experiencing high load right now, but I can still help you book pitches, view upcoming matches, or contact support!";
+      ? 'مرحباً بك! أنا مساعد EGFootball5 الذكي. كيف يمكنني مساعدتك اليوم في حجز الملاعب، استعراض المباريات القادمة، أو موقع الملاعب؟'
+      : "Welcome! I am your EGFootball5 AI Assistant ⚽ How can I help you today with pitches, bookings, or matches?";
 
     return NextResponse.json({
       success: true,
       text: fallbackText,
       chips: isArabic
-        ? ['⚽ كيف أحجز ملعباً؟', '🏆 استعراض المباريات', '🛡️ التواصل مع الدعم']
-        : ['⚽ How to book a pitch?', '🏆 View matches', '🛡️ Contact support'],
+        ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '📍 أماكن الملاعب']
+        : ['⚽ How to book a pitch?', '🏆 Available matches', '📍 Find pitch locations'],
       modelUsed: 'fallback-rules',
     });
   } catch (error: unknown) {

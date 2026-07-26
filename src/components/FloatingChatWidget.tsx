@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
-
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useLocale, useTranslations } from 'next-intl';
@@ -33,7 +32,7 @@ import {
   Smile,
   Reply,
   Trash2,
-  Search,
+  Filter,
   Sparkles,
   GripHorizontal,
   Clock,
@@ -42,7 +41,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-
 // Types
 interface AIMessage {
   id: string;
@@ -50,7 +48,6 @@ interface AIMessage {
   text: string;
   image?: string;
   chips?: string[];
-  modelUsed?: string;
   timestamp: number;
 }
 
@@ -62,7 +59,7 @@ interface CommunityMessage {
   text: string;
   imageUrl?: string;
   replyTo?: { id: string; userName: string; text: string };
-  reactions?: Record<string, string[]>; // { "❤️": ["uid1", "uid2"] }
+  reactions?: Record<string, string[]>;
   createdAt: unknown;
 }
 
@@ -88,7 +85,6 @@ interface SupportMessage {
 
 interface SpeechRecognitionResultAlternative {
   transcript: string;
-  confidence?: number;
 }
 
 interface SpeechRecognitionResultItem {
@@ -116,6 +112,63 @@ type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 const EMOJI_LIST = ['❤️', '🔥', '👏', '😂', '👍', '⚽', '🏆', '🎯', '🚀', '💯'];
 const SLOW_MODE_SECONDS = 5;
 
+// Helper: Formatted Markdown Text Component (Renders **bold**, *italics*, line breaks & lists)
+function FormattedMarkdownText({ content, className = '' }: { content: string; className?: string }) {
+  if (!content) return null;
+  const lines = content.split('\n');
+
+  return (
+    <div className={`space-y-1 ${className}`}>
+      {lines.map((line, lineIdx) => {
+        if (!line.trim()) return <div key={lineIdx} className="h-1" />;
+
+        // Parse **bold**, *italics*, and `code`
+        const parts = line.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`)/g);
+
+        const renderedParts = parts.map((part, pIdx) => {
+          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+            return (
+              <strong key={pIdx} className="font-black text-foreground">
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+            return (
+              <em key={pIdx} className="italic">
+                {part.slice(1, -1)}
+              </em>
+            );
+          }
+          if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
+            return (
+              <code key={pIdx} className="bg-black/30 text-emerald-300 px-1 py-0.5 rounded font-mono text-[11px]">
+                {part.slice(1, -1)}
+              </code>
+            );
+          }
+          return part;
+        });
+
+        if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+          return (
+            <div key={lineIdx} className="flex items-start gap-1.5 ms-2">
+              <span className="text-emerald-400 font-bold shrink-0">•</span>
+              <span>{renderedParts}</span>
+            </div>
+          );
+        }
+
+        return (
+          <p key={lineIdx} className="leading-relaxed">
+            {renderedParts}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export function FloatingChatWidget() {
   const { appUser, firebaseUser } = useAuthStore();
   const locale = useLocale();
@@ -125,26 +178,14 @@ export function FloatingChatWidget() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'ai' | 'community' | 'support'>('ai');
-
   const [modalHeight, setModalHeight] = useState<number>(560);
   const isResizing = useRef(false);
 
   // ----------------------------------------------------
-  // Tab 1: AI Assistant State
+  // Tab 1: AI Assistant State & Dynamic Initial Prompt Loading
   // ----------------------------------------------------
-  const [aiMessages, setAiMessages] = useState<AIMessage[]>(() => [
-    {
-      id: 'welcome',
-      sender: 'ai',
-      text: t('welcomeAiText'),
-      chips: [
-        t('welcomeChip1'),
-        t('welcomeChip2'),
-        t('welcomeChip3'),
-      ],
-      timestamp: 1700000000000,
-    },
-  ]);
+  const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
+  const [initialAiLoading, setInitialAiLoading] = useState<boolean>(true);
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
@@ -179,6 +220,87 @@ export function FloatingChatWidget() {
     }, 100);
   }, []);
 
+  // Fetch or retrieve cached dynamic AI Welcome greeting
+  const loadInitialAiGreeting = useCallback(async () => {
+    const cacheKey = `egfootball5_ai_welcome_${locale}_${appUser?.name || 'guest'}`;
+    const cached = typeof window !== 'undefined' ? sessionStorage.getItem(cacheKey) : null;
+
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        setAiMessages([
+          {
+            id: 'welcome',
+            sender: 'ai',
+            text: parsed.text,
+            chips: parsed.chips,
+            timestamp: Date.now(),
+          },
+        ]);
+        setInitialAiLoading(false);
+        return;
+      } catch {
+        // Fallthrough to fetch
+      }
+    }
+
+    setInitialAiLoading(true);
+    try {
+      const userName = appUser?.name || (isArabic ? 'لاعبنا المميز' : 'Player');
+      const prompt = isArabic
+        ? `أنشئ رسالة ترحيبية قصيرة وجذابة للاعب ${userName} في منصة EGFootball5 لحجز ملاعب الخماسي بالعبور والقاهرة الجديدة. أضف 3 اقتراحات أسئلة سريعة.`
+        : `Welcome user ${userName} to EGFootball5 pitch booking platform. Generate a friendly greeting and 3 quick prompt chips.`;
+
+      const res = await generateAIResponse(prompt, { locale });
+
+      const welcomeMsg: AIMessage = {
+        id: 'welcome',
+        sender: 'ai',
+        text: res.text,
+        chips: res.chips.length >= 3 ? res.chips : (
+          isArabic
+            ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '📍 أماكن الملاعب']
+            : ['⚽ How to book a pitch?', '🏆 Available matches', '📍 Find pitch locations']
+        ),
+        timestamp: Date.now(),
+      };
+
+      setAiMessages([welcomeMsg]);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(
+          cacheKey,
+          JSON.stringify({ text: welcomeMsg.text, chips: welcomeMsg.chips })
+        );
+      }
+    } catch {
+      const fallbackText = isArabic
+        ? `أهلاً بك! أنا مساعد **EGFootball5** الذكي ⚽ كيف يمكنني مساعدتك اليوم في حجز الملاعب أو تنظيم المباريات؟`
+        : `Welcome! I am your **EGFootball5** AI Assistant ⚽ How can I help you today with pitches, bookings, or matches?`;
+      const fallbackChips = isArabic
+        ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '📍 أماكن الملاعب']
+        : ['⚽ How to book a pitch?', '🏆 Available matches', '📍 Find pitch locations'];
+
+      setAiMessages([
+        {
+          id: 'welcome',
+          sender: 'ai',
+          text: fallbackText,
+          chips: fallbackChips,
+          timestamp: Date.now(),
+        },
+      ]);
+    } finally {
+      setInitialAiLoading(false);
+    }
+  }, [appUser, locale, isArabic]);
+
+  // Load initial greeting when chatbot opens
+  useEffect(() => {
+    if (isOpen && aiMessages.length === 0) {
+      loadInitialAiGreeting();
+    }
+  }, [isOpen, aiMessages.length, loadInitialAiGreeting]);
+
   // ----------------------------------------------------
   // Resize Handle Logic
   // ----------------------------------------------------
@@ -208,14 +330,10 @@ export function FloatingChatWidget() {
     window.addEventListener('touchend', onEnd);
   };
 
-
-  // ----------------------------------------------------
   // Firestore Subscriptions
-  // ----------------------------------------------------
   useEffect(() => {
     if (!isOpen) return;
 
-    // Sub to Community Messages
     const qComm = query(
       collection(db, 'community_messages'),
       orderBy('createdAt', 'asc'),
@@ -230,12 +348,10 @@ export function FloatingChatWidget() {
     return () => unsubComm();
   }, [isOpen, activeTab, scrollToBottom]);
 
-
   useEffect(() => {
     if (!isOpen || !firebaseUser) return;
 
     if (isAdmin) {
-      // Admin view: fetch all support tickets
       const qTickets = query(collection(db, 'support_tickets'), orderBy('updatedAt', 'desc'));
       const unsubTickets = onSnapshot(qTickets, (snap) => {
         const tix = snap.docs.map((d) => ({ id: d.id, ...d.data() } as SupportTicket));
@@ -243,7 +359,6 @@ export function FloatingChatWidget() {
       });
       return () => unsubTickets();
     } else {
-      // User view: single ticket under user's UID
       const userTicketId = firebaseUser.uid;
       const qUserMsgs = query(
         collection(db, 'support_tickets', userTicketId, 'messages'),
@@ -258,7 +373,6 @@ export function FloatingChatWidget() {
     }
   }, [isOpen, firebaseUser, isAdmin, activeTab, scrollToBottom]);
 
-  // Admin selected ticket messages subscription
   useEffect(() => {
     if (!isAdmin || !selectedTicketId) return;
     const qStaffMsgs = query(
@@ -273,8 +387,6 @@ export function FloatingChatWidget() {
     return () => unsubStaffMsgs();
   }, [isAdmin, selectedTicketId, scrollToBottom]);
 
-
-  // Cooldown countdown timer
   useEffect(() => {
     if (cooldownLeft <= 0) return;
     const timer = setInterval(() => {
@@ -283,9 +395,7 @@ export function FloatingChatWidget() {
     return () => clearInterval(timer);
   }, [cooldownLeft]);
 
-  // ----------------------------------------------------
   // AI Assistant Functions
-  // ----------------------------------------------------
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -330,11 +440,7 @@ export function FloatingChatWidget() {
       setAiInput(transcript);
     };
 
-    recognition.onerror = (err: unknown) => {
-      console.warn('Speech error:', err);
-      setIsListening(false);
-    };
-
+    recognition.onerror = () => setIsListening(false);
     recognition.onend = () => setIsListening(false);
 
     speechRecognitionRef.current = recognition;
@@ -343,10 +449,11 @@ export function FloatingChatWidget() {
 
   const playTTSAudio = async (text: string) => {
     try {
+      const cleanText = text.replace(/\*\*/g, '').replace(/\*/g, '');
       const res = await fetch('/api/ai/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, locale }),
+        body: JSON.stringify({ text: cleanText, locale }),
       });
       const data = await res.json();
 
@@ -356,73 +463,70 @@ export function FloatingChatWidget() {
         return;
       }
 
-      // Fallback: Browser SpeechSynthesis
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
+        const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = isArabic ? 'ar-SA' : 'en-US';
         window.speechSynthesis.speak(utterance);
-      } else {
-        toast.error(isArabic ? 'خاصية القراءة الصوتية غير متاحة' : 'Speech synthesis not available');
       }
     } catch {
       if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(text);
+        const cleanText = text.replace(/\*\*/g, '').replace(/\*/g, '');
+        const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = isArabic ? 'ar-SA' : 'en-US';
         window.speechSynthesis.speak(utterance);
       }
     }
   };
 
-  const sendAIMessage = useCallback(async (textToSend?: string) => {
-    const queryText = (textToSend || aiInput).trim();
-    if (!queryText && !attachedImage) return;
+  const sendAIMessage = useCallback(
+    async (textToSend?: string) => {
+      const queryText = (textToSend || aiInput).trim();
+      if (!queryText && !attachedImage) return;
 
-    const userMsg: AIMessage = {
-      id: `usr-${Date.now()}`,
-      sender: 'user',
-      text: queryText,
-      image: attachedImage || undefined,
-      timestamp: Date.now(),
-    };
-
-    setAiMessages((prev) => [...prev, userMsg]);
-    setAiInput('');
-    const currentImg = attachedImage;
-    setAttachedImage(null);
-    setAiLoading(true);
-    scrollToBottom();
-
-    try {
-      const res = await generateAIResponse(queryText, {
-        imageBase64: currentImg || undefined,
-        systemContext: `User: ${appUser?.name || 'Guest'}, Role: ${appUser?.role || 'player'}`,
-        locale,
-      });
-
-      const aiMsg: AIMessage = {
-        id: `ai-${Date.now()}`,
-        sender: 'ai',
-        text: res.text,
-        chips: res.chips,
-        modelUsed: res.modelUsed,
+      const userMsg: AIMessage = {
+        id: `usr-${Date.now()}`,
+        sender: 'user',
+        text: queryText,
+        image: attachedImage || undefined,
         timestamp: Date.now(),
       };
 
-      setAiMessages((prev) => [...prev, aiMsg]);
-    } catch (err: unknown) {
-      const error = err as Error;
-      toast.error(error.message || 'AI Error');
-    } finally {
-      setAiLoading(false);
+      setAiMessages((prev) => [...prev, userMsg]);
+      setAiInput('');
+      const currentImg = attachedImage;
+      setAttachedImage(null);
+      setAiLoading(true);
       scrollToBottom();
-    }
-  }, [aiInput, attachedImage, appUser, locale, scrollToBottom]);
 
+      try {
+        const res = await generateAIResponse(queryText, {
+          imageBase64: currentImg || undefined,
+          systemContext: `User: ${appUser?.name || 'Guest'}, Role: ${appUser?.role || 'player'}`,
+          locale,
+        });
 
-  // ----------------------------------------------------
+        const aiMsg: AIMessage = {
+          id: `ai-${Date.now()}`,
+          sender: 'ai',
+          text: res.text,
+          chips: res.chips,
+          timestamp: Date.now(),
+        };
+
+        setAiMessages((prev) => [...prev, aiMsg]);
+      } catch (err: unknown) {
+        const error = err as Error;
+        toast.error(error.message || 'AI Error');
+      } finally {
+        setAiLoading(false);
+        scrollToBottom();
+      }
+    },
+    [aiInput, attachedImage, appUser, locale, scrollToBottom]
+  );
+
   // Community Channel Functions
-  // ----------------------------------------------------
   const handleCommunityImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -495,7 +599,6 @@ export function FloatingChatWidget() {
     }
   };
 
-
   const deleteCommunityMessage = async (msgId: string) => {
     try {
       await deleteDoc(doc(db, 'community_messages', msgId));
@@ -506,9 +609,7 @@ export function FloatingChatWidget() {
     }
   };
 
-  // ----------------------------------------------------
   // Support Center Functions
-  // ----------------------------------------------------
   const sendSupportMessage = async () => {
     if (!firebaseUser) {
       toast.error(isArabic ? 'يرجى تسجيل الدخول أولاً' : 'Please log in first');
@@ -520,7 +621,6 @@ export function FloatingChatWidget() {
     if (!ticketId) return;
 
     try {
-      // 1. Ensure parent ticket exists
       const ticketRef = doc(db, 'support_tickets', ticketId);
       await updateDoc(ticketRef, {
         lastMessage: supportInput.trim(),
@@ -528,7 +628,6 @@ export function FloatingChatWidget() {
         unreadByUser: isAdmin,
         updatedAt: serverTimestamp(),
       }).catch(async () => {
-        // Create if missing
         await addDoc(collection(db, 'support_tickets'), {
           id: ticketId,
           userId: firebaseUser.uid,
@@ -541,7 +640,6 @@ export function FloatingChatWidget() {
         });
       });
 
-      // 2. Add message to subcollection
       await addDoc(collection(db, 'support_tickets', ticketId, 'messages'), {
         senderId: firebaseUser.uid,
         senderName: appUser?.name || (isAdmin ? 'Staff Support' : 'User'),
@@ -557,7 +655,6 @@ export function FloatingChatWidget() {
       toast.error(error.message || 'Support error');
     }
   };
-
 
   const filteredTickets = supportTickets.filter((t) => {
     const matchesFilter = supportFilter === 'all' || (supportFilter === 'unread' && t.unreadByStaff);
@@ -612,7 +709,7 @@ export function FloatingChatWidget() {
               <GripHorizontal className="w-5 h-5 text-muted-foreground/60 group-hover:text-foreground transition-colors" />
             </div>
 
-            {/* Header with Navigation Tabs */}
+            {/* Header Navigation Tabs */}
             <div className="p-3 border-b border-border/60 bg-background/50 flex items-center justify-between gap-2 shrink-0">
               <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-2xl border border-border/40 flex-1">
                 <button
@@ -668,70 +765,88 @@ export function FloatingChatWidget() {
               {activeTab === 'ai' && (
                 <div className="flex flex-col h-full justify-between space-y-4">
                   <div className="flex-1 overflow-y-auto space-y-3 pe-1">
-                    {aiMessages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={`flex flex-col ${
-                          msg.sender === 'user' ? 'items-end' : 'items-start'
-                        }`}
-                      >
+                    {/* Initial AI Loading Skeleton Animation */}
+                    {initialAiLoading ? (
+                      <div className="space-y-4 animate-in fade-in duration-300">
+                        {/* Skeleton Message Bubble */}
+                        <div className="max-w-[85%] p-4 rounded-2xl bg-muted/60 border border-border/50 space-y-2.5">
+                          <div className="h-4 bg-primary/20 rounded-md w-3/4 animate-pulse" />
+                          <div className="h-3.5 bg-muted/60 rounded-md w-full animate-pulse" />
+                          <div className="h-3.5 bg-muted/60 rounded-md w-5/6 animate-pulse" />
+                        </div>
+                        {/* Skeleton Chips */}
+                        <div className="flex flex-wrap gap-2">
+                          <div className="h-7 w-36 bg-emerald-500/15 rounded-full border border-emerald-500/20 animate-pulse" />
+                          <div className="h-7 w-32 bg-emerald-500/15 rounded-full border border-emerald-500/20 animate-pulse" />
+                          <div className="h-7 w-40 bg-emerald-500/15 rounded-full border border-emerald-500/20 animate-pulse" />
+                        </div>
+                      </div>
+                    ) : (
+                      aiMessages.map((msg) => (
                         <div
-                          className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed ${
-                            msg.sender === 'user'
-                              ? 'bg-emerald-500 text-black font-medium rounded-br-none shadow-md shadow-emerald-500/10'
-                              : 'bg-muted/80 border border-border/60 text-foreground rounded-bl-none'
+                          key={msg.id}
+                          className={`flex flex-col ${
+                            msg.sender === 'user' ? 'items-end' : 'items-start'
                           }`}
                         >
-                          {/* User uploaded image thumbnail */}
-                          {msg.image && (
-                            <Image
-                              src={msg.image}
-                              alt="Uploaded screenshot"
-                              width={300}
-                              height={200}
-                              unoptimized
-                              className="w-full max-h-48 object-cover rounded-xl mb-2 border border-black/20"
-                            />
-                          )}
+                          <div
+                            className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed ${
+                              msg.sender === 'user'
+                                ? 'bg-emerald-500 text-black font-medium rounded-br-none shadow-md shadow-emerald-500/10'
+                                : 'bg-muted/80 border border-border/60 text-foreground rounded-bl-none'
+                            }`}
+                          >
+                            {/* User uploaded image thumbnail */}
+                            {msg.image && (
+                              <Image
+                                src={msg.image}
+                                alt="Uploaded screenshot"
+                                width={300}
+                                height={200}
+                                unoptimized
+                                className="w-full max-h-48 object-cover rounded-xl mb-2 border border-black/20"
+                              />
+                            )}
 
-                          <p className="whitespace-pre-wrap">{msg.text}</p>
+                            {/* Render formatted markdown for AI, or clean text for user */}
+                            {msg.sender === 'ai' ? (
+                              <FormattedMarkdownText content={msg.text} />
+                            ) : (
+                              <p className="whitespace-pre-wrap">{msg.text}</p>
+                            )}
 
-                          {/* AI Actions: Speech Playback */}
-                          {msg.sender === 'ai' && (
-                            <div className="mt-2.5 pt-2 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
-                              <button
-                                onClick={() => playTTSAudio(msg.text)}
-                                className="flex items-center gap-1 hover:text-emerald-400 transition-colors cursor-pointer"
-                              >
-                                <Volume2 className="w-3.5 h-3.5" />
-                                <span>{t('listenVoice')}</span>
-                              </button>
-                              {msg.modelUsed && (
-                                <span className="text-[10px] font-mono opacity-60">
-                                  {msg.modelUsed}
-                                </span>
-                              )}
+                            {/* Speech Playback Action */}
+                            {msg.sender === 'ai' && (
+                              <div className="mt-2.5 pt-2 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+                                <button
+                                  onClick={() => playTTSAudio(msg.text)}
+                                  className="flex items-center gap-1 hover:text-emerald-400 transition-colors cursor-pointer"
+                                >
+                                  <Volume2 className="w-3.5 h-3.5" />
+                                  <span>{t('listenVoice')}</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Dynamic Prompt Chips */}
+                          {msg.sender === 'ai' && msg.chips && msg.chips.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-2.5 max-w-[90%]">
+                              {msg.chips.map((chip, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => sendAIMessage(chip)}
+                                  className="text-xs px-3 py-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-all font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                  <span>{chip}</span>
+                                </button>
+                              ))}
                             </div>
                           )}
                         </div>
-
-                        {/* Dynamic Prompt Chips */}
-                        {msg.sender === 'ai' && msg.chips && msg.chips.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mt-2.5 max-w-[90%]">
-                            {msg.chips.map((chip, idx) => (
-                              <button
-                                key={idx}
-                                onClick={() => sendAIMessage(chip)}
-                                className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-all font-medium flex items-center gap-1 cursor-pointer"
-                              >
-                                <Sparkles className="w-3 h-3 shrink-0" />
-                                <span>{chip}</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      ))
+                    )}
 
                     {aiLoading && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 rounded-2xl bg-muted/40 w-max animate-pulse">
@@ -742,7 +857,7 @@ export function FloatingChatWidget() {
                     <div ref={chatBottomRef} />
                   </div>
 
-                  {/* AI Input controls */}
+                  {/* AI Input controls — sleek glass container, no inner box border */}
                   <div className="pt-2 border-t border-border/40 space-y-2 shrink-0">
                     {attachedImage && (
                       <div className="relative inline-block">
@@ -764,7 +879,7 @@ export function FloatingChatWidget() {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-2 bg-muted/70 border border-border/80 p-1.5 rounded-full focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all shadow-inner">
+                    <div className="flex items-center gap-1.5 bg-muted/70 border border-border/80 p-1.5 rounded-full focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all shadow-inner">
                       {/* Vision / Image button */}
                       <label className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-emerald-400 cursor-pointer transition-colors shrink-0">
                         <Camera className="w-4 h-4" />
@@ -795,8 +910,9 @@ export function FloatingChatWidget() {
                         value={aiInput}
                         onChange={(e) => setAiInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && sendAIMessage()}
-                        placeholder={t('askAiPlaceholder')}
-                        className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 text-xs text-foreground placeholder:text-muted-foreground/60 px-1 py-1"
+                        placeholder={isArabic ? 'اكتب سؤالك أو استفسارك هنا...' : 'Type your message or question...'}
+                        style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                        className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 appearance-none text-xs text-foreground placeholder:text-muted-foreground/60 px-1 py-1"
                       />
 
                       <button
@@ -822,7 +938,6 @@ export function FloatingChatWidget() {
                         key={msg.id}
                         className="p-3 rounded-2xl bg-muted/60 border border-border/50 space-y-2 relative group"
                       >
-                        {/* Header info */}
                         <div className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-foreground">{msg.userName}</span>
@@ -842,45 +957,43 @@ export function FloatingChatWidget() {
                           )}
                         </div>
 
-                        {/* Reply banner if any */}
                         {msg.replyTo && (
                           <div className="p-2 rounded-xl bg-background/50 border-l-2 border-emerald-500 text-xs text-muted-foreground">
                             <span className="font-bold text-emerald-400">@{msg.replyTo.userName}: </span>
-                            <span className="truncate block">{msg.replyTo.text}</span>
+                            <span className="truncate">{msg.replyTo.text}</span>
                           </div>
                         )}
 
-                        {/* Message image */}
                         {msg.imageUrl && (
                           <Image
                             src={msg.imageUrl}
-                            alt="Attachment"
+                            alt="Community attachment"
                             width={300}
                             height={200}
                             unoptimized
-                            className="w-full max-h-48 object-cover rounded-xl border border-border"
+                            className="w-full max-h-48 object-cover rounded-xl border border-black/20"
                           />
                         )}
 
-                        <p className="text-sm text-foreground">{msg.text}</p>
+                        <p className="text-xs text-foreground leading-relaxed whitespace-pre-wrap">{msg.text}</p>
 
-                        {/* Emoji Reactions & Reply Bar */}
-                        <div className="flex flex-wrap items-center justify-between pt-1 gap-2 border-t border-border/30 text-xs">
-                          <div className="flex flex-wrap items-center gap-1">
-                            {['❤️', '🔥', '👏', '😂', '👍'].map((emoji) => {
-                              const uids = msg.reactions?.[emoji] || [];
-                              const hasReacted = uids.includes(firebaseUser?.uid || '');
+                        <div className="pt-2 border-t border-border/30 flex items-center justify-between">
+                          <div className="flex flex-wrap gap-1">
+                            {EMOJI_LIST.map((emoji) => {
+                              const count = msg.reactions?.[emoji]?.length || 0;
+                              const hasReacted = firebaseUser && msg.reactions?.[emoji]?.includes(firebaseUser.uid);
                               return (
                                 <button
                                   key={emoji}
                                   onClick={() => toggleReaction(msg.id, emoji)}
-                                  className={`px-1.5 py-0.5 rounded-lg text-xs border transition-all cursor-pointer ${
+                                  className={`text-[11px] px-1.5 py-0.5 rounded-lg border transition-all flex items-center gap-1 cursor-pointer ${
                                     hasReacted
-                                      ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
-                                      : 'bg-background/40 border-border/40 hover:bg-muted'
+                                      ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
+                                      : 'bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted'
                                   }`}
                                 >
-                                  {emoji} {uids.length > 0 && uids.length}
+                                  <span>{emoji}</span>
+                                  {count > 0 && <span className="font-bold">{count}</span>}
                                 </button>
                               );
                             })}
@@ -899,7 +1012,7 @@ export function FloatingChatWidget() {
                     <div ref={chatBottomRef} />
                   </div>
 
-                  {/* Input & Cooldown Bar */}
+                  {/* Input Bar */}
                   <div className="pt-2 border-t border-border/40 space-y-2 shrink-0">
                     {replyingTo && (
                       <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-400">
@@ -932,7 +1045,6 @@ export function FloatingChatWidget() {
                       </div>
                     )}
 
-                    {/* Emoji picker popover */}
                     {showEmojiPicker && (
                       <div className="p-2 rounded-2xl bg-card border border-border flex flex-wrap gap-1 mb-1">
                         {EMOJI_LIST.map((emoji) => (
@@ -975,7 +1087,8 @@ export function FloatingChatWidget() {
                         onChange={(e) => setCommunityInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && sendCommunityMessage()}
                         placeholder={t('shareCommunityPlaceholder')}
-                        className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 text-xs text-foreground placeholder:text-muted-foreground/60 px-1 py-1"
+                        style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                        className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 appearance-none text-xs text-foreground placeholder:text-muted-foreground/60 px-1 py-1"
                       />
 
                       <button
@@ -1002,10 +1115,10 @@ export function FloatingChatWidget() {
               {/* ==================================================== */}
               {activeTab === 'support' && (
                 <div className="flex flex-col h-full space-y-3">
-                  {/* STAFF / ADMIN VIEW: Searchable Inbox with Filter Pills */}
+                  {/* STAFF / ADMIN VIEW: Searchable Inbox with Filter Pills & Animated Search */}
                   {isAdmin ? (
                     <div className="flex flex-col h-full space-y-3">
-                      {/* Filter Pills */}
+                      {/* Filter Pills & Animated Search Bar */}
                       <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2">
                         <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border/40">
                           {(['all', 'unread'] as const).map((filter) => (
@@ -1030,14 +1143,16 @@ export function FloatingChatWidget() {
                           ))}
                         </div>
 
-                        <div className="relative flex-1 max-w-[160px]">
-                          <Search className="w-3.5 h-3.5 absolute start-2.5 top-2.5 text-muted-foreground" />
+                        {/* Animated Search Bar with Filter Icon */}
+                        <div className="relative flex-1 max-w-[170px] group transition-all duration-300 rounded-full border border-border/60 focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/30 focus-within:shadow-[0_0_15px_rgba(57,255,20,0.25)] bg-muted/40 overflow-hidden">
+                          <Filter className="w-3.5 h-3.5 absolute start-2.5 top-2 text-emerald-400 group-focus-within:rotate-180 transition-transform duration-300" />
                           <input
                             type="text"
                             value={supportSearch}
                             onChange={(e) => setSupportSearch(e.target.value)}
                             placeholder={t('searchPlaceholder')}
-                            className="w-full bg-muted/40 border border-border rounded-xl text-xs ps-8 pe-2 py-1 text-foreground focus:outline-none"
+                            style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                            className="w-full bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 appearance-none text-xs ps-8 pe-2 py-1 text-foreground placeholder:text-muted-foreground/60"
                           />
                         </div>
                       </div>
@@ -1100,18 +1215,19 @@ export function FloatingChatWidget() {
                             <div ref={chatBottomRef} />
                           </div>
 
-                          <div className="flex items-center gap-1.5 bg-muted/50 border border-border p-1.5 rounded-2xl mt-2">
+                          <div className="flex items-center gap-2 bg-muted/70 border border-border/80 p-1.5 rounded-full focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all shadow-inner mt-2">
                             <input
                               type="text"
                               value={supportInput}
                               onChange={(e) => setSupportInput(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && sendSupportMessage()}
                               placeholder={t('replyToUserPlaceholder')}
-                              className="flex-1 bg-transparent border-none text-xs text-foreground focus:outline-none px-2"
+                              style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                              className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 appearance-none text-xs text-foreground placeholder:text-muted-foreground/60 px-2 py-1"
                             />
                             <button
                               onClick={sendSupportMessage}
-                              className="p-2 rounded-xl bg-emerald-500 text-black font-bold cursor-pointer"
+                              className="p-2.5 rounded-full bg-emerald-500 text-black font-bold cursor-pointer shrink-0 shadow-md hover:scale-105"
                             >
                               <Send className="w-4 h-4" />
                             </button>
@@ -1124,9 +1240,7 @@ export function FloatingChatWidget() {
                     <div className="flex flex-col h-full justify-between space-y-3">
                       <div className="flex items-center gap-2 p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400">
                         <ShieldCheck className="w-4 h-4 shrink-0" />
-                        <span>
-                          {t('staffSupportOnline')}
-                        </span>
+                        <span>{t('staffSupportOnline')}</span>
                       </div>
 
                       <div className="flex-1 overflow-y-auto space-y-2 pe-1">
@@ -1161,19 +1275,20 @@ export function FloatingChatWidget() {
                         <div ref={chatBottomRef} />
                       </div>
 
-                      <div className="flex items-center gap-1.5 bg-muted/50 border border-border p-1.5 rounded-2xl shrink-0">
+                      <div className="flex items-center gap-2 bg-muted/70 border border-border/80 p-1.5 rounded-full focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all shadow-inner shrink-0">
                         <input
                           type="text"
                           value={supportInput}
                           onChange={(e) => setSupportInput(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && sendSupportMessage()}
                           placeholder={t('typeMessageToStaff')}
-                          className="flex-1 bg-transparent border-none text-xs text-foreground focus:outline-none px-2"
+                          style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                          className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 appearance-none text-xs text-foreground placeholder:text-muted-foreground/60 px-2 py-1"
                         />
                         <button
                           onClick={sendSupportMessage}
                           disabled={!supportInput.trim()}
-                          className="p-2 rounded-xl bg-emerald-500 text-black disabled:opacity-40 hover:bg-emerald-400 transition-colors cursor-pointer"
+                          className="p-2.5 rounded-full bg-emerald-500 text-black disabled:opacity-40 hover:bg-emerald-400 transition-all cursor-pointer shrink-0 shadow-md hover:scale-105"
                         >
                           <Send className="w-4 h-4" />
                         </button>
