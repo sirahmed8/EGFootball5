@@ -105,7 +105,6 @@ export default async function RootLayout({
                 </MainContainer>
 
                 <Toaster />
-                <ScrollToTop />
                 <ClientChatWidget />
               </AuthProvider>
             </ThemeProvider>
