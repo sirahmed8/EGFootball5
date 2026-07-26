@@ -74,7 +74,7 @@ export function QuickSearchHero() {
   return (
     <form
       onSubmit={handleSearch}
-      className="w-full max-w-4xl mx-auto p-2.5 sm:p-3 rounded-3xl bg-card border border-border shadow-2xl hover:border-primary/40 transition-all space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-2.5 relative z-30"
+      className="w-full max-w-4xl mx-auto p-2.5 sm:p-3 rounded-3xl bg-card border border-border shadow-2xl hover:border-primary/40 transition-all space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-2.5 relative z-[999]"
     >
       {/* Search Text Input — zero focus outline box */}
       <div className="relative flex items-center gap-3 px-4 py-3 flex-1 bg-background rounded-2xl border border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">

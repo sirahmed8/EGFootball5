@@ -60,7 +60,8 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
       {/* Nav links — scrollable */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5">
         {navLinks.map((link) => {
-          const isActive = pathname === link.href;
+          const normalize = (p: string) => p.replace(/\/$/, '') || '/';
+          const isActive = normalize(pathname) === normalize(link.href);
           return (
             <button
               key={link.href}
@@ -149,6 +150,10 @@ function MobileDrawer() {
 export function DesktopSidebar() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
+  const firebaseUser = useAuthStore((s) => s.firebaseUser);
+  const loading = useAuthStore((s) => s.loading);
+
+  if (loading || !firebaseUser) return null;
 
   return (
     <aside

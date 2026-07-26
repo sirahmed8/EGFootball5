@@ -30,51 +30,7 @@ import { MatchesPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 const MatchChat = dynamic(() => import('@/components/MatchChat'), { ssr: false });
 
-const SAMPLE_PUBLIC_MATCHES: Booking[] = [
-  {
-    id: 'sample-match-1',
-    userId: 'sample-host-1',
-    pitchId: 'obour-stadium-1',
-    date: '2026-07-26',
-    timeSlot: 20,
-    duration: 1,
-    status: BookingStatus.CONFIRMED,
-    totalAmount: 350,
-    depositAmount: 100,
-    createdAt: 1700000000000,
-    bookingType: 'public',
-    numPeople: 10,
-    joinedPlayers: [
-      { uid: 'u1', name: 'كابتن محمود (Host) [MID]' },
-      { uid: 'u2', name: 'أحمد علي [STR]' },
-      { uid: 'u3', name: 'عمر خالد [DEF]' },
-      { uid: 'u4', name: 'مصطفى حسين [GK]' },
-      { uid: 'u5', name: 'إسلام طارق [MID]' },
-      { uid: 'u6', name: 'كريم عادل [STR]' },
-      { uid: 'u7', name: 'يوسف أيمن [DEF]' },
-    ],
-  },
-  {
-    id: 'sample-match-2',
-    userId: 'sample-host-2',
-    pitchId: 'elnojoom-pitch-2',
-    date: '2026-07-27',
-    timeSlot: 21.5,
-    duration: 1.5,
-    status: BookingStatus.CONFIRMED,
-    totalAmount: 500,
-    depositAmount: 150,
-    createdAt: 1700000000000,
-    bookingType: 'public',
-    numPeople: 14,
-    joinedPlayers: [
-      { uid: 'u8', name: 'كابتن رامي (Host) [STR]' },
-      { uid: 'u9', name: 'سامح حسن [MID]' },
-      { uid: 'u10', name: 'طارق نبيل [DEF]' },
-      { uid: 'u11', name: 'حازم ماهر [GK]' },
-    ],
-  },
-];
+const SAMPLE_PUBLIC_MATCHES: Booking[] = [];
 
 function CreateMatchModal({
   pitches,

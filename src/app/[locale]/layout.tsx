@@ -10,6 +10,7 @@ import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { ClientChatWidget } from '@/components/ClientChatWidget';
+import { MainContainer } from '@/components/MainContainer';
 import { NextIntlClientProvider } from 'next-intl';
 
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
@@ -98,10 +99,10 @@ export default async function RootLayout({
                 <Navbar />
 
                 {/* Main content area: below 64px (h-16) top bar */}
-                <main className="min-h-screen flex flex-col pt-16 md:ms-64 md:pt-16">
+                <MainContainer>
                   {children}
                   <Footer />
-                </main>
+                </MainContainer>
 
                 <Toaster />
                 <ScrollToTop />

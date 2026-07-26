@@ -173,7 +173,7 @@ function HomeContent() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="p-5 rounded-3xl bg-card/70 border border-border backdrop-blur-xl space-y-4 shadow-xl">
+      <div className="p-5 rounded-3xl bg-card/70 border border-border backdrop-blur-xl space-y-4 shadow-xl relative z-50">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           {/* Search Input with logical positioning start-3.5, end-3, ps-10 pe-9 */}
           <div className="md:col-span-4 relative">
@@ -262,10 +262,10 @@ function HomeContent() {
                 <button
                   key={item.id}
                   onClick={() => toggleAmenity(item.id)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border cursor-pointer ${
                     isSelected
-                      ? 'bg-primary/20 border-primary text-primary shadow-[0_0_12px_rgba(57,255,20,0.3)]'
-                      : 'bg-background/40 border-border text-muted-foreground hover:bg-muted'
+                      ? 'bg-primary/20 text-primary border-primary/50 shadow-sm'
+                      : 'bg-background/40 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
                   }`}
                 >
                   {item.icon}
@@ -275,12 +275,12 @@ function HomeContent() {
             })}
           </div>
 
-          {(searchQuery || selectedFormat !== 'all' || selectedCity !== 'all' || selectedAmenities.length > 0 || maxPrice < 1000) && (
+          {(searchQuery || selectedFormat !== 'all' || selectedCity !== 'all' || maxPrice !== 1000 || selectedAmenities.length > 0) && (
             <Button
               variant="ghost"
               size="sm"
               onClick={resetFilters}
-              className="text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl gap-1"
+              className="text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl gap-1.5 cursor-pointer"
             >
               <FilterX className="w-3.5 h-3.5" />
               {t('resetFilters')}
@@ -291,17 +291,19 @@ function HomeContent() {
 
       {/* Empty State when no pitches found */}
       {filteredPitches.length === 0 && (
-        <div className="p-12 text-center rounded-3xl bg-card/40 border border-border backdrop-blur-xl space-y-4 max-w-lg mx-auto my-12">
+        <div className="p-12 text-center rounded-3xl bg-card/40 border border-border backdrop-blur-xl space-y-4 max-w-lg mx-auto my-12 relative z-10">
           <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mx-auto">
             <Search className="w-8 h-8" />
           </div>
           <h3 className="text-2xl font-black text-foreground">
-            {t('noPitchesFound')}
+            {rawPitches.length === 0 ? 'No Pitches Available Yet' : t('noPitchesFound')}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {t('noPitchesDesc')}
+            {rawPitches.length === 0
+              ? 'Platform owners can add new pitches from the Owner Dashboard.'
+              : t('noPitchesDesc')}
           </p>
-          <Button onClick={resetFilters} className="bg-primary text-black font-extrabold rounded-xl px-6">
+          <Button onClick={resetFilters} className="bg-primary text-black font-extrabold rounded-xl px-6 cursor-pointer">
             {t('showAllPitches')}
           </Button>
         </div>
