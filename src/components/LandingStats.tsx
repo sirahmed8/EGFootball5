@@ -45,8 +45,8 @@ export function LandingStats() {
 
   if (stats.isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {[...Array(3)].map((_, i) => (
           <div key={i} className="p-6 rounded-3xl bg-card/40 border border-border/50 backdrop-blur-xl flex flex-col items-center justify-center space-y-3 relative overflow-hidden">
             <div className="w-20 h-10 rounded-xl bg-primary/15 animate-pulse" />
             <div className="w-16 h-3 rounded-md bg-muted/30 animate-pulse" />
@@ -57,7 +57,7 @@ export function LandingStats() {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
       {/* Players Counter */}
       <div className="p-6 rounded-3xl bg-card border border-border hover:border-primary/50 transition-all space-y-2">
         <div className="flex justify-center text-primary mb-1">
@@ -89,17 +89,6 @@ export function LandingStats() {
           {stats.matches >= 1000 ? `${(stats.matches / 1000).toFixed(1)}k+` : `${stats.matches}`}
         </p>
         <p className="text-xs sm:text-sm text-muted-foreground font-extrabold uppercase tracking-wider">{t('matches')}</p>
-      </div>
-
-      {/* Rating Counter */}
-      <div className="p-6 rounded-3xl bg-card border border-border hover:border-yellow-400/50 transition-all space-y-2">
-        <div className="flex justify-center text-yellow-400 gap-1">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} className="w-4 h-4 fill-current" />
-          ))}
-        </div>
-        <p className="text-4xl sm:text-5xl font-black text-yellow-400 font-mono">5.0/5</p>
-        <p className="text-xs sm:text-sm text-muted-foreground font-extrabold uppercase tracking-wider">{t('rating')}</p>
       </div>
     </div>
   );
