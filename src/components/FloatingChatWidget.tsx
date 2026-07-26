@@ -536,26 +536,30 @@ export function FloatingChatWidget() {
   });
 
   return (
-    <div className="fixed bottom-20 sm:bottom-6 right-6 z-[9999999]">
-      {/* Floating Toggle Button */}
-      {!isOpen && (
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsOpen(true)}
-          className="relative p-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-black shadow-[0_0_25px_rgba(57,255,20,0.4)] flex items-center justify-center cursor-pointer group border border-emerald-400/50"
-          aria-label="Open Floating Chatbot"
-        >
-          <Bot className="w-7 h-7 text-black stroke-[2.5]" />
-          <span className="absolute -top-1 -right-1 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-400"></span>
-          </span>
-        </motion.button>
-      )}
+    <div className="fixed bottom-6 end-6 md:bottom-8 md:end-8 z-[9999999]">
+      <AnimatePresence mode="wait">
+        {/* Floating Toggle Button */}
+        {!isOpen && (
+          <motion.button
+            key="chat-toggle-btn"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsOpen(true)}
+            className="relative p-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-black shadow-[0_0_25px_rgba(57,255,20,0.4)] flex items-center justify-center cursor-pointer group border border-emerald-400/50"
+            aria-label="Open Floating Chatbot"
+          >
+            <Bot className="w-7 h-7 text-black stroke-[2.5]" />
+            <span className="absolute -top-1 -right-1 flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-400"></span>
+            </span>
+          </motion.button>
+        )}
 
-      {/* Spring Animated Modal */}
-      <AnimatePresence>
+        {/* Spring Animated Modal */}
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.92 }}

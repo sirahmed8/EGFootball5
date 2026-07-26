@@ -4,8 +4,8 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
-  // Use static export by default (for Firebase), unless running on Vercel
-  output: process.env.VERCEL === '1' ? undefined : 'export',
+  // Use static export by default for static production builds, unless running dev server or Vercel
+  output: process.env.NODE_ENV === 'development' || process.env.VERCEL === '1' ? undefined : 'export',
   trailingSlash: true,
   images: {
     unoptimized: process.env.VERCEL !== '1'
