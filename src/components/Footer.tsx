@@ -5,7 +5,7 @@ export function Footer() {
   const t = useTranslations('Footer');
 
   return (
-    <footer className="w-full py-8 mt-auto border-t border-border/50 bg-background/50 backdrop-blur-sm">
+    <footer className="w-full py-8 mt-auto border-t border-border bg-background">
       <div className="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center gap-4 text-sm text-muted-foreground">
         <a 
           href="https://linktr.ee/sir.ahmed" 

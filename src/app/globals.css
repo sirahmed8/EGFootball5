@@ -8,6 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
+  --font-cairo: var(--font-cairo);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -160,4 +161,89 @@
 
 .animate-shimmer {
   animation: shimmer 2s infinite ease-in-out;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.animate-marquee {
+  display: inline-flex;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s infinite ease-in-out;
+}
+
+.stadium-glass {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ── Neon glow utilities ──────────────────────────────────── */
+.glow-primary {
+  box-shadow: 0 0 20px oklch(0.85 0.25 150 / 30%), 0 0 40px oklch(0.85 0.25 150 / 10%);
+}
+
+.glow-primary-sm {
+  box-shadow: 0 0 8px oklch(0.85 0.25 150 / 25%);
+}
+
+/* ── Premium card hover lift ─────────────────────────────── */
+.card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 0 20px oklch(0.85 0.25 150 / 12%);
+}
+
+/* ── Smooth focus-visible ring for all interactive elements ── */
+:focus-visible {
+  outline: 2px solid oklch(0.85 0.25 150 / 80%);
+  outline-offset: 2px;
+}
+
+/* ── Hide scrollbar (keep scroll functionality) ──────────── */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Text balance for headlines ──────────────────────────── */
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+/* ── Gradient text utility ───────────────────────────────── */
+.text-gradient-primary {
+  background: linear-gradient(135deg, oklch(0.85 0.25 150), oklch(0.75 0.22 160));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Background mesh gradient pattern ───────────────────── */
+.bg-mesh {
+  background-image:
+    radial-gradient(at 20% 20%, oklch(0.85 0.25 150 / 5%) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, oklch(0.65 0.25 250 / 5%) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, oklch(0.85 0.25 150 / 3%) 0px, transparent 60%);
 }

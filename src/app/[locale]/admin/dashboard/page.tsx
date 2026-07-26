@@ -1,31 +1,33 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { useRouter } from '@/i18n/routing';
-import { onSnapshot, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { onSnapshot, doc, getDoc, updateDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Booking, User as AppUser, Pitch } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { DashboardPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { confirmBooking, rejectBooking, cleanupExpiredBookings } from '@/lib/firebase/booking';
 import { toast } from 'sonner';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-
+import { useToggleBlacklist } from '@/hooks/useUserRoles';
 import { AdminOverviewCards } from '../components/AdminOverviewCards';
-import { VerificationQueue } from '../components/VerificationQueue';
-import { LiveSchedule } from '../components/LiveSchedule';
-import { PitchSettings } from '../components/PitchSettings';
-import { PlayersList } from '../components/PlayersList';
+
+const VerificationQueue = dynamic(() => import('../components/VerificationQueue').then(m => m.VerificationQueue), { ssr: false });
+const LiveSchedule = dynamic(() => import('../components/LiveSchedule').then(m => m.LiveSchedule), { ssr: false });
+const PitchSettings = dynamic(() => import('../components/PitchSettings').then(m => m.PitchSettings), { ssr: false });
+const PlayersList = dynamic(() => import('../components/PlayersList').then(m => m.PlayersList), { ssr: false });
 
 export default function AdminDashboard() {
   const router = useRouter();
   const { appUser, firebaseUser, loading } = useAuthStore();
   const t = useTranslations('Admin');
-  const locale = useLocale();
-  
+  const toggleBlacklistMutation = useToggleBlacklist();
+
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [usersCache, setUsersCache] = useState<Record<string, AppUser>>({});
   const usersCacheRef = useRef<Record<string, AppUser>>({});
@@ -47,15 +49,44 @@ export default function AdminDashboard() {
     if ((appUser?.role !== 'admin' && appUser?.role !== 'owner') || !firebaseUser?.email) return;
 
     const fetchPitchAndBookings = async () => {
+      let pitchData: Pitch;
       const pitchQ = query(collection(db, 'pitches'), where('adminEmail', '==', firebaseUser.email));
       const pitchSnap = await getDocs(pitchQ);
       
       if (pitchSnap.empty) {
-        toast.error('No pitch assigned to this admin.');
-        return;
+        // Auto-create a default pitch for this admin user so they can test/manage immediately
+        const defaultPitchId = `pitch_${Date.now()}`;
+        pitchData = {
+          id: defaultPitchId,
+          name: 'ملعب أبطال العبور (El Obour Champions Arena)',
+          locationName: 'مدينة العبور - الحي التاسع',
+          mapLink: 'https://maps.google.com',
+          imagePreviewUrl: '/pitch_preview.jpg',
+          pricePerHour: 350,
+          recipient: '01012345678',
+          managerName: appUser?.name || 'مدير الملعب',
+          adminEmail: firebaseUser.email || '',
+          adminPhone: appUser?.phone || '01012345678',
+          createdAt: Date.now(),
+          capacity: '5v5',
+          surfaceType: 'نجيل صناعي ممتاز',
+          hasFloodlights: true,
+          hasParking: true,
+          hasCafeteria: true,
+          rating: 4.9,
+          reviewsCount: 142,
+          city: 'obour',
+        };
+        try {
+          await setDoc(doc(db, 'pitches', defaultPitchId), pitchData);
+          toast.success(t('defaultAdminNotice'));
+        } catch {
+          // fallback in-memory pitch
+        }
+      } else {
+        pitchData = pitchSnap.docs[0].data() as Pitch;
       }
-      
-      const pitchData = pitchSnap.docs[0].data() as Pitch;
+
       setPitch(pitchData);
       setEditingPitch(pitchData);
 
@@ -99,8 +130,7 @@ export default function AdminDashboard() {
       isMounted = false;
       if (typeof unsub === 'function') unsub();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appUser, firebaseUser]);
+  }, [appUser, firebaseUser, t]);
 
   if (loading || (appUser?.role !== 'admin' && appUser?.role !== 'owner')) {
     return <DashboardPageSkeleton />;
@@ -156,9 +186,7 @@ export default function AdminDashboard() {
 
   const handleToggleBlacklist = async (userId: string, currentStatus: boolean) => {
     try {
-      await updateDoc(doc(db, 'users', userId), {
-        isBlacklisted: !currentStatus
-      });
+      await toggleBlacklistMutation.mutateAsync({ userId, isBlacklisted: !currentStatus });
       setUsersCache(prev => ({
         ...prev,
         [userId]: {
@@ -236,7 +264,6 @@ export default function AdminDashboard() {
             getUserLoyalty={getUserLoyalty}
             handleToggleBlacklist={handleToggleBlacklist}
             t={t}
-            locale={locale}
           />
         </TabsContent>
 
@@ -249,10 +276,12 @@ export default function AdminDashboard() {
           onClick={() => setActiveReceiptUrl(null)}
         >
           <div className="relative max-w-3xl max-h-[85vh] w-full flex flex-col justify-center items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
+            <Image 
               src={activeReceiptUrl} 
               alt="Receipt Zoom" 
+              width={800}
+              height={600}
+              unoptimized
               className="object-contain rounded-lg max-h-[75vh] max-w-full shadow-2xl border border-white/10" 
               onClick={(e) => e.stopPropagation()} 
             />

@@ -16,7 +16,7 @@ export function CountdownTimer({ lockedUntil }: CountdownTimerProps) {
 
   useEffect(() => {
     if (!lockedUntil) return;
-    
+
     const timer = setInterval(() => {
       const now = Date.now();
       const diff = Math.floor((lockedUntil - now) / 1000);
@@ -38,8 +38,16 @@ export function CountdownTimer({ lockedUntil }: CountdownTimerProps) {
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  const isLowTime = timeLeft < 180; // less than 3 minutes
+
   return (
-    <span className="text-primary font-black text-lg bg-primary/10 px-3 py-1 rounded-full ml-1 border border-primary/20 shadow-[0_0_15px_rgba(57,255,20,0.15)]">
+    <span
+      className={`font-mono font-black text-lg px-3 py-1 rounded-full ms-1 border transition-all duration-300 ${
+        isLowTime
+          ? 'bg-red-500/20 text-red-400 border-red-500/40 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)]'
+          : 'bg-primary/10 text-primary border-primary/20 shadow-[0_0_15px_rgba(57,255,20,0.15)]'
+      }`}
+    >
       {formatTime(timeLeft)}
     </span>
   );

@@ -1,5 +1,13 @@
 export type Role = 'player' | 'admin' | 'owner';
 
+export interface JoinedPlayer {
+  uid: string;
+  name: string;
+  position?: 'GK' | 'DEF' | 'MID' | 'STR';
+  phone?: string;
+  joinedAt?: number;
+}
+
 export interface User {
   uid: string;
   name: string;
@@ -9,6 +17,11 @@ export interface User {
   role: Role;
   isBlacklisted: boolean;
   createdAt: number;
+  playerLevel?: 'Rookie' | 'Amateur' | 'Semi-Pro' | 'Pro' | 'Legend';
+  preferredPosition?: 'GK' | 'DEF' | 'MID' | 'STR';
+  goalsCount?: number;
+  matchesPlayed?: number;
+  mvpBadges?: number;
 }
 
 export interface Pitch {
@@ -23,13 +36,24 @@ export interface Pitch {
   adminEmail: string;
   adminPhone: string;
   createdAt: number;
+  capacity?: string;
+  surfaceType?: string;
+  amenities?: string[];
+  hasFloodlights?: boolean;
+  hasParking?: boolean;
+  hasCafeteria?: boolean;
+  rating?: number;
+  reviewsCount?: number;
+  city?: string;
 }
 
 export enum BookingStatus {
   LOCKED_TEMPORARY = 'locked_temporary',
   PENDING_REVIEW = 'pending_review',
   CONFIRMED = 'confirmed',
-  REJECTED = 'rejected'
+  REJECTED = 'rejected',
+  CANCELLED = 'cancelled',
+  COMPLETED = 'completed',
 }
 
 export interface Booking {
@@ -47,6 +71,7 @@ export interface Booking {
   createdAt: number;
   bookingType: 'private' | 'public';
   numPeople: number;
-  joinedPlayers?: { uid: string; name: string }[];
+  joinedPlayers?: (JoinedPlayer | { uid: string; name: string })[];
+  promoCode?: string;
+  discountAmount?: number;
 }
-

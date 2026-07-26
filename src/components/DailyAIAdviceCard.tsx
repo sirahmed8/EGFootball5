@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+
 import { useAuthStore } from '@/store/useAuthStore';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { generateAIResponse } from '@/lib/aiService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,43 +14,38 @@ export function DailyAIAdviceCard() {
   const { appUser, firebaseUser } = useAuthStore();
   const locale = useLocale();
   const isArabic = locale === 'ar';
+  const t = useTranslations('AiAdvice');
 
   const userUid = firebaseUser?.uid || 'guest';
   const todayDate = new Date().toISOString().split('T')[0];
   const storageKey = `11players_ai_advice_${todayDate}_${userUid}`;
 
   const MAX_DAILY_USES = 3;
-  const [usedCount, setUsedCount] = useState<number>(0);
-  const [advice, setAdvice] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
+  const [usedCount, setUsedCount] = useState<number>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(storageKey);
       if (stored) {
         const parsed = parseInt(stored, 10);
-        setUsedCount(isNaN(parsed) ? 0 : parsed);
-      } else {
-        setUsedCount(0);
-      }
-
-      // Check if there's saved advice text for today
-      const savedAdvice = localStorage.getItem(`${storageKey}_text`);
-      if (savedAdvice) {
-        setAdvice(savedAdvice);
+        return isNaN(parsed) ? 0 : parsed;
       }
     }
-  }, [storageKey]);
+    return 0;
+  });
+
+  const [advice, setAdvice] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(`${storageKey}_text`);
+    }
+    return null;
+  });
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   const remaining = Math.max(0, MAX_DAILY_USES - usedCount);
 
   const fetchDailyAdvice = async () => {
     if (usedCount >= MAX_DAILY_USES) {
-      toast.error(
-        isArabic
-          ? '🔒 تم الوصول للحد اليومي 3/3 (عد غداً للحصول على المزيد)'
-          : '🔒 Daily 3/3 Limit Reached (Return Tomorrow)'
-      );
+      toast.error(t('limitReachedToast'));
       return;
     }
 
@@ -74,22 +70,20 @@ export function DailyAIAdviceCard() {
         localStorage.setItem(`${storageKey}_text`, result.text);
       }
 
-      toast.success(
-        isArabic
-          ? `✨ حصلت على نصيحة اليوم! المتبقي: ${MAX_DAILY_USES - newCount}/${MAX_DAILY_USES}`
-          : `✨ Daily AI Advice generated! Remaining: ${MAX_DAILY_USES - newCount}/${MAX_DAILY_USES}`
-      );
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to fetch AI advice');
+      toast.success(t('generatedToast', { remaining: MAX_DAILY_USES - newCount }));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to fetch AI advice';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
+
   return (
-    <Card className="bg-gradient-to-br from-emerald-950/40 via-card/80 to-background border-emerald-500/30 shadow-lg backdrop-blur-xl relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      
+    <Card className="bg-gradient-to-br from-emerald-950/40 via-card/80 to-background border-emerald-500/30 shadow-lg backdrop-blur-xl relative overflow-hidden rounded-3xl">
+      <div className="absolute top-0 end-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -97,15 +91,14 @@ export function DailyAIAdviceCard() {
           </div>
           <div>
             <CardTitle className="text-base font-bold text-foreground">
-              {isArabic ? '💡 نصائح اليوم الذكية (AI)' : '💡 Daily AI Football Insights'}
+              {t('title')}
             </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              {isArabic ? 'نصائح تكتيكية ولياقة يومية مخصصة لك' : 'Personalized tactical & fitness advice'}
+            <p className="text-xs text-muted-foreground font-medium">
+              {t('subtitle')}
             </p>
           </div>
         </div>
 
-        {/* Badge counter */}
         <span
           className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full border ${
             remaining > 0
@@ -128,7 +121,7 @@ export function DailyAIAdviceCard() {
         <Button
           onClick={fetchDailyAdvice}
           disabled={loading || remaining === 0}
-          className={`w-full font-bold shadow-md transition-all ${
+          className={`w-full font-bold shadow-md transition-all rounded-2xl ${
             remaining > 0
               ? 'bg-emerald-500 hover:bg-emerald-600 text-black shadow-emerald-500/20'
               : 'bg-muted text-muted-foreground cursor-not-allowed border border-border'
@@ -137,21 +130,17 @@ export function DailyAIAdviceCard() {
           {loading ? (
             <span className="flex items-center gap-2">
               <RefreshCw className="w-4 h-4 animate-spin" />
-              {isArabic ? 'جاري توليد النصيحة...' : 'Generating Advice...'}
+              {t('generating')}
             </span>
           ) : remaining === 0 ? (
             <span className="flex items-center gap-2">
               <Lock className="w-4 h-4" />
-              {isArabic
-                ? '🔒 تم الوصول للحد اليومي 3/3 (عد غداً)'
-                : '🔒 Daily 3/3 Limit Reached (Return Tomorrow)'}
+              {t('limitReachedBtn')}
             </span>
           ) : (
             <span className="flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
-              {isArabic
-                ? `احصل على نصيحة جديدة (${remaining} متبقي)`
-                : `Get Daily Advice (${remaining} left)`}
+              {t('getAdviceBtn', { remaining })}
             </span>
           )}
         </Button>

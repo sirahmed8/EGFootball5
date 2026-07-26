@@ -14,10 +14,76 @@ import { toast } from 'sonner';
 import { submitReceipt } from '@/lib/firebase/booking';
 import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
-import { MapPin, Calendar, Clock, CreditCard, Shield, Users, FileText } from 'lucide-react';
+import {
+  MapPin,
+  Calendar,
+  Clock,
+  CreditCard,
+  Users,
+  FileText,
+  Copy,
+  Check,
+  QrCode,
+  Download,
+  ExternalLink,
+  CheckCircle2,
+  ShieldCheck,
+} from 'lucide-react';
 import { CheckoutPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import imageCompression from 'browser-image-compression';
 import { CountdownTimer } from '@/components/CountdownTimer';
+
+function DynamicMatchQrCode({ value }: { value: string }) {
+  const size = 21;
+  const matrix: boolean[][] = Array.from({ length: size }, () => Array(size).fill(false));
+
+  const drawFinder = (startX: number, startY: number) => {
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 7; c++) {
+        if (
+          r === 0 || r === 6 || c === 0 || c === 6 ||
+          (r >= 2 && r <= 4 && c >= 2 && c <= 4)
+        ) {
+          matrix[startY + r][startX + c] = true;
+        }
+      }
+    }
+  };
+
+  drawFinder(0, 0);
+  drawFinder(size - 7, 0);
+  drawFinder(0, size - 7);
+
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      if ((r < 8 && c < 8) || (r < 8 && c >= size - 8) || (r >= size - 8 && c < 8)) {
+        continue;
+      }
+      if (r === 6 || c === 6) {
+        matrix[r][c] = (r + c) % 2 === 0;
+        continue;
+      }
+      const val = Math.abs(Math.sin(r * 12.9898 + c * 78.233 + hash) * 43758.5453);
+      matrix[r][c] = val - Math.floor(val) > 0.45;
+    }
+  }
+
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} className="w-40 h-40 mx-auto bg-white p-2 rounded-2xl border border-border shadow-inner">
+      {matrix.map((row, r) =>
+        row.map((cell, c) => (
+          cell ? <rect key={`${r}-${c}`} x={c} y={r} width={1} height={1} fill="#090d16" rx={0.1} /> : null
+        ))
+      )}
+    </svg>
+  );
+}
 
 function CheckoutForm() {
   const router = useRouter();
@@ -25,13 +91,14 @@ function CheckoutForm() {
   const bookingId = searchParams.get('bookingId');
   const typeParam = searchParams.get('type') || 'private';
   const peopleParam = parseInt(searchParams.get('people') || '10') || 10;
-  
+
   const { firebaseUser, loading: authLoading } = useAuthStore();
   const t = useTranslations('Checkout');
   const tBook = useTranslations('Book');
   const tErrors = useTranslations('Errors');
   const locale = useLocale();
-  
+  const isArabic = locale === 'ar';
+
   const [booking, setBooking] = useState<Booking | null>(null);
   const bookingType = booking?.bookingType || typeParam;
   const numPeople = booking?.numPeople || peopleParam;
@@ -40,6 +107,10 @@ function CheckoutForm() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const [copiedVodafone, setCopiedVodafone] = useState(false);
+  const [copiedInstapay, setCopiedInstapay] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   useEffect(() => {
     if (!bookingId) {
@@ -50,10 +121,9 @@ function CheckoutForm() {
     const unsubscribe = onSnapshot(doc(db, 'bookings', bookingId), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data() as Booking;
-        
-        // Security Check: Ensure booking belongs to the current logged-in user
+
         if (firebaseUser && data.userId !== firebaseUser.uid) {
-          toast.error(locale === 'ar' ? 'وصول غير مصرح به لهذا الحجز' : 'Unauthorized access to this booking');
+          toast.error(t('unauthorized'));
           router.push('/book');
           return;
         }
@@ -61,17 +131,18 @@ function CheckoutForm() {
         setBooking(data);
         if (data.status !== 'locked_temporary') {
           if (data.status === 'pending_review' || data.status === 'confirmed') {
-            router.push('/book'); 
+            router.push('/profile');
           }
         }
       } else {
-        toast.error(locale === 'ar' ? 'الحجز غير موجود أو منتهي الصلاحية' : 'Booking not found or expired');
+        toast.error(t('bookingNotFound'));
         router.push('/book');
       }
     });
 
     return () => unsubscribe();
-  }, [bookingId, router, firebaseUser, locale]);
+  }, [bookingId, router, firebaseUser, isArabic, t]);
+
 
   useEffect(() => {
     if (!booking) return;
@@ -83,7 +154,7 @@ function CheckoutForm() {
           setPitch(pitchSnap.data() as Pitch);
         }
       } catch (err) {
-        console.error("Error fetching pitch:", err);
+        console.error('Error fetching pitch:', err);
       }
     };
 
@@ -96,6 +167,18 @@ function CheckoutForm() {
     };
   }, [previewUrl]);
 
+  const copyToClipboard = (text: string, type: 'vodafone' | 'instapay') => {
+    navigator.clipboard.writeText(text);
+    if (type === 'vodafone') {
+      setCopiedVodafone(true);
+      setTimeout(() => setCopiedVodafone(false), 2000);
+    } else {
+      setCopiedInstapay(true);
+      setTimeout(() => setCopiedInstapay(false), 2000);
+    }
+    toast.success(t('copiedText', { text }));
+  };
+
   const handleUpload = async () => {
     if (!file || !firebaseUser || !bookingId) return;
 
@@ -103,40 +186,39 @@ function CheckoutForm() {
     setProgress(0);
 
     try {
-      // 1. Create a unique path in Firebase Storage
       const storageRef = ref(storage, `receipts/${bookingId}_${file.name}`);
-      
-      // Compress the image before uploading
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true
-      };
-      
-      const compressedFile = await imageCompression(file, options);
 
-      // 2. Start upload task
-      const uploadTask = uploadBytesResumable(storageRef, compressedFile);
+      let uploadFile = file;
+      if (file.type.startsWith('image/')) {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        uploadFile = await imageCompression(file, options);
+      }
 
-      uploadTask.on('state_changed', 
+      const uploadTask = uploadBytesResumable(storageRef, uploadFile);
+
+      uploadTask.on(
+        'state_changed',
         (snapshot) => {
           const prog = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setProgress(prog);
-        }, 
+        },
         (error) => {
-          toast.error((locale === 'ar' ? 'فشل الرفع: ' : 'Upload failed: ') + error.message);
+          toast.error(t('uploadFailed') + error.message);
           setUploading(false);
-        }, 
+        },
         async () => {
           try {
-            // 3. Get download URL and update booking
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
             await submitReceipt(bookingId, downloadURL, firebaseUser.uid);
-            toast.success(locale === 'ar' ? 'تم رفع الإيصال بنجاح! بانتظار مراجعة المسؤول.' : 'Receipt uploaded successfully! Awaiting admin review.');
+            toast.success(t('receiptSuccess'));
             router.push('/profile');
           } catch (compErr: unknown) {
             const err = compErr as Error;
-            toast.error((locale === 'ar' ? 'خطأ في حفظ الإيصال: ' : 'Error saving receipt: ') + err.message);
+            toast.error(t('receiptSaveError') + err.message);
             setUploading(false);
           }
         }
@@ -151,7 +233,7 @@ function CheckoutForm() {
           // fallback
         }
       } else {
-        errMsg = (locale === 'ar' ? 'فشل إرسال الإيصال: ' : 'Failed to submit receipt: ') + err.message;
+        errMsg = t('receiptSubmitFailed') + err.message;
       }
       toast.error(errMsg);
       setUploading(false);
@@ -161,7 +243,7 @@ function CheckoutForm() {
   const formatTimeSlot = (slot: number) => {
     const hour = Math.floor(slot);
     const mins = slot % 1 === 0 ? '00' : '30';
-    const ampm = hour >= 12 && hour < 24 ? (locale === 'ar' ? 'م' : 'PM') : (locale === 'ar' ? 'ص' : 'AM');
+    const ampm = hour >= 12 && hour < 24 ? (isArabic ? 'م' : 'PM') : (isArabic ? 'ص' : 'AM');
     const modHour = hour % 12 || 12;
     return `${modHour}:${mins} ${ampm}`;
   };
@@ -170,189 +252,292 @@ function CheckoutForm() {
     return <CheckoutPageSkeleton />;
   }
 
+  const vodafoneNum = pitch?.recipient || '01012345678';
+  const instapayAddress = 'egfootball5@instapay';
+
   return (
-    <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-in fade-in duration-500">
-      
-      {/* Left Panel: Booking & Pitch Summary */}
-      <div className="lg:col-span-5 space-y-6">
-        <Card className="bg-card border-border backdrop-blur-xl shadow-xl overflow-hidden hover:border-primary/20 transition-all duration-300">
-          <CardHeader className="bg-primary/5 border-b border-border p-5">
-            <CardTitle className="text-xl font-bold flex items-center gap-2 text-foreground">
-              <span>🏟️</span> {pitch?.name || tBook('title')}
-            </CardTitle>
-            {pitch?.locationName && (
-              <CardDescription className="flex items-center gap-1.5 text-muted-foreground text-sm mt-1">
-                <MapPin className="w-4 h-4 text-primary" /> {pitch.locationName}
-              </CardDescription>
-            )}
-          </CardHeader>
-          <CardContent className="p-6 space-y-6 text-sm">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-border pb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  <span>Date</span>
-                </div>
-                <strong className="text-foreground">{booking.date}</strong>
-              </div>
-
-              <div className="flex items-center justify-between border-b border-border pb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Clock className="w-4 h-4 text-primary" />
-                  <span>Time & Duration</span>
-                </div>
-                <strong className="text-foreground">
-                  {formatTimeSlot(booking.timeSlot)} ({booking.duration} hr)
-                </strong>
-              </div>
-
-              <div className="flex items-center justify-between border-b border-border pb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Users className="w-4 h-4 text-primary" />
-                  <span>Booking Type</span>
-                </div>
-                <strong className="text-foreground capitalize">
-                  {bookingType} ({numPeople} Players)
-                </strong>
-              </div>
-
-              <div className="flex items-center justify-between border-b border-border pb-3">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <CreditCard className="w-4 h-4 text-primary" />
-                  <span>Estimated / Player</span>
-                </div>
-                <strong className="text-primary font-black">
-                  {(booking.totalAmount / numPeople).toFixed(2)} EGP
-                </strong>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-muted/20 border border-border space-y-2">
-              <div className="flex justify-between items-center text-muted-foreground">
-                <span>Total Amount:</span>
-                <span className="font-semibold text-foreground">{booking.totalAmount} EGP</span>
-              </div>
-              <div className="flex justify-between items-center text-foreground font-bold text-lg pt-1 border-t border-border/30">
-                <span>Required Deposit:</span>
-                <span className="text-primary">{booking.depositAmount} EGP</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Security / Expiration Warning */}
-        <Card className="bg-destructive/5 border-destructive/20 text-destructive-foreground p-4 flex gap-3 rounded-xl animate-pulse">
-          <Shield className="w-6 h-6 text-destructive flex-shrink-0" />
-          <div className="text-xs">
-            <h4 className="font-bold text-destructive">Secure Lock Policy</h4>
-            <p className="opacity-85 mt-1 leading-relaxed">
-              This slot is temporarily locked exclusively for you. You must upload a payment receipt within the timer or the slot will be auto-released for other players.
-            </p>
-          </div>
-        </Card>
+    <div className="w-full max-w-5xl space-y-8 animate-in fade-in duration-500">
+      {/* Checkout Progress Stepper */}
+      <div className="p-4 rounded-3xl bg-card border border-border backdrop-blur-xl shadow-lg flex items-center justify-around text-xs font-bold">
+        <div className="flex items-center gap-2 text-emerald-400">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span>{t('lockPitchStep')}</span>
+        </div>
+        <span className="text-border">→</span>
+        <div className="flex items-center gap-2 text-primary font-black">
+          <span className="w-4 h-4 rounded-full bg-primary text-black flex items-center justify-center text-[10px]">2</span>
+          <span>{t('payDepositStep')}</span>
+        </div>
+        <span className="text-border">→</span>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <span className="w-4 h-4 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[10px]">3</span>
+          <span>{t('instantConfirmStep')}</span>
+        </div>
       </div>
 
-      {/* Right Panel: Payment Upload Form */}
-      <div className="lg:col-span-7">
-        <Card className="w-full bg-card border-border backdrop-blur-xl shadow-xl hover:border-primary/20 transition-all duration-300">
-          <CardHeader className="text-center pb-2">
-            <CardTitle className="text-2xl text-card-foreground font-black">{t('title')}</CardTitle>
-            <CardDescription className="text-muted-foreground text-sm mt-1">
-              {t('timerInfo')} <CountdownTimer lockedUntil={booking.lockedUntil} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6 space-y-6">
-            <div className="bg-muted/30 p-5 rounded-xl border border-border space-y-3">
-              <h3 className="text-foreground font-bold flex items-center gap-1.5">
-                <span>💰</span> {t('paymentDetails')}
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {t('transferInfo')} <strong className="text-primary">{booking.depositAmount} EGP</strong> {t('secureInfo')}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                <div className="p-3 bg-background/50 border border-border/50 rounded-lg text-xs space-y-1">
-                  <span className="text-muted-foreground block font-semibold">Vodafone Cash</span>
-                  <strong className="text-foreground text-sm font-mono">{pitch?.recipient || "01012345678"}</strong>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Panel: Booking Ticket & Details */}
+        <div className="lg:col-span-5 space-y-6">
+          <Card className="bg-card border-border backdrop-blur-xl shadow-xl overflow-hidden rounded-3xl">
+            <CardHeader className="bg-primary/10 border-b border-border p-5">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-black flex items-center gap-2 text-foreground">
+                  <span>🏟️</span> {pitch?.name || tBook('title')}
+                </CardTitle>
+                <button
+                  onClick={() => setShowQrModal(true)}
+                  className="px-3 py-1.5 rounded-full text-[11px] font-mono font-black bg-primary text-black flex items-center gap-1 hover:scale-105 transition-transform cursor-pointer shadow-md"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>QR PASS</span>
+                </button>
+              </div>
+              {pitch?.locationName && (
+                <CardDescription className="flex items-center gap-1.5 text-muted-foreground text-xs mt-1 font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-primary" /> {pitch.locationName}
+                </CardDescription>
+              )}
+            </CardHeader>
+
+            <CardContent className="p-6 space-y-6 text-sm">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs font-semibold">
+                    <Calendar className="w-4 h-4 text-primary" />
+                    <span>{t('dateLabel')}</span>
+                  </div>
+                  <strong className="text-foreground font-mono">{booking.date}</strong>
                 </div>
-                <div className="p-3 bg-background/50 border border-border/50 rounded-lg text-xs space-y-1">
-                  <span className="text-muted-foreground block font-semibold">Instapay Address</span>
-                  <strong className="text-foreground text-sm font-mono">egfootball5@instapay</strong>
+
+                <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs font-semibold">
+                    <Clock className="w-4 h-4 text-primary" />
+                    <span>{t('timeSlotLabel')}</span>
+                  </div>
+                  <strong className="text-foreground font-bold">
+                    {formatTimeSlot(booking.timeSlot)} ({booking.duration} hr)
+                  </strong>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs font-semibold">
+                    <Users className="w-4 h-4 text-primary" />
+                    <span>{t('matchTypeLabel')}</span>
+                  </div>
+                  <strong className="text-foreground capitalize font-bold">
+                    {bookingType} ({numPeople} {t('players')})
+                  </strong>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs font-semibold">
+                    <CreditCard className="w-4 h-4 text-primary" />
+                    <span>{t('costPerPlayerLabel')}</span>
+                  </div>
+                  <strong className="text-primary font-black font-mono text-base">
+                    {(booking.totalAmount / numPeople).toFixed(2)} EGP
+                  </strong>
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-4">
-              <label className="block text-foreground font-bold text-sm flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-primary" /> {t('uploadLabel')}
-              </label>
-              
-              <div className="flex flex-col gap-4">
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={(e) => {
-                    const selected = e.target.files?.[0] || null;
-                    setFile(selected);
-                    if (selected) {
-                      const objectUrl = URL.createObjectURL(selected);
-                      setPreviewUrl(objectUrl);
-                    } else {
-                      setPreviewUrl(null);
-                    }
-                  }}
-                  disabled={uploading}
-                  className="w-full text-foreground file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer border border-dashed border-border p-3 rounded-xl hover:border-primary/50 transition-colors bg-background/20"
-                />
+              <div className="p-4 rounded-2xl bg-muted/40 border border-border/60 space-y-2">
+                <div className="flex justify-between items-center text-muted-foreground text-xs">
+                  <span>{t('totalPitchPriceLabel')}</span>
+                  <span className="font-bold text-foreground font-mono">{booking.totalAmount} EGP</span>
+                </div>
+                <div className="flex justify-between items-center text-foreground font-bold text-base pt-2 border-t border-border/40">
+                  <span>{t('requiredDepositLabel')}</span>
+                  <span className="text-primary font-black font-mono text-xl">{booking.depositAmount} EGP</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-                {/* File Preview */}
-                {previewUrl && (
-                  <div className="relative border border-border rounded-xl p-2 bg-background/40 max-w-xs mx-auto animate-in zoom-in-95 duration-300">
-                    <p className="text-xs text-muted-foreground mb-1 text-center font-semibold">Selected Receipt Preview</p>
-                    <div className="aspect-[3/4] relative w-full h-64 rounded-lg overflow-hidden">
-                      <Image 
-                        src={previewUrl} 
-                        alt="Receipt Preview" 
-                        fill 
-                        sizes="(max-width: 500px) 100vw, 320px" 
-                        className="object-cover" 
+        {/* Right Panel: Payment Upload Form */}
+        <div className="lg:col-span-7">
+          <Card className="w-full bg-card border-border backdrop-blur-xl shadow-xl rounded-3xl">
+            <CardHeader className="text-center pb-2 space-y-2">
+              <CardTitle className="text-2xl font-black text-foreground">{t('title')}</CardTitle>
+              <CardDescription className="text-muted-foreground text-sm font-medium">
+                {t('timerInfo')} <CountdownTimer lockedUntil={booking.lockedUntil} />
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="p-6 space-y-6">
+              <div className="bg-muted/30 p-5 rounded-2xl border border-border space-y-4">
+                <h3 className="text-foreground font-extrabold flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2">
+                    <span>💰</span> {t('paymentDetails')}
+                  </span>
+                  <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    {t('secureTransfer')}
+                  </span>
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Vodafone Cash */}
+                  <div className="p-4 bg-background/70 border border-border rounded-2xl text-xs space-y-2">
+                    <span className="text-muted-foreground block font-bold">Vodafone Cash (فودافون كاش)</span>
+                    <div className="flex items-center justify-between">
+                      <strong className="text-foreground text-base font-mono font-black" dir="ltr">{vodafoneNum}</strong>
+                      <button
+                        onClick={() => copyToClipboard(vodafoneNum, 'vodafone')}
+                        className="p-2 rounded-xl bg-muted/60 hover:bg-emerald-500/20 text-muted-foreground hover:text-emerald-400 transition-colors cursor-pointer"
+                        title="Copy Number"
+                      >
+                        {copiedVodafone ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* InstaPay */}
+                  <div className="p-4 bg-background/70 border border-border rounded-2xl text-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground block font-bold">InstaPay (إنستا باي)</span>
+                      <a
+                        href="instapay://"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] text-primary hover:underline flex items-center gap-0.5 font-bold"
+                      >
+                        <span>{t('openApp')}</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <strong className="text-foreground text-xs font-mono font-bold truncate" dir="ltr">{instapayAddress}</strong>
+                      <button
+                        onClick={() => copyToClipboard(instapayAddress, 'instapay')}
+                        className="p-2 rounded-xl bg-muted/60 hover:bg-emerald-500/20 text-muted-foreground hover:text-emerald-400 transition-colors cursor-pointer shrink-0 ms-1"
+                        title="Copy Address"
+                      >
+                        {copiedInstapay ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* File Upload Box */}
+              <div className="space-y-3">
+                <label className="block text-foreground font-extrabold text-sm flex items-center gap-1.5">
+                  <FileText className="w-4 h-4 text-primary" /> {t('uploadLabel')}
+                </label>
+
+                <div className="flex flex-col gap-4">
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => {
+                      const selected = e.target.files?.[0] || null;
+                      setFile(selected);
+                      if (selected && selected.type.startsWith('image/')) {
+                        setPreviewUrl(URL.createObjectURL(selected));
+                      } else {
+                        setPreviewUrl(null);
+                      }
+                    }}
+                    disabled={uploading}
+                    className="w-full text-foreground file:me-4 file:py-2.5 file:px-5 file:rounded-2xl file:border-0 file:text-xs file:font-black file:bg-primary file:text-black hover:file:bg-primary/90 cursor-pointer border border-dashed border-border p-4 rounded-3xl hover:border-primary/50 transition-colors bg-background/20"
+                  />
+
+                  {previewUrl && (
+                    <div className="border border-border rounded-2xl p-3 bg-background/40 max-w-xs mx-auto text-center space-y-2">
+                      <p className="text-xs text-muted-foreground font-bold">
+                        {t('receiptPreview')}
+                      </p>
+                      <div className="aspect-[3/4] relative w-full h-60 rounded-xl overflow-hidden border border-border">
+                        <Image src={previewUrl} alt="Receipt Preview" fill className="object-cover" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {uploading && (
+                  <div className="space-y-1.5 pt-2">
+                    <div className="flex justify-between text-xs text-muted-foreground font-bold">
+                      <span>{t('uploadingReceipt')}</span>
+                      <span className="font-mono">{progress.toFixed(0)}%</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+                      <div
+                        className="bg-primary h-2.5 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(57,255,20,0.5)]"
+                        style={{ width: `${progress}%` }}
                       />
                     </div>
                   </div>
                 )}
               </div>
+            </CardContent>
 
-              {uploading && (
-                <div className="space-y-1.5 pt-2">
-                  <div className="flex justify-between text-xs text-muted-foreground font-bold">
-                    <span>Uploading receipt screenshot...</span>
-                    <span>{progress.toFixed(0)}%</span>
-                  </div>
-                  <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                    <div className="bg-primary h-2.5 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(57,255,20,0.5)]" style={{ width: `${progress}%` }}></div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="p-6 pt-0">
-            <Button 
-              className="w-full bg-primary text-black font-extrabold hover:bg-primary/90 shadow-[0_0_20px_rgba(57,255,20,0.25)] hover:shadow-[0_0_35px_rgba(57,255,20,0.4)] text-lg h-14 rounded-xl transition-all duration-300 hover:scale-[1.01] active:scale-95 disabled:scale-100 cursor-pointer" 
-              onClick={handleUpload}
-              disabled={!file || uploading}
-            >
-              {uploading ? t('uploading') : t('submitBtn')}
-            </Button>
-          </CardFooter>
-        </Card>
+            <CardFooter className="p-6 pt-0">
+              <Button
+                className="w-full bg-primary text-black font-black hover:bg-primary/90 shadow-[0_0_25px_rgba(57,255,20,0.3)] text-lg h-14 rounded-2xl transition-all cursor-pointer"
+                onClick={handleUpload}
+                disabled={!file || uploading}
+              >
+                {uploading ? t('uploading') : t('submitBtn')}
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
 
+      {/* Dynamic SVG QR Pass Lightbox Modal */}
+      {showQrModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          onClick={() => setShowQrModal(false)}
+        >
+          <div
+            className="bg-card border border-border p-6 rounded-3xl max-w-sm w-full text-center space-y-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary mx-auto">
+              <QrCode className="w-8 h-8 text-primary" />
+            </div>
+
+            <h3 className="text-xl font-black text-foreground">
+              {t('digitalPassTitle')}
+            </h3>
+
+            <div className="p-4 rounded-2xl bg-background border border-border space-y-3">
+              <DynamicMatchQrCode value={booking.id} />
+              <p className="font-bold text-xs font-mono text-primary pt-1">MATCH PASS ID: #{booking.id.toUpperCase().slice(0, 10)}</p>
+            </div>
+
+            <p className="text-xs text-muted-foreground font-medium">
+              {t('printPassInstructions')}
+            </p>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => window.print()}
+                className="flex-1 border-border rounded-xl text-xs font-bold flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>{t('printPass')}</span>
+              </Button>
+              <Button
+                onClick={() => setShowQrModal(false)}
+                className="flex-1 bg-primary text-black font-bold rounded-xl text-xs cursor-pointer"
+              >
+                {t('close')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default function CheckoutPage() {
   return (
-    <div className="flex-1 flex items-center justify-center p-4 md:p-8 mt-12">
+    <div className="flex-1 flex items-center justify-center p-4 md:p-8 mt-10">
       <Suspense fallback={<CheckoutPageSkeleton />}>
         <CheckoutForm />
       </Suspense>

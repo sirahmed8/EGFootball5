@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { generateAIResponse } from '@/lib/aiService';
 import { db } from '@/lib/firebase/config';
 import {
@@ -17,11 +19,8 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
-  where,
-  getDocs,
 } from 'firebase/firestore';
 import {
-  MessageSquare,
   Bot,
   Users,
   Headphones,
@@ -36,14 +35,13 @@ import {
   Trash2,
   Search,
   Sparkles,
-  ChevronDown,
   GripHorizontal,
-  CheckCheck,
   Clock,
   ShieldCheck,
   ImageIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
 
 // Types
 interface AIMessage {
@@ -65,7 +63,7 @@ interface CommunityMessage {
   imageUrl?: string;
   replyTo?: { id: string; userName: string; text: string };
   reactions?: Record<string, string[]>; // { "❤️": ["uid1", "uid2"] }
-  createdAt: any;
+  createdAt: unknown;
 }
 
 interface SupportTicket {
@@ -76,7 +74,7 @@ interface SupportTicket {
   lastMessage: string;
   unreadByStaff: boolean;
   unreadByUser: boolean;
-  updatedAt: any;
+  updatedAt: unknown;
 }
 
 interface SupportMessage {
@@ -85,8 +83,35 @@ interface SupportMessage {
   senderName: string;
   senderRole: 'user' | 'staff';
   text: string;
-  createdAt: any;
+  createdAt: unknown;
 }
+
+interface SpeechRecognitionResultAlternative {
+  transcript: string;
+  confidence?: number;
+}
+
+interface SpeechRecognitionResultItem {
+  0: SpeechRecognitionResultAlternative;
+  length: number;
+}
+
+interface SpeechRecognitionEvent {
+  results: ArrayLike<SpeechRecognitionResultItem>;
+}
+
+interface SpeechRecognitionInstance {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((err: unknown) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+}
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 
 const EMOJI_LIST = ['❤️', '🔥', '👏', '😂', '👍', '⚽', '🏆', '🎯', '🚀', '💯'];
 const SLOW_MODE_SECONDS = 5;
@@ -94,35 +119,37 @@ const SLOW_MODE_SECONDS = 5;
 export function FloatingChatWidget() {
   const { appUser, firebaseUser } = useAuthStore();
   const locale = useLocale();
+  const t = useTranslations('FloatingChat');
   const isArabic = locale === 'ar';
   const isAdmin = appUser?.role === 'admin' || appUser?.role === 'owner';
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'ai' | 'community' | 'support'>('ai');
+
   const [modalHeight, setModalHeight] = useState<number>(560);
   const isResizing = useRef(false);
 
   // ----------------------------------------------------
   // Tab 1: AI Assistant State
   // ----------------------------------------------------
-  const [aiMessages, setAiMessages] = useState<AIMessage[]>([
+  const [aiMessages, setAiMessages] = useState<AIMessage[]>(() => [
     {
-      id: 'welcome-ai',
+      id: 'welcome',
       sender: 'ai',
-      text: isArabic
-        ? 'أهلاً بك! أنا مساعد Kickoff الذكي ⚽ كيف يمكنني مساعدتك اليوم في الملاعب أو المباريات؟'
-        : 'Welcome! I am Kickoff AI Assistant ⚽ How can I help you today with pitches, bookings, or matches?',
-      chips: isArabic
-        ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '📍 معرفة عناوين الملاعب']
-        : ['⚽ How to book a pitch?', '🏆 Available matches', '📍 Find pitch locations'],
-      timestamp: Date.now(),
+      text: t('welcomeAiText'),
+      chips: [
+        t('welcomeChip1'),
+        t('welcomeChip2'),
+        t('welcomeChip3'),
+      ],
+      timestamp: 1700000000000,
     },
   ]);
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
-  const speechRecognitionRef = useRef<any>(null);
+  const speechRecognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   // ----------------------------------------------------
   // Tab 2: Community Channel State
@@ -146,11 +173,11 @@ export function FloatingChatWidget() {
 
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
-  };
+  }, []);
 
   // ----------------------------------------------------
   // Resize Handle Logic
@@ -181,6 +208,7 @@ export function FloatingChatWidget() {
     window.addEventListener('touchend', onEnd);
   };
 
+
   // ----------------------------------------------------
   // Firestore Subscriptions
   // ----------------------------------------------------
@@ -200,7 +228,8 @@ export function FloatingChatWidget() {
     });
 
     return () => unsubComm();
-  }, [isOpen, activeTab]);
+  }, [isOpen, activeTab, scrollToBottom]);
+
 
   useEffect(() => {
     if (!isOpen || !firebaseUser) return;
@@ -216,7 +245,6 @@ export function FloatingChatWidget() {
     } else {
       // User view: single ticket under user's UID
       const userTicketId = firebaseUser.uid;
-      setSelectedTicketId(userTicketId);
       const qUserMsgs = query(
         collection(db, 'support_tickets', userTicketId, 'messages'),
         orderBy('createdAt', 'asc')
@@ -228,7 +256,7 @@ export function FloatingChatWidget() {
       });
       return () => unsubUserMsgs();
     }
-  }, [isOpen, firebaseUser, isAdmin, activeTab]);
+  }, [isOpen, firebaseUser, isAdmin, activeTab, scrollToBottom]);
 
   // Admin selected ticket messages subscription
   useEffect(() => {
@@ -243,7 +271,8 @@ export function FloatingChatWidget() {
       scrollToBottom();
     });
     return () => unsubStaffMsgs();
-  }, [isAdmin, selectedTicketId]);
+  }, [isAdmin, selectedTicketId, scrollToBottom]);
+
 
   // Cooldown countdown timer
   useEffect(() => {
@@ -262,7 +291,7 @@ export function FloatingChatWidget() {
     if (!file) return;
 
     if (!file.type.match(/^image\/(png|jpeg|jpg|webp)$/)) {
-      toast.error(isArabic ? 'صيغة الصورة غير مدعومة (png, jpeg, jpg, webp فقط)' : 'Only PNG, JPEG, JPG, WEBP formats allowed');
+      toast.error(t('imageNotSupported'));
       return;
     }
 
@@ -274,36 +303,34 @@ export function FloatingChatWidget() {
   };
 
   const toggleVoiceRecognition = () => {
-    if (isListening) {
-      if (speechRecognitionRef.current) {
-        speechRecognitionRef.current.stop();
-      }
-      setIsListening(false);
-      return;
-    }
+    const windowWithSpeech = window as unknown as {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
 
     const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      windowWithSpeech.SpeechRecognition ||
+      windowWithSpeech.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      toast.error(isArabic ? 'خاصية التعرف على الصوت غير مدعومة في متصفحك' : 'Voice recognition not supported in this browser');
+      toast.error(t('voiceNotSupported'));
       return;
     }
 
-    const recognition = new SpeechRecognition();
+    const recognition: SpeechRecognitionInstance = new SpeechRecognition();
     recognition.lang = isArabic ? 'ar-EG' : 'en-US';
     recognition.continuous = false;
     recognition.interimResults = true;
 
     recognition.onstart = () => setIsListening(true);
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = Array.from(event.results)
-        .map((result: any) => result[0].transcript)
+        .map((result: SpeechRecognitionResultItem) => result[0].transcript)
         .join('');
       setAiInput(transcript);
     };
 
-    recognition.onerror = (err: any) => {
+    recognition.onerror = (err: unknown) => {
       console.warn('Speech error:', err);
       setIsListening(false);
     };
@@ -316,7 +343,6 @@ export function FloatingChatWidget() {
 
   const playTTSAudio = async (text: string) => {
     try {
-      // Call /api/ai/tts route
       const res = await fetch('/api/ai/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -324,8 +350,8 @@ export function FloatingChatWidget() {
       });
       const data = await res.json();
 
-      if (data.audioUrl) {
-        const audio = new Audio(data.audioUrl);
+      if (data.audioContent) {
+        const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
         audio.play();
         return;
       }
@@ -348,7 +374,7 @@ export function FloatingChatWidget() {
     }
   };
 
-  const sendAIMessage = async (textToSend?: string) => {
+  const sendAIMessage = useCallback(async (textToSend?: string) => {
     const queryText = (textToSend || aiInput).trim();
     if (!queryText && !attachedImage) return;
 
@@ -384,13 +410,15 @@ export function FloatingChatWidget() {
       };
 
       setAiMessages((prev) => [...prev, aiMsg]);
-    } catch (err: any) {
-      toast.error(err.message || 'AI Error');
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || 'AI Error');
     } finally {
       setAiLoading(false);
       scrollToBottom();
     }
-  };
+  }, [aiInput, attachedImage, appUser, locale, scrollToBottom]);
+
 
   // ----------------------------------------------------
   // Community Channel Functions
@@ -399,7 +427,7 @@ export function FloatingChatWidget() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.match(/^image\/(png|jpeg|jpg|webp)$/)) {
-      toast.error(isArabic ? 'صيغة الصورة غير مدعومة' : 'Only PNG, JPEG, JPG, WEBP formats allowed');
+      toast.error(t('imageNotSupported'));
       return;
     }
     const reader = new FileReader();
@@ -438,8 +466,9 @@ export function FloatingChatWidget() {
       setReplyingTo(null);
       setCooldownLeft(SLOW_MODE_SECONDS);
       scrollToBottom();
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to send message');
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || 'Failed to send message');
     }
   };
 
@@ -461,17 +490,19 @@ export function FloatingChatWidget() {
 
     try {
       await updateDoc(doc(db, 'community_messages', msgId), { reactions: currentReactions });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn('Reaction error:', err);
     }
   };
+
 
   const deleteCommunityMessage = async (msgId: string) => {
     try {
       await deleteDoc(doc(db, 'community_messages', msgId));
       toast.success(isArabic ? 'تم حذف الرسالة' : 'Message deleted');
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message);
     }
   };
 
@@ -521,10 +552,12 @@ export function FloatingChatWidget() {
 
       setSupportInput('');
       scrollToBottom();
-    } catch (err: any) {
-      toast.error(err.message || 'Support error');
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || 'Support error');
     }
   };
+
 
   const filteredTickets = supportTickets.filter((t) => {
     const matchesFilter = supportFilter === 'all' || (supportFilter === 'unread' && t.unreadByStaff);
@@ -552,7 +585,7 @@ export function FloatingChatWidget() {
             aria-label="Open Floating Chatbot"
           >
             <Bot className="w-7 h-7 text-black stroke-[2.5]" />
-            <span className="absolute -top-1 -right-1 flex h-4 w-4">
+            <span className="absolute -top-1 -end-1 flex h-4 w-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-400"></span>
             </span>
@@ -591,7 +624,7 @@ export function FloatingChatWidget() {
                   }`}
                 >
                   <Bot className="w-4 h-4" />
-                  <span>{isArabic ? 'الذكاء الاصطناعي' : 'AI Assistant'}</span>
+                  <span>{t('tabAi')}</span>
                 </button>
 
                 <button
@@ -603,7 +636,7 @@ export function FloatingChatWidget() {
                   }`}
                 >
                   <Users className="w-4 h-4" />
-                  <span>{isArabic ? 'المجتمع' : 'Community'}</span>
+                  <span>{t('tabCommunity')}</span>
                 </button>
 
                 <button
@@ -615,7 +648,7 @@ export function FloatingChatWidget() {
                   }`}
                 >
                   <Headphones className="w-4 h-4" />
-                  <span>{isArabic ? 'الدعم' : 'Support'}</span>
+                  <span>{t('tabSupport')}</span>
                 </button>
               </div>
 
@@ -634,7 +667,7 @@ export function FloatingChatWidget() {
               {/* ==================================================== */}
               {activeTab === 'ai' && (
                 <div className="flex flex-col h-full justify-between space-y-4">
-                  <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                  <div className="flex-1 overflow-y-auto space-y-3 pe-1">
                     {aiMessages.map((msg) => (
                       <div
                         key={msg.id}
@@ -651,12 +684,16 @@ export function FloatingChatWidget() {
                         >
                           {/* User uploaded image thumbnail */}
                           {msg.image && (
-                            <img
+                            <Image
                               src={msg.image}
                               alt="Uploaded screenshot"
+                              width={300}
+                              height={200}
+                              unoptimized
                               className="w-full max-h-48 object-cover rounded-xl mb-2 border border-black/20"
                             />
                           )}
+
                           <p className="whitespace-pre-wrap">{msg.text}</p>
 
                           {/* AI Actions: Speech Playback */}
@@ -667,7 +704,7 @@ export function FloatingChatWidget() {
                                 className="flex items-center gap-1 hover:text-emerald-400 transition-colors cursor-pointer"
                               >
                                 <Volume2 className="w-3.5 h-3.5" />
-                                <span>{isArabic ? 'استماع' : 'Listen Voice'}</span>
+                                <span>{t('listenVoice')}</span>
                               </button>
                               {msg.modelUsed && (
                                 <span className="text-[10px] font-mono opacity-60">
@@ -699,7 +736,7 @@ export function FloatingChatWidget() {
                     {aiLoading && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 rounded-2xl bg-muted/40 w-max animate-pulse">
                         <Bot className="w-4 h-4 text-emerald-400 animate-bounce" />
-                        <span>{isArabic ? 'الذكاء الاصطناعي يفكر...' : 'Gemini AI is thinking...'}</span>
+                        <span>{t('aiThinking')}</span>
                       </div>
                     )}
                     <div ref={chatBottomRef} />
@@ -709,14 +746,18 @@ export function FloatingChatWidget() {
                   <div className="pt-2 border-t border-border/40 space-y-2 shrink-0">
                     {attachedImage && (
                       <div className="relative inline-block">
-                        <img
+                        <Image
                           src={attachedImage}
                           alt="Thumbnail preview"
+                          width={56}
+                          height={56}
+                          unoptimized
                           className="w-14 h-14 object-cover rounded-xl border border-emerald-500/50"
                         />
+
                         <button
                           onClick={() => setAttachedImage(null)}
-                          className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full bg-destructive text-white text-xs"
+                          className="absolute -top-1.5 -end-1.5 p-0.5 rounded-full bg-destructive text-white text-xs"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -754,9 +795,7 @@ export function FloatingChatWidget() {
                         value={aiInput}
                         onChange={(e) => setAiInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && sendAIMessage()}
-                        placeholder={
-                          isArabic ? 'اسأل الذكاء الاصطناعي...' : 'Ask Gemini AI assistant...'
-                        }
+                        placeholder={t('askAiPlaceholder')}
                         className="flex-1 bg-transparent border-none text-xs text-foreground focus:outline-none px-2"
                       />
 
@@ -777,7 +816,7 @@ export function FloatingChatWidget() {
               {/* ==================================================== */}
               {activeTab === 'community' && (
                 <div className="flex flex-col h-full justify-between space-y-4">
-                  <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                  <div className="flex-1 overflow-y-auto space-y-3 pe-1">
                     {communityMessages.map((msg) => (
                       <div
                         key={msg.id}
@@ -813,9 +852,12 @@ export function FloatingChatWidget() {
 
                         {/* Message image */}
                         {msg.imageUrl && (
-                          <img
+                          <Image
                             src={msg.imageUrl}
                             alt="Attachment"
+                            width={300}
+                            height={200}
+                            unoptimized
                             className="w-full max-h-48 object-cover rounded-xl border border-border"
                           />
                         )}
@@ -849,7 +891,7 @@ export function FloatingChatWidget() {
                             className="text-muted-foreground hover:text-emerald-400 flex items-center gap-1 text-[11px] cursor-pointer"
                           >
                             <Reply className="w-3 h-3" />
-                            <span>{isArabic ? 'رد' : 'Reply'}</span>
+                            <span>{t('reply')}</span>
                           </button>
                         </div>
                       </div>
@@ -862,7 +904,7 @@ export function FloatingChatWidget() {
                     {replyingTo && (
                       <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-400">
                         <span>
-                          {isArabic ? 'رد على' : 'Replying to'} <strong>@{replyingTo.userName}</strong>
+                          {t('replyingTo')} <strong>@{replyingTo.userName}</strong>
                         </span>
                         <button onClick={() => setReplyingTo(null)} className="cursor-pointer">
                           <X className="w-3.5 h-3.5" />
@@ -872,14 +914,18 @@ export function FloatingChatWidget() {
 
                     {communityImage && (
                       <div className="relative inline-block">
-                        <img
+                        <Image
                           src={communityImage}
                           alt="Thumbnail preview"
+                          width={56}
+                          height={56}
+                          unoptimized
                           className="w-14 h-14 object-cover rounded-xl border border-emerald-500/50"
                         />
+
                         <button
                           onClick={() => setCommunityImage(null)}
-                          className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full bg-destructive text-white text-xs"
+                          className="absolute -top-1.5 -end-1.5 p-0.5 rounded-full bg-destructive text-white text-xs"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -928,9 +974,7 @@ export function FloatingChatWidget() {
                         value={communityInput}
                         onChange={(e) => setCommunityInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && sendCommunityMessage()}
-                        placeholder={
-                          isArabic ? 'اكتب رسالة للمجتمع...' : 'Share message with community...'
-                        }
+                        placeholder={t('shareCommunityPlaceholder')}
                         className="flex-1 bg-transparent border-none text-xs text-foreground focus:outline-none px-2"
                       />
 
@@ -981,25 +1025,19 @@ export function FloatingChatWidget() {
                                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                                 />
                               )}
-                              {filter === 'all'
-                                ? isArabic
-                                  ? 'الكل'
-                                  : 'All'
-                                : isArabic
-                                ? 'غير مقروء'
-                                : 'Unread'}
+                              {filter === 'all' ? t('all') : t('unread')}
                             </button>
                           ))}
                         </div>
 
                         <div className="relative flex-1 max-w-[160px]">
-                          <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-muted-foreground" />
+                          <Search className="w-3.5 h-3.5 absolute start-2.5 top-2.5 text-muted-foreground" />
                           <input
                             type="text"
                             value={supportSearch}
                             onChange={(e) => setSupportSearch(e.target.value)}
-                            placeholder={isArabic ? 'بحث...' : 'Search...'}
-                            className="w-full bg-muted/40 border border-border rounded-xl text-xs pl-8 pr-2 py-1 text-foreground focus:outline-none"
+                            placeholder={t('searchPlaceholder')}
+                            className="w-full bg-muted/40 border border-border rounded-xl text-xs ps-8 pe-2 py-1 text-foreground focus:outline-none"
                           />
                         </div>
                       </div>
@@ -1009,14 +1047,14 @@ export function FloatingChatWidget() {
                         <div className="flex-1 overflow-y-auto space-y-2">
                           {filteredTickets.length === 0 ? (
                             <p className="text-xs text-muted-foreground text-center py-8">
-                              {isArabic ? 'لا توجد تذاكر دعم' : 'No support tickets found'}
+                              {t('noTicketsFound')}
                             </p>
                           ) : (
                             filteredTickets.map((tix) => (
                               <button
                                 key={tix.id}
                                 onClick={() => setSelectedTicketId(tix.id)}
-                                className="w-full text-left p-3 rounded-2xl bg-muted/50 hover:bg-muted border border-border/50 transition-all space-y-1 block cursor-pointer"
+                                className="w-full text-start p-3 rounded-2xl bg-muted/50 hover:bg-muted border border-border/50 transition-all space-y-1 block cursor-pointer"
                               >
                                 <div className="flex items-center justify-between text-xs font-bold text-foreground">
                                   <span>{tix.userName}</span>
@@ -1037,10 +1075,10 @@ export function FloatingChatWidget() {
                             onClick={() => setSelectedTicketId(null)}
                             className="text-xs text-emerald-400 flex items-center gap-1 font-bold mb-2 cursor-pointer"
                           >
-                            ← {isArabic ? 'العودة للبريد' : 'Back to Inbox'}
+                            ← {t('backToInbox')}
                           </button>
 
-                          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+                          <div className="flex-1 overflow-y-auto space-y-2 pe-1">
                             {supportMessages.map((msg) => (
                               <div
                                 key={msg.id}
@@ -1068,7 +1106,7 @@ export function FloatingChatWidget() {
                               value={supportInput}
                               onChange={(e) => setSupportInput(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && sendSupportMessage()}
-                              placeholder={isArabic ? 'الرد على المستخدم...' : 'Reply to user...'}
+                              placeholder={t('replyToUserPlaceholder')}
                               className="flex-1 bg-transparent border-none text-xs text-foreground focus:outline-none px-2"
                             />
                             <button
@@ -1087,17 +1125,15 @@ export function FloatingChatWidget() {
                       <div className="flex items-center gap-2 p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400">
                         <ShieldCheck className="w-4 h-4 shrink-0" />
                         <span>
-                          {isArabic
-                            ? 'فريق الدعم الفني متواجد لمساعدتك 24/7'
-                            : 'Staff support is online to assist you'}
+                          {t('staffSupportOnline')}
                         </span>
                       </div>
 
-                      <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+                      <div className="flex-1 overflow-y-auto space-y-2 pe-1">
                         {supportMessages.length === 0 ? (
                           <div className="text-center text-xs text-muted-foreground py-8">
                             <Headphones className="w-8 h-8 mx-auto mb-2 opacity-50 text-emerald-400" />
-                            <p>{isArabic ? 'كيف يمكننا مساعدتك اليوم؟' : 'How can staff help you today?'}</p>
+                            <p>{t('howCanStaffHelp')}</p>
                           </div>
                         ) : (
                           supportMessages.map((msg) => (
@@ -1131,9 +1167,7 @@ export function FloatingChatWidget() {
                           value={supportInput}
                           onChange={(e) => setSupportInput(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && sendSupportMessage()}
-                          placeholder={
-                            isArabic ? 'اكتب استفسارك للدعم...' : 'Type message to staff...'
-                          }
+                          placeholder={t('typeMessageToStaff')}
                           className="flex-1 bg-transparent border-none text-xs text-foreground focus:outline-none px-2"
                         />
                         <button

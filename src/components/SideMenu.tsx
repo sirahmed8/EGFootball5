@@ -17,7 +17,11 @@ import Image from 'next/image';
 // ── Sidebar content (shared between desktop & mobile) ─────────────────────────
 function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile: boolean }) {
   const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
+  const mounted = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -25,9 +29,6 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   const tNav = useTranslations('Navbar');
   const appUser = useAuthStore(s => s.appUser);
   const firebaseUser = useAuthStore(s => s.firebaseUser);
-
-  React.useEffect(() => { setMounted(true); }, []);
-
   const isDark = mounted && resolvedTheme === 'dark';
 
   const toggleLanguage = () => {
@@ -57,12 +58,12 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   const navLinks = [
     ...(appUser?.role !== 'owner' ? [{ href: '/home', label: tNav('bookPitch'), icon: <Home size={18} /> }] : []),
     ...(appUser?.role !== 'owner' ? [{ href: '/matches', label: tNav('publicMatches'), icon: <Trophy size={18} /> }] : []),
-    ...(appUser?.role !== 'owner' ? [{ href: '/book', label: 'Book a Pitch', icon: <CalendarDays size={18} /> }] : []),
+    ...(appUser?.role !== 'owner' ? [{ href: '/book', label: tNav('bookPitch'), icon: <CalendarDays size={18} /> }] : []),
     ...(appUser?.role === 'admin' ? [{ href: '/admin/dashboard', label: tNav('adminDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
     ...(appUser?.role === 'owner' ? [{ href: '/owner', label: tNav('ownerDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
-    ...(appUser?.role === 'owner' ? [{ href: '/owner/dashboard', label: 'Analytics Dashboard', icon: <Trophy size={18} /> }] : []),
-    ...(appUser?.role === 'owner' ? [{ href: '/owner/users', label: t('users'), icon: <Users size={18} /> }] : []),
-    ...(firebaseUser && appUser?.role !== 'owner' ? [{ href: '/profile', label: 'Profile', icon: <UserCircle size={18} /> }] : []),
+    ...(appUser?.role === 'owner' ? [{ href: '/owner/dashboard', label: tNav('analytics'), icon: <Trophy size={18} /> }] : []),
+    ...(appUser?.role === 'owner' ? [{ href: '/owner/users', label: tNav('managePlayers'), icon: <Users size={18} /> }] : []),
+    ...(firebaseUser && appUser?.role !== 'owner' ? [{ href: '/profile', label: tNav('profile'), icon: <UserCircle size={18} /> }] : []),
   ].filter((link, idx, arr) => arr.findIndex(l => l.href === link.href) === idx);
 
   return (
@@ -72,7 +73,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
         <Link href="/" onClick={() => onClose?.()} className="flex items-center gap-2">
           <Image src="/favicon.jpg" alt="Logo" width={28} height={28} className="rounded-full object-cover" priority={true} />
           <span className="font-black text-base tracking-tight">
-            EG<span className="text-primary drop-shadow-[0_0_6px_rgba(57,255,20,0.5)]">Football5</span>
+            EG<span className="text-primary">Football5</span>
           </span>
         </Link>
         {isMobile && (
@@ -158,6 +159,8 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
 // Drawer ALWAYS opens from the RIGHT (same side as hamburger button)
 function MobileDrawer() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const locale = useLocale();
+  const isRTL = locale === 'ar';
 
   React.useEffect(() => {
     if (isOpen) {
@@ -175,26 +178,32 @@ function MobileDrawer() {
       {/* Hamburger */}
       <button
         onClick={() => setIsOpen(true)}
-        className="p-2 rounded-full hover:bg-muted transition-colors text-foreground"
+        className="p-2 rounded-full hover:bg-muted transition-colors text-foreground cursor-pointer"
         aria-label="Open menu"
       >
         <Menu className="w-6 h-6" />
       </button>
 
-      {/* Backdrop — CSS opacity, always rendered */}
+      {/* Backdrop */}
       <div
         className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
         style={{ opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? 'auto' : 'none' }}
         onClick={() => setIsOpen(false)}
       />
 
-      {/* Drawer — slides from the RIGHT always (matches button position) */}
+      {/* Drawer — slides from left in LTR, right in RTL */}
       <div
-        className="fixed top-0 right-0 z-[60] h-full w-72 max-w-[85vw]
-          bg-background border-l border-border overflow-hidden shadow-2xl
-          rounded-l-2xl outline outline-1 outline-border
-          transition-transform duration-200 ease-in-out"
-        style={{ transform: isOpen ? 'translateX(0)' : 'translateX(110%)' }}
+        className={`fixed top-0 z-[60] h-full w-72 max-w-[85vw]
+          bg-background overflow-hidden shadow-2xl outline outline-1 outline-border
+          transition-transform duration-200 ease-in-out
+          ${isRTL ? 'end-0 border-e border-border rounded-e-2xl' : 'start-0 border-s border-border rounded-s-2xl'}`}
+        style={{
+          transform: isOpen
+            ? 'translateX(0)'
+            : isRTL
+            ? 'translateX(110%)'
+            : 'translateX(-110%)',
+        }}
       >
         <SidebarContent onClose={() => setIsOpen(false)} isMobile={true} />
       </div>
@@ -213,8 +222,8 @@ export function DesktopSidebar() {
       className={`hidden md:flex flex-col fixed top-0 bottom-0 z-40 w-64
         bg-background border-border overflow-hidden
         ${isRTL
-          ? 'right-0 border-l rounded-l-2xl outline outline-1 outline-border'
-          : 'left-0 border-r rounded-r-2xl outline outline-1 outline-border'
+          ? 'end-0 border-e rounded-e-2xl outline outline-1 outline-border'
+          : 'start-0 border-s rounded-s-2xl outline outline-1 outline-border'
         }`}
     >
       <SidebarContent isMobile={false} />

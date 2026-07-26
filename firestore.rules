@@ -3,6 +3,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Function to check if user is owner
+    function isOwner() {
+      return request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner'
+      );
+    }
+
     // Function to check if user is admin or owner
     function isAdmin() {
       return request.auth != null && (
@@ -38,7 +45,9 @@ service cloud.firestore {
     // Pitches collection
     match /pitches/{pitchId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create: if isOwner() || (isAdmin() && request.resource.data.adminEmail == request.auth.token.email);
+      allow update: if isOwner() || (isAdmin() && resource.data.adminEmail == request.auth.token.email && request.resource.data.adminEmail == request.auth.token.email);
+      allow delete: if isOwner();
     }
 
     // Bookings collection
@@ -48,14 +57,27 @@ service cloud.firestore {
                     && isNotBlacklisted()
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.status == 'locked_temporary'
-                    && request.resource.data.totalAmount == get(/databases/$(database)/documents/pitches/$(request.resource.data.pitchId)).data.pricePerHour * request.resource.data.duration
+                    && request.resource.data.totalAmount > 0
                     && request.resource.data.depositAmount >= 0
                     && request.resource.data.duration > 0;
       allow update: if isAuth() 
                     && isNotBlacklisted()
                     && (
                       isAdmin() || 
-                      (request.resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['receiptUrl', 'status']) && request.resource.data.status == 'pending_review' && resource.data.status == 'locked_temporary') ||
+                      (
+                        request.resource.data.userId == request.auth.uid &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['receiptUrl', 'status']) &&
+                        request.resource.data.status == 'pending_review' &&
+                        resource.data.status == 'locked_temporary' &&
+                        request.resource.data.receiptUrl is string &&
+                        request.resource.data.receiptUrl.size() > 0
+                      ) ||
+                      (
+                        request.resource.data.userId == request.auth.uid &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+                        (request.resource.data.status == 'rejected' || request.resource.data.status == 'cancelled') &&
+                        (resource.data.status == 'locked_temporary' || resource.data.status == 'pending_review')
+                      ) ||
                       // Allow players to join or leave public matches
                       (
                         resource.data.bookingType == 'public' &&
@@ -81,8 +103,9 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAuth() && isNotBlacklisted() && (
         isAdmin() || (
-          // Only allowed to modify or create the slots field. In a real production app, this should be purely driven by Cloud Functions.
-          (resource == null && request.resource.data.keys().hasOnly(['slots'])) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['slots'])
+          // Non-admin writes: restricted to modifying 'slots' field and prevents schedule deletion/wiping
+          ((resource == null && request.resource.data.keys().hasOnly(['slots'])) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['slots'])) &&
+          (resource == null || request.resource.data.slots.size() >= resource.data.slots.size() - 4)
         )
       );
     }
@@ -97,9 +120,21 @@ service cloud.firestore {
     // Notifications collection
     match /notifications/{notificationId} {
       allow read: if isAuth() && resource.data.userId == request.auth.uid;
-      allow create: if isAuth() && isAdmin();
+      allow create: if isAuth() && (request.auth.uid == request.resource.data.userId || request.resource.data.senderId == request.auth.uid || isAdmin() || isOwner());
       allow update: if isAuth() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
       allow delete: if isAuth() && resource.data.userId == request.auth.uid;
+    }
+
+    // Support Tickets collection
+    match /support_tickets/{ticketId} {
+      allow read: if isAuth() && (request.auth.uid == resource.data.userId || request.auth.uid == ticketId || isAdmin());
+      allow create, update: if isAuth() && (request.auth.uid == ticketId || isAdmin());
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if isAuth() && (request.auth.uid == ticketId || isAdmin());
+        allow create: if isAuth() && (request.auth.uid == ticketId || isAdmin() || request.auth.uid == request.resource.data.senderId);
+      }
     }
   }
 }

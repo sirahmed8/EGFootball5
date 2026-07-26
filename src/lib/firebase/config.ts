@@ -26,7 +26,10 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const rtdb = getDatabase(app);
+export const rtdb = getDatabase(
+  app,
+  process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "https://football1fc1-default-rtdb.europe-west1.firebasedatabase.app"
+);
 
 // Initialize Analytics safely on the client side only
 let analytics: Analytics | null = null;

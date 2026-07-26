@@ -12,7 +12,6 @@ interface PlayersListProps {
   getUserLoyalty: (userId: string) => number;
   handleToggleBlacklist: (userId: string, currentStatus: boolean) => Promise<void>;
   t: (key: string) => string;
-  locale: string;
 }
 
 export const PlayersList = React.memo(function PlayersList({
@@ -22,17 +21,17 @@ export const PlayersList = React.memo(function PlayersList({
   getUserLoyalty,
   handleToggleBlacklist,
   t,
-  locale
 }: PlayersListProps) {
+
   return (
-    <Card className="bg-card/50 border-border backdrop-blur-xl">
+    <Card className="bg-card border border-border rounded-3xl shadow-xl">
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4">
         <div>
-          <CardTitle className="text-card-foreground">{t('playersList')}</CardTitle>
+          <CardTitle className="text-xl font-black text-foreground">{t('playersList')}</CardTitle>
         </div>
         <div className="w-full sm:w-72">
           <Input
-            placeholder={locale === 'ar' ? 'بحث بالاسم أو الهاتف...' : 'Search by name or phone...'}
+            placeholder={t('searchPlayerPlaceholder')}
             value={playerSearch}
             onChange={(e) => setPlayerSearch(e.target.value)}
             className="bg-card text-foreground border-border"
@@ -41,16 +40,16 @@ export const PlayersList = React.memo(function PlayersList({
       </CardHeader>
       <CardContent>
         {uniquePlayers.length === 0 ? (
-          <p className="text-muted-foreground text-center py-6">No players found.</p>
+          <p className="text-muted-foreground text-center py-6">{t('noPlayersFound')}</p>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-border hover:bg-muted/50">
-                  <TableHead className="text-muted-foreground">Player</TableHead>
+                  <TableHead className="text-muted-foreground">{t('player')}</TableHead>
                   <TableHead className="text-muted-foreground">{t('loyaltyBookings')}</TableHead>
                   <TableHead className="text-muted-foreground">{t('playerStatus')}</TableHead>
-                  <TableHead className="text-right text-muted-foreground">Actions</TableHead>
+                  <TableHead className="text-end text-muted-foreground">{t('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -69,8 +68,8 @@ export const PlayersList = React.memo(function PlayersList({
                     return (
                       <TableRow key={user.uid} className="border-border hover:bg-muted/50 text-foreground">
                         <TableCell className="font-medium">
-                          <div>{user.name || 'Unnamed'}</div>
-                          <div className="text-xs text-muted-foreground">{user.phone || 'No phone'}</div>
+                          <div>{user.name || t('unnamed')}</div>
+                          <div className="text-xs text-muted-foreground">{user.phone || t('noPhone')}</div>
                         </TableCell>
                         <TableCell className="font-bold text-primary">{loyalty}</TableCell>
                         <TableCell>
@@ -82,7 +81,7 @@ export const PlayersList = React.memo(function PlayersList({
                             {isBlack ? t('blacklisted') : t('active')}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-end">
                           <Button
                             variant={isBlack ? 'outline' : 'destructive'}
                             size="sm"

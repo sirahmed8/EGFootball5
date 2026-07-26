@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -27,9 +28,9 @@ export function PitchSettings({
   if (!editingPitch) return null;
 
   return (
-    <Card className="bg-card/50 border-border backdrop-blur-xl">
+    <Card className="bg-card border border-border rounded-3xl shadow-xl">
       <CardHeader>
-        <CardTitle className="text-card-foreground">{t('editPitch')}</CardTitle>
+        <CardTitle className="text-xl font-black text-foreground">{t('editPitch')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-4 max-w-xl">
@@ -90,11 +91,10 @@ export function PitchSettings({
                     setSavingPitch(false);
                   }
                 }}
-                className="bg-card text-foreground flex-1 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
+                className="bg-card text-foreground flex-1 file:me-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 cursor-pointer"
               />
               {editingPitch.imagePreviewUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={editingPitch.imagePreviewUrl} alt="Preview" className="w-12 h-12 rounded-lg object-cover" />
+                <Image src={editingPitch.imagePreviewUrl} alt="Preview" width={48} height={48} unoptimized className="w-12 h-12 rounded-lg object-cover" />
               )}
             </div>
           </div>
@@ -110,3 +110,4 @@ export function PitchSettings({
     </Card>
   );
 }
+

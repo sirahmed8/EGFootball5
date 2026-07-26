@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useRouter } from '@/i18n/routing';
 import {
   GoogleAuthProvider,
@@ -21,7 +21,7 @@ export default function LoginPage() {
   const router = useRouter();
   const t = useTranslations('Login');
 
-  const processUserSignIn = async (user: FirebaseUser) => {
+  const processUserSignIn = useCallback(async (user: FirebaseUser) => {
     const userRef = doc(db, 'users', user.uid);
     const userSnap = await getDoc(userRef);
 
@@ -101,7 +101,7 @@ export default function LoginPage() {
         router.push('/home');
       }
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     // Check if user returned from OAuth redirect
@@ -114,7 +114,8 @@ export default function LoginPage() {
       .catch((err: unknown) => {
         console.error('Redirect sign-in error:', err);
       });
-  }, []);
+  }, [processUserSignIn]);
+
 
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();

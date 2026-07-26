@@ -1,0 +1,29 @@
+{
+  "rules": {
+    "status": {
+      ".read": "auth != null",
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "chats": {
+      "$matchId": {
+        "messages": {
+          ".read": "auth != null",
+          ".indexOn": ["timestamp"],
+          "$messageId": {
+            ".write": "auth != null && (!newData.exists() || newData.child('senderId').val() === auth.uid)",
+            ".validate": "newData.hasChildren(['text', 'senderId', 'senderName']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('senderName').isString()"
+          }
+        },
+        "typing": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        }
+      }
+    }
+  }
+}

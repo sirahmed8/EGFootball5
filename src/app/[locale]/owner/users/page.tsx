@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
-import { collection, query, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
 import { User as AppUser } from '@/types';
+import { useUsers, useUpdateUserRole, useToggleBlacklist, useDeleteUser } from '@/hooks/useUserRoles';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { User, Shield, ShieldAlert, Ban, CheckCircle, Mail, Trash2 } from 'lucide-react';
@@ -19,10 +18,13 @@ export default function OwnerUsersPage() {
   const router = useRouter();
   const { appUser, loading } = useAuthStore();
   const t = useTranslations('OwnerUsers');
-  
-  const [users, setUsers] = useState<AppUser[]>([]);
-  const [fetching, setFetching] = useState(true);
-  const [userToDelete, setUserToDelete] = useState<{ id: string, name: string } | null>(null);
+
+  const { data: users = [], isLoading: fetching } = useUsers();
+  const updateRoleMutation = useUpdateUserRole();
+  const toggleBlacklistMutation = useToggleBlacklist();
+  const deleteUserMutation = useDeleteUser();
+
+  const [userToDelete, setUserToDelete] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     if (!loading && appUser?.role !== 'owner') {
@@ -30,26 +32,13 @@ export default function OwnerUsersPage() {
     }
   }, [appUser, loading, router]);
 
-  useEffect(() => {
-    if (appUser?.role !== 'owner') return;
-
-    const q = query(collection(db, 'users'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const allUsers = snapshot.docs.map(d => d.data() as AppUser);
-      setUsers(allUsers);
-      setFetching(false);
-    });
-
-    return () => unsubscribe();
-  }, [appUser]);
-
   if (loading || appUser?.role !== 'owner' || fetching) {
     return <UsersPageSkeleton />;
   }
 
   const handleUpdateRole = async (userId: string, newRole: AppUser['role']) => {
     try {
-      await updateDoc(doc(db, 'users', userId), { role: newRole });
+      await updateRoleMutation.mutateAsync({ userId, newRole });
       toast.success('Role updated successfully');
     } catch (error) {
       const err = error as Error;
@@ -59,7 +48,7 @@ export default function OwnerUsersPage() {
 
   const handleUpdateBlacklist = async (userId: string, isBlacklisted: boolean) => {
     try {
-      await updateDoc(doc(db, 'users', userId), { isBlacklisted });
+      await toggleBlacklistMutation.mutateAsync({ userId, isBlacklisted });
       toast.success(isBlacklisted ? 'User blacklisted' : 'User unblacklisted');
     } catch (error) {
       const err = error as Error;
@@ -70,7 +59,7 @@ export default function OwnerUsersPage() {
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
     try {
-      await deleteDoc(doc(db, 'users', userToDelete.id));
+      await deleteUserMutation.mutateAsync({ userId: userToDelete.id });
       toast.success(`User "${userToDelete.name}" deleted successfully`);
     } catch (error) {
       const err = error as Error;
@@ -87,9 +76,9 @@ export default function OwnerUsersPage() {
         <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
       </div>
 
-      <Card className="bg-card/50 border-border backdrop-blur-xl">
+      <Card className="bg-card border border-border rounded-3xl shadow-xl">
         <CardHeader>
-          <CardTitle className="text-xl font-bold flex items-center gap-2 text-foreground">
+          <CardTitle className="text-xl font-black flex items-center gap-2 text-foreground">
             <User className="w-5 h-5 text-primary" />
             {t('title')}
           </CardTitle>
@@ -99,19 +88,19 @@ export default function OwnerUsersPage() {
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
+            <div className="text-center text-muted-foreground py-8 font-medium">
               {t('noUsers')}
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
+              <table className="w-full text-sm text-start">
                 <thead className="text-xs text-muted-foreground uppercase bg-muted/50">
                   <tr>
-                    <th className="px-4 py-3">{t('name')}</th>
-                    <th className="px-4 py-3">{t('email')}</th>
-                    <th className="px-4 py-3">{t('role')}</th>
-                    <th className="px-4 py-3">{t('status')}</th>
-                    <th className="px-4 py-3">{t('actions')}</th>
+                    <th className="px-4 py-3 text-start">{t('name')}</th>
+                    <th className="px-4 py-3 text-start">{t('email')}</th>
+                    <th className="px-4 py-3 text-start">{t('role')}</th>
+                    <th className="px-4 py-3 text-start">{t('status')}</th>
+                    <th className="px-4 py-3 text-start">{t('actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -160,46 +149,50 @@ export default function OwnerUsersPage() {
                           {user.role !== 'owner' && (
                             <>
                               {user.role === 'admin' ? (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
+                                <Button
+                                  variant="outline"
+                                  size="sm"
                                   onClick={() => handleUpdateRole(user.uid, 'player')}
-                                  className="border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+                                  disabled={updateRoleMutation.isPending}
+                                  className="border-border text-foreground hover:bg-accent hover:text-accent-foreground rounded-xl"
                                 >
-                                  <ShieldAlert className="w-4 h-4 mr-1" />
+                                  <ShieldAlert className="w-4 h-4 me-1" />
                                   {t('makePlayer')}
                                 </Button>
                               ) : (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
+                                <Button
+                                  variant="outline"
+                                  size="sm"
                                   onClick={() => handleUpdateRole(user.uid, 'admin')}
-                                  className="border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+                                  disabled={updateRoleMutation.isPending}
+                                  className="border-border text-foreground hover:bg-accent hover:text-accent-foreground rounded-xl"
                                 >
-                                  <Shield className="w-4 h-4 mr-1" />
+                                  <Shield className="w-4 h-4 me-1" />
                                   {t('makeAdmin')}
                                 </Button>
                               )}
-                              
-                              <Button 
+
+                              <Button
                                 variant={user.isBlacklisted ? "default" : "destructive"}
-                                size="sm" 
+                                size="sm"
                                 onClick={() => handleUpdateBlacklist(user.uid, !user.isBlacklisted)}
-                                className="font-semibold"
+                                disabled={toggleBlacklistMutation.isPending}
+                                className="font-semibold rounded-xl"
                               >
                                 {user.isBlacklisted ? t('unblacklist') : t('blacklist')}
                               </Button>
 
-                                <Button 
-                                  variant="destructive"
-                                  size="sm" 
-                                  onClick={() => setUserToDelete({ id: user.uid, name: user.name })}
-                                  className="font-semibold bg-red-600/80 hover:bg-red-600 text-white flex items-center"
-                                  title="Delete User"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-1" />
-                                  Delete
-                                </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => setUserToDelete({ id: user.uid, name: user.name })}
+                                disabled={deleteUserMutation.isPending}
+                                className="font-semibold bg-red-600/80 hover:bg-red-600 text-white flex items-center rounded-xl cursor-pointer"
+                                title={t('deleteUser')}
+                              >
+                                <Trash2 className="w-4 h-4 me-1" />
+                                {t('delete')}
+                              </Button>
                             </>
                           )}
                         </div>
@@ -214,19 +207,19 @@ export default function OwnerUsersPage() {
       </Card>
 
       <Dialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
-        <DialogContent>
+        <DialogContent className="rounded-3xl border-border bg-card">
           <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
+            <DialogTitle>{t('deleteUser')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to permanently delete user &quot;{userToDelete?.name}&quot;? This action cannot be undone.
+              {t('deleteConfirm', { name: userToDelete?.name || '' })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setUserToDelete(null)}>
-              Cancel
+            <Button variant="outline" onClick={() => setUserToDelete(null)} className="rounded-xl cursor-pointer">
+              {t('cancel')}
             </Button>
-            <Button variant="destructive" onClick={handleDeleteUser}>
-              Delete
+            <Button variant="destructive" onClick={handleDeleteUser} disabled={deleteUserMutation.isPending} className="rounded-xl font-bold cursor-pointer">
+              {t('delete')}
             </Button>
           </DialogFooter>
         </DialogContent>
