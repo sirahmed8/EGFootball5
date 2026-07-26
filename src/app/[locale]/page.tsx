@@ -26,7 +26,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       <LandingRedirect />
 
       {/* ── HERO SECTION ──────────────────────────────────────────────── */}
-      <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 py-16 overflow-hidden bg-background">
+      <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 py-16 bg-background">
         <div className="relative z-10 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-700">
           {/* Top Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs sm:text-sm font-extrabold">

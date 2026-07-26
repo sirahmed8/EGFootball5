@@ -73,7 +73,7 @@ export function SolidSelect({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -4 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full mt-2 start-0 min-w-[180px] w-full bg-[#121820] dark:bg-[#0b1017] border border-border/80 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-[99999] p-1.5 space-y-0.5 overflow-hidden opacity-100"
+            className="absolute top-full mt-2 start-0 min-w-[180px] w-full bg-[#0d131c] dark:bg-[#080d14] border border-border/80 rounded-2xl shadow-[0_15px_50px_rgba(0,0,0,0.95)] z-[999999] p-1.5 space-y-0.5 max-h-[260px] overflow-y-auto opacity-100"
           >
             {options.map((opt) => {
               const isSelected = opt.value === value;
