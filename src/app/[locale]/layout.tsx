@@ -9,6 +9,7 @@ import { DesktopSidebar } from "@/components/SideMenu";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { FloatingChatWidget } from "@/components/FloatingChatWidget";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
@@ -77,6 +78,7 @@ export default async function RootLayout({
 
               <Toaster theme="system" />
               <ScrollToTop />
+              <FloatingChatWidget />
             </AuthProvider>
           </ThemeProvider>
           </ReactQueryProvider>

@@ -17,6 +17,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { User as AppUser, Booking, Pitch } from '@/types';
 import { cancelBooking } from '@/lib/firebase/booking';
 import { ProfilePageSkeleton } from '@/components/skeletons/PageSkeletons';
+import { DailyAIAdviceCard } from '@/components/DailyAIAdviceCard';
 
 function BookingCountdown({ lockedUntil }: { lockedUntil: number }) {
   const [timeLeft, setTimeLeft] = useState(0);
@@ -350,6 +351,9 @@ export default function ProfilePage() {
         <h1 className="text-4xl font-black text-foreground">{t('title')}</h1>
         <p className="text-muted-foreground mt-2">{t('description')}</p>
       </div>
+
+      {/* Daily AI Insights Card */}
+      <DailyAIAdviceCard />
 
       {/* Player Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
