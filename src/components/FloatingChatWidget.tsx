@@ -39,6 +39,8 @@ import {
   ShieldCheck,
   ImageIcon,
 } from 'lucide-react';
+import { useRouter } from '@/i18n/routing';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 // Types
@@ -170,6 +172,7 @@ function FormattedMarkdownText({ content, className = '' }: { content: string; c
 }
 
 export function FloatingChatWidget() {
+  const router = useRouter();
   const { appUser, firebaseUser } = useAuthStore();
   const locale = useLocale();
   const t = useTranslations('FloatingChat');
@@ -764,171 +767,198 @@ export function FloatingChatWidget() {
             {/* TAB CONTENT CONTAINER */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {/* ==================================================== */}
-              {/* TAB 1: 🟢 AI ASSISTANT */}
+              {/* TAB 1: 🤖 AI ASSISTANT */}
               {/* ==================================================== */}
               {activeTab === 'ai' && (
-                <div className="flex flex-col h-full justify-between space-y-4">
-                  <div className="flex-1 overflow-y-auto space-y-3 pe-1">
-                    {/* Initial AI Loading Skeleton Animation */}
-                    {initialAiLoading ? (
-                      <div className="space-y-4 animate-in fade-in duration-300">
-                        {/* Skeleton Message Bubble */}
-                        <div className="max-w-[85%] p-4 rounded-2xl bg-muted/60 border border-border/50 space-y-2.5">
-                          <div className="h-4 bg-primary/20 rounded-md w-3/4 animate-pulse" />
-                          <div className="h-3.5 bg-muted/60 rounded-md w-full animate-pulse" />
-                          <div className="h-3.5 bg-muted/60 rounded-md w-5/6 animate-pulse" />
+                !firebaseUser ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-4 my-auto bg-muted/20 rounded-3xl border border-border/40">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-md">
+                      <Bot className="w-8 h-8" />
+                    </div>
+                    <div className="space-y-2 max-w-xs">
+                      <h3 className="text-xl font-black text-foreground">
+                        {isArabic ? 'تسجيل الدخول مطلوب' : 'Sign In Required'}
+                      </h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed font-medium">
+                        {isArabic
+                          ? 'يرجى تسجيل الدخول لاستخدام مساعد EGFootball5 الذكي لحجز الملاعب والبحث التلقائي والإرشادات.'
+                          : 'Please sign in to unlock AI-powered pitch search, booking assistance, and tactical advice.'}
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        setIsOpen(false);
+                        router.push('/login');
+                      }}
+                      className="bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-2xl px-6 py-5 w-full text-xs cursor-pointer shadow-lg shadow-emerald-500/20"
+                    >
+                      {isArabic ? 'تسجيل الدخول / إنشاء حساب' : 'Sign In / Register'}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col h-full justify-between space-y-4">
+                    <div className="flex-1 overflow-y-auto space-y-3 pe-1">
+                      {/* Initial AI Loading Skeleton Animation */}
+                      {initialAiLoading ? (
+                        <div className="space-y-4 animate-in fade-in duration-300">
+                          {/* Skeleton Message Bubble */}
+                          <div className="max-w-[85%] p-4 rounded-2xl bg-muted/60 border border-border/50 space-y-2.5">
+                            <div className="h-4 bg-primary/20 rounded-md w-3/4 animate-pulse" />
+                            <div className="h-3.5 bg-muted/60 rounded-md w-full animate-pulse" />
+                            <div className="h-3.5 bg-muted/60 rounded-md w-5/6 animate-pulse" />
+                          </div>
+                          {/* Skeleton Chips */}
+                          <div className="flex flex-wrap gap-2">
+                            <div className="h-7 w-36 bg-emerald-500/15 rounded-full border border-emerald-500/20 animate-pulse" />
+                            <div className="h-7 w-32 bg-emerald-500/15 rounded-full border border-emerald-500/20 animate-pulse" />
+                            <div className="h-7 w-40 bg-emerald-500/15 rounded-full border border-emerald-500/20 animate-pulse" />
+                          </div>
                         </div>
-                        {/* Skeleton Chips */}
-                        <div className="flex flex-wrap gap-2">
-                          <div className="h-7 w-36 bg-emerald-500/15 rounded-full border border-emerald-500/20 animate-pulse" />
-                          <div className="h-7 w-32 bg-emerald-500/15 rounded-full border border-emerald-500/20 animate-pulse" />
-                          <div className="h-7 w-40 bg-emerald-500/15 rounded-full border border-emerald-500/20 animate-pulse" />
-                        </div>
-                      </div>
-                    ) : (
-                      aiMessages.map((msg) => (
-                        <div
-                          key={msg.id}
-                          className={`flex flex-col ${
-                            msg.sender === 'user' ? 'items-end' : 'items-start'
-                          }`}
-                        >
+                      ) : (
+                        aiMessages.map((msg) => (
                           <div
-                            className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed ${
-                              msg.sender === 'user'
-                                ? 'bg-emerald-500 text-black font-medium rounded-br-none shadow-md shadow-emerald-500/10'
-                                : 'bg-muted/80 border border-border/60 text-foreground rounded-bl-none'
+                            key={msg.id}
+                            className={`flex flex-col ${
+                              msg.sender === 'user' ? 'items-end' : 'items-start'
                             }`}
                           >
-                            {/* User uploaded image thumbnail */}
-                            {msg.image && (
-                              <Image
-                                src={msg.image}
-                                alt="Uploaded screenshot"
-                                width={300}
-                                height={200}
-                                unoptimized
-                                className="w-full max-h-48 object-cover rounded-xl mb-2 border border-black/20"
-                              />
-                            )}
+                            <div
+                              className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed ${
+                                msg.sender === 'user'
+                                  ? 'bg-emerald-500 text-black font-medium rounded-br-none shadow-md shadow-emerald-500/10'
+                                  : 'bg-muted/80 border border-border/60 text-foreground rounded-bl-none'
+                              }`}
+                            >
+                              {/* User uploaded image thumbnail */}
+                              {msg.image && (
+                                <Image
+                                  src={msg.image}
+                                  alt="Uploaded screenshot"
+                                  width={300}
+                                  height={200}
+                                  unoptimized
+                                  className="w-full max-h-48 object-cover rounded-xl mb-2 border border-black/20"
+                                />
+                              )}
 
-                            {/* Render formatted markdown for AI, or clean text for user */}
-                            {msg.sender === 'ai' ? (
-                              <FormattedMarkdownText content={msg.text} />
-                            ) : (
-                              <p className="whitespace-pre-wrap">{msg.text}</p>
-                            )}
+                              {/* Render formatted markdown for AI, or clean text for user */}
+                              {msg.sender === 'ai' ? (
+                                <FormattedMarkdownText content={msg.text} />
+                              ) : (
+                                <p className="whitespace-pre-wrap">{msg.text}</p>
+                              )}
 
-                            {/* Speech Playback Action */}
-                            {msg.sender === 'ai' && (
-                              <div className="mt-2.5 pt-2 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
-                                <button
-                                  onClick={() => playTTSAudio(msg.text)}
-                                  className="flex items-center gap-1 hover:text-emerald-400 transition-colors cursor-pointer"
-                                >
-                                  <Volume2 className="w-3.5 h-3.5" />
-                                  <span>{t('listenVoice')}</span>
-                                </button>
+                              {/* Speech Playback Action */}
+                              {msg.sender === 'ai' && (
+                                <div className="mt-2.5 pt-2 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+                                  <button
+                                    onClick={() => playTTSAudio(msg.text)}
+                                    className="flex items-center gap-1 hover:text-emerald-400 transition-colors cursor-pointer"
+                                  >
+                                    <Volume2 className="w-3.5 h-3.5" />
+                                    <span>{t('listenVoice')}</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Dynamic Prompt Chips - Unclipped Full Width Layout */}
+                            {msg.sender === 'ai' && msg.chips && msg.chips.length > 0 && (
+                              <div className="flex flex-col sm:flex-row flex-wrap gap-2 mt-3 w-full p-0.5 overflow-visible">
+                                {msg.chips.map((chip, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => sendAIMessage(chip)}
+                                    className="text-xs px-3.5 py-2 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-all font-bold flex items-center gap-2 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-95 text-start whitespace-normal break-words max-w-full"
+                                  >
+                                    <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                    <span>{chip}</span>
+                                  </button>
+                                ))}
                               </div>
                             )}
                           </div>
+                        ))
+                      )}
 
-                          {/* Dynamic Prompt Chips */}
-                          {msg.sender === 'ai' && msg.chips && msg.chips.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mt-2.5 max-w-[90%]">
-                              {msg.chips.map((chip, idx) => (
-                                <button
-                                  key={idx}
-                                  onClick={() => sendAIMessage(chip)}
-                                  className="text-xs px-3 py-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-all font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
-                                >
-                                  <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                                  <span>{chip}</span>
-                                </button>
-                              ))}
-                            </div>
-                          )}
+                      {aiLoading && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 rounded-2xl bg-muted/40 w-max animate-pulse">
+                          <Bot className="w-4 h-4 text-emerald-400 animate-bounce" />
+                          <span>{t('aiThinking')}</span>
                         </div>
-                      ))
-                    )}
+                      )}
+                      <div ref={chatBottomRef} />
+                    </div>
 
-                    {aiLoading && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 rounded-2xl bg-muted/40 w-max animate-pulse">
-                        <Bot className="w-4 h-4 text-emerald-400 animate-bounce" />
-                        <span>{t('aiThinking')}</span>
-                      </div>
-                    )}
-                    <div ref={chatBottomRef} />
-                  </div>
+                    {/* AI Input controls — sleek glass container, no inner box border */}
+                    <div className="pt-2 border-t border-border/40 space-y-2 shrink-0">
+                      {attachedImage && (
+                        <div className="relative inline-block">
+                          <Image
+                            src={attachedImage}
+                            alt="Thumbnail preview"
+                            width={56}
+                            height={56}
+                            unoptimized
+                            className="w-14 h-14 object-cover rounded-xl border border-emerald-500/50"
+                          />
 
-                  {/* AI Input controls — sleek glass container, no inner box border */}
-                  <div className="pt-2 border-t border-border/40 space-y-2 shrink-0">
-                    {attachedImage && (
-                      <div className="relative inline-block">
-                        <Image
-                          src={attachedImage}
-                          alt="Thumbnail preview"
-                          width={56}
-                          height={56}
-                          unoptimized
-                          className="w-14 h-14 object-cover rounded-xl border border-emerald-500/50"
+                          <button
+                            onClick={() => setAttachedImage(null)}
+                            className="absolute -top-1.5 -end-1.5 p-0.5 rounded-full bg-destructive text-white text-xs"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-1.5 bg-muted/70 border border-border/80 p-1.5 rounded-full focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all shadow-inner">
+                        {/* Vision / Image button */}
+                        <label className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-emerald-400 cursor-pointer transition-colors shrink-0">
+                          <Camera className="w-4 h-4" />
+                          <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/jpg, image/webp"
+                            className="hidden"
+                            onChange={handleImageUpload}
+                          />
+                        </label>
+
+                        {/* Voice Recognition button */}
+                        <button
+                          type="button"
+                          onClick={toggleVoiceRecognition}
+                          className={`p-2 rounded-full transition-colors cursor-pointer shrink-0 ${
+                            isListening
+                              ? 'bg-destructive/20 text-destructive animate-pulse'
+                              : 'hover:bg-muted text-muted-foreground hover:text-emerald-400'
+                          }`}
+                          title="Voice recognition"
+                        >
+                          {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                        </button>
+
+                        <input
+                          type="text"
+                          value={aiInput}
+                          onChange={(e) => setAiInput(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && sendAIMessage()}
+                          placeholder={isArabic ? 'اكتب سؤالك أو استفسارك هنا...' : 'Type your message or question...'}
+                          style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
+                          className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 appearance-none text-xs text-foreground placeholder:text-muted-foreground/60 px-1 py-1"
                         />
 
                         <button
-                          onClick={() => setAttachedImage(null)}
-                          className="absolute -top-1.5 -end-1.5 p-0.5 rounded-full bg-destructive text-white text-xs"
+                          onClick={() => sendAIMessage()}
+                          disabled={aiLoading || (!aiInput.trim() && !attachedImage)}
+                          className="p-2.5 rounded-full bg-emerald-500 text-black disabled:opacity-40 hover:bg-emerald-400 transition-all cursor-pointer shrink-0 shadow-md hover:scale-105 active:scale-95"
                         >
-                          <X className="w-3 h-3" />
+                          <Send className="w-4 h-4" />
                         </button>
                       </div>
-                    )}
-
-                    <div className="flex items-center gap-1.5 bg-muted/70 border border-border/80 p-1.5 rounded-full focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all shadow-inner">
-                      {/* Vision / Image button */}
-                      <label className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-emerald-400 cursor-pointer transition-colors shrink-0">
-                        <Camera className="w-4 h-4" />
-                        <input
-                          type="file"
-                          accept="image/png, image/jpeg, image/jpg, image/webp"
-                          className="hidden"
-                          onChange={handleImageUpload}
-                        />
-                      </label>
-
-                      {/* Voice Recognition button */}
-                      <button
-                        type="button"
-                        onClick={toggleVoiceRecognition}
-                        className={`p-2 rounded-full transition-colors cursor-pointer shrink-0 ${
-                          isListening
-                            ? 'bg-destructive/20 text-destructive animate-pulse'
-                            : 'hover:bg-muted text-muted-foreground hover:text-emerald-400'
-                        }`}
-                        title="Voice recognition"
-                      >
-                        {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                      </button>
-
-                      <input
-                        type="text"
-                        value={aiInput}
-                        onChange={(e) => setAiInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && sendAIMessage()}
-                        placeholder={isArabic ? 'اكتب سؤالك أو استفسارك هنا...' : 'Type your message or question...'}
-                        style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
-                        className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 appearance-none text-xs text-foreground placeholder:text-muted-foreground/60 px-1 py-1"
-                      />
-
-                      <button
-                        onClick={() => sendAIMessage()}
-                        disabled={aiLoading || (!aiInput.trim() && !attachedImage)}
-                        className="p-2.5 rounded-full bg-emerald-500 text-black disabled:opacity-40 hover:bg-emerald-400 transition-all cursor-pointer shrink-0 shadow-md hover:scale-105 active:scale-95"
-                      >
-                        <Send className="w-4 h-4" />
-                      </button>
                     </div>
                   </div>
-                </div>
+                )
               )}
 
               {/* ==================================================== */}
