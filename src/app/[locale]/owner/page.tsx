@@ -11,6 +11,7 @@ import { useTranslations, useLocale } from 'next-intl';
 
 import { PitchCreationForm } from './components/PitchCreationForm';
 import { ExistingPitchesList } from './components/ExistingPitchesList';
+import { CityManagementCard } from './components/CityManagementCard';
 import { DashboardPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 export default function OwnerDashboard() {
@@ -119,6 +120,8 @@ export default function OwnerDashboard() {
         handleUpdateAdminRole={handleUpdateAdminRole}
         t={t}
       />
+
+      <CityManagementCard />
     </div>
   );
 }
