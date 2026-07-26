@@ -56,11 +56,27 @@ export function NavbarSettingsMenu() {
     const nextLocale = locale === 'ar' ? 'en' : 'ar';
     localStorage.setItem('preferredLocale', nextLocale);
     setIsOpen(false);
-    router.replace(pathname, { locale: nextLocale, scroll: false });
+
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      (document as any).startViewTransition(() => {
+        router.replace(pathname, { locale: nextLocale, scroll: false });
+      });
+    } else {
+      router.replace(pathname, { locale: nextLocale, scroll: false });
+    }
   };
 
   const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+    const nextTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.add('theme-transitioning');
+      setTheme(nextTheme);
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 500);
+    } else {
+      setTheme(nextTheme);
+    }
   };
 
   const handleLogout = async () => {

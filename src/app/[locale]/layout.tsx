@@ -86,11 +86,11 @@ export default async function RootLayout({
   const fontVariables = `${geistSans.variable} ${cairo.variable}`;
 
   return (
-    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning>
+    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning className="bg-background text-foreground dark" style={{ backgroundColor: '#0b0f17' }}>
       <body className={`${fontVariables} ${activeFontClass} antialiased bg-background text-foreground min-h-screen`}>
         <NextIntlClientProvider messages={messages}>
           <ReactQueryProvider>
-            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
               <AuthProvider>
                 {/* Always-visible desktop sidebar */}
                 <DesktopSidebar />
