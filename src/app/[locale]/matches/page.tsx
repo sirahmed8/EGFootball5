@@ -176,12 +176,12 @@ export default function MatchesPage() {
           return a.timeSlot - b.timeSlot;
         });
 
-        setMatches(fetchedMatches.length > 0 ? fetchedMatches : SAMPLE_PUBLIC_MATCHES);
+        setMatches(fetchedMatches);
         setLoadingData(false);
       },
       (error) => {
         console.error('Error fetching public matches: ', error);
-        setMatches(SAMPLE_PUBLIC_MATCHES);
+        setMatches([]);
         setLoadingData(false);
       }
     );

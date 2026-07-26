@@ -500,7 +500,10 @@
     "joinedMatchesTab": "مباريات انضممت إليها",
     "organizerCannotLeave": "منظم المباراة لا يمكنه المغادرة، يمكنك الإلغاء عبر الصفحة الشخصية.",
     "noMatchesAvailable": "لا توجد مباريات متاحة حالياً",
-    "noMatchesTitle": "لا توجد مباريات متاحة حالياً"
+    "noMatchesTitle": "لا توجد مباريات متاحة حالياً",
+    "joinedPlayersTitle": "اللاعبون المنضمون",
+    "joinMatchBtn": "الانضمام للمباراة العامة",
+    "openMatchChat": "فتح محادثة المباراة"
   },
   "Errors": {
     "ERROR_BLACKLISTED": "حسابك محظور من إجراء الحجوزات على المنصة.",

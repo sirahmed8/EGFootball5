@@ -501,7 +501,10 @@
     "joinedMatchesTab": "Joined Matches",
     "organizerCannotLeave": "The match organizer cannot leave the match.",
     "noMatchesAvailable": "No matches available",
-    "noMatchesTitle": "No matches available"
+    "noMatchesTitle": "No matches available",
+    "joinedPlayersTitle": "Joined Players",
+    "joinMatchBtn": "Join Public Match",
+    "openMatchChat": "Open Match Chat"
   },
   "Errors": {
     "ERROR_BLACKLISTED": "Your account has been blacklisted. You cannot book pitches.",

@@ -31,80 +31,14 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { SolidSelect, SelectOption } from '@/components/ui/SolidSelect';
 import { HomePageSkeleton } from '@/components/skeletons/PageSkeletons';
-
-const DEFAULT_PITCHES: Pitch[] = [
-  {
-    id: 'obour-stadium-1',
-    name: 'ملعب أبطال العبور',
-    locationName: 'مدينة العبور - الحي التاسع',
-    mapLink: 'https://maps.google.com',
-    imagePreviewUrl: '/pitch_preview.jpg',
-    pricePerHour: 350,
-    recipient: '01012345678',
-    managerName: 'الكابتن محمد علي',
-    adminEmail: 'manager@obourstadium.com',
-    adminPhone: '01012345678',
-    createdAt: 1700000000000,
-    capacity: '5v5',
-    surfaceType: 'نجيل صناعي ممتاز',
-    hasFloodlights: true,
-    hasParking: true,
-    hasCafeteria: true,
-    rating: 4.9,
-    reviewsCount: 142,
-    city: 'obour',
-  },
-  {
-    id: 'elnojoom-pitch-2',
-    name: 'استاد النجوم',
-    locationName: 'مدينة العبور - حي الشباب',
-    mapLink: 'https://maps.google.com',
-    imagePreviewUrl: '/stadium_hero_bg.jpg',
-    pricePerHour: 400,
-    recipient: '01098765432',
-    managerName: 'الكابتن أحمد حسن',
-    adminEmail: 'nojoom@football.com',
-    adminPhone: '01098765432',
-    createdAt: 1700000000000,
-    capacity: '7v7',
-    surfaceType: 'نجيل هجين',
-    hasFloodlights: true,
-    hasParking: true,
-    hasCafeteria: true,
-    rating: 4.85,
-    reviewsCount: 98,
-    city: 'obour',
-  },
-  {
-    id: 'al-shabab-arena-3',
-    name: 'ملعب نادي الشباب الرياضي',
-    locationName: 'مدينة العبور - المنطقة المركزية',
-    mapLink: 'https://maps.google.com',
-    imagePreviewUrl: '/pitch_preview.jpg',
-    pricePerHour: 300,
-    recipient: '01122334455',
-    managerName: 'الكابتن محمود السيد',
-    adminEmail: 'shabab@football.com',
-    adminPhone: '01122334455',
-    createdAt: 1700000000000,
-    capacity: '5v5',
-    surfaceType: 'نجيل صناعي مواصفات دولية',
-    hasFloodlights: true,
-    hasParking: true,
-    hasCafeteria: false,
-    rating: 4.95,
-    reviewsCount: 215,
-    city: 'obour',
-  },
-];
 
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const t = useTranslations('Home');
-
 
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
   const [selectedFormat, setSelectedFormat] = useState<string>(() => searchParams.get('size') || 'all');
@@ -114,7 +48,6 @@ function HomeContent() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedPitchPreview, setSelectedPitchPreview] = useState<Pitch | null>(null);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-
 
   const toggleAmenity = (amenity: string) => {
     setSelectedAmenities((prev) =>
@@ -144,7 +77,7 @@ function HomeContent() {
   });
 
   const pitches = useMemo(() => {
-    return rawPitches.length > 0 ? rawPitches : DEFAULT_PITCHES;
+    return rawPitches;
   }, [rawPitches]);
 
 
@@ -264,37 +197,34 @@ function HomeContent() {
 
           {/* Format / Pitch Capacity Selector */}
           <div className="md:col-span-3">
-            <div className="flex items-center gap-2 bg-background/60 px-3 py-1.5 rounded-2xl border border-border">
-              <Zap className="w-4 h-4 text-primary shrink-0" />
-              <select
-                value={selectedFormat}
-                onChange={(e) => setSelectedFormat(e.target.value)}
-                className="w-full bg-transparent text-xs font-bold text-foreground focus:outline-none cursor-pointer py-1.5"
-              >
-                <option value="all" className="bg-card text-foreground">{t('allSizes')}</option>
-                <option value="5v5" className="bg-card text-foreground">{t('format5v5')}</option>
-                <option value="7v7" className="bg-card text-foreground">{t('format7v7')}</option>
-                <option value="11v11" className="bg-card text-foreground">{t('format11v11')}</option>
-              </select>
-            </div>
+            <SolidSelect
+              value={selectedFormat}
+              onChange={setSelectedFormat}
+              options={[
+                { value: 'all', label: t('allSizes') },
+                { value: '5v5', label: t('format5v5') },
+                { value: '7v7', label: t('format7v7') },
+                { value: '11v11', label: t('format11v11') },
+              ]}
+              icon={Zap}
+              iconColor="text-primary"
+            />
           </div>
 
           {/* Sort Selector */}
           <div className="md:col-span-3">
-            <div className="flex items-center gap-2 bg-background/60 px-3 py-1.5 rounded-2xl border border-border">
-              <ArrowUpDown className="w-4 h-4 text-muted-foreground shrink-0" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'recommended' | 'price-asc' | 'price-desc' | 'rating')}
-
-                className="w-full bg-transparent text-xs font-bold text-foreground focus:outline-none cursor-pointer py-1.5"
-              >
-                <option value="recommended" className="bg-card text-foreground">{t('recommended')}</option>
-                <option value="price-asc" className="bg-card text-foreground">{t('priceAsc')}</option>
-                <option value="price-desc" className="bg-card text-foreground">{t('priceDesc')}</option>
-                <option value="rating" className="bg-card text-foreground">{t('topRated')}</option>
-              </select>
-            </div>
+            <SolidSelect
+              value={sortBy}
+              onChange={(val) => setSortBy(val as 'recommended' | 'price-asc' | 'price-desc' | 'rating')}
+              options={[
+                { value: 'recommended', label: t('recommended') },
+                { value: 'price-asc', label: t('priceAsc') },
+                { value: 'price-desc', label: t('priceDesc') },
+                { value: 'rating', label: t('topRated') },
+              ]}
+              icon={ArrowUpDown}
+              iconColor="text-muted-foreground"
+            />
           </div>
 
           {/* Price Range Slider */}
