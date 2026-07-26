@@ -223,30 +223,8 @@ export function FloatingChatWidget() {
     }, 100);
   }, []);
 
-  // Fetch or retrieve cached dynamic AI Welcome greeting
+  // Fetch dynamic AI Welcome greeting on chatbot open / page refresh
   const loadInitialAiGreeting = useCallback(async () => {
-    const cacheKey = `egfootball5_ai_welcome_${locale}_${appUser?.name || 'guest'}`;
-    const cached = typeof window !== 'undefined' ? sessionStorage.getItem(cacheKey) : null;
-
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        setAiMessages([
-          {
-            id: 'welcome',
-            sender: 'ai',
-            text: parsed.text,
-            chips: parsed.chips,
-            timestamp: Date.now(),
-          },
-        ]);
-        setInitialAiLoading(false);
-        return;
-      } catch {
-        // Fallthrough to fetch
-      }
-    }
-
     setInitialAiLoading(true);
     try {
       const userName = appUser?.name || (isArabic ? 'لاعبنا المميز' : 'Player');
@@ -269,12 +247,6 @@ export function FloatingChatWidget() {
       };
 
       setAiMessages([welcomeMsg]);
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem(
-          cacheKey,
-          JSON.stringify({ text: welcomeMsg.text, chips: welcomeMsg.chips })
-        );
-      }
     } catch {
       const fallbackText = isArabic
         ? `أهلاً بك! أنا مساعد **EGFootball5** الذكي ⚽ كيف يمكنني مساعدتك اليوم في حجز الملاعب أو تنظيم المباريات؟`
