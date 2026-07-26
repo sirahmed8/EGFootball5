@@ -1,5 +1,6 @@
 {
   "Navbar": {
+    "browsePitches": "Browse Pitches",
     "bookPitch": "Book a Pitch",
     "adminDashboard": "Pitch Dashboard",
     "ownerDashboard": "Owner Dashboard",

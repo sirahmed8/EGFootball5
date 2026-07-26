@@ -36,7 +36,7 @@ import { HomePageSkeleton } from '@/components/skeletons/PageSkeletons';
 const DEFAULT_PITCHES: Pitch[] = [
   {
     id: 'obour-stadium-1',
-    name: 'ملعب أبطال العبور (El Obour Champions Field)',
+    name: 'ملعب أبطال العبور',
     locationName: 'مدينة العبور - الحي التاسع',
     mapLink: 'https://maps.google.com',
     imagePreviewUrl: '/pitch_preview.jpg',
@@ -57,7 +57,7 @@ const DEFAULT_PITCHES: Pitch[] = [
   },
   {
     id: 'elnojoom-pitch-2',
-    name: 'استاد النجوم (El-Nojoom Stadium)',
+    name: 'استاد النجوم',
     locationName: 'مدينة العبور - حي الشباب',
     mapLink: 'https://maps.google.com',
     imagePreviewUrl: '/stadium_hero_bg.jpg',

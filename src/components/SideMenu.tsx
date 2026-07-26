@@ -31,9 +31,8 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   };
 
   const navLinks = [
-    ...(appUser?.role !== 'owner' ? [{ href: '/home', label: tNav('bookPitch'), icon: <Home size={18} /> }] : []),
+    ...(appUser?.role !== 'owner' ? [{ href: '/home', label: tNav('browsePitches'), icon: <Home size={18} /> }] : []),
     ...(appUser?.role !== 'owner' ? [{ href: '/matches', label: tNav('publicMatches'), icon: <Trophy size={18} /> }] : []),
-    ...(appUser?.role !== 'owner' ? [{ href: '/book', label: tNav('bookPitch'), icon: <CalendarDays size={18} /> }] : []),
     ...(appUser?.role === 'admin' ? [{ href: '/admin/dashboard', label: tNav('adminDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
     ...(appUser?.role === 'owner' ? [{ href: '/owner', label: tNav('ownerDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
     ...(appUser?.role === 'owner' ? [{ href: '/owner/dashboard', label: tNav('analytics'), icon: <Trophy size={18} /> }] : []),
@@ -61,7 +60,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
       {/* Nav links — scrollable */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5">
         {navLinks.map((link) => {
-          const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+          const isActive = pathname === link.href;
           return (
             <button
               key={link.href}

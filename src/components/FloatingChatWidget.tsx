@@ -764,9 +764,9 @@ export function FloatingChatWidget() {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-1.5 bg-muted/50 border border-border p-1.5 rounded-2xl">
+                    <div className="flex items-center gap-2 bg-muted/70 border border-border/80 p-1.5 rounded-full focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all shadow-inner">
                       {/* Vision / Image button */}
-                      <label className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-emerald-400 cursor-pointer transition-colors">
+                      <label className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-emerald-400 cursor-pointer transition-colors shrink-0">
                         <Camera className="w-4 h-4" />
                         <input
                           type="file"
@@ -780,7 +780,7 @@ export function FloatingChatWidget() {
                       <button
                         type="button"
                         onClick={toggleVoiceRecognition}
-                        className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                        className={`p-2 rounded-full transition-colors cursor-pointer shrink-0 ${
                           isListening
                             ? 'bg-destructive/20 text-destructive animate-pulse'
                             : 'hover:bg-muted text-muted-foreground hover:text-emerald-400'
@@ -796,13 +796,13 @@ export function FloatingChatWidget() {
                         onChange={(e) => setAiInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && sendAIMessage()}
                         placeholder={t('askAiPlaceholder')}
-                        className="flex-1 bg-transparent border-none text-xs text-foreground focus:outline-none px-2"
+                        className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 text-xs text-foreground placeholder:text-muted-foreground/60 px-1 py-1"
                       />
 
                       <button
                         onClick={() => sendAIMessage()}
                         disabled={aiLoading || (!aiInput.trim() && !attachedImage)}
-                        className="p-2 rounded-xl bg-emerald-500 text-black disabled:opacity-40 hover:bg-emerald-400 transition-colors cursor-pointer"
+                        className="p-2.5 rounded-full bg-emerald-500 text-black disabled:opacity-40 hover:bg-emerald-400 transition-all cursor-pointer shrink-0 shadow-md hover:scale-105 active:scale-95"
                       >
                         <Send className="w-4 h-4" />
                       </button>
@@ -950,16 +950,16 @@ export function FloatingChatWidget() {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-1.5 bg-muted/50 border border-border p-1.5 rounded-2xl">
+                    <div className="flex items-center gap-2 bg-muted/70 border border-border/80 p-1.5 rounded-full focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all shadow-inner">
                       <button
                         type="button"
                         onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                        className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-emerald-400 cursor-pointer"
+                        className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-emerald-400 cursor-pointer shrink-0"
                       >
                         <Smile className="w-4 h-4" />
                       </button>
 
-                      <label className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-emerald-400 cursor-pointer">
+                      <label className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-emerald-400 cursor-pointer shrink-0">
                         <ImageIcon className="w-4 h-4" />
                         <input
                           type="file"
@@ -975,13 +975,13 @@ export function FloatingChatWidget() {
                         onChange={(e) => setCommunityInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && sendCommunityMessage()}
                         placeholder={t('shareCommunityPlaceholder')}
-                        className="flex-1 bg-transparent border-none text-xs text-foreground focus:outline-none px-2"
+                        className="flex-1 bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 text-xs text-foreground placeholder:text-muted-foreground/60 px-1 py-1"
                       />
 
                       <button
                         onClick={sendCommunityMessage}
                         disabled={cooldownLeft > 0 || (!communityInput.trim() && !communityImage)}
-                        className="p-2 rounded-xl bg-emerald-500 text-black disabled:opacity-40 hover:bg-emerald-400 transition-colors flex items-center justify-center min-w-[36px] cursor-pointer"
+                        className="p-2.5 rounded-full bg-emerald-500 text-black disabled:opacity-40 hover:bg-emerald-400 transition-all flex items-center justify-center min-w-[36px] cursor-pointer shrink-0 shadow-md hover:scale-105 active:scale-95"
                       >
                         {cooldownLeft > 0 ? (
                           <span className="text-xs font-mono font-bold flex items-center gap-1">
