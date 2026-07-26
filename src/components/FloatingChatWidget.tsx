@@ -665,6 +665,8 @@ export function FloatingChatWidget() {
     return matchesFilter && matchesSearch;
   });
 
+  const hasUnreadSupport = supportTickets.some((t) => (isAdmin ? t.unreadByStaff : t.unreadByUser));
+
   return (
     <div className="fixed bottom-6 end-6 md:bottom-8 md:end-8 z-[9999999]">
       <AnimatePresence mode="wait">
@@ -682,10 +684,12 @@ export function FloatingChatWidget() {
             aria-label="Open Floating Chatbot"
           >
             <Bot className="w-7 h-7 text-black stroke-[2.5]" />
-            <span className="absolute -top-1 -end-1 flex h-4 w-4">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-400"></span>
-            </span>
+            {hasUnreadSupport && (
+              <span className="absolute -top-1 -end-1 flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-400"></span>
+              </span>
+            )}
           </motion.button>
         )}
 
