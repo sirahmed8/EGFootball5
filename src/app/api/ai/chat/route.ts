@@ -10,6 +10,14 @@ const CANDIDATE_MODELS = [
   'gemini-2.0-flash-lite-preview-02-05',
 ];
 
+const OPENROUTER_MODELS = [
+  'google/gemini-2.0-flash-001',
+  'meta-llama/llama-3.3-70b-instruct',
+  'mistralai/mistral-small-24b-instruct-2501',
+  'deepseek/deepseek-r1-distill-llama-70b',
+  'qwen/qwen-2.5-72b-instruct',
+];
+
 function detectIsArabic(prompt: string, locale?: string): boolean {
   const arabicRegex = /[\u0600-\u06FF]/;
   const englishRegex = /[a-zA-Z]/;
@@ -56,6 +64,61 @@ function extractChips(text: string, isArabic = false): { cleanText: string; chip
   return { cleanText, chips: chips.slice(0, 3) };
 }
 
+async function callOpenRouterAI(
+  apiKey: string,
+  prompt: string,
+  systemInstruction: string,
+  imageBase64?: string
+): Promise<{ text: string; modelUsed: string } | null> {
+  const userContent: Array<{ type: string; text?: string; image_url?: { url: string } }> = [
+    { type: 'text', text: prompt },
+  ];
+
+  if (imageBase64) {
+    const formattedData = imageBase64.startsWith('data:')
+      ? imageBase64
+      : `data:image/jpeg;base64,${imageBase64}`;
+    userContent.push({
+      type: 'image_url',
+      image_url: { url: formattedData },
+    });
+  }
+
+  for (const model of OPENROUTER_MODELS) {
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'HTTP-Referer': 'https://egfootball5.web.app',
+          'X-Title': 'EGFootball5',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemInstruction },
+            { role: 'user', content: userContent },
+          ],
+          temperature: 0.3,
+          max_tokens: 1024,
+        }),
+      });
+
+      if (!res.ok) continue;
+
+      const json = await res.json();
+      const text = json?.choices?.[0]?.message?.content;
+      if (text && typeof text === 'string' && text.trim().length > 0) {
+        return { text, modelUsed: `openrouter/${model}` };
+      }
+    } catch {
+      // Continue to next OpenRouter candidate model
+    }
+  }
+  return null;
+}
+
 export async function POST(req: NextRequest) {
   try {
     // 1. Enforce Token Verification
@@ -65,6 +128,7 @@ export async function POST(req: NextRequest) {
     }
 
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+    const openRouterApiKey = process.env.OPENROUTER_API_KEY || '';
 
     const body = await req.json().catch(() => ({}));
     const { prompt, imageBase64, mimeType, systemContext, locale } = body;
@@ -115,6 +179,7 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
       },
     ];
 
+    // 1. Try Google Gemini Candidate Models
     if (apiKey) {
       for (const model of CANDIDATE_MODELS) {
         try {
@@ -157,7 +222,26 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
       }
     }
 
-    // Fallback response if API key is unconfigured, rate-limited, or all models failed
+    // 2. Try OpenRouter API Fallback Chain if Google Gemini API fails
+    if (openRouterApiKey) {
+      const openRouterResult = await callOpenRouterAI(
+        openRouterApiKey,
+        prompt,
+        systemInstruction,
+        imageBase64
+      );
+      if (openRouterResult) {
+        const { cleanText, chips } = extractChips(openRouterResult.text, isArabic);
+        return NextResponse.json({
+          success: true,
+          text: cleanText,
+          chips,
+          modelUsed: openRouterResult.modelUsed,
+        });
+      }
+    }
+
+    // 3. Structured Fallback response if all API providers fail or offline
     const fallbackText = isArabic
       ? 'مرحباً بك! أنا مساعد EGFootball5 الذكي ⚽ كيف يمكنني مساعدتك اليوم في حجز الملاعب بالعبور، استعراض المباريات القادمة، أو دفع العربون؟'
       : "Welcome! I am your EGFootball5 AI Assistant ⚽ How can I help you today with pitches in Obour City, bookings, or joining public matches?";
