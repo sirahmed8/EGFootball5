@@ -20,7 +20,6 @@ interface OpenSlotInfo {
 }
 
 export function LiveSlotsMarquee() {
-
   const t = useTranslations('LiveMarquee');
   const [openSlots, setOpenSlots] = useState<OpenSlotInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,16 +63,6 @@ export function LiveSlotsMarquee() {
           }
         }
 
-        if (results.length === 0) {
-          results.push(
-            { pitchName: 'ملعب أبطال العبور - الحي التاسع', slotTime: '7:00 PM', location: 'العبور' },
-            { pitchName: 'استاد النجوم - حي الشباب', slotTime: '9:00 PM', location: 'العبور' },
-            { pitchName: 'ملعب نادي الشباب الرياضي', slotTime: '10:00 PM', location: 'العبور' },
-            { pitchName: 'ساحة العاصمة خماسي', slotTime: '8:00 PM', location: 'القاهرة الجديدة' },
-            { pitchName: 'استاد الفرسان الدولي', slotTime: '11:00 PM', location: 'مدينة الشروق' }
-          );
-        }
-
         setOpenSlots(results);
       } catch (e) {
         console.error('Error fetching marquee slots:', e);
@@ -85,17 +74,8 @@ export function LiveSlotsMarquee() {
     fetchLiveSlots();
   }, [t]);
 
-  if (isLoading) {
-    return (
-      <section className="py-3.5 bg-card border-y border-border overflow-hidden relative">
-        <div className="flex items-center gap-6 px-4 animate-pulse">
-          <div className="h-4 w-36 bg-muted/60 rounded-full" />
-          <div className="h-6 w-48 bg-muted/40 rounded-full" />
-          <div className="h-6 w-48 bg-muted/40 rounded-full hidden sm:block" />
-          <div className="h-6 w-48 bg-muted/40 rounded-full hidden md:block" />
-        </div>
-      </section>
-    );
+  if (isLoading || openSlots.length === 0) {
+    return null;
   }
 
   return (

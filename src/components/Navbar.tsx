@@ -4,11 +4,11 @@ import { Link } from '@/i18n/routing';
 import { useAuthStore } from '@/store/useAuthStore';
 import { NotificationBell } from './NotificationBell';
 import { SideMenu } from './SideMenu';
-import PresenceIndicator from './PresenceIndicator';
+import { NavbarSettingsMenu } from './NavbarSettingsMenu';
 import Image from 'next/image';
 
 export function Navbar() {
-  const firebaseUser = useAuthStore(s => s.firebaseUser);
+  const firebaseUser = useAuthStore((s) => s.firebaseUser);
 
   return (
     <>
@@ -19,9 +19,9 @@ export function Navbar() {
             <Image src="/favicon.jpg" alt="EGFootball5 Logo" width={28} height={28} className="rounded-full object-cover" priority={true} />
             <span>EG<span className="text-primary">Football5</span></span>
           </Link>
-          <div className="flex items-center gap-1">
-            <PresenceIndicator />
+          <div className="flex items-center gap-2">
             {firebaseUser && <NotificationBell />}
+            <NavbarSettingsMenu />
             <SideMenu />
           </div>
         </div>
@@ -31,9 +31,9 @@ export function Navbar() {
       <header className="hidden md:flex fixed top-0 z-40 h-16 items-center justify-end px-6 border-b border-border bg-background
         ltr:left-64 ltr:right-0
         rtl:right-64 rtl:left-0">
-        <div className="flex items-center gap-2">
-          <PresenceIndicator />
+        <div className="flex items-center gap-3">
           {firebaseUser && <NotificationBell />}
+          <NavbarSettingsMenu />
         </div>
       </header>
     </>

@@ -15,7 +15,6 @@ import { LandingRedirect } from '@/components/LandingRedirect';
 import { FeaturedStadiums } from '@/components/FeaturedStadiums';
 import { QuickSearchHero } from '@/components/QuickSearchHero';
 import { LiveSlotsMarquee } from '@/components/LiveSlotsMarquee';
-import { WhatsAppSupportButton } from '@/components/WhatsAppSupportButton';
 
 export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -25,7 +24,6 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden relative">
       <LandingRedirect />
-      <WhatsAppSupportButton />
 
       {/* ── HERO SECTION ──────────────────────────────────────────────── */}
       <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 py-16 overflow-hidden bg-background">

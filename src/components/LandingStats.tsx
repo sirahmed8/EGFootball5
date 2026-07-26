@@ -8,12 +8,12 @@ import { useTranslations } from 'next-intl';
 
 export function LandingStats() {
   const t = useTranslations('Landing');
-  
+
   const [stats, setStats] = useState({
     pitches: 0,
     users: 0,
     matches: 0,
-    isLoading: true
+    isLoading: true,
   });
 
   useEffect(() => {
@@ -30,14 +30,14 @@ export function LandingStats() {
         const realBookings = bookingsSnap ? bookingsSnap.size : 0;
 
         setStats({
-          users: Math.max(realUsers, 12),
-          pitches: Math.max(realPitches, 3),
-          matches: Math.max(realBookings, 45),
-          isLoading: false
+          users: realUsers,
+          pitches: realPitches,
+          matches: realBookings,
+          isLoading: false,
         });
       } catch (e) {
-        console.error("Could not fetch real stats", e);
-        setStats({ users: 12, pitches: 3, matches: 45, isLoading: false });
+        console.error('Error fetching real stats:', e);
+        setStats({ users: 0, pitches: 0, matches: 0, isLoading: false });
       }
     };
     fetchStats();
@@ -64,7 +64,7 @@ export function LandingStats() {
           <Users className="w-6 h-6" />
         </div>
         <p className="text-4xl sm:text-5xl font-black text-primary font-mono">
-          {stats.users >= 1000 ? `${(stats.users / 1000).toFixed(1)}k+` : `${stats.users}+`}
+          {stats.users >= 1000 ? `${(stats.users / 1000).toFixed(1)}k+` : `${stats.users}`}
         </p>
         <p className="text-xs sm:text-sm text-muted-foreground font-extrabold uppercase tracking-wider">{t('players')}</p>
       </div>
@@ -75,7 +75,7 @@ export function LandingStats() {
           <ShieldCheck className="w-6 h-6" />
         </div>
         <p className="text-4xl sm:text-5xl font-black text-emerald-400 font-mono">
-          {stats.pitches}+
+          {stats.pitches}
         </p>
         <p className="text-xs sm:text-sm text-muted-foreground font-extrabold uppercase tracking-wider">{t('stadiums')}</p>
       </div>
@@ -86,7 +86,7 @@ export function LandingStats() {
           <Trophy className="w-6 h-6" />
         </div>
         <p className="text-4xl sm:text-5xl font-black text-amber-400 font-mono">
-          {stats.matches >= 1000 ? `${(stats.matches / 1000).toFixed(1)}k+` : `${stats.matches}+`}
+          {stats.matches >= 1000 ? `${(stats.matches / 1000).toFixed(1)}k+` : `${stats.matches}`}
         </p>
         <p className="text-xs sm:text-sm text-muted-foreground font-extrabold uppercase tracking-wider">{t('matches')}</p>
       </div>
@@ -98,10 +98,9 @@ export function LandingStats() {
             <Star key={i} className="w-4 h-4 fill-current" />
           ))}
         </div>
-        <p className="text-4xl sm:text-5xl font-black text-yellow-400 font-mono">4.9/5</p>
+        <p className="text-4xl sm:text-5xl font-black text-yellow-400 font-mono">5.0/5</p>
         <p className="text-xs sm:text-sm text-muted-foreground font-extrabold uppercase tracking-wider">{t('rating')}</p>
       </div>
     </div>
   );
 }
-

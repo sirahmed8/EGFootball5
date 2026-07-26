@@ -5,99 +5,25 @@ import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { Star, MapPin, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { collection, getDocs, query, limit, doc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useQuery } from '@tanstack/react-query';
 import { Pitch } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const REAL_FALLBACK_STADIUMS: Pitch[] = [
-  {
-    id: 'obour-stadium-1',
-    name: 'ملعب أبطال العبور - الحي التاسع',
-    locationName: 'مدينة العبور - الحي التاسع',
-    mapLink: 'https://maps.google.com',
-    imagePreviewUrl: '/pitch_preview.jpg',
-    pricePerHour: 350,
-    recipient: '01012345678',
-    managerName: 'الكابتن محمد علي',
-    adminEmail: 'manager@obourstadium.com',
-    adminPhone: '01012345678',
-    createdAt: Date.now(),
-    capacity: '5v5',
-    surfaceType: 'نجيل صناعي دولي ممتاز',
-    hasFloodlights: true,
-    hasParking: true,
-    hasCafeteria: true,
-    rating: 4.9,
-    reviewsCount: 142,
-    city: 'obour',
-  },
-  {
-    id: 'elnojoom-pitch-2',
-    name: 'استاد النجوم - حي الشباب',
-    locationName: 'مدينة العبور - حي الشباب',
-    mapLink: 'https://maps.google.com',
-    imagePreviewUrl: '/stadium_hero_bg.jpg',
-    pricePerHour: 400,
-    recipient: '01098765432',
-    managerName: 'الكابتن أحمد حسن',
-    adminEmail: 'nojoom@football.com',
-    adminPhone: '01098765432',
-    createdAt: Date.now(),
-    capacity: '7v7',
-    surfaceType: 'نجيل هجين دولي',
-    hasFloodlights: true,
-    hasParking: true,
-    hasCafeteria: true,
-    rating: 4.85,
-    reviewsCount: 98,
-    city: 'obour',
-  },
-  {
-    id: 'al-shabab-arena-3',
-    name: 'ملعب نادي الشباب الرياضي',
-    locationName: 'مدينة العبور - المنطقة المركزية',
-    mapLink: 'https://maps.google.com',
-    imagePreviewUrl: '/pitch_preview.jpg',
-    pricePerHour: 300,
-    recipient: '01122334455',
-    managerName: 'الكابتن محمود السيد',
-    adminEmail: 'shabab@football.com',
-    adminPhone: '01122334455',
-    createdAt: Date.now(),
-    capacity: '5v5',
-    surfaceType: 'نجيل صناعي مواصفات دولية',
-    hasFloodlights: true,
-    hasParking: true,
-    hasCafeteria: false,
-    rating: 4.95,
-    reviewsCount: 215,
-    city: 'obour',
-  },
-];
-
 export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
-  const { data: dbPitches = [], isLoading } = useQuery({
+  const { data: pitches = [], isLoading } = useQuery({
     queryKey: ['featured_pitches'],
     queryFn: async () => {
       const q = query(collection(db, 'pitches'), limit(6));
       const snap = await getDocs(q);
-      if (snap.empty) {
-        for (const p of REAL_FALLBACK_STADIUMS) {
-          try {
-            await setDoc(doc(db, 'pitches', p.id), p);
-          } catch (err) {
-            console.warn('Seed pitch error:', err);
-          }
-        }
-        return REAL_FALLBACK_STADIUMS;
-      }
       return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Pitch));
     },
   });
 
-  const displayPitches = dbPitches.length > 0 ? dbPitches : REAL_FALLBACK_STADIUMS;
+  if (!isLoading && pitches.length === 0) {
+    return null;
+  }
 
   return (
     <div className="space-y-8">
@@ -105,7 +31,7 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
         <div className="text-start space-y-1.5">
           <span className="inline-flex items-center gap-1.5 text-xs font-black text-primary uppercase tracking-wider bg-primary/10 px-3.5 py-1.5 rounded-full border border-primary/30">
             <Zap className="w-3.5 h-3.5 text-primary" />
-            {isArabic ? 'الملاعب الأكثر طلباً بالعبور والقاهرة' : 'Top Rated Stadiums'}
+            {isArabic ? 'الملاعب المتاحة' : 'Featured Stadiums'}
           </span>
           <h3 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
             {isArabic ? 'استكشف ملاعب خماسي مجهزة وموثقة' : 'Featured Pitch Selection'}
@@ -141,7 +67,7 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-          {displayPitches.map((stadium) => (
+          {pitches.map((stadium) => (
             <div
               key={stadium.id}
               className="group relative rounded-3xl overflow-hidden bg-card border border-border hover:border-primary/50 transition-all duration-300 shadow-xl flex flex-col justify-between"
@@ -157,11 +83,15 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-black/40" />
 
                 {/* Rating badge */}
-                <div className="absolute top-3 end-3 bg-background/90 text-amber-400 font-black text-xs px-3 py-1 rounded-full border border-amber-500/40 flex items-center gap-1.5 shadow-md">
-                  <Star className="w-3.5 h-3.5 fill-amber-400" />
-                  <span>{stadium.rating || 4.9}</span>
-                  <span className="text-muted-foreground text-[10px]">({stadium.reviewsCount || 120})</span>
-                </div>
+                {stadium.rating && (
+                  <div className="absolute top-3 end-3 bg-background/90 text-amber-400 font-black text-xs px-3 py-1 rounded-full border border-amber-500/40 flex items-center gap-1.5 shadow-md">
+                    <Star className="w-3.5 h-3.5 fill-amber-400" />
+                    <span>{stadium.rating}</span>
+                    {stadium.reviewsCount && (
+                      <span className="text-muted-foreground text-[10px]">({stadium.reviewsCount})</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Content body */}
@@ -191,7 +121,7 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
                 <div className="pt-4 border-t border-border flex items-center justify-between gap-3">
                   <div>
                     <span className="text-2xl sm:text-3xl font-black text-primary font-mono">
-                      {stadium.pricePerHour || 350}
+                      {stadium.pricePerHour}
                     </span>
                     <span className="text-xs text-muted-foreground font-bold ms-1">
                       {isArabic ? 'ج.م / ساعة' : ' EGP/hr'}

@@ -11,7 +11,6 @@ import { User, Shield, ShieldAlert, Ban, CheckCircle, Mail, Trash2 } from 'lucid
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import Image from 'next/image';
 import { UsersPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 export default function OwnerUsersPage() {
@@ -25,6 +24,7 @@ export default function OwnerUsersPage() {
   const deleteUserMutation = useDeleteUser();
 
   const [userToDelete, setUserToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [failedImageUids, setFailedImageUids] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!loading && appUser?.role !== 'owner') {
@@ -104,101 +104,112 @@ export default function OwnerUsersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {users.map(user => (
-                    <tr key={user.uid} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-4 font-medium text-foreground flex items-center gap-3">
-                        {user.photoURL ? (
-                          <Image src={user.photoURL} alt={user.name} width={32} height={32} className="w-8 h-8 rounded-full border border-border" />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center border border-border">
-                            <User className="w-4 h-4 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div>
-                          <div>{user.name}</div>
-                          <div className="text-xs text-muted-foreground md:hidden">{user.email}</div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-muted-foreground hidden md:table-cell">
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4" />
-                          {user.email || '-'}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          user.role === 'owner' ? 'bg-primary/20 text-primary' :
-                          user.role === 'admin' ? 'bg-secondary/20 text-secondary' :
-                          'bg-muted text-muted-foreground'
-                        }`}>
-                          {user.role === 'owner' ? t('owner') :
-                           user.role === 'admin' ? t('admin') :
-                           t('player')}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit ${
-                          user.isBlacklisted ? 'bg-destructive/20 text-destructive' : 'bg-emerald-500/20 text-emerald-500'
-                        }`}>
-                          {user.isBlacklisted ? <Ban className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
-                          {user.isBlacklisted ? t('blacklisted') : t('active')}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex flex-wrap items-center gap-2">
-                          {user.role !== 'owner' && (
-                            <>
-                              {user.role === 'admin' ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleUpdateRole(user.uid, 'player')}
-                                  disabled={updateRoleMutation.isPending}
-                                  className="border-border text-foreground hover:bg-accent hover:text-accent-foreground rounded-xl"
-                                >
-                                  <ShieldAlert className="w-4 h-4 me-1" />
-                                  {t('makePlayer')}
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleUpdateRole(user.uid, 'admin')}
-                                  disabled={updateRoleMutation.isPending}
-                                  className="border-border text-foreground hover:bg-accent hover:text-accent-foreground rounded-xl"
-                                >
-                                  <Shield className="w-4 h-4 me-1" />
-                                  {t('makeAdmin')}
-                                </Button>
-                              )}
-
-                              <Button
-                                variant={user.isBlacklisted ? "default" : "destructive"}
-                                size="sm"
-                                onClick={() => handleUpdateBlacklist(user.uid, !user.isBlacklisted)}
-                                disabled={toggleBlacklistMutation.isPending}
-                                className="font-semibold rounded-xl"
-                              >
-                                {user.isBlacklisted ? t('unblacklist') : t('blacklist')}
-                              </Button>
-
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => setUserToDelete({ id: user.uid, name: user.name })}
-                                disabled={deleteUserMutation.isPending}
-                                className="font-semibold bg-red-600/80 hover:bg-red-600 text-white flex items-center rounded-xl cursor-pointer"
-                                title={t('deleteUser')}
-                              >
-                                <Trash2 className="w-4 h-4 me-1" />
-                                {t('delete')}
-                              </Button>
-                            </>
+                  {users.map((user) => {
+                    const hasFailedImg = failedImageUids[user.uid];
+                    return (
+                      <tr key={user.uid} className="hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-4 font-medium text-foreground flex items-center gap-3">
+                          {user.photoURL && !hasFailedImg ? (
+                            <img
+                              src={user.photoURL}
+                              alt={user.name || 'User'}
+                              className="w-9 h-9 rounded-full border border-primary/30 object-cover shrink-0"
+                              referrerPolicy="no-referrer"
+                              onError={() => {
+                                setFailedImageUids((prev) => ({ ...prev, [user.uid]: true }));
+                              }}
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-full bg-primary/15 text-primary flex items-center justify-center border border-primary/30 font-bold text-xs shrink-0">
+                              {user.name ? user.name.charAt(0).toUpperCase() : <User className="w-4 h-4 text-primary" />}
+                            </div>
                           )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                          <div>
+                            <div className="font-bold">{user.name}</div>
+                            <div className="text-xs text-muted-foreground md:hidden">{user.email}</div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 text-muted-foreground hidden md:table-cell">
+                          <div className="flex items-center gap-2 font-mono text-xs">
+                            <Mail className="w-4 h-4 text-primary" />
+                            {user.email || '-'}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                            user.role === 'owner' ? 'bg-primary/20 text-primary border border-primary/30' :
+                            user.role === 'admin' ? 'bg-secondary/20 text-secondary border border-secondary/30' :
+                            'bg-muted text-muted-foreground border border-border'
+                          }`}>
+                            {user.role === 'owner' ? t('owner') :
+                             user.role === 'admin' ? t('admin') :
+                             t('player')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit ${
+                            user.isBlacklisted ? 'bg-destructive/20 text-destructive' : 'bg-emerald-500/20 text-emerald-500'
+                          }`}>
+                            {user.isBlacklisted ? <Ban className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
+                            {user.isBlacklisted ? t('blacklisted') : t('active')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {user.role !== 'owner' && (
+                              <>
+                                {user.role === 'admin' ? (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleUpdateRole(user.uid, 'player')}
+                                    disabled={updateRoleMutation.isPending}
+                                    className="border-border text-foreground hover:bg-accent hover:text-accent-foreground rounded-xl cursor-pointer"
+                                  >
+                                    <ShieldAlert className="w-4 h-4 me-1" />
+                                    {t('makePlayer')}
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleUpdateRole(user.uid, 'admin')}
+                                    disabled={updateRoleMutation.isPending}
+                                    className="border-border text-foreground hover:bg-accent hover:text-accent-foreground rounded-xl cursor-pointer"
+                                  >
+                                    <Shield className="w-4 h-4 me-1" />
+                                    {t('makeAdmin')}
+                                  </Button>
+                                )}
+
+                                <Button
+                                  variant={user.isBlacklisted ? "default" : "destructive"}
+                                  size="sm"
+                                  onClick={() => handleUpdateBlacklist(user.uid, !user.isBlacklisted)}
+                                  disabled={toggleBlacklistMutation.isPending}
+                                  className="font-semibold rounded-xl cursor-pointer"
+                                >
+                                  {user.isBlacklisted ? t('unblacklist') : t('blacklist')}
+                                </Button>
+
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => setUserToDelete({ id: user.uid, name: user.name })}
+                                  disabled={deleteUserMutation.isPending}
+                                  className="font-semibold bg-red-600/80 hover:bg-red-600 text-white flex items-center rounded-xl cursor-pointer"
+                                  title={t('deleteUser')}
+                                >
+                                  <Trash2 className="w-4 h-4 me-1" />
+                                  {t('delete')}
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
