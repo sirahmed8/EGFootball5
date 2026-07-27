@@ -649,6 +649,9 @@
   "Announcements": {
     "title": "Platform Announcements & News",
     "subtitle": "Official updates from the EGFootball5 team",
+    "feedTitle": "Platform Announcements Feed",
+    "announcements": "Official Platform News",
+    "subscribe": "Subscribe to Alerts",
     "all": "All",
     "tournaments": "Tournaments",
     "maintenance": "Maintenance",

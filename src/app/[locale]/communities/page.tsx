@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Search, Plus, Shield, MapPin, Trophy, Sparkles, CheckCircle2, UserPlus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { CommunitiesPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface Community {
   id: string;
@@ -117,6 +118,8 @@ export default function CommunitiesPage() {
     const matchesCat = category === 'All' || c.category === category;
     return matchesSearch && matchesCat;
   });
+
+  if (loading) return <CommunitiesPageSkeleton />;
 
   return (
     <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-7xl mx-auto space-y-8">

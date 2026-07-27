@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { HelpCircle, MessageSquare, Plus, CheckCircle2, Clock, Send, ChevronDown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { SupportPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface SupportTicket {
   id: string;
@@ -23,6 +24,7 @@ export default function SupportPage() {
   const appUser = useAuthStore((s) => s.appUser);
 
   const [tickets, setTickets] = React.useState<SupportTicket[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const [subject, setSubject] = React.useState('');
   const [category, setCategory] = React.useState('Booking Issue');
   const [message, setMessage] = React.useState('');
@@ -41,6 +43,7 @@ export default function SupportPage() {
     async function fetchTickets() {
       if (!firebaseUser) {
         setTickets([]);
+        setLoading(false);
         return;
       }
       try {
@@ -55,6 +58,8 @@ export default function SupportPage() {
       } catch (err) {
         console.error(err);
         setTickets([]);
+      } finally {
+        setLoading(false);
       }
     }
     fetchTickets();
@@ -92,6 +97,8 @@ export default function SupportPage() {
       setSubmitting(false);
     }
   };
+
+  if (loading) return <SupportPageSkeleton />;
 
   return (
     <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-5xl mx-auto space-y-8">

@@ -648,6 +648,9 @@
   "Announcements": {
     "title": "إعلانات وأخبار المنصة",
     "subtitle": "آخر التحديثات الرسمية من فريق EGFootball5",
+    "feedTitle": "موجز إعلانات المنصة",
+    "announcements": "الأخبار والتحديثات الرسمية",
+    "subscribe": "الاشتراك في التنبيهات",
     "all": "الكل",
     "tournaments": "البطولات",
     "maintenance": "الصيانة",
