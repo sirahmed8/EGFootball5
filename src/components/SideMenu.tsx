@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 
-// ── Sidebar content (shared between desktop & mobile) ─────────────────────────
+// ── Sidebar Content (shared between desktop & mobile) ─────────────────────────
 function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile: boolean }) {
   const locale = useLocale();
   const pathname = usePathname();
@@ -69,24 +69,26 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   ].filter((link, idx, arr) => arr.findIndex((l) => l.href === link.href) === idx);
 
   return (
-    <div className="flex flex-col h-full stadium-glass">
-      {/* Logo header */}
-      <div className="h-16 flex items-center justify-between px-6 border-b border-white/10 flex-shrink-0">
-        <Link href="/" onClick={() => onClose?.()} className="flex items-center gap-2">
-          <Image src="/favicon.jpg" alt="Logo" width={28} height={28} className="rounded-full object-cover shadow-md" priority={true} />
-          <span className="font-black text-base tracking-tight text-foreground">
-            EG<span className="text-gradient-primary">Football5</span>
-          </span>
-        </Link>
-        {isMobile && (
-          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-white/10 transition-colors cursor-pointer">
-            <X size={20} className="text-muted-foreground" />
+    <div className="flex flex-col h-full min-h-screen bg-neutral-950/95 backdrop-blur-2xl text-foreground">
+      {/* Mobile Drawer Header */}
+      {isMobile && (
+        <div className="h-16 flex items-center justify-between px-6 border-b border-white/10 shrink-0">
+          <div className="flex items-center gap-2 font-black text-base tracking-tight text-foreground">
+            <Image src="/favicon.jpg" alt="Logo" width={28} height={28} className="rounded-full object-cover shadow-md" priority={true} />
+            <span>EG<span className="text-gradient-primary">Football5</span></span>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-foreground transition-colors cursor-pointer"
+            aria-label="Close menu"
+          >
+            <X size={20} />
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Nav links — scrollable */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5">
+      {/* Nav Links — Scrollable */}
+      <nav className="flex-1 overflow-y-auto p-4 space-y-1.5 min-h-0">
         {navLinks.map((link) => {
           const normalize = (p: string) => p.replace(/\/$/, '') || '/';
           const isActive = normalize(pathname) === normalize(link.href);
@@ -94,9 +96,9 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
             <button
               key={link.href}
               onClick={() => handleNav(link.href)}
-              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm transition-all text-start cursor-pointer ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm transition-all text-start cursor-pointer ${
                 isActive
-                  ? 'bg-primary text-black font-black shadow-lg glow-primary-sm scale-[1.02]'
+                  ? 'bg-primary text-black font-black shadow-lg glow-primary-sm scale-[1.01]'
                   : 'font-semibold text-muted-foreground hover:text-foreground hover:bg-white/10'
               }`}
             >
@@ -109,7 +111,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
         {!firebaseUser && (
           <button
             onClick={() => handleNav('/login')}
-            className="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-bold text-primary hover:bg-primary/20 transition-all text-start cursor-pointer border border-primary/30"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-primary hover:bg-primary/20 transition-all text-start cursor-pointer border border-primary/30 mt-4"
           >
             {tNav('signIn')}
           </button>
@@ -119,7 +121,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   );
 }
 
-// ── Mobile drawer ─────────────────────────────────────────────────────────────
+// ── Mobile Drawer ─────────────────────────────────────────────────────────────
 function MobileDrawer() {
   const [isOpen, setIsOpen] = React.useState(false);
   const locale = useLocale();
@@ -127,45 +129,45 @@ function MobileDrawer() {
 
   React.useEffect(() => {
     if (isOpen) {
-      document.body.setAttribute('data-mobile-menu-open', 'true');
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.removeAttribute('data-mobile-menu-open');
+      document.body.style.overflow = '';
     }
     return () => {
-      document.body.removeAttribute('data-mobile-menu-open');
+      document.body.style.overflow = '';
     };
   }, [isOpen]);
 
   return (
     <>
-      {/* Hamburger */}
+      {/* Hamburger Trigger */}
       <button
         onClick={() => setIsOpen(true)}
-        className="p-2 rounded-full hover:bg-white/10 transition-colors text-foreground cursor-pointer"
+        className="p-2 rounded-full hover:bg-white/10 transition-colors text-foreground cursor-pointer focus:outline-none"
         aria-label="Open menu"
       >
-        <Menu className="w-6 h-6" />
+        <Menu className="w-6 h-6 text-foreground" />
       </button>
 
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md transition-opacity duration-200"
-        style={{ opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? 'auto' : 'none' }}
-        onClick={() => setIsOpen(false)}
-      />
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-md transition-opacity duration-200"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 z-[60] h-full w-72 max-w-[85vw]
-          stadium-glass overflow-hidden shadow-2xl border-white/10
-          transition-transform duration-200 ease-in-out
-          ${isRTL ? 'end-0 border-s rounded-s-3xl' : 'start-0 border-e rounded-e-3xl'}`}
+        className={`fixed inset-y-0 z-[100] w-80 max-w-[85vw]
+          shadow-2xl border-white/10 transition-transform duration-300 ease-in-out
+          ${isRTL ? 'end-0 border-s' : 'start-0 border-e'}`}
         style={{
           transform: isOpen
             ? 'translateX(0)'
             : isRTL
-            ? 'translateX(110%)'
-            : 'translateX(-110%)',
+            ? 'translateX(100%)'
+            : 'translateX(-100%)',
         }}
       >
         <SidebarContent onClose={() => setIsOpen(false)} isMobile={true} />
@@ -174,7 +176,7 @@ function MobileDrawer() {
   );
 }
 
-// ── Desktop persistent sidebar ────────────────────────────────────────────────
+// ── Desktop Persistent Sidebar ────────────────────────────────────────────────
 export function DesktopSidebar() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
@@ -186,19 +188,16 @@ export function DesktopSidebar() {
   return (
     <aside
       dir={isRTL ? 'rtl' : 'ltr'}
-      className={`hidden md:flex flex-col fixed top-0 bottom-0 z-40 w-64
+      className={`hidden md:flex flex-col fixed top-16 bottom-0 z-40 w-64
         stadium-glass border-white/10 overflow-hidden
-        ${isRTL
-          ? 'end-0 border-s rounded-s-3xl'
-          : 'start-0 border-e rounded-e-3xl'
-        }`}
+        ${isRTL ? 'end-0 border-s' : 'start-0 border-e'}`}
     >
       <SidebarContent isMobile={false} />
     </aside>
   );
 }
 
-// ── Mobile trigger export ─────────────────────────────────────────────────────
+// ── SideMenu Export ───────────────────────────────────────────────────────────
 export function SideMenu() {
   return <MobileDrawer />;
 }
