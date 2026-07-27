@@ -80,7 +80,7 @@ export function NotificationBell() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -4 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute top-full mt-2 w-[min(340px,calc(100vw-1.5rem))] bg-card/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl z-[9999] overflow-hidden end-0"
+            className="absolute top-full mt-2 w-[min(340px,calc(100vw-1.5rem))] bg-[#0B0F19] border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999] overflow-hidden end-0 global-outline-glow"
           >
             {/* Header */}
             <div className="flex justify-between items-center px-4 py-3 border-b border-border">
@@ -105,7 +105,7 @@ export function NotificationBell() {
             </div>
 
             {/* Scrollable body */}
-            <div className="max-h-80 overflow-y-auto divide-y divide-border/50">
+            <div className="max-h-80 overflow-y-auto divide-y divide-border/50 p-2 space-y-1">
               {notifications.length === 0 ? (
                 <div className="p-10 text-center">
                   <Inbox className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
@@ -115,8 +115,8 @@ export function NotificationBell() {
                 notifications.map((notif: AppNotification) => (
                   <div
                     key={notif.id}
-                    className={`px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors ${
-                      notif.read ? 'opacity-60' : 'bg-primary/5'
+                    className={`px-4 py-3 cursor-pointer global-list-item ${
+                      notif.read ? 'opacity-60' : 'bg-primary/10 border-s-2 border-primary'
                     }`}
                     onClick={() => {
                       if (!notif.read) handleMarkAsRead(notif.id);

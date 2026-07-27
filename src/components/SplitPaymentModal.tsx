@@ -29,7 +29,7 @@ export function SplitPaymentModal({ totalAmount, numPlayers, isOpen, onClose }: 
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-5 shadow-2xl relative">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md global-box global-outline-glow rounded-3xl p-6 md:p-8 space-y-5 shadow-2xl relative">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h2 className="text-xl font-black text-foreground flex items-center gap-2">
             <span>💸</span> Split Payment Link
@@ -52,13 +52,13 @@ export function SplitPaymentModal({ totalAmount, numPlayers, isOpen, onClose }: 
               value={shareUrl}
               className="flex-1 p-3 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-foreground"
             />
-            <Button onClick={handleCopy} className="bg-primary text-black font-black rounded-xl px-4 cursor-pointer">
+            <Button onClick={handleCopy} className="bg-primary text-black font-black rounded-xl px-4 global-btn">
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </Button>
           </div>
         </div>
 
-        <Button onClick={handleCopy} className="w-full py-4 bg-emerald-500 text-black hover:bg-emerald-400 font-black rounded-2xl glow-primary cursor-pointer flex items-center justify-center gap-2">
+        <Button onClick={handleCopy} className="w-full py-4 bg-emerald-500 text-black hover:bg-emerald-400 font-black rounded-2xl glow-primary global-btn flex items-center justify-center gap-2">
           <Share2 className="w-4 h-4" /> Share on WhatsApp
         </Button>
       </motion.div>

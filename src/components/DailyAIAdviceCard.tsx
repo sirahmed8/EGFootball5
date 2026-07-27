@@ -81,7 +81,7 @@ export function DailyAIAdviceCard() {
 
 
   return (
-    <Card className="bg-gradient-to-br from-emerald-950/40 via-card/80 to-background border-emerald-500/30 shadow-lg backdrop-blur-xl relative overflow-hidden rounded-3xl">
+    <Card className="global-box global-outline-glow relative overflow-hidden rounded-3xl p-1">
       <div className="absolute top-0 end-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
@@ -121,7 +121,7 @@ export function DailyAIAdviceCard() {
         <Button
           onClick={fetchDailyAdvice}
           disabled={loading || remaining === 0}
-          className={`w-full font-bold shadow-md transition-all rounded-2xl ${
+          className={`w-full font-bold shadow-md transition-all rounded-2xl global-btn ${
             remaining > 0
               ? 'bg-emerald-500 hover:bg-emerald-600 text-black shadow-emerald-500/20'
               : 'bg-muted text-muted-foreground cursor-not-allowed border border-border'

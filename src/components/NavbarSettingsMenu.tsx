@@ -129,7 +129,7 @@ export function NavbarSettingsMenu() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: -8 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full mt-2 end-0 w-80 bg-[#0B0F19] border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999] overflow-hidden p-5 space-y-4 text-foreground glow-primary-sm"
+            className="absolute top-full mt-2 end-0 w-80 bg-[#0B0F19] border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999] overflow-hidden p-5 space-y-4 text-foreground global-outline-glow"
           >
             {/* Header / User Info Card */}
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
@@ -148,16 +148,11 @@ export function NavbarSettingsMenu() {
                 )}
                 <div className="overflow-hidden space-y-0.5">
                   <p className="font-black text-sm text-foreground truncate">
-                    {appUser?.name || firebaseUser?.displayName || 'User'}
+                    {appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'لاعب كريم' : 'Player')}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {appUser?.email || firebaseUser?.email || '-'}
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {firebaseUser?.email || (locale === 'ar' ? 'مسجل كزائر' : 'Guest Player')}
                   </p>
-                  {appUser?.role && (
-                    <span className="inline-block text-[10px] font-black text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-md uppercase tracking-wider border border-emerald-500/30">
-                      {appUser.role}
-                    </span>
-                  )}
                 </div>
               </div>
 
@@ -178,7 +173,7 @@ export function NavbarSettingsMenu() {
               {/* Language Switcher */}
               <button
                 onClick={toggleLanguage}
-                className="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all cursor-pointer text-sm font-bold text-foreground"
+                className="w-full flex items-center justify-between px-3.5 py-3 global-list-item bg-white/5 border border-white/10 text-sm font-bold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
                   <Languages className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -193,7 +188,7 @@ export function NavbarSettingsMenu() {
               {mounted && (
                 <button
                   onClick={toggleTheme}
-                  className="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all cursor-pointer text-sm font-bold text-foreground"
+                  className="w-full flex items-center justify-between px-3.5 py-3 global-list-item bg-white/5 border border-white/10 text-sm font-bold text-foreground"
                 >
                   <div className="flex items-center gap-2.5">
                     {isDark ? (

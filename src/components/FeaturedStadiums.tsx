@@ -70,7 +70,7 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
           {pitches.map((stadium) => (
             <div
               key={stadium.id}
-              className="group relative rounded-3xl overflow-hidden stadium-glass border-white/10 card-lift transition-all duration-300 shadow-xl flex flex-col justify-between"
+              className="group relative rounded-3xl overflow-hidden global-card flex flex-col justify-between"
             >
               {/* Image header */}
               <div className="relative h-56 w-full overflow-hidden bg-muted">
@@ -107,10 +107,10 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
                   </h4>
 
                   <div className="flex flex-wrap gap-2 pt-1">
-                    <span className="text-[11px] font-extrabold px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-xs">
+                    <span className="global-badge">
                       ⚽ {stadium.capacity || '5v5'} {stadium.surfaceType || (isArabic ? 'نجيل صناعي' : 'Turf')}
                     </span>
-                    <span className="text-[11px] font-extrabold px-3 py-1 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 shadow-xs">
+                    <span className="global-badge text-primary border-primary/30 bg-primary/10">
                       <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                       {isArabic ? 'إضاءة تراك' : 'Floodlights'}
                     </span>
@@ -129,7 +129,7 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
                   </div>
 
                   <Link href={`/book?pitchId=${stadium.id}`}>
-                    <Button size="sm" className="bg-primary text-black font-black hover:bg-primary/90 rounded-xl px-5 py-5 shadow-lg glow-primary-sm hover:scale-105 transition-all cursor-pointer">
+                    <Button size="sm" className="bg-primary text-black font-black hover:bg-primary/90 rounded-xl px-5 py-5 shadow-lg glow-primary-sm global-btn">
                       {isArabic ? 'احجز الآن' : 'Book Pitch'}
                     </Button>
                   </Link>

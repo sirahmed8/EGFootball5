@@ -24,7 +24,7 @@ export function EmergencyGKModal({ isOpen, onClose, pitchName, timeSlot }: Emerg
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md stadium-glass border-rose-500/40 rounded-3xl p-6 md:p-8 space-y-5 shadow-2xl relative">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md global-box global-outline-glow rounded-3xl p-6 md:p-8 space-y-5 shadow-2xl relative">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h2 className="text-xl font-black text-rose-400 flex items-center gap-2">
             <Radio className="w-5 h-5 animate-pulse" /> Emergency GK Call
@@ -44,7 +44,7 @@ export function EmergencyGKModal({ isOpen, onClose, pitchName, timeSlot }: Emerg
         <Button
           onClick={handleBroadcast}
           disabled={broadcasted}
-          className={`w-full py-4 font-black rounded-2xl cursor-pointer transition-all ${
+          className={`w-full py-4 font-black rounded-2xl global-btn transition-all ${
             broadcasted
               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
               : 'bg-rose-500 text-white hover:bg-rose-600 shadow-xl glow-primary'
