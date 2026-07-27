@@ -324,10 +324,10 @@ function BookContent() {
   const { duration, totalAmount, depositAmount } = getBookingDetails();
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-10 animate-in fade-in duration-500">
+    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-mesh">
       {/* Stadium Banner Header */}
-      <div className="relative rounded-3xl overflow-hidden bg-card border border-border p-6 md:p-8 shadow-2xl space-y-6">
-        <div className="absolute inset-0 z-0 opacity-20">
+      <div className="relative rounded-3xl overflow-hidden stadium-glass border-white/10 p-6 md:p-8 shadow-2xl space-y-6">
+        <div className="absolute inset-0 z-0 opacity-25">
           <Image
             src={pitch.imagePreviewUrl || '/stadium_hero_bg.jpg'}
             alt={pitch.name}
@@ -340,10 +340,10 @@ function BookContent() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-primary/10 text-primary border border-primary/30">
+              <span className="px-3.5 py-1 rounded-full text-xs font-black bg-primary/10 text-primary border border-primary/30 shadow-xs">
                 ⚽ {pitch.capacity || '5v5 Premium Turf'}
               </span>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+              <span className="px-3.5 py-1 rounded-full text-xs font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1 shadow-xs">
                 ⭐ {pitch.rating || 4.9} ({pitch.reviewsCount || 120} {isArabic ? 'تقييم' : 'reviews'})
               </span>
             </div>
@@ -353,14 +353,14 @@ function BookContent() {
             </h1>
 
             <p className="text-muted-foreground text-sm md:text-base flex items-center gap-2 font-medium">
-              <MapPin className="w-4 h-4 text-primary shrink-0" />
+              <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>{pitch.locationName || t('defaultLocation')}</span>
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="bg-background/80 backdrop-blur-md p-4 rounded-2xl border border-border text-center">
-              <span className="text-2xl font-black text-primary font-mono block">
+            <div className="stadium-glass p-4 rounded-2xl border-white/10 text-center shadow-lg">
+              <span className="text-2xl font-black text-primary font-mono block tracking-tight">
                 {pitch.pricePerHour} EGP
               </span>
               <span className="text-[10px] text-muted-foreground uppercase font-extrabold tracking-wider">
@@ -371,7 +371,7 @@ function BookContent() {
             {pitch.adminPhone && (
               <a
                 href={`tel:${pitch.adminPhone}`}
-                className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 p-4 rounded-2xl flex items-center justify-center gap-2 font-black text-xs transition-colors"
+                className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 p-4 rounded-2xl flex items-center justify-center gap-2 font-black text-xs transition-all hover:scale-105 shadow-sm"
               >
                 <Phone className="w-4 h-4" />
                 <span>{t('callManager')}</span>

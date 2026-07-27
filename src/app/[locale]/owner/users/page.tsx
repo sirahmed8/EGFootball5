@@ -70,19 +70,19 @@ export default function OwnerUsersPage() {
   };
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-12">
+    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-mesh">
       <div>
-        <h1 className="text-4xl font-black text-foreground">{t('title')}</h1>
-        <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
+        <h1 className="text-4xl font-black text-foreground tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground mt-2 font-medium">{t('subtitle')}</p>
       </div>
 
-      <Card className="bg-card border border-border rounded-3xl shadow-xl">
+      <Card className="stadium-glass border-white/10 rounded-3xl shadow-2xl overflow-hidden">
         <CardHeader>
           <CardTitle className="text-xl font-black flex items-center gap-2 text-foreground">
             <User className="w-5 h-5 text-primary" />
             {t('title')}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="font-medium text-xs">
             {users.length} {t('title')}
           </CardDescription>
         </CardHeader>

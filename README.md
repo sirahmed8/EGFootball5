@@ -1,25 +1,61 @@
-# EGFootball5 ⚽
+# EGFootball5 / Kickoff ⚽
 
-EGFootball5 is a modern, high-performance web application built to streamline the booking and management of 5-a-side football pitches in Egypt. Designed with both players and pitch owners in mind, it provides a comprehensive platform for finding, booking, and managing football matches.
+**Kickoff (EGFootball5)** is a modern 5-a-side football pitch booking, matchmaking, and stadium management web application built with Next.js 16 (App Router), React 19, Tailwind CSS v4, Framer Motion, and Firebase.
 
-## ✨ Features
+---
 
-*   **Role-Based Access Control**:
-    *   **Players**: Find nearby pitches, book matches, join existing matches, and chat with team members in real-time.
-    *   **Admins**: Manage specific pitches, approve/reject bookings, and communicate with players.
-    *   **Owners**: Oversee the entire platform, manage all pitches and admins, and view global analytics.
-*   **Real-time Collaboration**: Powered by Firebase Realtime Database, allowing users to see who is online and chat instantly within their match lobbies.
-*   **Multi-language Support (i18n)**: Fully accessible in both English (en) and Arabic (ar).
-*   **Secure Authentication**: Seamless login via Google using Firebase Auth.
-*   **Responsive UI/UX**: Built with Tailwind CSS and Shadcn UI to provide a beautiful, glassmorphic, and dynamic user experience across all devices.
+## 🌟 Key Features
 
-## 🛠 Tech Stack
+- 🏟️ **Stadium Booking Engine**: Interactive calendar slot selection grid with 15-minute temporary slot lock.
+- 💳 **Deposit Verification**: Mobile transfer payment proof (Vodafone Cash / InstaPay) upload with pitch admin verification queue & dynamic SVG QR match admission pass.
+- ⚽ **Public Match Lobbies ("Hagaz")**: Position-based matchmaking (GK, DEF, MID, STR) with WhatsApp match invitation link generator.
+- 📋 **5-a-Side Lineup & Tactics Board (`PitchTacticalBoard`)**: Interactive formation selector (1-2-1, 2-1-1, 2-2) with player positioning and WhatsApp share.
+- ☀️ **Stadium Weather Tracker (`StadiumWeatherCard`)**: Live weather, temperature, humidity, and pitch surface condition status.
+- 🏆 **Leaderboard & 3D Podium**: Hall of fame for Top Scorers, Golden Glove Keepers, and Season MVPs.
+- 👥 **Football Communities**: Squad creation, neighborhood clubs, member badges, and join requests.
+- 💬 **Live Community Chat**: Real-time regional chatrooms (`#general`, `#need-gk`, `#match-invites`, `#pitch-reviews`).
+- 🎖️ **Achievements & XP Levels**: Milestone trophies, loyalty levels, and XP progress bars.
+- 🔔 **Notifications Inbox**: Activity center with category filters and batch read actions.
+- 🎉 **Season Ceremony Gala**: Season gala countdown, Golden Boot/Glove awards, and interactive Team of the Season (TOTS) formation.
+- 🎧 **Support Help Desk**: Support ticket system, live thread view, and FAQ accordion.
+- 📖 **Guide & Rules**: Platform charter, deposit hold rules, and fair play policy.
+- 🛡️ **Multi-Tenant Administration**: Dedicated dashboards for Pitch Admins (slot control, receipt review, blacklisting) and Platform Owners (city manager, stadium creator, user role privileges).
+- 🌐 **Full Internationalization (i18n)**: Arabic (`ar`) with full RTL layout, and English (`en`) with LTR layout.
 
-*   **Frontend**: Next.js (App Router), React, Tailwind CSS, Shadcn UI
-*   **Backend & Services**: Firebase (Firestore, Realtime Database, Auth, Storage)
-*   **Language Support**: next-intl
-*   **Deployment**: Firebase Hosting / Vercel
+---
 
-## 🔒 Private Project
+## 🚀 Getting Started
 
-This project is closed-source and strictly private. Unauthorized copying, distribution, or use of this repository is strictly prohibited.
+### Prerequisites
+- Node.js 18+
+- npm / yarn / pnpm
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/kickoff.git
+cd kickoff
+
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 🛠️ Build & Verification
+
+```bash
+# Run TypeScript compilation and production build
+npm run build
+```
+
+---
+
+## 📄 License
+MIT License © 2026 EGFootball5. All rights reserved.

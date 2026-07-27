@@ -346,9 +346,9 @@ export default function ProfilePage() {
   const loyaltyBadge = getLoyaltyBadge(confirmedMatches);
 
   return (
-    <div className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-8 mt-10 animate-in fade-in duration-500">
+    <div className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-mesh">
       <div>
-        <h1 className="text-4xl font-black text-foreground">{t('title')}</h1>
+        <h1 className="text-4xl font-black text-foreground tracking-tight">{t('title')}</h1>
         <p className="text-muted-foreground mt-2 font-medium">{t('description')}</p>
       </div>
 
@@ -356,38 +356,38 @@ export default function ProfilePage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-card/70 border-border backdrop-blur-xl rounded-3xl hover:border-primary/30 transition-all duration-300 shadow-md">
+        <Card className="stadium-glass border-white/10 card-lift rounded-3xl transition-all duration-300 shadow-md">
           <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('totalBookings')}</span>
+            <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">{t('totalBookings')}</span>
             <div className="flex items-baseline gap-2 mt-2">
               <span className="text-4xl font-black text-foreground font-mono">{totalBookings}</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card/70 border-border backdrop-blur-xl rounded-3xl hover:border-primary/30 transition-all duration-300 shadow-md">
+        <Card className="stadium-glass border-white/10 card-lift rounded-3xl transition-all duration-300 shadow-md">
           <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('matchesPlayed')}</span>
+            <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">{t('matchesPlayed')}</span>
             <div className="flex items-baseline gap-2 mt-2">
               <span className="text-4xl font-black text-primary font-mono">{confirmedMatches}</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card/70 border-border backdrop-blur-xl rounded-3xl hover:border-primary/30 transition-all duration-300 shadow-md">
+        <Card className="stadium-glass border-white/10 card-lift rounded-3xl transition-all duration-300 shadow-md">
           <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('preferredPitch')}</span>
-            <span className="text-sm font-extrabold text-foreground mt-2 truncate block" title={preferredPitchName}>
+            <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">{t('preferredPitch')}</span>
+            <span className="text-sm font-black text-foreground mt-2 truncate block" title={preferredPitchName}>
               ⚽ {preferredPitchName}
             </span>
           </CardContent>
         </Card>
 
-        <Card className="bg-card/70 border-border backdrop-blur-xl rounded-3xl hover:border-primary/30 transition-all duration-300 shadow-md">
+        <Card className="stadium-glass border-white/10 card-lift rounded-3xl transition-all duration-300 shadow-md">
           <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('loyaltyLevel')}</span>
+            <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">{t('loyaltyLevel')}</span>
             <div className="mt-2">
-              <span className="inline-block px-3 py-1 rounded-full text-xs font-black bg-primary/20 text-primary border border-primary/40 shadow-sm">
+              <span className="inline-block px-3.5 py-1 rounded-full text-xs font-black bg-primary/20 text-primary border border-primary/40 shadow-xs">
                 {loyaltyBadge}
               </span>
             </div>
@@ -396,7 +396,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Badges Section */}
-      <Card className="bg-card/70 border-border backdrop-blur-xl p-6 space-y-4 rounded-3xl shadow-lg">
+      <Card className="stadium-glass border-white/10 p-6 space-y-4 rounded-3xl shadow-xl">
         <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">
           <Award className="w-5 h-5 text-emerald-400" />
           <span>{tAchieve('title')}</span>

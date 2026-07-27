@@ -655,7 +655,7 @@ export function FloatingChatWidget() {
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="relative p-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-black shadow-[0_0_25px_rgba(57,255,20,0.4)] flex items-center justify-center cursor-pointer group border border-emerald-400/50"
+            className="relative p-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-black shadow-2xl glow-primary flex items-center justify-center cursor-pointer group border border-emerald-400/50"
             aria-label="Open Floating Chatbot"
           >
             <Bot className="w-7 h-7 text-black stroke-[2.5]" />
@@ -676,26 +676,26 @@ export function FloatingChatWidget() {
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 380, damping: 26 }}
             style={{ height: `${modalHeight}px` }}
-            className="w-[calc(100vw-2rem)] sm:w-[420px] bg-card/95 border border-border backdrop-blur-2xl rounded-3xl shadow-2xl flex flex-col overflow-hidden relative"
+            className="w-[calc(100vw-2rem)] sm:w-[420px] stadium-glass border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden relative backdrop-blur-2xl"
           >
             {/* Top Resize Handle */}
             <div
               onMouseDown={startResizing}
               onTouchStart={startResizing}
-              className="w-full h-6 bg-muted/40 hover:bg-muted/80 transition-colors flex items-center justify-center cursor-ns-resize group select-none border-b border-border/40 shrink-0"
+              className="w-full h-6 bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center cursor-ns-resize group select-none border-b border-white/10 shrink-0"
               title="Drag to resize height"
             >
               <GripHorizontal className="w-5 h-5 text-muted-foreground/60 group-hover:text-foreground transition-colors" />
             </div>
 
             {/* Header Navigation Tabs */}
-            <div className="p-3 border-b border-border/60 bg-background/50 flex items-center justify-between gap-2 shrink-0">
-              <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-2xl border border-border/40 flex-1">
+            <div className="p-3 border-b border-white/10 bg-background/40 flex items-center justify-between gap-2 shrink-0">
+              <div className="flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/10 flex-1">
                 <button
                   onClick={() => setActiveTab('ai')}
-                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     activeTab === 'ai'
-                      ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/20'
+                      ? 'bg-primary text-black shadow-md glow-primary-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -705,9 +705,9 @@ export function FloatingChatWidget() {
 
                 <button
                   onClick={() => setActiveTab('community')}
-                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     activeTab === 'community'
-                      ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/20'
+                      ? 'bg-primary text-black shadow-md glow-primary-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -717,9 +717,9 @@ export function FloatingChatWidget() {
 
                 <button
                   onClick={() => setActiveTab('support')}
-                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     activeTab === 'support'
-                      ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/20'
+                      ? 'bg-primary text-black shadow-md glow-primary-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -730,7 +730,7 @@ export function FloatingChatWidget() {
 
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors shrink-0 cursor-pointer"
+                className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>

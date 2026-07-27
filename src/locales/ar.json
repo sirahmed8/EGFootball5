@@ -9,7 +9,18 @@
     "profile": "الملف الشخصي",
     "hi": "أهلاً، {name}",
     "logout": "تسجيل الخروج",
-    "signIn": "تسجيل الدخول"
+    "signIn": "تسجيل الدخول",
+    "browsePitches": "تصفح الملاعب",
+    "communities": "المجتمعات والفرق",
+    "leaderboard": "لوحة الصدارة والجوائز",
+    "communityChat": "دردشة المجتمع",
+    "achievements": "الإنجازات والأوسمة",
+    "notifications": "الإشعارات",
+    "ceremony": "حفل ختام الموسم",
+    "announcements": "الإعلانات والأخبار",
+    "support": "الدعم والشكاوى",
+    "guide": "الدليل والقوانين",
+    "onboarding": "إعداد اللاعب"
   },
   "Notifications": {
     "title": "الإشعارات",

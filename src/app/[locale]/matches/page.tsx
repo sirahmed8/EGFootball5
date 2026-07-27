@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { MatchesPageSkeleton } from '@/components/skeletons/PageSkeletons';
+import { PitchTacticalBoard } from '@/components/PitchTacticalBoard';
 
 const MatchChat = dynamic(() => import('@/components/MatchChat'), { ssr: false });
 
@@ -385,9 +386,12 @@ export default function MatchesPage() {
         })}
       </div>
 
+      {/* Tactical Lineup Visualizer */}
+      <PitchTacticalBoard />
+
       {/* Match Cards List */}
       {filteredMatches.length === 0 ? (
-        <Card className="bg-card/40 border-border/60 backdrop-blur-xl py-16 text-center rounded-3xl">
+        <Card className="stadium-glass border-white/10 backdrop-blur-xl py-16 text-center rounded-3xl">
           <CardContent className="space-y-4 max-w-md mx-auto pt-6">
             <span className="text-5xl block">⚽</span>
             <h3 className="text-2xl font-black text-foreground">
@@ -408,10 +412,10 @@ export default function MatchesPage() {
             return (
               <Card
                 key={match.id}
-                className="bg-card/70 border-border hover:border-primary/40 hover:shadow-[0_0_30px_rgba(57,255,20,0.1)] transition-all duration-300 backdrop-blur-xl flex flex-col justify-between overflow-hidden rounded-3xl"
+                className="stadium-glass border-white/10 card-lift transition-all duration-300 backdrop-blur-xl flex flex-col justify-between overflow-hidden rounded-3xl shadow-xl"
               >
                 <div>
-                  <div className="h-44 w-full relative bg-slate-900 flex items-center justify-center overflow-hidden border-b border-border/40">
+                  <div className="h-48 w-full relative bg-slate-900 flex items-center justify-center overflow-hidden border-b border-white/10">
                     <Image
                       src={pitch?.imagePreviewUrl || '/stadium_hero_bg.jpg'}
                       alt={pitch?.name || 'Pitch'}
@@ -421,12 +425,12 @@ export default function MatchesPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-black/40" />
 
-                    <span className="absolute top-3 end-3 px-3 py-1 rounded-full text-xs font-black bg-primary text-black shadow-md">
+                    <span className="absolute top-3 end-3 px-3.5 py-1 rounded-full text-xs font-black bg-primary text-black shadow-md">
                       {t('spotsSummary', { joined: currentPlayers, total: match.numPeople })}
                     </span>
 
                     {spotsRemaining > 0 && (
-                      <span className="absolute top-3 start-3 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+                      <span className="absolute top-3 start-3 px-3 py-1 rounded-full text-[11px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md shadow-xs">
                         🔥 {spotsRemaining} {t('spotsLeft')}
                       </span>
                     )}
@@ -438,7 +442,7 @@ export default function MatchesPage() {
                         {pitch?.name || 'Obour Champions Stadium'}
                       </h3>
                       <p className="text-xs text-muted-foreground flex items-center gap-1 font-medium mt-1">
-                        <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span>{pitch?.locationName || 'Obour City'}</span>
                       </p>
                     </div>

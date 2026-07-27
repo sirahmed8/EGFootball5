@@ -74,10 +74,10 @@ export function QuickSearchHero() {
   return (
     <form
       onSubmit={handleSearch}
-      className="w-full max-w-4xl mx-auto p-2.5 sm:p-3 rounded-3xl bg-card border border-border shadow-2xl hover:border-primary/40 transition-all space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-2.5 relative z-[999]"
+      className="w-full max-w-4xl mx-auto p-2.5 sm:p-3 rounded-3xl stadium-glass border-white/10 shadow-2xl hover:border-primary/40 transition-all space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-2.5 relative z-[999]"
     >
       {/* Search Text Input — zero focus outline box */}
-      <div className="relative flex items-center gap-3 px-4 py-3 flex-1 bg-background rounded-2xl border border-border focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+      <div className="relative flex items-center gap-3 px-4 py-3 flex-1 bg-white/5 rounded-2xl border border-white/10 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
         <Search className="w-5 h-5 text-primary shrink-0" />
         <input
           type="text"
@@ -85,7 +85,7 @@ export function QuickSearchHero() {
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder={t('placeholder')}
           style={{ outline: 'none', border: 'none', boxShadow: 'none' }}
-          className="w-full bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 appearance-none text-xs sm:text-sm font-medium text-foreground placeholder:text-muted-foreground/70"
+          className="w-full bg-transparent border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 appearance-none text-xs sm:text-sm font-semibold text-foreground placeholder:text-muted-foreground/70"
         />
       </div>
 
@@ -111,7 +111,7 @@ export function QuickSearchHero() {
       <Button
         type="submit"
         size="lg"
-        className="w-full sm:w-auto bg-primary text-black font-black hover:bg-primary/90 rounded-2xl px-6 py-6 shadow-md hover:scale-105 transition-all cursor-pointer text-sm shrink-0 gap-2"
+        className="w-full sm:w-auto bg-primary text-black font-black hover:bg-primary/90 rounded-2xl px-6 py-6 shadow-md glow-primary-sm hover:scale-105 transition-all cursor-pointer text-sm shrink-0 gap-2"
       >
         <Sparkles className="w-4 h-4 text-black shrink-0" />
         <span>{t('findBtn')}</span>

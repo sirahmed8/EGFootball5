@@ -19,6 +19,12 @@ export interface User {
   createdAt: number;
   playerLevel?: 'Rookie' | 'Amateur' | 'Semi-Pro' | 'Pro' | 'Legend';
   preferredPosition?: 'GK' | 'DEF' | 'MID' | 'STR';
+  position?: 'GK' | 'DEF' | 'MID' | 'STR';
+  skillLevel?: number;
+  favoriteTeam?: string;
+  preferredSize?: string;
+  city?: string;
+  onboarded?: boolean;
   goalsCount?: number;
   matchesPlayed?: number;
   mvpBadges?: number;

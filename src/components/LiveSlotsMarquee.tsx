@@ -79,18 +79,19 @@ export function LiveSlotsMarquee() {
   }
 
   return (
-    <section className="py-3.5 bg-card border-y border-border overflow-hidden relative">
+    <section className="py-3.5 stadium-glass border-y border-white/10 overflow-hidden relative backdrop-blur-xl">
       <div className="flex items-center gap-8 animate-marquee whitespace-nowrap text-xs font-black text-emerald-400 uppercase tracking-wider">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
           <Clock className="w-4 h-4 text-primary" />
           {t('header')}
         </span>
         {openSlots.map((slot, idx) => (
           <span key={idx} className="flex items-center gap-3">
-            <span className="bg-muted px-3.5 py-1 rounded-full border border-border text-foreground">
+            <span className="bg-white/5 px-3.5 py-1 rounded-full border border-white/10 text-foreground shadow-sm">
               ⚽ {slot.pitchName} — <strong className="text-primary font-mono">{slot.slotTime}</strong> ({t('open')})
             </span>
-            {idx < openSlots.length - 1 && <span>•</span>}
+            {idx < openSlots.length - 1 && <span className="opacity-30">•</span>}
           </span>
         ))}
       </div>

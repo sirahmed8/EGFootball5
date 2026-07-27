@@ -1,0 +1,10 @@
+# Cursor AI Rules & Engineering Guidelines
+
+# Mirroring AGENT_INSTRUCTIONS.md:
+# Refer to AGENT_INSTRUCTIONS.md for full context.
+
+- MANDATORY: Whenever you add, update, or refactor any feature or page, you MUST update PROJECT_OVERVIEW.md immediately.
+- Never modify or break existing backend queries, Firestore rules, API routes, or state stores.
+- Technology Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Framer Motion, Firebase, TanStack React Query, next-intl.
+- Design System: Follow design tokens defined in DESIGN_SYSTEM.md and src/app/globals.css.
+- RTL & i18n: Always test both English (LTR) and Arabic (RTL) compatibility using logical Tailwind utilities.

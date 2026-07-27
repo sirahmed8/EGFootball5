@@ -205,20 +205,28 @@ export default function AdminDashboard() {
   const uniquePlayers = uniquePlayerIds.map(id => usersCache[id]).filter(Boolean);
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8">
+    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-mesh">
       <div>
-        <h1 className="text-4xl font-black text-foreground">{t('title')}</h1>
-        <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
+        <h1 className="text-4xl font-black text-foreground tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground mt-2 font-medium">{t('subtitle')}</p>
       </div>
 
       <AdminOverviewCards revenue={revenue} pendingCount={pendingReview.length} t={t} />
 
       <Tabs defaultValue="verification" className="w-full">
-        <TabsList className="bg-muted/50 border border-border mb-4 p-1 rounded-xl">
-          <TabsTrigger value="verification" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold rounded-lg">{t('verificationQueue')}</TabsTrigger>
-          <TabsTrigger value="schedule" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">{t('liveSchedule')}</TabsTrigger>
-          <TabsTrigger value="players" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">{t('playersTab')}</TabsTrigger>
-          <TabsTrigger value="settings" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-semibold rounded-lg">{t('settingsTab')}</TabsTrigger>
+        <TabsList className="stadium-glass border-white/10 mb-6 p-1.5 rounded-2xl w-full grid grid-cols-2 md:grid-cols-4 max-w-2xl">
+          <TabsTrigger value="verification" className="data-[state=active]:bg-primary data-[state=active]:text-black font-black rounded-xl cursor-pointer transition-all">
+            {t('verificationQueue')}
+          </TabsTrigger>
+          <TabsTrigger value="schedule" className="data-[state=active]:bg-white/10 data-[state=active]:text-foreground font-bold rounded-xl cursor-pointer transition-all">
+            {t('liveSchedule')}
+          </TabsTrigger>
+          <TabsTrigger value="players" className="data-[state=active]:bg-white/10 data-[state=active]:text-foreground font-bold rounded-xl cursor-pointer transition-all">
+            {t('playersTab')}
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="data-[state=active]:bg-white/10 data-[state=active]:text-foreground font-bold rounded-xl cursor-pointer transition-all">
+            {t('settingsTab')}
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="verification">

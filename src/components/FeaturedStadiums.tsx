@@ -70,21 +70,21 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
           {pitches.map((stadium) => (
             <div
               key={stadium.id}
-              className="group relative rounded-3xl overflow-hidden bg-card border border-border hover:border-primary/50 transition-all duration-300 shadow-xl flex flex-col justify-between"
+              className="group relative rounded-3xl overflow-hidden stadium-glass border-white/10 card-lift transition-all duration-300 shadow-xl flex flex-col justify-between"
             >
               {/* Image header */}
-              <div className="relative h-52 w-full overflow-hidden bg-muted">
+              <div className="relative h-56 w-full overflow-hidden bg-muted">
                 <Image
                   src={stadium.imagePreviewUrl || '/pitch_preview.jpg'}
                   alt={stadium.name}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-black/40" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-black/40" />
 
                 {/* Rating badge */}
                 {stadium.rating && (
-                  <div className="absolute top-3 end-3 bg-background/90 text-amber-400 font-black text-xs px-3 py-1 rounded-full border border-amber-500/40 flex items-center gap-1.5 shadow-md">
+                  <div className="absolute top-3 end-3 bg-background/90 text-amber-400 font-black text-xs px-3.5 py-1.5 rounded-full border border-amber-500/40 flex items-center gap-1.5 shadow-md backdrop-blur-md">
                     <Star className="w-3.5 h-3.5 fill-amber-400" />
                     <span>{stadium.rating}</span>
                     {stadium.reviewsCount && (
@@ -107,10 +107,10 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
                   </h4>
 
                   <div className="flex flex-wrap gap-2 pt-1">
-                    <span className="text-[11px] font-extrabold px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span className="text-[11px] font-extrabold px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-xs">
                       ⚽ {stadium.capacity || '5v5'} {stadium.surfaceType || (isArabic ? 'نجيل صناعي' : 'Turf')}
                     </span>
-                    <span className="text-[11px] font-extrabold px-3 py-1 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center gap-1">
+                    <span className="text-[11px] font-extrabold px-3 py-1 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 shadow-xs">
                       <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                       {isArabic ? 'إضاءة تراك' : 'Floodlights'}
                     </span>
@@ -118,9 +118,9 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
                 </div>
 
                 {/* Footer pricing & quick book */}
-                <div className="pt-4 border-t border-border flex items-center justify-between gap-3">
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
                   <div>
-                    <span className="text-2xl sm:text-3xl font-black text-primary font-mono">
+                    <span className="text-2xl sm:text-3xl font-black text-primary font-mono tracking-tight">
                       {stadium.pricePerHour}
                     </span>
                     <span className="text-xs text-muted-foreground font-bold ms-1">
@@ -129,7 +129,7 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
                   </div>
 
                   <Link href={`/book?pitchId=${stadium.id}`}>
-                    <Button size="sm" className="bg-primary text-black font-black hover:bg-primary/90 rounded-xl px-5 py-5 shadow-md hover:scale-105 transition-all cursor-pointer">
+                    <Button size="sm" className="bg-primary text-black font-black hover:bg-primary/90 rounded-xl px-5 py-5 shadow-lg glow-primary-sm hover:scale-105 transition-all cursor-pointer">
                       {isArabic ? 'احجز الآن' : 'Book Pitch'}
                     </Button>
                   </Link>

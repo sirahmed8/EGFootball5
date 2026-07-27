@@ -33,6 +33,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { SolidSelect, SelectOption } from '@/components/ui/SolidSelect';
 import { HomePageSkeleton } from '@/components/skeletons/PageSkeletons';
+import { StadiumWeatherCard } from '@/components/StadiumWeatherCard';
 
 function HomeContent() {
   const router = useRouter();
@@ -131,6 +132,9 @@ function HomeContent() {
 
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-10 animate-in fade-in duration-500">
+      {/* Live Stadium Weather & Conditions Card */}
+      <StadiumWeatherCard />
+
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border/40 pb-6">
         <div className="space-y-2">
@@ -315,7 +319,7 @@ function HomeContent() {
           {filteredPitches.map((pitch) => (
             <Card
               key={pitch.id}
-              className="bg-card/80 border-border backdrop-blur-xl overflow-hidden hover:border-primary/50 transition-all duration-300 group flex flex-col justify-between shadow-xl rounded-3xl"
+              className="stadium-glass border-white/10 card-lift overflow-hidden hover:border-primary/50 transition-all duration-300 group flex flex-col justify-between shadow-2xl rounded-3xl"
             >
               <div>
                 <div className="aspect-video relative w-full bg-slate-900 overflow-hidden">
@@ -329,7 +333,7 @@ function HomeContent() {
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-black/30" />
 
                   {/* Price Tag */}
-                  <div className="absolute top-3 end-3 bg-background/90 backdrop-blur-md px-3.5 py-1 rounded-full text-primary font-black text-sm border border-primary/30 shadow-md">
+                  <div className="absolute top-3 end-3 bg-background/90 backdrop-blur-md px-3.5 py-1 rounded-full text-primary font-black text-sm border border-primary/30 shadow-md font-mono">
                     {pitch.pricePerHour || 350} {t('egpPerHour')}
                   </div>
 
@@ -345,7 +349,7 @@ function HomeContent() {
                     {pitch.name}
                   </CardTitle>
                   <CardDescription className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
-                    <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                     {pitch.mapLink ? (
                       <a
                         href={pitch.mapLink}

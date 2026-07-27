@@ -258,19 +258,19 @@ function CheckoutForm() {
   return (
     <div className="w-full max-w-5xl space-y-8 animate-in fade-in duration-500">
       {/* Checkout Progress Stepper */}
-      <div className="p-4 rounded-3xl bg-card border border-border backdrop-blur-xl shadow-lg flex items-center justify-around text-xs font-bold">
+      <div className="p-4 rounded-3xl stadium-glass border-white/10 shadow-xl flex items-center justify-around text-xs font-bold">
         <div className="flex items-center gap-2 text-emerald-400">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>{t('lockPitchStep')}</span>
         </div>
-        <span className="text-border">→</span>
+        <span className="text-white/20">→</span>
         <div className="flex items-center gap-2 text-primary font-black">
-          <span className="w-4 h-4 rounded-full bg-primary text-black flex items-center justify-center text-[10px]">2</span>
+          <span className="w-5 h-5 rounded-full bg-primary text-black flex items-center justify-center text-[10px] shadow-sm">2</span>
           <span>{t('payDepositStep')}</span>
         </div>
-        <span className="text-border">→</span>
+        <span className="text-white/20">→</span>
         <div className="flex items-center gap-2 text-muted-foreground">
-          <span className="w-4 h-4 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-[10px]">3</span>
+          <span className="w-5 h-5 rounded-full bg-white/10 text-muted-foreground flex items-center justify-center text-[10px]">3</span>
           <span>{t('instantConfirmStep')}</span>
         </div>
       </div>
@@ -278,15 +278,15 @@ function CheckoutForm() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Panel: Booking Ticket & Details */}
         <div className="lg:col-span-5 space-y-6">
-          <Card className="bg-card border-border backdrop-blur-xl shadow-xl overflow-hidden rounded-3xl">
-            <CardHeader className="bg-primary/10 border-b border-border p-5">
+          <Card className="stadium-glass border-white/10 shadow-2xl overflow-hidden rounded-3xl">
+            <CardHeader className="bg-primary/10 border-b border-white/10 p-5">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl font-black flex items-center gap-2 text-foreground">
                   <span>🏟️</span> {pitch?.name || tBook('title')}
                 </CardTitle>
                 <button
                   onClick={() => setShowQrModal(true)}
-                  className="px-3 py-1.5 rounded-full text-[11px] font-mono font-black bg-primary text-black flex items-center gap-1 hover:scale-105 transition-transform cursor-pointer shadow-md"
+                  className="px-3.5 py-1.5 rounded-full text-[11px] font-mono font-black bg-primary text-black flex items-center gap-1.5 hover:scale-105 transition-transform cursor-pointer shadow-lg glow-primary-sm"
                 >
                   <QrCode className="w-3.5 h-3.5" />
                   <span>QR PASS</span>
@@ -301,7 +301,7 @@ function CheckoutForm() {
 
             <CardContent className="p-6 space-y-6 text-sm">
               <div className="space-y-3">
-                <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
                   <div className="flex items-center gap-2 text-muted-foreground text-xs font-semibold">
                     <Calendar className="w-4 h-4 text-primary" />
                     <span>{t('dateLabel')}</span>
@@ -309,7 +309,7 @@ function CheckoutForm() {
                   <strong className="text-foreground font-mono">{booking.date}</strong>
                 </div>
 
-                <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
                   <div className="flex items-center gap-2 text-muted-foreground text-xs font-semibold">
                     <Clock className="w-4 h-4 text-primary" />
                     <span>{t('timeSlotLabel')}</span>
@@ -319,7 +319,7 @@ function CheckoutForm() {
                   </strong>
                 </div>
 
-                <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
                   <div className="flex items-center gap-2 text-muted-foreground text-xs font-semibold">
                     <Users className="w-4 h-4 text-primary" />
                     <span>{t('matchTypeLabel')}</span>
@@ -340,12 +340,12 @@ function CheckoutForm() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-muted/40 border border-border/60 space-y-2">
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                 <div className="flex justify-between items-center text-muted-foreground text-xs">
                   <span>{t('totalPitchPriceLabel')}</span>
                   <span className="font-bold text-foreground font-mono">{booking.totalAmount} EGP</span>
                 </div>
-                <div className="flex justify-between items-center text-foreground font-bold text-base pt-2 border-t border-border/40">
+                <div className="flex justify-between items-center text-foreground font-bold text-base pt-2 border-t border-white/10">
                   <span>{t('requiredDepositLabel')}</span>
                   <span className="text-primary font-black font-mono text-xl">{booking.depositAmount} EGP</span>
                 </div>

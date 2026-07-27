@@ -13,11 +13,11 @@ export function Navbar() {
   return (
     <>
       {/* ── Mobile top bar ───────────────────────────────────── */}
-      <nav className="md:hidden fixed top-0 start-0 end-0 z-50 bg-background border-b border-border">
+      <nav className="md:hidden fixed top-0 start-0 end-0 z-50 stadium-glass border-b border-white/10 backdrop-blur-xl">
         <div className="px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-black text-xl tracking-tighter text-foreground">
-            <Image src="/favicon.jpg" alt="EGFootball5 Logo" width={28} height={28} className="rounded-full object-cover" priority={true} />
-            <span>EG<span className="text-primary">Football5</span></span>
+            <Image src="/favicon.jpg" alt="EGFootball5 Logo" width={28} height={28} className="rounded-full object-cover shadow-md" priority={true} />
+            <span>EG<span className="text-gradient-primary">Football5</span></span>
           </Link>
           <div className="flex items-center gap-2">
             {firebaseUser && <NotificationBell />}
@@ -28,7 +28,7 @@ export function Navbar() {
       </nav>
 
       {/* ── Desktop top bar (right of sidebar in LTR, left of sidebar in RTL) ── */}
-      <header className="hidden md:flex fixed top-0 z-40 h-16 items-center justify-end px-6 border-b border-border bg-background
+      <header className="hidden md:flex fixed top-0 z-40 h-16 items-center justify-end px-6 border-b border-white/10 stadium-glass backdrop-blur-xl
         ltr:left-64 ltr:right-0
         rtl:right-64 rtl:left-0">
         <div className="flex items-center gap-3">

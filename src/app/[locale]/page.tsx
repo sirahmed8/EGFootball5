@@ -22,21 +22,25 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   const t = await getTranslations({ locale, namespace: 'Landing' });
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden relative">
+    <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden relative bg-mesh">
       <LandingRedirect />
 
+      {/* Ambient background glows */}
+      <div className="absolute top-10 start-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-primary/10 rounded-full blur-[120px] pointer-events-none animate-pulse-glow" />
+      <div className="absolute top-96 -start-40 w-96 h-96 bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
+
       {/* ── HERO SECTION ──────────────────────────────────────────────── */}
-      <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 py-16 bg-background">
-        <div className="relative z-10 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-700">
+      <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 py-16">
+        <div className="relative z-10 max-w-5xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-700">
           {/* Top Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs sm:text-sm font-extrabold">
-            <Sparkles className="w-4 h-4 text-emerald-400" />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs sm:text-sm font-extrabold shadow-sm backdrop-blur-md">
+            <Sparkles className="w-4 h-4 text-emerald-400 animate-spin-slow" />
             <span>{t('heroBadge')}</span>
           </div>
 
           {/* Main Hero Headline */}
           <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter text-foreground leading-[1.05]">
-            EG<span className="text-primary">Football5</span>
+            EG<span className="text-gradient-primary">Football5</span>
           </h1>
 
           <p className="text-xl sm:text-3xl font-black text-primary tracking-tight max-w-3xl mx-auto">
@@ -57,7 +61,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             <Link href="/home">
               <Button
                 size="lg"
-                className="bg-primary text-black hover:bg-primary/90 font-black text-lg px-9 py-7 rounded-2xl shadow-lg hover:scale-105 transition-all cursor-pointer"
+                className="bg-primary text-black hover:bg-primary/90 font-black text-lg px-9 py-7 rounded-2xl shadow-xl glow-primary hover:scale-105 transition-all cursor-pointer"
               >
                 {t('browsePitches')}
               </Button>
@@ -66,7 +70,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               <Button
                 size="lg"
                 variant="outline"
-                className="border-border text-foreground hover:bg-muted font-black text-lg px-9 py-7 rounded-2xl cursor-pointer hover:scale-105 transition-all"
+                className="stadium-glass border-white/10 text-foreground hover:bg-white/10 font-black text-lg px-9 py-7 rounded-2xl cursor-pointer hover:scale-105 transition-all"
               >
                 <Trophy className="w-5 h-5 me-2 text-primary" />
                 {t('publicMatchesBtn')}
@@ -84,9 +88,8 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         <FeaturedStadiums isArabic={locale === 'ar'} />
       </section>
 
-
       {/* ── LIVE STATS COUNTER ────────────────────────────────────────── */}
-      <section className="py-16 px-4 bg-card border-y border-border relative">
+      <section className="py-16 px-4 stadium-glass border-y border-white/10 relative">
         <div className="max-w-6xl mx-auto text-center space-y-8">
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-muted-foreground uppercase">
             {t('trustedBy')}
@@ -96,7 +99,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       </section>
 
       {/* ── HOW IT WORKS (3-STEP WORKFLOW) ────────────────────────────── */}
-      <section className="py-24 px-4 relative overflow-hidden bg-background">
+      <section className="py-24 px-4 relative overflow-hidden">
         <div className="max-w-6xl mx-auto space-y-16">
           <div className="text-center space-y-4 max-w-2xl mx-auto">
             <span className="px-3.5 py-1.5 rounded-full text-xs font-black bg-primary/10 text-primary border border-primary/30">
@@ -111,8 +114,8 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-card border-border hover:border-primary/50 transition-all p-7 space-y-4 relative group rounded-3xl shadow-lg">
-              <div className="w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center text-primary font-black text-2xl group-hover:scale-105 transition-transform">
+            <Card className="stadium-glass border-white/10 card-lift p-7 space-y-4 relative group rounded-3xl shadow-xl">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-2xl group-hover:scale-110 transition-transform">
                 1
               </div>
               <h3 className="text-2xl font-black text-foreground">
@@ -123,8 +126,8 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               </p>
             </Card>
 
-            <Card className="bg-card border-border hover:border-emerald-500/50 transition-all p-7 space-y-4 relative group rounded-3xl shadow-lg">
-              <div className="w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center text-emerald-400 font-black text-2xl group-hover:scale-105 transition-transform">
+            <Card className="stadium-glass border-white/10 card-lift p-7 space-y-4 relative group rounded-3xl shadow-xl">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black text-2xl group-hover:scale-110 transition-transform">
                 2
               </div>
               <h3 className="text-2xl font-black text-foreground">
@@ -135,8 +138,8 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               </p>
             </Card>
 
-            <Card className="bg-card border-border hover:border-teal-500/50 transition-all p-7 space-y-4 relative group rounded-3xl shadow-lg">
-              <div className="w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center text-teal-400 font-black text-2xl group-hover:scale-105 transition-transform">
+            <Card className="stadium-glass border-white/10 card-lift p-7 space-y-4 relative group rounded-3xl shadow-xl">
+              <div className="w-14 h-14 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 font-black text-2xl group-hover:scale-110 transition-transform">
                 3
               </div>
               <h3 className="text-2xl font-black text-foreground">
@@ -151,7 +154,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       </section>
 
       {/* ── FAQ SECTION ───────────────────────────────────────────────── */}
-      <section className="py-24 px-4 bg-background relative border-t border-border">
+      <section className="py-24 px-4 relative border-t border-white/10">
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-black text-foreground tracking-tight">{t('faqTitle')}</h2>
@@ -161,7 +164,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           </div>
 
           <div className="space-y-4">
-            <Card className="bg-card border-border p-6 rounded-3xl shadow-lg">
+            <Card className="stadium-glass border-white/10 p-6 rounded-3xl shadow-lg">
               <h3 className="text-lg font-black text-foreground mb-2 flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
                 {t('faq1Q')}
@@ -171,7 +174,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               </p>
             </Card>
 
-            <Card className="bg-card border-border p-6 rounded-3xl shadow-lg">
+            <Card className="stadium-glass border-white/10 p-6 rounded-3xl shadow-lg">
               <h3 className="text-lg font-black text-foreground mb-2 flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
                 {t('faq2Q')}
@@ -181,7 +184,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               </p>
             </Card>
 
-            <Card className="bg-card border-border p-6 rounded-3xl shadow-lg">
+            <Card className="stadium-glass border-white/10 p-6 rounded-3xl shadow-lg">
               <h3 className="text-lg font-black text-foreground mb-2 flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
                 {t('faq3Q')}
@@ -195,7 +198,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       </section>
 
       {/* ── FINAL CTA BANNER ──────────────────────────────────────────── */}
-      <section className="py-28 px-4 text-center bg-card border-t border-border relative overflow-hidden">
+      <section className="py-28 px-4 text-center stadium-glass border-t border-white/10 relative overflow-hidden">
         <div className="relative z-10 max-w-3xl mx-auto space-y-8">
           <h2 className="text-5xl sm:text-6xl font-black text-foreground tracking-tight">
             {t('ready')}
@@ -207,7 +210,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             <Link href="/login">
               <Button
                 size="lg"
-                className="text-xl px-12 py-8 bg-primary text-black hover:bg-primary/90 font-black rounded-2xl shadow-lg hover:scale-105 transition-all cursor-pointer"
+                className="text-xl px-12 py-8 bg-primary text-black hover:bg-primary/90 font-black rounded-2xl shadow-xl glow-primary hover:scale-105 transition-all cursor-pointer"
               >
                 {t('getStarted')}
               </Button>

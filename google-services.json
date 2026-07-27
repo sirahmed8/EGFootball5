@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "389913644938",
+    "firebase_url": "https://football1fc1-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "football1fc1",
+    "storage_bucket": "football1fc1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389913644938:android:ecbcc66552abcf30ce0273",
+        "android_client_info": {
+          "package_name": "com.sir.egfootball5"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "389913644938-v0hb129021chbqqk9ac6i4mhpd7tp8h1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4L4JK8nryHW1g3aE8lDE8sDUcm0qaASU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "389913644938-v0hb129021chbqqk9ac6i4mhpd7tp8h1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

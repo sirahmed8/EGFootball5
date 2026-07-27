@@ -59,10 +59,10 @@ export default function OwnerDashboardPage() {
   const totalRevenue = confirmedBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-10 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border/40 pb-6">
+    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-mesh">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-black shadow-xs">
             <Sparkles className="w-3.5 h-3.5" />
             <span>{t('statsOverview')}</span>
           </div>
@@ -76,7 +76,7 @@ export default function OwnerDashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
-        <Card className="bg-card border border-border rounded-3xl shadow-xl hover:border-primary/50 transition-all">
+        <Card className="stadium-glass border-white/10 card-lift rounded-3xl shadow-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">
               {t('totalRevenue')}
@@ -84,11 +84,11 @@ export default function OwnerDashboardPage() {
             <DollarSign className="w-5 h-5 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-primary font-mono">EGP {totalRevenue.toLocaleString()}</div>
+            <div className="text-3xl font-black text-primary font-mono tracking-tight">EGP {totalRevenue.toLocaleString()}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card border border-border rounded-3xl shadow-xl hover:border-primary/50 transition-all">
+        <Card className="stadium-glass border-white/10 card-lift rounded-3xl shadow-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">
               {t('totalBookings')}
@@ -103,7 +103,7 @@ export default function OwnerDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card border border-border rounded-3xl shadow-xl hover:border-primary/50 transition-all">
+        <Card className="stadium-glass border-white/10 card-lift rounded-3xl shadow-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">
               {t('registeredUsers')}
@@ -115,7 +115,7 @@ export default function OwnerDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card border border-border rounded-3xl shadow-xl hover:border-primary/50 transition-all">
+        <Card className="stadium-glass border-white/10 card-lift rounded-3xl shadow-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">
               {t('activePitches')}
@@ -129,7 +129,7 @@ export default function OwnerDashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="bg-card border border-border rounded-3xl shadow-xl">
+        <Card className="stadium-glass border-white/10 rounded-3xl shadow-2xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl font-black">
               <Activity className="w-5 h-5 text-primary" />
@@ -147,7 +147,7 @@ export default function OwnerDashboardPage() {
                 .map((b) => (
                   <div
                     key={b.id}
-                    className="flex justify-between items-center pb-4 border-b border-border/50 last:border-0 last:pb-0"
+                    className="flex justify-between items-center pb-4 border-b border-white/10 last:border-0 last:pb-0"
                   >
                     <div>
                       <div className="font-extrabold text-foreground text-sm">
