@@ -129,10 +129,10 @@ export function NavbarSettingsMenu() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: -8 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full mt-2 end-0 w-80 stadium-glass backdrop-blur-2xl bg-neutral-950/95 border border-white/15 rounded-3xl shadow-2xl z-[9999] overflow-hidden p-5 space-y-4 text-foreground"
+            className="absolute top-full mt-2 end-0 w-80 bg-[#0B0F19] border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999] overflow-hidden p-5 space-y-4 text-foreground glow-primary-sm"
           >
             {/* Header / User Info Card */}
-            <div className="flex items-center justify-between pb-3 border-b border-border">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-3 overflow-hidden">
                 {firebaseUser?.photoURL ? (
                   <img
@@ -154,7 +154,7 @@ export function NavbarSettingsMenu() {
                     {appUser?.email || firebaseUser?.email || '-'}
                   </p>
                   {appUser?.role && (
-                    <span className="inline-block text-[10px] font-black text-primary bg-primary/15 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                    <span className="inline-block text-[10px] font-black text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-md uppercase tracking-wider border border-emerald-500/30">
                       {appUser.role}
                     </span>
                   )}
@@ -163,28 +163,28 @@ export function NavbarSettingsMenu() {
 
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-full hover:bg-muted text-muted-foreground transition-colors shrink-0 cursor-pointer"
+                className="p-1.5 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors shrink-0 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Controls */}
-            <div className="space-y-1.5">
-              <p className="text-[11px] font-extrabold text-muted-foreground/70 uppercase tracking-wider px-2">
+            <div className="space-y-2">
+              <p className="text-[11px] font-black text-muted-foreground/70 uppercase tracking-wider px-1">
                 {t('title')}
               </p>
 
               {/* Language Switcher */}
               <button
                 onClick={toggleLanguage}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-muted/70 transition-all cursor-pointer text-sm font-semibold text-foreground"
+                className="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all cursor-pointer text-sm font-bold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
-                  <Languages className="w-4 h-4 text-primary shrink-0" />
+                  <Languages className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>{locale === 'ar' ? 'اللغة العربية' : 'English'}</span>
                 </div>
-                <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded-lg border border-border">
+                <span className="text-xs text-muted-foreground font-mono bg-neutral-900 px-2.5 py-1 rounded-lg border border-white/10 font-bold">
                   {locale === 'ar' ? 'English' : 'العربية'}
                 </span>
               </button>
@@ -193,17 +193,17 @@ export function NavbarSettingsMenu() {
               {mounted && (
                 <button
                   onClick={toggleTheme}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-muted/70 transition-all cursor-pointer text-sm font-semibold text-foreground"
+                  className="w-full flex items-center justify-between px-3.5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all cursor-pointer text-sm font-bold text-foreground"
                 >
                   <div className="flex items-center gap-2.5">
                     {isDark ? (
                       <Sun className="w-4 h-4 text-amber-400 shrink-0" />
                     ) : (
-                      <Moon className="w-4 h-4 text-primary shrink-0" />
+                      <Moon className="w-4 h-4 text-emerald-400 shrink-0" />
                     )}
                     <span>{isDark ? t('lightMode') : t('darkMode')}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded-lg border border-border">
+                  <span className="text-xs text-muted-foreground font-mono bg-neutral-900 px-2.5 py-1 rounded-lg border border-white/10 font-bold">
                     {isDark ? (locale === 'ar' ? 'نهار' : 'Light') : (locale === 'ar' ? 'ليل' : 'Dark')}
                   </span>
                 </button>
@@ -212,10 +212,10 @@ export function NavbarSettingsMenu() {
 
             {/* Logout Button */}
             {firebaseUser && (
-              <div className="pt-2 border-t border-border">
+              <div className="pt-2 border-t border-white/10">
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-2xl bg-destructive/10 text-destructive hover:bg-destructive/20 font-bold transition-all cursor-pointer text-sm"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/30 font-black transition-all cursor-pointer text-sm shadow-sm"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>{tNav('logout')}</span>
