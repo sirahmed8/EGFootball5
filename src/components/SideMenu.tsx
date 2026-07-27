@@ -96,10 +96,10 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
             <button
               key={link.href}
               onClick={() => handleNav(link.href)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm transition-all duration-200 text-start cursor-pointer group ${
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm global-list-item text-start group ${
                 isActive
-                  ? 'bg-primary text-black font-black shadow-lg glow-primary-sm scale-[1.01]'
-                  : 'font-semibold text-muted-foreground hover:text-foreground hover:bg-white/10 hover:translate-x-1.5 rtl:hover:-translate-x-1.5'
+                  ? 'bg-primary text-black font-black shadow-lg glow-primary-sm scale-[1.01] global-outline-glow'
+                  : 'font-semibold text-muted-foreground hover:text-foreground'
               }`}
             >
               <span className={`flex-shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-black' : 'text-primary'}`}>{link.icon}</span>

@@ -274,3 +274,83 @@ h1, h2, h3 {
     radial-gradient(at 80% 80%, oklch(0.65 0.25 250 / 5%) 0px, transparent 50%),
     radial-gradient(at 50% 50%, oklch(0.85 0.25 150 / 3%) 0px, transparent 60%);
 }
+
+/* ── Global Pulse Outline Animation ──────────────────────────── */
+@keyframes globalPulseOutline {
+  0%, 100% {
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
+  }
+  50% {
+    border-color: rgba(16, 185, 129, 0.7);
+    box-shadow: 0 0 24px rgba(16, 185, 129, 0.35);
+  }
+}
+
+.global-outline-glow {
+  animation: globalPulseOutline 3s infinite ease-in-out;
+}
+
+/* ── Global Card / Box Utility ─────────────────────────────── */
+.global-box, .global-card {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.5rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.global-box:hover, .global-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+/* ── Global List Item Micro-Interaction ────────────────────── */
+.global-list-item {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 1rem;
+}
+
+.global-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(16, 185, 129, 0.35);
+  transform: translateX(4px);
+}
+
+[dir="rtl"] .global-list-item:hover {
+  transform: translateX(-4px);
+}
+
+/* ── Global Button Micro-Interaction ──────────────────────── */
+.global-btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.global-btn:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.global-btn:active {
+  transform: scale(0.98);
+}
+
+/* ── Global Status Badge ───────────────────────────────────── */
+.global-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background-color: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

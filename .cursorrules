@@ -7,4 +7,5 @@
 - Never modify or break existing backend queries, Firestore rules, API routes, or state stores.
 - Technology Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Framer Motion, Firebase, TanStack React Query, next-intl.
 - Design System: Follow design tokens defined in DESIGN_SYSTEM.md and src/app/globals.css.
+- MANDATORY GLOBAL ANIMATIONS: Every card/box MUST use `.global-box` or `.global-card`. Highlighted boxes MUST use `.global-outline-glow`. List items MUST use `.global-list-item`. Buttons MUST use `.global-btn`. Badges MUST use `.global-badge`.
 - RTL & i18n: Always test both English (LTR) and Arabic (RTL) compatibility using logical Tailwind utilities.
