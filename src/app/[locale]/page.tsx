@@ -15,6 +15,7 @@ import { LandingRedirect } from '@/components/LandingRedirect';
 import { FeaturedStadiums } from '@/components/FeaturedStadiums';
 import { QuickSearchHero } from '@/components/QuickSearchHero';
 import { LiveSlotsMarquee } from '@/components/LiveSlotsMarquee';
+import { MotionDiv } from '@/components/MotionWrapper';
 
 export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -26,38 +27,91 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       <LandingRedirect />
 
       {/* Ambient background glows */}
-      <div className="absolute top-10 start-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-primary/10 rounded-full blur-[120px] pointer-events-none animate-pulse-glow" />
-      <div className="absolute top-96 -start-40 w-96 h-96 bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <MotionDiv
+          animate={{ y: [0, -20, 0], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+          className="absolute top-10 start-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-primary/15 rounded-full blur-[140px] pointer-events-none"
+        />
+        <MotionDiv
+          animate={{ y: [0, 30, 0], opacity: [0.3, 0.6, 0.3] }}
+          transition={{ repeat: Infinity, duration: 8, ease: "easeInOut", delay: 1 }}
+          className="absolute top-96 -start-40 w-[500px] h-[500px] bg-emerald-500/15 rounded-full blur-[150px] pointer-events-none"
+        />
+        <MotionDiv
+          animate={{ x: [0, 30, 0], opacity: [0.2, 0.5, 0.2] }}
+          transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }}
+          className="absolute bottom-1/4 -end-40 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[150px] pointer-events-none"
+        />
+      </div>
 
       {/* ── HERO SECTION ──────────────────────────────────────────────── */}
       <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 py-16">
-        <div className="relative z-10 max-w-5xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-700">
+        <MotionDiv 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut", staggerChildren: 0.15 }}
+          className="relative z-10 max-w-5xl mx-auto space-y-8"
+        >
           {/* Top Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs sm:text-sm font-extrabold shadow-sm backdrop-blur-md">
+          <MotionDiv 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs sm:text-sm font-extrabold shadow-sm backdrop-blur-md"
+          >
             <Sparkles className="w-4 h-4 text-emerald-400 animate-spin-slow" />
             <span>{t('heroBadge')}</span>
-          </div>
+          </MotionDiv>
 
           {/* Main Hero Headline */}
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter text-foreground leading-[1.05]">
-            EG<span className="text-gradient-primary">Football5</span>
-          </h1>
+          <MotionDiv
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter text-foreground leading-[1.05]">
+              EG<span className="text-gradient-primary">Football5</span>
+            </h1>
+          </MotionDiv>
 
-          <p className="text-xl sm:text-3xl font-black text-primary tracking-tight max-w-3xl mx-auto">
-            {t('heroSubtitle')}
-          </p>
+          <MotionDiv
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <p className="text-xl sm:text-3xl font-black text-primary tracking-tight max-w-3xl mx-auto">
+              {t('heroSubtitle')}
+            </p>
+          </MotionDiv>
 
-          <p className="text-muted-foreground text-base sm:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
-            {t('heroDescription')}
-          </p>
+          <MotionDiv
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <p className="text-muted-foreground text-base sm:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
+              {t('heroDescription')}
+            </p>
+          </MotionDiv>
 
           {/* Interactive Quick Search Hero Widget */}
-          <div className="pt-2">
+          <MotionDiv 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="pt-2"
+          >
             <QuickSearchHero />
-          </div>
+          </MotionDiv>
 
           {/* Primary CTA Buttons */}
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+          <MotionDiv 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="pt-4 flex flex-wrap items-center justify-center gap-4"
+          >
             <Link href="/home">
               <Button
                 size="lg"
@@ -76,8 +130,8 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 {t('publicMatchesBtn')}
               </Button>
             </Link>
-          </div>
-        </div>
+          </MotionDiv>
+        </MotionDiv>
       </section>
 
       {/* ── LIVE AVAILABILITY MARQUEE TICKER ───────────────────────────── */}
@@ -114,8 +168,15 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="stadium-glass border-white/10 card-lift p-7 space-y-4 relative group rounded-3xl shadow-xl">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-2xl group-hover:scale-110 transition-transform">
+            <MotionDiv 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              whileHover={{ y: -5 }}
+              className="stadium-glass border-white/10 p-7 space-y-4 relative group rounded-3xl shadow-xl transition-colors hover:border-primary/50"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-2xl group-hover:scale-110 transition-transform glow-primary-sm">
                 1
               </div>
               <h3 className="text-2xl font-black text-foreground">
@@ -124,9 +185,16 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               <p className="text-muted-foreground leading-relaxed text-sm font-medium">
                 {t('step1Desc')}
               </p>
-            </Card>
+            </MotionDiv>
 
-            <Card className="stadium-glass border-white/10 card-lift p-7 space-y-4 relative group rounded-3xl shadow-xl">
+            <MotionDiv 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              whileHover={{ y: -5 }}
+              className="stadium-glass border-white/10 p-7 space-y-4 relative group rounded-3xl shadow-xl transition-colors hover:border-emerald-500/50"
+            >
               <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black text-2xl group-hover:scale-110 transition-transform">
                 2
               </div>
@@ -136,9 +204,16 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               <p className="text-muted-foreground leading-relaxed text-sm font-medium">
                 {t('step2Desc')}
               </p>
-            </Card>
+            </MotionDiv>
 
-            <Card className="stadium-glass border-white/10 card-lift p-7 space-y-4 relative group rounded-3xl shadow-xl">
+            <MotionDiv 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              whileHover={{ y: -5 }}
+              className="stadium-glass border-white/10 p-7 space-y-4 relative group rounded-3xl shadow-xl transition-colors hover:border-teal-500/50"
+            >
               <div className="w-14 h-14 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 font-black text-2xl group-hover:scale-110 transition-transform">
                 3
               </div>
@@ -148,7 +223,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
               <p className="text-muted-foreground leading-relaxed text-sm font-medium">
                 {t('step3Desc')}
               </p>
-            </Card>
+            </MotionDiv>
           </div>
         </div>
       </section>

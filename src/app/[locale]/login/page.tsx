@@ -16,6 +16,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner';
 import { User as AppUser } from '@/types';
 import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
+import { Sparkles, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,7 +30,6 @@ export default function LoginPage() {
     const isOwner = user.email === 'a7medorabe7@gmail.com';
     let defaultRole = isOwner ? 'owner' : 'player';
 
-    // Check if user is an admin by querying pitches
     if (!isOwner && user.email) {
       const { collection, query, where, getDocs } = await import('firebase/firestore');
       const q = query(collection(db, 'pitches'), where('adminEmail', '==', user.email));
@@ -51,7 +52,6 @@ export default function LoginPage() {
       };
       await setDoc(userRef, appUser);
 
-      // Increment global stats
       const { increment } = await import('firebase/firestore');
       await setDoc(doc(db, 'stats', 'global'), { users: increment(1) }, { merge: true });
 
@@ -72,7 +72,6 @@ export default function LoginPage() {
         photoUpdated = true;
       }
 
-      // Auto upgrade owner if not set
       if (isOwner && appUser.role !== 'owner') {
         appUser.role = 'owner';
         roleUpdated = true;
@@ -104,7 +103,6 @@ export default function LoginPage() {
   }, [router]);
 
   useEffect(() => {
-    // Check if user returned from OAuth redirect
     getRedirectResult(auth)
       .then(async (result) => {
         if (result?.user) {
@@ -116,7 +114,6 @@ export default function LoginPage() {
       });
   }, [processUserSignIn]);
 
-
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -126,7 +123,6 @@ export default function LoginPage() {
       const err = error as { code?: string; message?: string };
       const code = err.code || '';
 
-      // Gracefully ignore closed or cancelled popups
       if (
         code === 'auth/cancelled-popup-request' ||
         code === 'auth/popup-closed-by-user'
@@ -134,7 +130,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Fall back to redirect if popup was blocked by browser/mobile
       if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
         try {
           await signInWithRedirect(auth, provider);
@@ -145,7 +140,7 @@ export default function LoginPage() {
       }
 
       if (code === 'auth/unauthorized-domain') {
-        toast.error('Domain not authorized in Firebase Console (Authentication > Authorized domains)');
+        toast.error('Domain not authorized in Firebase Console');
         return;
       }
 
@@ -154,78 +149,112 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center p-4 md:p-8 overflow-hidden bg-mesh">
-      {/* Background Glow Elements */}
-      <div className="absolute top-1/4 -start-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none animate-pulse-glow" />
-      <div className="absolute bottom-1/4 -end-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl pointer-events-none animate-pulse-glow" style={{ animationDelay: '2s' }} />
+    <div className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center p-4 md:p-8 overflow-hidden bg-background font-sans">
+      {/* Floating Particles Backdrop */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{ y: [0, -20, 0], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+          className="absolute top-1/4 -start-20 w-[400px] h-[400px] bg-primary/20 rounded-full blur-[100px]"
+        />
+        <motion.div
+          animate={{ y: [0, 20, 0], opacity: [0.3, 0.6, 0.3] }}
+          transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 1 }}
+          className="absolute bottom-1/4 -end-20 w-[400px] h-[400px] bg-secondary/20 rounded-full blur-[100px]"
+        />
+        <div className="absolute inset-0 bg-mesh opacity-30 mix-blend-overlay"></div>
+      </div>
 
-      <Card className="w-full max-w-lg stadium-glass border-border/40 shadow-2xl relative z-10 rounded-3xl overflow-hidden backdrop-blur-2xl">
-        <CardHeader className="text-center space-y-4 pt-8 px-6 md:px-10">
-          <div className="mx-auto w-20 h-20 bg-primary/15 border border-primary/30 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 glow-primary-sm group hover:scale-105 transition-transform duration-300">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground font-black text-xl shadow-inner">
-              ⚽
+      <motion.div
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-lg z-10"
+      >
+        <Card className="w-full stadium-glass border-white/10 shadow-2xl relative rounded-[2rem] overflow-hidden backdrop-blur-2xl bg-black/40">
+          <CardHeader className="text-center space-y-6 pt-10 px-6 md:px-10">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 20 }}
+              className="mx-auto w-24 h-24 bg-primary/10 border border-primary/20 rounded-3xl flex items-center justify-center shadow-lg shadow-primary/20 glow-primary group hover:scale-110 transition-transform duration-300"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-primary-foreground font-black text-2xl shadow-inner">
+                ⚽
+              </div>
+            </motion.div>
+            
+            <div className="space-y-2">
+              <CardTitle className="text-3xl md:text-5xl font-black text-foreground tracking-tighter">
+                EG<span className="text-gradient-primary">Football5</span>
+              </CardTitle>
+              <CardDescription className="text-muted-foreground text-base md:text-lg font-medium">
+                {t('welcomeBack')}
+              </CardDescription>
             </div>
-          </div>
-          
-          <div className="space-y-1">
-            <CardTitle className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
-              EGFootball5
-            </CardTitle>
-            <CardDescription className="text-muted-foreground text-base font-medium">
-              {t('welcomeBack')}
-            </CardDescription>
-          </div>
-        </CardHeader>
+          </CardHeader>
 
-        <CardContent className="flex flex-col gap-6 p-6 md:p-10">
-          {/* Features Pills */}
-          <div className="grid grid-cols-3 gap-2 py-2">
-            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/5 border border-white/5 text-center">
-              <span className="text-lg">🏟️</span>
-              <span className="text-xs font-semibold text-foreground mt-1">Top Pitches</span>
+          <CardContent className="flex flex-col gap-8 p-6 md:p-10">
+            {/* Features Pills */}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { icon: '🏟️', label: 'Top Pitches' },
+                { icon: '⚡', label: 'Instant Lock' },
+                { icon: '🏆', label: 'Matches' }
+              ].map((feat, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + idx * 0.1 }}
+                  className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 text-center hover:bg-white/10 transition-colors"
+                >
+                  <span className="text-xl mb-1">{feat.icon}</span>
+                  <span className="text-[10px] sm:text-xs font-bold text-foreground/90 uppercase tracking-wider">{feat.label}</span>
+                </motion.div>
+              ))}
             </div>
-            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/5 border border-white/5 text-center">
-              <span className="text-lg">⚡</span>
-              <span className="text-xs font-semibold text-foreground mt-1">Instant Lock</span>
-            </div>
-            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/5 border border-white/5 text-center">
-              <span className="text-lg">🏆</span>
-              <span className="text-xs font-semibold text-foreground mt-1">Public Matches</span>
-            </div>
-          </div>
 
-          <Button
-            type="button"
-            size="lg"
-            onClick={handleGoogleSignIn}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-lg glow-primary transition-all duration-200 hover:scale-[1.02] active:scale-98 text-base md:text-lg h-14 rounded-2xl flex items-center justify-center gap-3 cursor-pointer"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="currentColor"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
-            </svg>
-            {t('continueWithGoogle')}
-          </Button>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full"
+            >
+              <Button
+                type="button"
+                size="lg"
+                onClick={handleGoogleSignIn}
+                className="w-full bg-primary text-black hover:bg-primary/90 font-black shadow-xl glow-primary transition-all duration-300 text-lg h-16 rounded-2xl flex items-center justify-center gap-4 cursor-pointer"
+              >
+                <svg className="w-6 h-6" viewBox="0 0 24 24">
+                  <path
+                    fill="currentColor"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                {t('continueWithGoogle')}
+                <ArrowRight className="w-5 h-5 opacity-50" />
+              </Button>
+            </motion.div>
 
-          <p className="text-center text-xs text-muted-foreground leading-relaxed px-4">
-            By continuing, you agree to EGFootball5 Platform Terms of Service and Privacy Policy.
-          </p>
-        </CardContent>
-      </Card>
+            <p className="text-center text-xs font-medium text-muted-foreground leading-relaxed px-4">
+              By continuing, you agree to EGFootball5 Platform <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }
