@@ -60,7 +60,7 @@ export function BookingSummaryCard({
         </div>
         <CardContent className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-xs">
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-xs hover:scale-[1.03] hover:border-primary/40 transition-all duration-200 cursor-default">
               <span className="text-muted-foreground block text-xs font-bold mb-1 uppercase tracking-wider">
                 {tSummary('durationLabel')}
               </span>
@@ -68,7 +68,7 @@ export function BookingSummaryCard({
                 {duration} {tSummary('hours')}
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-xs">
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-xs hover:scale-[1.03] hover:border-primary/40 transition-all duration-200 cursor-default">
               <span className="text-muted-foreground block text-xs font-bold mb-1 uppercase tracking-wider">
                 {tSummary('totalPrice')}
               </span>
@@ -76,9 +76,10 @@ export function BookingSummaryCard({
                 {totalAmount} {tBook('egp')}
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-xs">
-              <span className="text-muted-foreground block text-xs font-bold mb-1 uppercase tracking-wider">
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-xs hover:scale-[1.03] hover:border-secondary/40 transition-all duration-200 cursor-default">
+              <span className="text-muted-foreground block text-xs font-bold mb-1 uppercase tracking-wider flex items-center justify-between">
                 {tSummary('requiredDeposit')}
+                <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
               </span>
               <span className="text-xl font-black text-secondary font-mono">
                 {depositAmount} {tBook('egp')}

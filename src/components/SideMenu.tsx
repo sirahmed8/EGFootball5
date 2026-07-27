@@ -96,14 +96,15 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
             <button
               key={link.href}
               onClick={() => handleNav(link.href)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm transition-all text-start cursor-pointer ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm transition-all duration-200 text-start cursor-pointer group ${
                 isActive
                   ? 'bg-primary text-black font-black shadow-lg glow-primary-sm scale-[1.01]'
-                  : 'font-semibold text-muted-foreground hover:text-foreground hover:bg-white/10'
+                  : 'font-semibold text-muted-foreground hover:text-foreground hover:bg-white/10 hover:translate-x-1.5 rtl:hover:-translate-x-1.5'
               }`}
             >
-              <span className={`flex-shrink-0 ${isActive ? 'text-black' : 'text-primary'}`}>{link.icon}</span>
-              <span className="truncate">{link.label}</span>
+              <span className={`flex-shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-black' : 'text-primary'}`}>{link.icon}</span>
+              <span className="truncate flex-1">{link.label}</span>
+              {isActive && <span className="w-2 h-2 rounded-full bg-black animate-pulse shrink-0" />}
             </button>
           );
         })}

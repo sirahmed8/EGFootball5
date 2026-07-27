@@ -25,6 +25,7 @@ export function StadiumWeatherCard() {
           </div>
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-400 uppercase tracking-wider mb-0.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <Sparkles className="w-3.5 h-3.5" /> Live Turf Conditions
             </div>
             <h3 className="text-xl font-black text-foreground">{city} Stadiums</h3>
