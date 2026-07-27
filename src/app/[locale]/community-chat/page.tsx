@@ -29,10 +29,10 @@ export default function CommunityChatPage() {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   const channels = [
-    { id: 'general', name: 'general-chat', desc: 'Main Obour & Cairo football lounge', icon: '⚽' },
-    { id: 'need-gk', name: 'need-goalkeeper', desc: 'Callouts for Goalkeepers for upcoming games', icon: '🧤' },
-    { id: 'match-invites', name: 'match-invitations', desc: 'Open lobby announcements & player calls', icon: '🏆' },
-    { id: 'pitch-reviews', name: 'pitch-reviews', desc: 'Turf ratings & stadium feedback', icon: '⭐' },
+    { id: 'general', name: 'General Chat', desc: 'Live platform discussion lounge', icon: '⚽' },
+    { id: 'need-gk', name: 'Goalkeepers Callout', desc: 'Find goalkeepers for matches', icon: '🧤' },
+    { id: 'match-invites', name: 'Match Lobbies', desc: 'Open match announcements', icon: '🏆' },
+    { id: 'pitch-reviews', name: 'Stadium Feedback', desc: 'Pitch and turf reviews', icon: '⭐' },
   ];
 
   React.useEffect(() => {

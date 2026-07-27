@@ -20,26 +20,9 @@ export default function LeaderboardPage() {
   const [tab, setTab] = React.useState<'scorers' | 'keepers' | 'mvp'>('scorers');
   const [search, setSearch] = React.useState('');
 
-  const topScorers: PlayerRank[] = [
-    { id: '1', rank: 1, name: 'Ziad Ammar', avatar: '👑', position: 'STR', score: 38, matchesPlayed: 24, badge: 'Gold Boot' },
-    { id: '2', rank: 2, name: 'Omar Khaled', avatar: '⚡', position: 'STR', score: 31, matchesPlayed: 21, badge: 'Silver Boot' },
-    { id: '3', rank: 3, name: 'Youssef El-Sayed', avatar: '🎯', position: 'MID', score: 27, matchesPlayed: 19, badge: 'Bronze Boot' },
-    { id: '4', rank: 4, name: 'Ahmed Hassan', avatar: '⚽', position: 'STR', score: 24, matchesPlayed: 18, badge: 'Top 10' },
-    { id: '5', rank: 5, name: 'Mahmoud Tarek', avatar: '🔥', position: 'MID', score: 21, matchesPlayed: 15, badge: 'Top 10' },
-    { id: '6', rank: 6, name: 'Karim Mostafa', avatar: '👟', position: 'STR', score: 19, matchesPlayed: 14, badge: 'Top 10' },
-  ];
-
-  const topKeepers: PlayerRank[] = [
-    { id: '10', rank: 1, name: 'Mohamed El-Shenawy', avatar: '🧤', position: 'GK', score: 14, matchesPlayed: 20, badge: 'Golden Glove' },
-    { id: '11', rank: 2, name: 'Mostafa Shobeir', avatar: '🛡️', position: 'GK', score: 11, matchesPlayed: 16, badge: 'Silver Glove' },
-    { id: '12', rank: 3, name: 'Aly Lofti', avatar: '🧱', position: 'GK', score: 9, matchesPlayed: 15, badge: 'Bronze Glove' },
-  ];
-
-  const topMVPs: PlayerRank[] = [
-    { id: '20', rank: 1, name: 'Ahmed Hassan', avatar: '🌟', position: 'MID', score: 9.4, matchesPlayed: 22, badge: 'Season MVP' },
-    { id: '21', rank: 2, name: 'Ziad Ammar', avatar: '🔥', position: 'STR', score: 9.1, matchesPlayed: 24, badge: 'Runner Up' },
-    { id: '22', rank: 3, name: 'Mohamed El-Shenawy', avatar: '🧤', position: 'GK', score: 8.9, matchesPlayed: 20, badge: 'Pro Wall' },
-  ];
+  const topScorers: PlayerRank[] = [];
+  const topKeepers: PlayerRank[] = [];
+  const topMVPs: PlayerRank[] = [];
 
   const activeList = tab === 'scorers' ? topScorers : tab === 'keepers' ? topKeepers : topMVPs;
   const filteredList = activeList.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
@@ -48,7 +31,7 @@ export default function LeaderboardPage() {
   const remaining = filteredList.slice(3);
 
   return (
-    <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#0B0F19] py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
       {/* Header Banner */}
       <div className="text-center space-y-4 stadium-glass p-8 rounded-3xl border-white/10 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 start-1/2 -translate-x-1/2 w-96 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none" />

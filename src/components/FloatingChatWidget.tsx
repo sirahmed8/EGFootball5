@@ -269,12 +269,12 @@ export function FloatingChatWidget() {
     }
   }, [appUser, locale, isArabic]);
 
-  // Load initial greeting when chatbot opens
+  // Load dynamic AI greeting whenever chatbot opens
   useEffect(() => {
-    if (isOpen && aiMessages.length === 0) {
+    if (isOpen) {
       loadInitialAiGreeting();
     }
-  }, [isOpen, aiMessages.length, loadInitialAiGreeting]);
+  }, [isOpen, loadInitialAiGreeting]);
 
   // ----------------------------------------------------
   // Resize Handle Logic

@@ -632,5 +632,28 @@
     "welcomeChip1": "⚽ How to book a pitch?",
     "welcomeChip2": "🏆 Available matches",
     "welcomeChip3": "📍 Find pitch locations"
+  },
+  "Ceremony": {
+    "galaTitle": "End-of-Season Ceremony & Trophy Gala",
+    "mainHeading": "Season Finale & Trophy Ceremony",
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "goldenBoot": "Golden Boot Award",
+    "goldenBootDesc": "Awarded to the top goalscorer of the season.",
+    "goldenGlove": "Golden Glove Award",
+    "goldenGloveDesc": "Awarded to the goalkeeper with the most clean sheets.",
+    "tots": "Team of the Season (TOTS)"
+  },
+  "Announcements": {
+    "title": "Platform Announcements & News",
+    "subtitle": "Official updates from the EGFootball5 team",
+    "all": "All",
+    "tournaments": "Tournaments",
+    "maintenance": "Maintenance",
+    "offers": "Offers",
+    "updates": "Updates",
+    "noAnnouncements": "No announcements posted yet."
   }
 }

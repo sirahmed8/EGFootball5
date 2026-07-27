@@ -19,48 +19,7 @@ interface Announcement {
   badgeColor: string;
 }
 
-const announcementsData: Announcement[] = [
-  {
-    id: "1",
-    category: "Tournaments",
-    title: "Summer League Registration Open",
-    summary: "Sign up now for the upcoming Summer League. Limited slots available!",
-    content: "The annual Summer League is back! Assemble your team and register before August 15th. We have exciting new prizes this year, including custom kits for the winning team and a grand cash prize. Don't miss out on the biggest tournament of the season.",
-    date: "2026-07-25",
-    author: "EG Football Team",
-    badgeColor: "bg-blue-500",
-  },
-  {
-    id: "2",
-    category: "Stadium Maintenance",
-    title: "Pitch 3 Turf Replacement",
-    summary: "Pitch 3 will be closed for maintenance next weekend.",
-    content: "To ensure the highest quality playing surface, Pitch 3 will undergo a full turf replacement starting this Friday. It will remain closed throughout the weekend and will reopen on Monday morning. We apologize for any inconvenience.",
-    date: "2026-07-24",
-    author: "EG Football Team",
-    badgeColor: "bg-emerald-500",
-  },
-  {
-    id: "3",
-    category: "Special Offers",
-    title: "Weekend Discount: 20% Off",
-    summary: "Book any pitch this weekend and get a 20% discount.",
-    content: "Celebrate the start of the new month with our special weekend discount. Use code WKND20 at checkout to receive 20% off any pitch booking for this upcoming Saturday or Sunday. Valid for all time slots.",
-    date: "2026-07-22",
-    author: "EG Football Team",
-    badgeColor: "bg-amber-500",
-  },
-  {
-    id: "4",
-    category: "Platform Updates",
-    title: "New Matchmaking Feature Live",
-    summary: "Find opponents easier with our new matchmaking system.",
-    content: "We're thrilled to announce the launch of our new matchmaking feature! You can now mark your team as 'Looking for Match' and our system will connect you with teams of similar skill levels. Try it out in the Teams tab.",
-    date: "2026-07-20",
-    author: "EG Football Team",
-    badgeColor: "bg-purple-500",
-  },
-];
+const mockAnnouncements: Announcement[] = [];
 
 const categories: Category[] = ["All", "Tournaments", "Stadium Maintenance", "Special Offers", "Platform Updates"];
 
@@ -71,7 +30,7 @@ export default function AnnouncementsPage() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
 
-  const filteredAnnouncements = announcementsData.filter(
+  const filteredAnnouncements = mockAnnouncements.filter(
     (a) => activeCategory === "All" || a.category === activeCategory
   );
 

@@ -7,11 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function LiveStreamPage() {
-  const [chat, setChat] = React.useState([
-    { name: 'Ahmed', msg: 'What a goal by Obour Eagles!' },
-    { name: 'Karim', msg: 'Great save from the keeper 🔥' },
-    { name: 'Youssef', msg: 'Come on Tagamoa!' },
-  ]);
+  const [chat, setChat] = React.useState<Array<{ name: string; msg: string }>>([]);
   const [inputMsg, setInputMsg] = React.useState('');
 
   const handleSend = (e: React.FormEvent) => {

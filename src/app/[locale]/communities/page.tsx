@@ -41,44 +41,7 @@ export default function CommunitiesPage() {
   const [commCategory, setCommCategory] = React.useState('Neighborhood Teams');
   const [creating, setCreating] = React.useState(false);
 
-  const mockCommunities: Community[] = [
-    {
-      id: 'comm-1',
-      name: 'Obour Eagles FC',
-      description: 'The top 5-a-side community squad in Obour City. Friendly weekly matches!',
-      city: 'Obour',
-      membersCount: 24,
-      matchesPlayed: 48,
-      captainName: 'Ahmed Hassan',
-      captainUid: 'cap-1',
-      logoEmoji: '🦅',
-      category: 'Neighborhood Teams',
-    },
-    {
-      id: 'comm-2',
-      name: 'El-Tagamoa Strikers',
-      description: 'Weekend warriors playing high-intensity games at Cairo Pitches.',
-      city: 'Cairo',
-      membersCount: 18,
-      matchesPlayed: 32,
-      captainName: 'Mahmoud Tarek',
-      captainUid: 'cap-2',
-      logoEmoji: '⚡',
-      category: 'Weekend Warriors',
-    },
-    {
-      id: 'comm-3',
-      name: 'Obour Goalkeepers Union',
-      description: 'Exclusive community for Goalkeepers sharing training tips and pitch callouts.',
-      city: 'Obour',
-      membersCount: 12,
-      matchesPlayed: 19,
-      captainName: 'Omar Khaled',
-      captainUid: 'cap-3',
-      logoEmoji: '🧤',
-      category: 'Competitive Clubs',
-    },
-  ];
+  const mockCommunities: Community[] = [];
 
   React.useEffect(() => {
     async function fetchCommunities() {
@@ -89,11 +52,11 @@ export default function CommunitiesPage() {
           const list = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Community));
           setCommunities(list);
         } else {
-          setCommunities(mockCommunities);
+          setCommunities([]);
         }
       } catch (err) {
         console.error(err);
-        setCommunities(mockCommunities);
+        setCommunities([]);
       } finally {
         setLoading(false);
       }

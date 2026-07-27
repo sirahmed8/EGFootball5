@@ -10,30 +10,7 @@ import { toast } from 'sonner';
 export default function TournamentsPage() {
   const [registered, setRegistered] = React.useState(false);
 
-  const bracketRounds = [
-    {
-      name: 'Quarterfinals',
-      matches: [
-        { team1: 'Obour Eagles', score1: 3, team2: 'Cairo Strikers', score2: 1 },
-        { team1: 'Tagamoa Wolves', score1: 2, team2: 'Giza Lions', score2: 4 },
-        { team1: 'Obour Stars', score1: 5, team2: 'Alex Kings', score2: 2 },
-        { team1: 'Zamalek Gunners', score1: 1, team2: 'Naser City FC', score2: 0 },
-      ],
-    },
-    {
-      name: 'Semifinals',
-      matches: [
-        { team1: 'Obour Eagles', score1: 4, team2: 'Giza Lions', score2: 2 },
-        { team1: 'Obour Stars', score1: 3, team2: 'Zamalek Gunners', score2: 1 },
-      ],
-    },
-    {
-      name: 'Grand Finale 🏆',
-      matches: [
-        { team1: 'Obour Eagles', score1: '?', team2: 'Obour Stars', score2: '?' },
-      ],
-    },
-  ];
+  const bracketRounds: Array<{ name: string; matches: Array<{ team1: string; score1: string | number; team2: string; score2: string | number }> }> = [];
 
   return (
     <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">

@@ -8,21 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 export default function VarHighlightsPage() {
-  const [selectedClip, setSelectedClip] = React.useState({
-    id: 'v1',
-    title: 'Unstoppable Volley Goal - Slot #8',
-    player: 'Ziad Ammar',
-    pitch: 'Al Ahly Obour Stadium',
-    time: 'Yesterday 9:30 PM',
-    views: '1.4k',
-    videoEmoji: '⚽',
-  });
-
-  const clips = [
-    { id: 'v1', title: 'Unstoppable Volley Goal', player: 'Ziad Ammar', pitch: 'Al Ahly Obour Stadium', time: 'Yesterday 9:30 PM', views: '1.4k', videoEmoji: '⚽' },
-    { id: 'v2', title: 'Double Save Reflexes', player: 'Mohamed El-Shenawy', pitch: 'Cairo Turf Arena', time: '2 days ago', views: '980', videoEmoji: '🧤' },
-    { id: 'v3', title: 'Nutmeg & Assist', player: 'Omar Khaled', pitch: 'Obour Stadium #2', time: '3 days ago', views: '2.1k', videoEmoji: '⚡' },
-  ];
+  const [selectedClip, setSelectedClip] = React.useState<any>(null);
+  const clips: any[] = [];
 
   return (
     <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
@@ -40,38 +27,50 @@ export default function VarHighlightsPage() {
       </div>
 
       {/* Main Video Player */}
-      <Card className="stadium-glass border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
-        <div className="w-full h-80 md:h-[420px] rounded-2xl bg-emerald-950/80 border-2 border-emerald-500/40 flex flex-col items-center justify-center relative overflow-hidden group shadow-inner">
-          <span className="text-7xl group-hover:scale-110 transition-transform">{selectedClip.videoEmoji}</span>
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button size="lg" className="bg-primary text-black rounded-full p-6 glow-primary cursor-pointer">
-              <Play className="w-8 h-8 fill-black" />
+      {selectedClip ? (
+        <Card className="stadium-glass border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div className="w-full h-80 md:h-[420px] rounded-2xl bg-emerald-950/80 border-2 border-emerald-500/40 flex flex-col items-center justify-center relative overflow-hidden group shadow-inner">
+            <span className="text-7xl group-hover:scale-110 transition-transform">{selectedClip.videoEmoji}</span>
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button size="lg" className="bg-primary text-black rounded-full p-6 glow-primary cursor-pointer">
+                <Play className="w-8 h-8 fill-black" />
+              </Button>
+            </div>
+            <div className="absolute bottom-4 start-4 px-3 py-1 rounded-full bg-black/80 text-xs font-bold text-emerald-400 border border-emerald-500/30">
+              EGFootball5 VAR HD Recording
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+            <div>
+              <h2 className="text-2xl font-black text-foreground">{selectedClip.title}</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Player: <strong className="text-foreground">{selectedClip.player}</strong> • Stadium: {selectedClip.pitch} ({selectedClip.time})
+              </p>
+            </div>
+
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast.success('Clip link copied! Ready to share on TikTok & Instagram 📲');
+              }}
+              className="bg-primary text-black hover:bg-primary/90 font-black px-6 py-3.5 rounded-2xl glow-primary-sm cursor-pointer flex items-center gap-2"
+            >
+              <Share2 className="w-4 h-4" /> Share VAR Clip
             </Button>
           </div>
-          <div className="absolute bottom-4 start-4 px-3 py-1 rounded-full bg-black/80 text-xs font-bold text-emerald-400 border border-emerald-500/30">
-            EGFootball5 VAR HD Recording
+        </Card>
+      ) : (
+        <div className="stadium-glass border-white/10 rounded-3xl p-12 text-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto text-primary">
+            <Film className="w-8 h-8" />
           </div>
+          <h3 className="text-xl font-black text-foreground">No VAR Highlights Recorded Yet</h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Book a pitch slot with automated HD video recording to capture your goals and skills live!
+          </p>
         </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-          <div>
-            <h2 className="text-2xl font-black text-foreground">{selectedClip.title}</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Player: <strong className="text-foreground">{selectedClip.player}</strong> • Stadium: {selectedClip.pitch} ({selectedClip.time})
-            </p>
-          </div>
-
-          <Button
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
-              toast.success('Clip link copied! Ready to share on TikTok & Instagram 📲');
-            }}
-            className="bg-primary text-black hover:bg-primary/90 font-black px-6 py-3.5 rounded-2xl glow-primary-sm cursor-pointer flex items-center gap-2"
-          >
-            <Share2 className="w-4 h-4" /> Share VAR Clip
-          </Button>
-        </div>
-      </Card>
+      )}
 
       {/* Clips Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

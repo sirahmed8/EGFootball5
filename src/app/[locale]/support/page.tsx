@@ -29,10 +29,7 @@ export default function SupportPage() {
   const [submitting, setSubmitting] = React.useState(false);
   const [isFormOpen, setIsFormOpen] = React.useState(false);
 
-  const mockTickets: SupportTicket[] = [
-    { id: 't1', subject: 'Receipt Deposit Pending Verification', category: 'Payment', status: 'in_progress', createdAt: Date.now() - 3600000 },
-    { id: 't2', subject: 'Inquired about Obour pitch lighting', category: 'General Inquiry', status: 'closed', createdAt: Date.now() - 86400000 },
-  ];
+  const mockTickets: SupportTicket[] = [];
 
   const faqs = [
     { q: 'How does the 15-minute slot lock work?', a: 'When you select a time slot on the booking calendar, it is locked exclusively for you for 15 minutes to complete your Vodafone Cash or InstaPay deposit.' },
@@ -43,7 +40,7 @@ export default function SupportPage() {
   React.useEffect(() => {
     async function fetchTickets() {
       if (!firebaseUser) {
-        setTickets(mockTickets);
+        setTickets([]);
         return;
       }
       try {
@@ -53,11 +50,11 @@ export default function SupportPage() {
           const list = snap.docs.map((d) => ({ id: d.id, ...d.data() } as SupportTicket));
           setTickets(list);
         } else {
-          setTickets(mockTickets);
+          setTickets([]);
         }
       } catch (err) {
         console.error(err);
-        setTickets(mockTickets);
+        setTickets([]);
       }
     }
     fetchTickets();

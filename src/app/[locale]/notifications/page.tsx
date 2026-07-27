@@ -26,37 +26,12 @@ export default function NotificationsPage() {
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState<'all' | 'unread'>('all');
 
-  const mockNotifs: NotificationItem[] = [
-    {
-      id: 'n1',
-      title: 'Booking Confirmed! ⚽',
-      body: 'Your deposit for Obour Stadium Slot (8:00 PM) has been verified. Download your QR Pass now!',
-      type: 'booking',
-      read: false,
-      createdAt: Date.now() - 3600000,
-    },
-    {
-      id: 'n2',
-      title: 'Public Match Invitation 🏆',
-      body: 'Player Ziad invited you to join "Obour Champions 5v5" match tomorrow.',
-      type: 'match',
-      read: false,
-      createdAt: Date.now() - 86400000,
-    },
-    {
-      id: 'n3',
-      title: 'New Pitch Feature Live! ⚡',
-      body: 'InstaPay fast deposit is now available for all stadium bookings.',
-      type: 'system',
-      read: true,
-      createdAt: Date.now() - 172800000,
-    },
-  ];
+  const mockNotifs: NotificationItem[] = [];
 
   React.useEffect(() => {
     async function fetchNotifs() {
       if (!firebaseUser) {
-        setNotifications(mockNotifs);
+        setNotifications([]);
         setLoading(false);
         return;
       }
@@ -71,11 +46,11 @@ export default function NotificationsPage() {
           const list = snap.docs.map((d) => ({ id: d.id, ...d.data() } as NotificationItem));
           setNotifications(list);
         } else {
-          setNotifications(mockNotifs);
+          setNotifications([]);
         }
       } catch (err) {
         console.error(err);
-        setNotifications(mockNotifs);
+        setNotifications([]);
       } finally {
         setLoading(false);
       }

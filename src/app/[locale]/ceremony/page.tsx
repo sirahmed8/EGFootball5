@@ -81,17 +81,17 @@ export default function CeremonyPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-wrap justify-center gap-4 md:gap-8"
+          className="flex flex-wrap justify-center gap-4 md:gap-6"
         >
           {[
-            { label: t("days", { defaultMessage: "Days" }), value: timeLeft.days },
-            { label: t("hours", { defaultMessage: "Hours" }), value: timeLeft.hours },
-            { label: t("minutes", { defaultMessage: "Minutes" }), value: timeLeft.minutes },
-            { label: t("seconds", { defaultMessage: "Seconds" }), value: timeLeft.seconds },
+            { label: t("days"), value: timeLeft.days },
+            { label: t("hours"), value: timeLeft.hours },
+            { label: t("minutes"), value: timeLeft.minutes },
+            { label: t("seconds"), value: timeLeft.seconds },
           ].map((item, idx) => (
-            <div key={idx} className="flex flex-col items-center justify-center p-4 md:p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl w-24 md:w-32 shadow-xl shadow-black/50">
-              <span className="text-3xl md:text-5xl font-bold text-white mb-2">{item.value.toString().padStart(2, "0")}</span>
-              <span className="text-xs md:text-sm text-neutral-400 uppercase tracking-widest">{item.label}</span>
+            <div key={idx} className="flex flex-col items-center justify-center p-4 md:p-6 rounded-3xl global-box global-outline-glow min-w-[100px] md:min-w-[130px] shadow-xl">
+              <span className="text-3xl md:text-5xl font-black text-primary mb-1 font-mono">{item.value.toString().padStart(2, "0")}</span>
+              <span className="text-[11px] md:text-xs font-black text-muted-foreground uppercase tracking-widest text-center whitespace-nowrap">{item.label}</span>
             </div>
           ))}
         </motion.div>

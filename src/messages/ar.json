@@ -631,5 +631,28 @@
     "welcomeChip1": "⚽ كيف أحجز ملعباً؟",
     "welcomeChip2": "🏆 المباريات المتاحة",
     "welcomeChip3": "📍 معرفة عناوين الملاعب"
+  },
+  "Ceremony": {
+    "galaTitle": "حفل ختام الموسم وجوائز التكريم",
+    "mainHeading": "نهائي الموسم وحفل الكؤوس",
+    "days": "أيام",
+    "hours": "ساعات",
+    "minutes": "دقائق",
+    "seconds": "ثواني",
+    "goldenBoot": "جائزة الحذاء الذهبي",
+    "goldenBootDesc": "تُمنح لأفضل هداف في الموسم الرياضي.",
+    "goldenGlove": "جائزة القفاز الذهبي",
+    "goldenGloveDesc": "تُمنح لأفضل حارس مرمى حافظ على نظافة شباكه.",
+    "tots": "تشكيلة الموسم المثالية (TOTS)"
+  },
+  "Announcements": {
+    "title": "إعلانات وأخبار المنصة",
+    "subtitle": "آخر التحديثات الرسمية من فريق EGFootball5",
+    "all": "الكل",
+    "tournaments": "البطولات",
+    "maintenance": "الصيانة",
+    "offers": "العروض",
+    "updates": "التحديثات",
+    "noAnnouncements": "لا توجد إعلانات منشورة حالياً."
   }
 }
