@@ -42,7 +42,7 @@ export function CountdownTimer({ lockedUntil }: CountdownTimerProps) {
 
   return (
     <span
-      className={`font-mono font-black text-lg px-3 py-1 rounded-full ms-1 border transition-all duration-300 ${
+      className={`font-mono font-black text-lg px-3.5 py-1.5 rounded-full ms-1 border transition-all duration-300 global-outline-glow ${
         isLowTime
           ? 'bg-red-500/20 text-red-400 border-red-500/40 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)]'
           : 'bg-primary/10 text-primary border-primary/20 shadow-[0_0_15px_rgba(57,255,20,0.15)]'

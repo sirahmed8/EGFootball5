@@ -143,7 +143,7 @@ export default function MatchChat({ matchId }: { matchId: string }) {
           <button
             key={idx}
             onClick={() => sendDirectMessage(chip)}
-            className="px-2.5 py-1 rounded-full bg-background border border-border text-[11px] font-bold text-foreground hover:bg-primary/20 hover:border-primary/40 transition-colors whitespace-nowrap cursor-pointer shrink-0"
+            className="px-2.5 py-1 rounded-full global-list-item text-[11px] font-bold text-foreground hover:bg-primary/20 hover:border-primary/40 transition-colors whitespace-nowrap cursor-pointer shrink-0"
           >
             {chip}
           </button>
@@ -163,9 +163,9 @@ export default function MatchChat({ matchId }: { matchId: string }) {
           type="submit"
           disabled={!newMessage.trim()}
           size="icon"
-          className="rounded-full bg-primary text-black hover:bg-primary/90 shrink-0 cursor-pointer"
+          className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-md global-btn shrink-0"
         >
-          <Send className="w-4 h-4" />
+          <Send className="w-4 h-4 rtl:rotate-180" />
         </Button>
       </form>
     </div>

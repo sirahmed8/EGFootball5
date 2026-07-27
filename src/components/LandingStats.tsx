@@ -59,7 +59,7 @@ export function LandingStats() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
       {/* Players Counter */}
-      <div className="p-6 rounded-3xl bg-card border border-border hover:border-primary/50 transition-all space-y-2">
+      <div className="p-6 rounded-3xl global-card global-outline-glow space-y-2 text-center">
         <div className="flex justify-center text-primary mb-1">
           <Users className="w-6 h-6" />
         </div>
@@ -70,7 +70,7 @@ export function LandingStats() {
       </div>
 
       {/* Stadiums Counter */}
-      <div className="p-6 rounded-3xl bg-card border border-border hover:border-emerald-500/50 transition-all space-y-2">
+      <div className="p-6 rounded-3xl global-card global-outline-glow space-y-2 text-center">
         <div className="flex justify-center text-emerald-400 mb-1">
           <ShieldCheck className="w-6 h-6" />
         </div>
@@ -81,7 +81,7 @@ export function LandingStats() {
       </div>
 
       {/* Matches Counter */}
-      <div className="p-6 rounded-3xl bg-card border border-border hover:border-amber-500/50 transition-all space-y-2">
+      <div className="p-6 rounded-3xl global-card global-outline-glow space-y-2 text-center">
         <div className="flex justify-center text-amber-400 mb-1">
           <Trophy className="w-6 h-6" />
         </div>

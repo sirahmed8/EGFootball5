@@ -103,7 +103,7 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-4xl mx-auto space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 stadium-glass p-6 md:p-8 rounded-3xl border-white/10 shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 global-box global-outline-glow p-6 md:p-8 rounded-3xl shadow-xl">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-black">
             <Bell className="w-3.5 h-3.5" /> Notifications Center
@@ -117,27 +117,27 @@ export default function NotificationsPage() {
           <Button
             onClick={handleMarkAllRead}
             variant="outline"
-            className="stadium-glass border-white/10 text-foreground hover:bg-white/10 text-xs font-bold rounded-2xl cursor-pointer flex items-center gap-2"
+            className="global-box border-white/10 text-foreground hover:bg-white/10 text-xs font-bold rounded-2xl global-btn flex items-center gap-2"
           >
-            <CheckCheck className="w-4 h-4 text-primary" /> Mark All Read
+            <CheckCheck className="w-4 h-4 text-primary" /> Mark all as read
           </Button>
         </div>
       </div>
 
-      {/* Filter Tabs */}
+      {/* Tabs */}
       <div className="flex gap-3">
         <button
           onClick={() => setFilter('all')}
-          className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer ${
-            filter === 'all' ? 'bg-primary text-black shadow-lg glow-primary-sm' : 'stadium-glass border-white/10 text-muted-foreground'
+          className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all global-btn ${
+            filter === 'all' ? 'bg-primary text-black shadow-lg glow-primary-sm' : 'global-box border-white/10 text-muted-foreground'
           }`}
         >
           All Notifications ({notifications.length})
         </button>
         <button
           onClick={() => setFilter('unread')}
-          className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer ${
-            filter === 'unread' ? 'bg-primary text-black shadow-lg glow-primary-sm' : 'stadium-glass border-white/10 text-muted-foreground'
+          className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all global-btn ${
+            filter === 'unread' ? 'bg-primary text-black shadow-lg glow-primary-sm' : 'global-box border-white/10 text-muted-foreground'
           }`}
         >
           Unread ({notifications.filter((n) => !n.read).length})
@@ -149,7 +149,7 @@ export default function NotificationsPage() {
         {filtered.map((item) => (
           <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <Card
-              className={`stadium-glass border-white/10 rounded-3xl p-5 shadow-lg transition-all ${
+              className={`global-list-item global-box border-white/10 rounded-3xl p-5 shadow-lg transition-all ${
                 !item.read ? 'border-s-4 border-s-primary bg-primary/5' : 'opacity-80'
               }`}
             >
