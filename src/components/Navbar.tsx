@@ -37,10 +37,16 @@ export function Navbar() {
         }`}
       >
         <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2.5 font-black text-xl tracking-tighter text-foreground hover:opacity-90 transition-opacity">
-            <Image src="/favicon.jpg" alt="EGFootball5 Logo" width={32} height={32} className="rounded-full object-cover shadow-md" priority={true} />
-            <span>EG<span className="text-gradient-primary">Football5</span></span>
-          </Link>
+          {!isLoggedIn ? (
+            <Link href="/" className="flex items-center gap-2.5 font-black text-xl tracking-tighter text-foreground hover:opacity-90 transition-opacity">
+              <Image src="/favicon.jpg" alt="EGFootball5 Logo" width={32} height={32} className="rounded-full object-cover shadow-md" priority={true} />
+              <span>EG<span className="text-gradient-primary">Football5</span></span>
+            </Link>
+          ) : (
+            <span className="text-xs font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> EGFootball5 Arena
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

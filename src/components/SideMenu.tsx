@@ -159,7 +159,7 @@ function MobileDrawer() {
         className={`fixed top-0 z-[60] h-full w-72 max-w-[85vw]
           stadium-glass overflow-hidden shadow-2xl border-white/10
           transition-transform duration-200 ease-in-out
-          ${isRTL ? 'end-0 border-e rounded-e-3xl' : 'start-0 border-s rounded-s-3xl'}`}
+          ${isRTL ? 'end-0 border-s rounded-s-3xl' : 'start-0 border-e rounded-e-3xl'}`}
         style={{
           transform: isOpen
             ? 'translateX(0)'
@@ -189,8 +189,8 @@ export function DesktopSidebar() {
       className={`hidden md:flex flex-col fixed top-0 bottom-0 z-40 w-64
         stadium-glass border-white/10 overflow-hidden
         ${isRTL
-          ? 'end-0 border-e rounded-e-3xl'
-          : 'start-0 border-s rounded-s-3xl'
+          ? 'end-0 border-s rounded-s-3xl'
+          : 'start-0 border-e rounded-e-3xl'
         }`}
     >
       <SidebarContent isMobile={false} />

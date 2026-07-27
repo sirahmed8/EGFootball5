@@ -129,7 +129,7 @@ export function NavbarSettingsMenu() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: -8 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full mt-2 end-0 w-80 bg-card/95 backdrop-blur-2xl border border-border rounded-3xl shadow-2xl z-[9999] overflow-hidden p-4 space-y-4"
+            className="absolute top-full mt-2 end-0 w-80 stadium-glass backdrop-blur-2xl bg-neutral-950/95 border border-white/15 rounded-3xl shadow-2xl z-[9999] overflow-hidden p-5 space-y-4 text-foreground"
           >
             {/* Header / User Info Card */}
             <div className="flex items-center justify-between pb-3 border-b border-border">
