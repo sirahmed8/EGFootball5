@@ -23,7 +23,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   const t = await getTranslations({ locale, namespace: 'Landing' });
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden relative bg-mesh">
+    <div className="flex flex-col min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 overflow-x-hidden relative">
       <LandingRedirect />
 
       {/* Ambient background glows */}

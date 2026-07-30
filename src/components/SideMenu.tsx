@@ -51,6 +51,14 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
 
   const handleNav = (href: string) => {
     onClose?.();
+    if (href === '/community-chat') {
+      window.dispatchEvent(new CustomEvent('open-ai-chat', { detail: { tab: 'community' } }));
+      return;
+    }
+    if (href === '/support') {
+      window.dispatchEvent(new CustomEvent('open-ai-chat', { detail: { tab: 'support' } }));
+      return;
+    }
     router.push(href as '/');
   };
 
@@ -94,10 +102,10 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
     {
       title: isArabic ? '💬 المجتمع والدعم' : '💬 Community & Support',
       items: [
-        { href: '/community-chat', label: tNav('communityChat'), icon: <MessageSquare size={18} /> },
+        { href: '/community-chat', label: isArabic ? 'شات المجتمع' : 'Community Chat', icon: <MessageSquare size={18} /> },
         { href: '/ceremony', label: tNav('ceremony'), icon: <Sparkles size={18} /> },
         { href: '/announcements', label: tNav('announcements'), icon: <Megaphone size={18} /> },
-        { href: '/support', label: tNav('support'), icon: <HelpCircle size={18} /> },
+        { href: '/support', label: isArabic ? 'الدعم الفني' : 'Support & Help', icon: <HelpCircle size={18} /> },
         { href: '/guide', label: tNav('guide'), icon: <BookOpen size={18} /> },
       ],
     },
@@ -117,10 +125,10 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   ];
 
   return (
-    <div className="flex flex-col h-full min-h-screen bg-[#0B0F19] border-e border-white/10 text-foreground">
+    <div className="flex flex-col h-full min-h-screen bg-black border-e border-white/10 text-foreground">
       {/* Mobile Drawer Header */}
       {isMobile && (
-        <div className="h-16 flex items-center justify-between px-6 border-b border-white/10 shrink-0 bg-[#0B0F19]">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-white/10 shrink-0 bg-black">
           <div className="flex items-center gap-2 font-black text-base tracking-tight text-foreground">
             <Image src="/favicon.jpg" alt="Logo" width={28} height={28} className="rounded-full object-cover shadow-md" priority={true} />
             <span>EG<span className="text-gradient-primary">Football5</span></span>
@@ -136,7 +144,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
       )}
 
       {/* Categorized Nav Links — Scrollable */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-5 min-h-0 bg-[#0B0F19]">
+      <nav className="flex-1 overflow-y-auto p-4 space-y-5 min-h-0 bg-black">
         {sections.map((section, sIdx) => (
           <div key={sIdx} className="space-y-1.5">
             <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest px-3 mb-1 opacity-80">
@@ -216,7 +224,7 @@ function MobileDrawer() {
 
       {/* Drawer */}
       <div
-        className={`fixed inset-y-0 z-[100] w-80 max-w-[85vw] bg-[#0B0F19]
+        className={`fixed inset-y-0 z-[100] w-80 max-w-[85vw] bg-black
           shadow-2xl border-white/10 transition-transform duration-300 ease-in-out
           ${isRTL ? 'end-0 border-s' : 'start-0 border-e'}`}
         style={{
@@ -246,7 +254,7 @@ export function DesktopSidebar() {
     <aside
       dir={isRTL ? 'rtl' : 'ltr'}
       className={`hidden md:flex flex-col fixed top-16 bottom-0 z-40 w-64
-        bg-[#0B0F19] border-white/10 overflow-hidden
+        bg-black border-white/10 overflow-hidden
         ${isRTL ? 'end-0 border-s' : 'start-0 border-e'}`}
     >
       <SidebarContent isMobile={false} />

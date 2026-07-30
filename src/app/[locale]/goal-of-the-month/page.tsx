@@ -2,10 +2,13 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, ThumbsUp, Upload, Sparkles, Video, Flame, Award, CheckCircle2 } from 'lucide-react';
+import { Trophy, ThumbsUp, Upload, Sparkles, Video, Flame, Award, CheckCircle2, Inbox } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { collection, getDocs, query, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface GoalSubmission {
   id: string;
@@ -13,54 +16,100 @@ interface GoalSubmission {
   team: string;
   title: string;
   votes: number;
-  videoThumb: string;
+  videoUrl?: string;
   date: string;
 }
 
 export default function GoalOfTheMonthPage() {
-  const [goals, setGoals] = React.useState<GoalSubmission[]>([
-    {
-      id: 'g1',
-      player: 'Ziad Ammar',
-      team: 'Obour Eagles',
-      title: 'Bicycle kick volley into top corner',
-      votes: 142,
-      videoThumb: '⚽',
-      date: 'July 24, 2026',
-    },
-    {
-      id: 'g2',
-      player: 'Omar Khaled',
-      team: 'El-Tagamoa Strikers',
-      title: 'Solo dribble past 3 defenders & chip keeper',
-      votes: 98,
-      videoThumb: '🔥',
-      date: 'July 21, 2026',
-    },
-    {
-      id: 'g3',
-      player: 'Youssef El-Sayed',
-      team: 'Obour Stars',
-      title: 'Long-range rocket off the crossbar',
-      votes: 76,
-      videoThumb: '⚡',
-      date: 'July 18, 2026',
-    },
-  ]);
-
+  const firebaseUser = useAuthStore((s) => s.firebaseUser);
+  const appUser = useAuthStore((s) => s.appUser);
+  const [goals, setGoals] = React.useState<GoalSubmission[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const [votedIds, setVotedIds] = React.useState<string[]>([]);
   const [isUploading, setIsUploading] = React.useState(false);
+  const [newTitle, setNewTitle] = React.useState('');
+  const [newVideoUrl, setNewVideoUrl] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
 
-  const handleVote = (id: string) => {
+  React.useEffect(() => {
+    async function fetchGoals() {
+      setLoading(true);
+      try {
+        const snap = await getDocs(query(collection(db, 'goal_contest'), orderBy('votes', 'desc')));
+        if (!snap.empty) {
+          const list = snap.docs.map((d) => ({ id: d.id, ...d.data() } as GoalSubmission));
+          setGoals(list);
+        } else {
+          setGoals([]);
+        }
+      } catch (err) {
+        console.error(err);
+        setGoals([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchGoals();
+  }, []);
+
+  const handleVote = async (id: string) => {
+    if (!firebaseUser) {
+      toast.error('Please sign in to vote for goals');
+      return;
+    }
     if (votedIds.includes(id)) {
       toast.error('You have already voted for this goal!');
       return;
     }
     setVotedIds((prev) => [...prev, id]);
     setGoals((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, votes: g.votes + 1 } : g))
+      prev.map((g) => (g.id === id ? { ...g, votes: (g.votes || 0) + 1 } : g))
     );
-    toast.success('Vote recorded! 🗳️');
+    try {
+      const target = goals.find((g) => g.id === id);
+      if (target) {
+        await updateDoc(doc(db, 'goal_contest', id), {
+          votes: (target.votes || 0) + 1,
+        });
+      }
+      toast.success('Vote recorded! 🗳️');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleGoalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firebaseUser) {
+      toast.error('Please sign in to submit a goal');
+      return;
+    }
+    if (!newTitle.trim()) {
+      toast.error('Please enter a goal description');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const newGoal = {
+        player: appUser?.name || firebaseUser.displayName || 'Player',
+        team: appUser?.city || 'Local Squad',
+        title: newTitle.trim(),
+        votes: 1,
+        videoUrl: newVideoUrl.trim() || '',
+        date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      };
+      const docRef = await addDoc(collection(db, 'goal_contest'), newGoal);
+      setGoals((prev) => [{ id: docRef.id, ...newGoal }, ...prev]);
+      toast.success('Goal clip submitted successfully! ⚽');
+      setIsUploading(false);
+      setNewTitle('');
+      setNewVideoUrl('');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to submit goal');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -89,48 +138,116 @@ export default function GoalOfTheMonthPage() {
       </div>
 
       {/* Goal Submissions Feed */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {goals.map((g, idx) => (
-          <motion.div key={g.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
-            <Card className="stadium-glass border-white/10 rounded-3xl p-6 shadow-xl card-lift flex flex-col justify-between h-full space-y-4">
-              <div className="space-y-3">
-                <div className="w-full h-44 rounded-2xl bg-emerald-950/60 border border-white/10 flex items-center justify-center text-5xl relative overflow-hidden group">
-                  {g.videoThumb}
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Video className="w-10 h-10 text-primary animate-pulse" />
+      {loading ? (
+        <div className="text-center py-12 space-y-3">
+          <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
+          <p className="text-xs text-muted-foreground font-medium">Loading contest submissions...</p>
+        </div>
+      ) : goals.length === 0 ? (
+        <Card className="global-box border-white/10 rounded-3xl p-12 text-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-3xl mx-auto">
+            ⚽
+          </div>
+          <h3 className="text-xl font-black text-foreground">No Goal Clips Submitted Yet</h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Be the first player to submit an incredible 5-a-side goal clip this month and claim the top spot!
+          </p>
+          <Button
+            onClick={() => setIsUploading(true)}
+            className="bg-primary text-black font-black px-6 py-3 rounded-xl glow-primary cursor-pointer"
+          >
+            Submit First Goal
+          </Button>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {goals.map((g, idx) => (
+            <motion.div key={g.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
+              <Card className="global-box border-white/10 rounded-3xl p-6 shadow-xl card-lift flex flex-col justify-between h-full space-y-4">
+                <div className="space-y-3">
+                  <div className="w-full h-44 rounded-2xl bg-black border border-white/10 flex items-center justify-center text-5xl relative overflow-hidden group">
+                    ⚽
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Video className="w-10 h-10 text-primary animate-pulse" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-black text-lg text-foreground">{g.title}</h3>
+                    <p className="text-xs text-muted-foreground font-medium mt-1">
+                      Scored by <strong className="text-foreground">{g.player}</strong> ({g.team})
+                    </p>
                   </div>
                 </div>
 
-                <div>
-                  <h3 className="font-black text-lg text-foreground">{g.title}</h3>
-                  <p className="text-xs text-muted-foreground font-medium mt-1">
-                    Scored by <strong className="text-foreground">{g.player}</strong> ({g.team})
-                  </p>
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                  <div className="text-xs font-black text-emerald-400 flex items-center gap-1">
+                    <Flame className="w-4 h-4 text-amber-400" /> {g.votes || 0} Votes
+                  </div>
+
+                  <Button
+                    onClick={() => handleVote(g.id)}
+                    disabled={votedIds.includes(g.id)}
+                    className="px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 bg-primary text-black hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    <ThumbsUp className="w-3.5 h-3.5" /> Vote
+                  </Button>
                 </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* Upload Goal Modal */}
+      {isUploading && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="global-box border-white/10 rounded-3xl p-6 max-w-md w-full space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <h3 className="text-lg font-black text-foreground flex items-center gap-2">
+                <Video className="w-5 h-5 text-primary" /> Submit Goal Video Clip
+              </h3>
+              <button onClick={() => setIsUploading(false)} className="text-muted-foreground hover:text-foreground cursor-pointer">
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleGoalSubmit} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-muted-foreground uppercase block mb-1">Goal Description / Title</label>
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="e.g. Volley into top corner off crossbar"
+                  required
+                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary"
+                />
               </div>
 
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                <div className="text-xs font-black text-emerald-400 flex items-center gap-1">
-                  <Flame className="w-4 h-4 text-amber-400" /> {g.votes} Votes
-                </div>
+              <div>
+                <label className="text-xs font-bold text-muted-foreground uppercase block mb-1">Video Link (Optional)</label>
+                <input
+                  type="text"
+                  value={newVideoUrl}
+                  onChange={(e) => setNewVideoUrl(e.target.value)}
+                  placeholder="TikTok, Instagram, or YouTube video URL"
+                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary"
+                />
+              </div>
 
-                <Button
-                  onClick={() => handleVote(g.id)}
-                  disabled={votedIds.includes(g.id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                    votedIds.includes(g.id)
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-primary text-black hover:bg-primary/90 glow-primary-sm'
-                  }`}
-                >
-                  <ThumbsUp className="w-3.5 h-3.5" />
-                  {votedIds.includes(g.id) ? 'Voted' : 'Vote'}
+              <div className="flex gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setIsUploading(false)} className="flex-1 rounded-xl">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={submitting} className="flex-1 bg-primary text-black font-black rounded-xl">
+                  {submitting ? 'Submitting...' : 'Submit Clip'}
                 </Button>
               </div>
-            </Card>
+            </form>
           </motion.div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

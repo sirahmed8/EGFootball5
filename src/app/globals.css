@@ -85,22 +85,22 @@
 }
 
 .dark {
-  --background: oklch(0.12 0.01 250);
+  --background: oklch(0 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.15 0.01 250 / 60%);
+  --card: oklch(0.08 0 0 / 80%);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.15 0.01 250 / 80%);
+  --popover: oklch(0.08 0 0 / 90%);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.85 0.25 150);
-  --primary-foreground: oklch(0.145 0 0);
+  --primary-foreground: oklch(0 0 0);
   --secondary: oklch(0.65 0.25 250);
-  --secondary-foreground: oklch(0.145 0 0);
-  --muted: oklch(0.20 0.01 250);
+  --secondary-foreground: oklch(0 0 0);
+  --muted: oklch(0.12 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.20 0.01 250);
+  --accent: oklch(0.15 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.85 0.25 150);
   --chart-1: oklch(0.85 0.25 150);
@@ -108,13 +108,13 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.15 0.01 250);
+  --sidebar: oklch(0.05 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.85 0.25 150);
-  --sidebar-primary-foreground: oklch(0.145 0 0);
-  --sidebar-accent: oklch(0.20 0.01 250);
+  --sidebar-primary-foreground: oklch(0 0 0);
+  --sidebar-accent: oklch(0.12 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: oklch(0.85 0.25 150);
 }
 
@@ -124,16 +124,16 @@
   }
   html {
     @apply font-sans bg-background text-foreground;
-    background-color: oklch(0.12 0.01 250);
+    background-color: #000000 !important;
     color-scheme: dark;
   }
   html:not(.dark) {
-    background-color: oklch(1 0 0);
-    color-scheme: light;
+    background-color: #000000 !important;
+    color-scheme: dark;
   }
   body {
     @apply bg-background text-foreground;
-    background-color: var(--background);
+    background-color: #000000 !important;
   }
 }
 
@@ -214,65 +214,40 @@ html.theme-transitioning *::after {
 }
 
 .stadium-glass {
-  background: rgba(15, 23, 42, 0.65);
+  background: rgba(10, 10, 10, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* ── Neon glow utilities ──────────────────────────────────── */
-.glow-primary {
-  box-shadow: 0 0 20px oklch(0.85 0.25 150 / 30%), 0 0 40px oklch(0.85 0.25 150 / 10%);
-}
-
-.glow-primary-sm {
-  box-shadow: 0 0 8px oklch(0.85 0.25 150 / 25%);
-}
-
-/* ── Premium card hover lift ─────────────────────────────── */
-.card-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card-lift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 0 20px oklch(0.85 0.25 150 / 12%);
-}
-
-/* ── Smooth focus-visible ring for all interactive elements ── */
-:focus-visible {
-  outline: 2px solid oklch(0.85 0.25 150 / 80%);
-  outline-offset: 2px;
-}
-
-/* ── Hide scrollbar (keep scroll functionality) ──────────── */
-.scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-
-/* ── Text balance for headlines ──────────────────────────── */
-h1, h2, h3 {
-  text-wrap: balance;
-}
-
-/* ── Gradient text utility ───────────────────────────────── */
-.text-gradient-primary {
-  background: linear-gradient(135deg, oklch(0.85 0.25 150), oklch(0.75 0.22 160));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ── Solid Smooth Dark Background Utility ───────────────────── */
 .bg-mesh {
-  background-color: #0B0F19;
+  background-color: #000000 !important;
 }
 
-/* ── Global Pulse Outline Animation ──────────────────────────── */
+/* ── Global Input Box Glow & Animations ────────────────────── */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+textarea:focus,
+select:focus {
+  border-color: rgba(16, 185, 129, 0.7) !important;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3), inset 0 0 10px rgba(16, 185, 129, 0.1) !important;
+  outline: none !important;
+}
 @keyframes globalPulseOutline {
   0%, 100% {
     border-color: rgba(16, 185, 129, 0.3);

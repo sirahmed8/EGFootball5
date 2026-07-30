@@ -184,6 +184,18 @@ export function FloatingChatWidget() {
   const [modalHeight, setModalHeight] = useState<number>(560);
   const isResizing = useRef(false);
 
+  useEffect(() => {
+    const handleOpenEvent = (e: Event) => {
+      const customEv = e as CustomEvent<{ tab?: 'ai' | 'community' | 'support' }>;
+      setIsOpen(true);
+      if (customEv.detail?.tab) {
+        setActiveTab(customEv.detail.tab);
+      }
+    };
+    window.addEventListener('open-ai-chat', handleOpenEvent);
+    return () => window.removeEventListener('open-ai-chat', handleOpenEvent);
+  }, []);
+
   // ----------------------------------------------------
   // Tab 1: AI Assistant State & Dynamic Initial Prompt Loading
   // ----------------------------------------------------
