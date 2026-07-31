@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { CustomDarkDatePicker } from '@/components/ui/CustomDarkDatePicker';
 import { Trophy, Calendar, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -88,12 +89,10 @@ export function SeasonManagementCard() {
             <Calendar className="w-4 h-4 text-primary" />
             {isArabic ? 'تاريخ وساعة ختام الموسم:' : 'Season Finale Date & Time:'}
           </label>
-          <input
-            type="datetime-local"
+          <CustomDarkDatePicker
             value={targetDate}
-            onChange={(e) => setTargetDate(e.target.value)}
-            style={{ colorScheme: 'dark' }}
-            className="w-full bg-black border border-white/15 rounded-2xl p-3 text-sm text-foreground focus:border-primary outline-none"
+            onChange={(newVal) => setTargetDate(newVal)}
+            isArabic={isArabic}
           />
         </div>
 
