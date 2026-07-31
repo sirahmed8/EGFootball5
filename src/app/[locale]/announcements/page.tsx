@@ -48,6 +48,8 @@ export default function AnnouncementsPage() {
   const [prevSummary, setPrevSummary] = useState("");
   const [isAiImproving, setIsAiImproving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewTab, setPreviewTab] = useState<'push' | 'chat'>('push');
 
   React.useEffect(() => {
     async function fetchAnnouncements() {
@@ -298,6 +300,80 @@ export default function AnnouncementsPage() {
                     placeholder="Write announcement details..."
                     className="w-full bg-black border border-white/15 rounded-2xl p-3 text-sm text-foreground focus:border-primary outline-none"
                   />
+                </div>
+
+                {/* Live Push & Chat Preview Accordion */}
+                <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/5 transition-all">
+                  <button
+                    type="button"
+                    onClick={() => setShowPreview(!showPreview)}
+                    className="w-full flex items-center justify-between p-3.5 text-xs font-bold text-foreground hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Megaphone className="w-4 h-4 text-emerald-400" />
+                      <span>Live Push & Chat Preview</span>
+                    </div>
+                    <span className="text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                      {showPreview ? "Show less ▲" : "Live Push & Chat Preview ▼"}
+                    </span>
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {showPreview && (
+                      <motion.div
+                        key="preview-content"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="p-4 pt-2 space-y-3 border-t border-white/10">
+                          {/* Sub-tabs */}
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setPreviewTab("push")}
+                              className={`px-3 py-1 rounded-xl text-[10px] font-black transition-all cursor-pointer ${
+                                previewTab === "push"
+                                  ? "bg-emerald-500 text-black shadow-md"
+                                  : "bg-white/5 text-muted-foreground hover:text-foreground"
+                              }`}
+                            >
+                              Push Notif 🔔
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setPreviewTab("chat")}
+                              className={`px-3 py-1 rounded-xl text-[10px] font-black transition-all cursor-pointer ${
+                                previewTab === "chat"
+                                  ? "bg-emerald-500 text-black shadow-md"
+                                  : "bg-white/5 text-muted-foreground hover:text-foreground"
+                              }`}
+                            >
+                              Chat Banner 💬
+                            </button>
+                          </div>
+
+                          {/* Simulated Live Preview */}
+                          <div className="p-3.5 rounded-2xl bg-black border border-emerald-500/30 space-y-2 shadow-inner">
+                            <div className="flex items-center justify-between text-[10px] text-emerald-400 font-black">
+                              <span>📢 [Official Community Broadcast]</span>
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                {pubCategory}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-black text-foreground">
+                              {pubTitle.trim() || "Title preview..."}
+                            </h4>
+                            <p className="text-xs text-muted-foreground font-medium leading-relaxed">
+                              {pubSummary.trim() || "Body text preview..."}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <Button
