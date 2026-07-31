@@ -108,29 +108,31 @@ export default function GuidePage() {
             >
               <Card
                 onClick={() => setExpandedIdx(isExpanded ? null : idx)}
-                className="global-box border-white/10 hover:border-primary/40 rounded-3xl p-6 shadow-xl cursor-pointer transition-colors space-y-3 bg-black"
+                className="border-white/10 hover:border-primary/40 rounded-3xl p-6 shadow-xl cursor-pointer transition-colors bg-black flex flex-col justify-between min-h-[135px]"
               >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                      {rule.icon}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                        {rule.icon}
+                      </div>
+                      <div>
+                        <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${rule.badgeColor}`}>
+                          {rule.category}
+                        </span>
+                        <h3 className="text-lg font-black text-foreground mt-1">{rule.title}</h3>
+                      </div>
                     </div>
-                    <div>
-                      <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${rule.badgeColor}`}>
-                        {rule.category}
-                      </span>
-                      <h3 className="text-lg font-black text-foreground mt-1">{rule.title}</h3>
-                    </div>
+
+                    <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-foreground transition-transform shrink-0">
+                      <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`} />
+                    </button>
                   </div>
 
-                  <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-foreground transition-transform">
-                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`} />
-                  </button>
+                  <p className="text-xs text-muted-foreground font-medium leading-relaxed sm:ps-16">
+                    {rule.shortDesc}
+                  </p>
                 </div>
-
-                <p className="text-xs text-muted-foreground font-medium leading-relaxed sm:ps-16">
-                  {rule.shortDesc}
-                </p>
 
                 <AnimatePresence initial={false}>
                   {isExpanded && (
@@ -139,8 +141,8 @@ export default function GuidePage() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                      className="pt-3 border-t border-white/10 sm:ps-16 space-y-2 overflow-hidden"
+                      transition={{ duration: 0.2 }}
+                      className="pt-3 border-t border-white/10 sm:ps-16 space-y-2 overflow-hidden mt-3"
                     >
                       <p className="text-xs text-foreground/90 font-normal leading-relaxed bg-white/5 p-4 rounded-2xl border border-white/5">
                         {rule.fullDetails}

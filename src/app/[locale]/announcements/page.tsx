@@ -3,10 +3,11 @@
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, BellOff, Megaphone, Calendar, User, ChevronRight, X, Plus, Sparkles, Undo2, Send } from "lucide-react";
+import { Bell, BellOff, Megaphone, Calendar, User, ChevronRight, X, Plus, Sparkles, Undo2, Send, Tag } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { SolidSelect } from "@/components/ui/SolidSelect";
 import { toast } from "sonner";
 import { collection, getDocs, addDoc, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
@@ -261,15 +262,12 @@ export default function AnnouncementsPage() {
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-muted-foreground">Category</label>
-                  <select
+                  <SolidSelect
                     value={pubCategory}
-                    onChange={(e) => setPubCategory(e.target.value as Category)}
-                    className="w-full bg-black border border-white/15 rounded-2xl p-3 text-sm text-foreground focus:border-primary outline-none"
-                  >
-                    {categories.filter((c) => c !== 'All').map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setPubCategory(val as Category)}
+                    options={categories.filter((c) => c !== 'All').map((c) => ({ value: c, label: c }))}
+                    icon={Tag}
+                  />
                 </div>
 
                 <div className="space-y-1.5">

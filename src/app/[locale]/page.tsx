@@ -96,20 +96,11 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           </MotionDiv>
 
           {/* Interactive Quick Search Hero Widget */}
-          <MotionDiv 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="pt-2"
-          >
-            <QuickSearchHero />
-          </MotionDiv>
-
           {/* Primary CTA Buttons */}
           <MotionDiv 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
+            transition={{ delay: 0.6 }}
             className="pt-4 flex flex-wrap items-center justify-center gap-4"
           >
             <Link href="/home">

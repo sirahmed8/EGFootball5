@@ -248,19 +248,8 @@ select:not(.bg-transparent):not(.border-0):not(.border-none):focus {
   box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
   outline: none;
 }
-@keyframes globalPulseOutline {
-  0%, 100% {
-    border-color: rgba(16, 185, 129, 0.3);
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
-  }
-  50% {
-    border-color: rgba(16, 185, 129, 0.7);
-    box-shadow: 0 0 24px rgba(16, 185, 129, 0.35);
-  }
-}
-
 .global-outline-glow {
-  animation: globalPulseOutline 3s infinite ease-in-out;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* ── Global Card / Box Utility ─────────────────────────────── */

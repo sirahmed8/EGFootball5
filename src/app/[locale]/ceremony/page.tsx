@@ -24,7 +24,7 @@ interface SeasonData {
   totsStr?: string;
 }
 
-const DEFAULT_TARGET = "2026-08-31T20:00:00Z";
+const DEFAULT_TARGET = "";
 
 export default function CeremonyPage() {
   const t = useTranslations("Ceremony");
@@ -33,7 +33,7 @@ export default function CeremonyPage() {
   const isAdminOrOwner = appUser?.role === "admin" || appUser?.role === "owner";
 
   const [seasonData, setSeasonData] = useState<SeasonData>({
-    targetDate: DEFAULT_TARGET,
+    targetDate: "",
     goldenBootWinner: "Pending Season End",
     goldenBootGoals: 0,
     goldenGloveWinner: "Pending Season End",
@@ -53,7 +53,7 @@ export default function CeremonyPage() {
   });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editTargetDate, setEditTargetDate] = useState(DEFAULT_TARGET);
+  const [editTargetDate, setEditTargetDate] = useState("");
   const [editBootWinner, setEditBootWinner] = useState("");
   const [editBootGoals, setEditBootGoals] = useState(0);
   const [editGloveWinner, setEditGloveWinner] = useState("");
@@ -70,10 +70,10 @@ export default function CeremonyPage() {
     async function fetchSeasonDocAndStats() {
       try {
         const snap = await getDoc(doc(db, "system", "season"));
-        let target = DEFAULT_TARGET;
+        let target = "";
         if (snap.exists()) {
           const data = snap.data() as SeasonData;
-          target = data.targetDate || DEFAULT_TARGET;
+          target = data.targetDate || "";
         }
 
         // Query real top players from Firestore users collection
@@ -122,49 +122,51 @@ export default function CeremonyPage() {
     fetchSeasonDocAndStats();
   }, []);
 
-  // Live Fixed Date Countdown Calculation
   useEffect(() => {
-    function updateCountdown() {
-      const targetTime = new Date(seasonData.targetDate || DEFAULT_TARGET).getTime();
-      const now = Date.now();
-      const diff = Math.max(0, targetTime - now);
+    if (!seasonData.targetDate) return;
+    const interval = setInterval(() => {
+      const target = new Date(seasonData.targetDate).getTime();
+      const now = new Date().getTime();
+      const difference = target - now;
 
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    }, 1000);
 
-      setTimeLeft({ days, hours, minutes, seconds });
-    }
-
-    updateCountdown();
-    const timer = setInterval(updateCountdown, 1000);
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
   }, [seasonData.targetDate]);
 
-  const handleSaveSeasonSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveSeasonSettings = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setSaving(true);
     try {
       const updated: SeasonData = {
         targetDate: editTargetDate,
-        goldenBootWinner: editBootWinner.trim() || "Pending Season End",
-        goldenBootGoals: Number(editBootGoals) || 0,
-        goldenGloveWinner: editGloveWinner.trim() || "Pending Season End",
-        goldenGloveSheets: Number(editGloveSheets) || 0,
-        totsGk: editGk.trim() || "Top GK",
-        totsDef1: editDef1.trim() || "Top DEF 1",
-        totsDef2: editDef2.trim() || "Top DEF 2",
-        totsMid: editMid.trim() || "Top MID",
-        totsStr: editStr.trim() || "Top STR",
+        goldenBootWinner: editBootWinner || seasonData.goldenBootWinner || "",
+        goldenBootGoals: editBootGoals,
+        goldenGloveWinner: editGloveWinner || seasonData.goldenGloveWinner || "",
+        goldenGloveSheets: editGloveSheets,
+        totsGk: editGk || seasonData.totsGk || "",
+        totsDef1: editDef1 || seasonData.totsDef1 || "",
+        totsDef2: editDef2 || seasonData.totsDef2 || "",
+        totsMid: editMid || seasonData.totsMid || "",
+        totsStr: editStr || seasonData.totsStr || "",
       };
+
       await setDoc(doc(db, "system", "season"), updated, { merge: true });
       setSeasonData(updated);
-      toast.success("Season ceremony settings updated!");
+      toast.success("Season Ceremony settings updated!");
       setIsEditModalOpen(false);
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to save ceremony settings");
+      toast.error("Failed to update ceremony settings.");
     } finally {
       setSaving(false);
     }
@@ -177,6 +179,8 @@ export default function CeremonyPage() {
     { position: "MID", top: "45%", left: "50%", name: seasonData.totsMid || "Top MID" },
     { position: "STR", top: "25%", left: "50%", name: seasonData.totsStr || "Top STR" },
   ];
+
+  const hasActiveTimer = Boolean(seasonData.targetDate && seasonData.targetDate.trim() !== "");
 
   return (
     <div className="min-h-screen bg-black text-white p-4 md:p-8 relative overflow-hidden flex flex-col items-center">
@@ -211,25 +215,36 @@ export default function CeremonyPage() {
           </p>
         </motion.div>
 
-        {/* Countdown Timer */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="flex flex-wrap justify-center gap-4 md:gap-6"
-        >
-          {[
-            { label: t("days"), value: timeLeft.days },
-            { label: t("hours"), value: timeLeft.hours },
-            { label: t("minutes"), value: timeLeft.minutes },
-            { label: t("seconds"), value: timeLeft.seconds },
-          ].map((item, idx) => (
-            <div key={idx} className="flex flex-col items-center justify-center p-4 md:p-6 rounded-3xl global-box global-outline-glow min-w-[100px] md:min-w-[130px] shadow-xl">
-              <span className="text-3xl md:text-5xl font-black text-primary mb-1 font-mono">{item.value.toString().padStart(2, "0")}</span>
-              <span className="text-[11px] md:text-xs font-black text-muted-foreground uppercase tracking-widest text-center whitespace-nowrap">{item.label}</span>
+        {/* Countdown Timer OR Season in Progress Banner */}
+        {hasActiveTimer ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="flex flex-wrap justify-center gap-4 md:gap-6"
+          >
+            {[
+              { label: t("days"), value: timeLeft.days },
+              { label: t("hours"), value: timeLeft.hours },
+              { label: t("minutes"), value: timeLeft.minutes },
+              { label: t("seconds"), value: timeLeft.seconds },
+            ].map((item, idx) => (
+              <div key={idx} className="flex flex-col items-center justify-center p-4 md:p-6 rounded-3xl bg-black border border-white/10 min-w-[100px] md:min-w-[130px] shadow-xl">
+                <span className="text-3xl md:text-5xl font-black text-primary mb-1 font-mono">{item.value.toString().padStart(2, "0")}</span>
+                <span className="text-[11px] md:text-xs font-black text-muted-foreground uppercase tracking-widest text-center whitespace-nowrap">{item.label}</span>
+              </div>
+            ))}
+          </motion.div>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-black border border-white/10 max-w-xl mx-auto text-center space-y-3">
+            <div className="flex items-center gap-2 text-amber-400 font-black text-base">
+              <Timer className="w-5 h-5" /> Season Status: Season in Progress
             </div>
-          ))}
-        </motion.div>
+            <p className="text-xs text-muted-foreground">
+              The official season finale date and awards gala countdown will be announced by stadium management once scheduled.
+            </p>
+          </div>
+        )}
 
         {/* Awards Showcase */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">

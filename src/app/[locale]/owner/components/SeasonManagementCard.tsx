@@ -5,15 +5,14 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Trophy, Calendar, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Trophy, Calendar, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function SeasonManagementCard() {
   const locale = useLocale();
   const isArabic = locale === 'ar';
 
-  const [targetDate, setTargetDate] = useState('2026-08-31T20:00');
+  const [targetDate, setTargetDate] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -22,7 +21,7 @@ export function SeasonManagementCard() {
         const snap = await getDoc(doc(db, 'system', 'season'));
         if (snap.exists() && snap.data().targetDate) {
           const iso = snap.data().targetDate;
-          setTargetDate(iso.slice(0, 16));
+          if (iso) setTargetDate(iso.slice(0, 16));
         }
       } catch (err) {
         console.warn('Error fetching season doc:', err);
@@ -49,8 +48,26 @@ export function SeasonManagementCard() {
     }
   };
 
+  const handlePreset = (days: number) => {
+    const future = new Date(Date.now() + days * 86400000);
+    setTargetDate(future.toISOString().slice(0, 16));
+  };
+
+  const handleResetSeason = async () => {
+    setSaving(true);
+    try {
+      await setDoc(doc(db, 'system', 'season'), { targetDate: '' }, { merge: true });
+      setTargetDate('');
+      toast.success(isArabic ? 'تم إلغاء عد الموسم ومسح الموعد' : 'Season countdown reset to TBD (Unstarted)');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reset season');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <div className="global-box border-white/10 rounded-3xl p-6 md:p-8 bg-black shadow-xl space-y-6">
+    <div className="border border-white/10 rounded-3xl p-6 md:p-8 bg-black shadow-xl space-y-6">
       <div className="flex items-center gap-3 border-b border-white/10 pb-4">
         <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
           <Trophy className="w-5 h-5" />
@@ -71,12 +88,38 @@ export function SeasonManagementCard() {
             <Calendar className="w-4 h-4 text-primary" />
             {isArabic ? 'تاريخ وساعة ختام الموسم:' : 'Season Finale Date & Time:'}
           </label>
-          <Input
+          <input
             type="datetime-local"
             value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
-            className="bg-black border-white/10 rounded-2xl text-foreground"
+            style={{ colorScheme: 'dark' }}
+            className="w-full bg-black border border-white/15 rounded-2xl p-3 text-sm text-foreground focus:border-primary outline-none"
           />
+        </div>
+
+        {/* Quick Date Presets */}
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <button
+            type="button"
+            onClick={() => handlePreset(30)}
+            className="text-xs font-bold bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-full text-foreground transition-colors cursor-pointer"
+          >
+            🗓️ +30 Days
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePreset(60)}
+            className="text-xs font-bold bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-full text-foreground transition-colors cursor-pointer"
+          >
+            🏆 +60 Days
+          </button>
+          <button
+            type="button"
+            onClick={handleResetSeason}
+            className="text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 px-3 py-1.5 rounded-full text-rose-400 transition-colors cursor-pointer"
+          >
+            ⚠️ Reset Season (TBD)
+          </button>
         </div>
 
         <Button
