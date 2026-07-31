@@ -46,12 +46,9 @@ export default function TournamentsPage() {
       {/* Bracket Tree Visualizer */}
       <div className="stadium-glass p-6 md:p-8 rounded-3xl border-white/10 shadow-xl space-y-6">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <h2 className="text-2xl font-black text-foreground flex items-center gap-2">
+          <h2 className="text-xl font-black text-foreground flex items-center gap-2">
             <Sparkles className="text-primary" /> Obour Summer Cup 2026 Knockout Tree
           </h2>
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/20 text-primary border border-primary/30">
-            16 Squads
-          </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">

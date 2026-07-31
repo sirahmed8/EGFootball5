@@ -4,8 +4,11 @@ import * as React from 'react';
 import { motion } from 'framer-motion';
 import { Thermometer, Wind, CheckCircle2, CloudRain, Sparkles, MapPin } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { SolidSelect, SelectOption } from '@/components/ui/SolidSelect';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 
-const CITY_COORDS: Record<string, { lat: number; lon: number; name: string }> = {
+const KNOWN_COORDS: Record<string, { lat: number; lon: number; name: string }> = {
   obour: { lat: 30.14, lon: 31.48, name: 'Obour City' },
   cairo: { lat: 30.04, lon: 31.23, name: 'Cairo' },
   giza: { lat: 30.01, lon: 31.21, name: 'Giza' },
@@ -15,6 +18,13 @@ const CITY_COORDS: Record<string, { lat: number; lon: number; name: string }> = 
 export function StadiumWeatherCard() {
   const [selectedCityKey, setSelectedCityKey] = React.useState('obour');
   const [loading, setLoading] = React.useState(true);
+  const [cityOptions, setCityOptions] = React.useState<SelectOption[]>([
+    { value: 'obour', label: 'Obour City' },
+    { value: 'cairo', label: 'Cairo' },
+    { value: 'giza', label: 'Giza' },
+    { value: 'alexandria', label: 'Alexandria' },
+  ]);
+
   const [weather, setWeather] = React.useState<{
     temp: number;
     wind: number;
@@ -33,7 +43,40 @@ export function StadiumWeatherCard() {
     iconEmoji: '☀️',
   });
 
-  const activeCity = CITY_COORDS[selectedCityKey] || CITY_COORDS.obour;
+  // Query cities from pitch listings added by owners
+  React.useEffect(() => {
+    async function fetchOwnerCities() {
+      try {
+        const snap = await getDocs(collection(db, 'pitches'));
+        if (!snap.empty) {
+          const citiesSet = new Set<string>();
+          snap.docs.forEach((doc) => {
+            const data = doc.data();
+            if (data.locationName) citiesSet.add(data.locationName);
+            if (data.city) citiesSet.add(data.city);
+          });
+          const fetchedCities = Array.from(citiesSet);
+          if (fetchedCities.length > 0) {
+            const options: SelectOption[] = fetchedCities.map((c) => ({
+              value: c.toLowerCase().replace(/\s+/g, ''),
+              label: c,
+            }));
+            setCityOptions(options);
+            setSelectedCityKey(options[0].value);
+          }
+        }
+      } catch (err) {
+        console.warn('Pitch cities query fallback:', err);
+      }
+    }
+    fetchOwnerCities();
+  }, []);
+
+  const activeCity = KNOWN_COORDS[selectedCityKey] || {
+    lat: 30.14,
+    lon: 31.48,
+    name: cityOptions.find((o) => o.value === selectedCityKey)?.label || 'Stadium Turf',
+  };
 
   React.useEffect(() => {
     async function fetchRealWeather() {
@@ -101,18 +144,16 @@ export function StadiumWeatherCard() {
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <Sparkles className="w-3.5 h-3.5" /> Live Satellite Weather & Pitch Status
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <h3 className="text-xl md:text-2xl font-black text-foreground">{activeCity.name} Turf</h3>
-              <select
+              <SolidSelect
                 value={selectedCityKey}
-                onChange={(e) => setSelectedCityKey(e.target.value)}
-                className="bg-white/5 border border-white/10 text-xs font-bold text-emerald-400 rounded-xl px-2.5 py-1 focus:outline-none focus:border-emerald-500 cursor-pointer"
-              >
-                <option value="obour" className="bg-black text-white">Obour City</option>
-                <option value="cairo" className="bg-black text-white">Cairo</option>
-                <option value="giza" className="bg-black text-white">Giza</option>
-                <option value="alexandria" className="bg-black text-white">Alexandria</option>
-              </select>
+                onChange={(val) => setSelectedCityKey(val)}
+                options={cityOptions}
+                icon={MapPin}
+                iconColor="text-emerald-400"
+                className="w-44"
+              />
             </div>
             <p className="text-xs text-muted-foreground font-medium mt-0.5">{weather.conditionText}</p>
           </div>

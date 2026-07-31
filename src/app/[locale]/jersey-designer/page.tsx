@@ -6,6 +6,7 @@ import { Shirt, ShoppingBag, Sparkles, Check, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { SolidSelect } from '@/components/ui/SolidSelect';
 
 export default function JerseyDesignerPage() {
   const [primaryColor, setPrimaryColor] = React.useState('#10B981');
@@ -131,15 +132,16 @@ export default function JerseyDesignerPage() {
             </div>
             <div>
               <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Pack Quantity</label>
-              <select
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
-                className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-bold"
-              >
-                <option value={5} className="bg-neutral-900">5 Jerseys (1500 EGP)</option>
-                <option value={10} className="bg-neutral-900">10 Jerseys (2800 EGP)</option>
-                <option value={15} className="bg-neutral-900">15 Jerseys (3900 EGP)</option>
-              </select>
+              <SolidSelect
+                value={String(quantity)}
+                onChange={(val) => setQuantity(Number(val))}
+                options={[
+                  { value: '5', label: '5 Jerseys' },
+                  { value: '10', label: '10 Jerseys' },
+                  { value: '15', label: '15 Jerseys' },
+                ]}
+                className="w-full"
+              />
             </div>
           </div>
 

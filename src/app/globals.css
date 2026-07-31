@@ -236,17 +236,17 @@ select {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="time"]:focus,
-textarea:focus,
-select:focus {
-  border-color: rgba(16, 185, 129, 0.7) !important;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3), inset 0 0 10px rgba(16, 185, 129, 0.1) !important;
-  outline: none !important;
+input[type="text"]:not(.bg-transparent):not(.border-0):not(.border-none):focus,
+input[type="email"]:not(.bg-transparent):not(.border-0):not(.border-none):focus,
+input[type="password"]:not(.bg-transparent):not(.border-0):not(.border-none):focus,
+input[type="number"]:not(.bg-transparent):not(.border-0):not(.border-none):focus,
+input[type="date"]:not(.bg-transparent):not(.border-0):not(.border-none):focus,
+input[type="time"]:not(.bg-transparent):not(.border-0):not(.border-none):focus,
+textarea:not(.bg-transparent):not(.border-0):not(.border-none):focus,
+select:not(.bg-transparent):not(.border-0):not(.border-none):focus {
+  border-color: rgba(16, 185, 129, 0.7);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+  outline: none;
 }
 @keyframes globalPulseOutline {
   0%, 100% {

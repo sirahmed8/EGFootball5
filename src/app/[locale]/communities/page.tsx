@@ -10,6 +10,7 @@ import { Users, Search, Plus, Shield, MapPin, Trophy, Sparkles, CheckCircle2, Us
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CommunitiesPageSkeleton } from '@/components/skeletons/PageSkeletons';
+import { SolidSelect } from '@/components/ui/SolidSelect';
 
 interface Community {
   id: string;
@@ -273,32 +274,34 @@ export default function CommunitiesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">City</label>
-                  <select
+                  <SolidSelect
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium"
-                  >
-                    <option value="Obour" className="bg-neutral-900">Obour</option>
-                    <option value="Cairo" className="bg-neutral-900">Cairo</option>
-                    <option value="Giza" className="bg-neutral-900">Giza</option>
-                    <option value="Alexandria" className="bg-neutral-900">Alexandria</option>
-                  </select>
+                    onChange={(val) => setCity(val)}
+                    options={[
+                      { value: 'Obour', label: 'Obour' },
+                      { value: 'Cairo', label: 'Cairo' },
+                      { value: 'Giza', label: 'Giza' },
+                      { value: 'Alexandria', label: 'Alexandria' },
+                    ]}
+                    className="w-full"
+                  />
                 </div>
 
                 <div>
                   <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Logo Avatar</label>
-                  <select
+                  <SolidSelect
                     value={logoEmoji}
-                    onChange={(e) => setLogoEmoji(e.target.value)}
-                    className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium"
-                  >
-                    <option value="⚽" className="bg-neutral-900">⚽ Football</option>
-                    <option value="🦅" className="bg-neutral-900">🦅 Eagle</option>
-                    <option value="⚡" className="bg-neutral-900">⚡ Lightning</option>
-                    <option value="🔥" className="bg-neutral-900">🔥 Fire</option>
-                    <option value="🧤" className="bg-neutral-900">🧤 Glove</option>
-                    <option value="👑" className="bg-neutral-900">👑 Crown</option>
-                  </select>
+                    onChange={(val) => setLogoEmoji(val)}
+                    options={[
+                      { value: '⚽', label: '⚽ Football' },
+                      { value: '🦅', label: '🦅 Eagle' },
+                      { value: '⚡', label: '⚡ Lightning' },
+                      { value: '🔥', label: '🔥 Fire' },
+                      { value: '🧤', label: '🧤 Glove' },
+                      { value: '👑', label: '👑 Crown' },
+                    ]}
+                    className="w-full"
+                  />
                 </div>
               </div>
 
