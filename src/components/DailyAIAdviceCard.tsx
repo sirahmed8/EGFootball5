@@ -108,7 +108,7 @@ export function DailyAIAdviceCard() {
               {isArabic ? '💡 نصائح AI الكروية والتكتيكية' : '💡 Hourly AI Football Insights'}
             </CardTitle>
             <p className="text-xs text-muted-foreground font-medium">
-              {isArabic ? 'نصيحة تكتيكية ومحفزة نُتاح مرة كل ساعة' : 'Personalized tactical advice (1 insight per 1 hour)'}
+              {isArabic ? 'نصيحة تكتيكية ومحفزة تكتيكية' : 'Personalized tactical & fitness advice'}
             </p>
           </div>
         </div>
@@ -150,7 +150,7 @@ export function DailyAIAdviceCard() {
           ) : (
             <span className="flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
-              {isArabic ? 'احصل على نصيحة تكتيكية (كل 1 ساعة)' : 'Get AI Tactical Insight (1 Per Hour)'}
+              {isArabic ? 'احصل على نصيحة تكتيكية' : 'Get AI Tactical Insight'}
             </span>
           )}
         </Button>

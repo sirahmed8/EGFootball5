@@ -2,12 +2,12 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, ShieldCheck, Clock, CreditCard, Users, AlertOctagon, Sparkles, CheckCircle2, Search, ChevronDown, HelpCircle, FileText } from 'lucide-react';
+import { BookOpen, ShieldCheck, Clock, CreditCard, Users, AlertOctagon, Search, ArrowRight, X, Sparkles } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 export default function GuidePage() {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [expandedIdx, setExpandedIdx] = React.useState<number | null>(0);
+  const [selectedRule, setSelectedRule] = React.useState<any | null>(null);
 
   const rules = [
     {
@@ -95,66 +95,99 @@ export default function GuidePage() {
         </div>
       </motion.div>
 
-      {/* Interactive Rules Feed */}
-      <div className="space-y-4">
-        {filteredRules.map((rule, idx) => {
-          const isExpanded = expandedIdx === idx;
-          return (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
+      {/* Fixed Height Cards Grid - SIZE NEVER CHANGES */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {filteredRules.map((rule, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+          >
+            <Card
+              onClick={() => setSelectedRule(rule)}
+              className="border-white/10 hover:border-emerald-500/50 rounded-3xl p-6 shadow-xl cursor-pointer transition-all hover:scale-[1.02] bg-black h-[210px] flex flex-col justify-between group"
             >
-              <Card
-                onClick={() => setExpandedIdx(isExpanded ? null : idx)}
-                className="border-white/10 hover:border-primary/40 rounded-3xl p-6 shadow-xl cursor-pointer transition-colors bg-black flex flex-col justify-between min-h-[135px]"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                        {rule.icon}
-                      </div>
-                      <div>
-                        <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${rule.badgeColor}`}>
-                          {rule.category}
-                        </span>
-                        <h3 className="text-lg font-black text-foreground mt-1">{rule.title}</h3>
-                      </div>
-                    </div>
-
-                    <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-foreground transition-transform shrink-0">
-                      <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`} />
-                    </button>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    {rule.icon}
                   </div>
-
-                  <p className="text-xs text-muted-foreground font-medium leading-relaxed sm:ps-16">
-                    {rule.shortDesc}
-                  </p>
+                  <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border ${rule.badgeColor}`}>
+                    {rule.category}
+                  </span>
                 </div>
 
-                <AnimatePresence initial={false}>
-                  {isExpanded && (
-                    <motion.div
-                      key="details"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="pt-3 border-t border-white/10 sm:ps-16 space-y-2 overflow-hidden mt-3"
-                    >
-                      <p className="text-xs text-foreground/90 font-normal leading-relaxed bg-white/5 p-4 rounded-2xl border border-white/5">
-                        {rule.fullDetails}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </Card>
-            </motion.div>
-          );
-        })}
+                <h3 className="text-base font-black text-foreground line-clamp-1">{rule.title}</h3>
+                <p className="text-xs text-muted-foreground font-medium leading-relaxed line-clamp-2">
+                  {rule.shortDesc}
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-bold text-emerald-400 group-hover:text-emerald-300">
+                <span>View Full Details</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Card>
+          </motion.div>
+        ))}
       </div>
+
+      {/* Full Details Modal Overlay */}
+      <AnimatePresence>
+        {selectedRule && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedRule(null)}
+              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-xl bg-black border border-white/15 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6"
+            >
+              <div className="flex items-start justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                    {selectedRule.icon}
+                  </div>
+                  <div>
+                    <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${selectedRule.badgeColor}`}>
+                      {selectedRule.category}
+                    </span>
+                    <h2 className="text-xl font-black text-foreground mt-1">{selectedRule.title}</h2>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedRule(null)}
+                  className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-foreground transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-sm font-bold text-emerald-400 bg-emerald-500/10 p-3 rounded-2xl border border-emerald-500/20">
+                  {selectedRule.shortDesc}
+                </p>
+                <div className="bg-white/5 p-5 rounded-2xl border border-white/10 space-y-2">
+                  <span className="text-xs font-black uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-primary" /> Full Charter Details
+                  </span>
+                  <p className="text-xs text-foreground/90 leading-relaxed font-medium">
+                    {selectedRule.fullDetails}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
