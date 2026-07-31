@@ -132,7 +132,7 @@ export function StadiumWeatherCard() {
   }, [activeCity.lat, activeCity.lon]);
 
   return (
-    <Card className="stadium-glass bg-black border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl relative overflow-hidden global-box global-outline-glow">
+    <Card className="stadium-glass bg-black border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl relative overflow-visible z-20 global-box global-outline-glow">
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         {/* City & Condition Header */}
         <div className="flex items-center gap-4 text-center md:text-start">

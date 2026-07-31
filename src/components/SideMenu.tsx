@@ -100,12 +100,10 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
       ],
     },
     {
-      title: isArabic ? '💬 المجتمع والدعم' : '💬 Community & Support',
+      title: isArabic ? '📣 الأخبار والدليل' : '📣 News & Charter',
       items: [
-        { href: '/community-chat', label: isArabic ? 'شات المجتمع' : 'Community Chat', icon: <MessageSquare size={18} /> },
         { href: '/ceremony', label: tNav('ceremony'), icon: <Sparkles size={18} /> },
         { href: '/announcements', label: tNav('announcements'), icon: <Megaphone size={18} /> },
-        { href: '/support', label: isArabic ? 'الدعم الفني' : 'Support & Help', icon: <HelpCircle size={18} /> },
         { href: '/guide', label: tNav('guide'), icon: <BookOpen size={18} /> },
       ],
     },

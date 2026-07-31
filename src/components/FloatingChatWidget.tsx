@@ -252,8 +252,8 @@ export function FloatingChatWidget() {
         text: res.text,
         chips: res.chips.length >= 3 ? res.chips : (
           isArabic
-            ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '📍 أماكن الملاعب']
-            : ['⚽ How to book a pitch?', '🏆 Available matches', '📍 Find pitch locations']
+            ? ['💡 نصيحة تكتيكية (تتجدد كل ساعة)', '⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة']
+            : ['💡 Hourly AI Tactical Insight', '⚽ How to book a pitch?', '🏆 Available matches']
         ),
         timestamp: Date.now(),
       };

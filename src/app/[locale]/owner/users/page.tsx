@@ -71,9 +71,19 @@ export default function OwnerUsersPage() {
 
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-mesh">
-      <div>
+      <div className="space-y-2">
         <h1 className="text-4xl font-black text-foreground tracking-tight">{t('title')}</h1>
-        <p className="text-muted-foreground mt-2 font-medium">{t('subtitle')}</p>
+        <p className="text-muted-foreground font-medium">{t('subtitle')}</p>
+
+        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-300 flex items-center justify-between gap-4 mt-2">
+          <div className="flex items-center gap-3">
+            <Shield className="w-6 h-6 text-emerald-400 shrink-0" />
+            <div>
+              <span className="font-black text-foreground block">Pitch Staff & Admin Delegation</span>
+              <span>Change a user's role to <strong className="text-emerald-400">Admin</strong> to allow them to upload VAR highlight clips, verify mobile deposits, and manage stadium bookings for your pitch.</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <Card className="stadium-glass border-white/10 rounded-3xl shadow-2xl overflow-hidden">

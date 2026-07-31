@@ -102,13 +102,14 @@ export default function GuidePage() {
           return (
             <motion.div
               key={idx}
+              layout
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.08 }}
+              transition={{ layout: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }, delay: idx * 0.05 }}
             >
               <Card
                 onClick={() => setExpandedIdx(isExpanded ? null : idx)}
-                className="global-box border-white/10 hover:border-primary/40 rounded-3xl p-6 shadow-xl cursor-pointer transition-all space-y-3"
+                className="global-box border-white/10 hover:border-primary/40 rounded-3xl p-6 shadow-xl cursor-pointer transition-colors space-y-3 overflow-hidden"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
@@ -128,18 +129,19 @@ export default function GuidePage() {
                   </button>
                 </div>
 
-                <p className="text-xs text-muted-foreground font-medium leading-relaxed ps-16">
+                <p className="text-xs text-muted-foreground font-medium leading-relaxed sm:ps-16">
                   {rule.shortDesc}
                 </p>
 
-                <AnimatePresence>
+                <AnimatePresence initial={false}>
                   {isExpanded && (
                     <motion.div
+                      key="details"
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="pt-3 border-t border-white/10 ps-16 space-y-2 overflow-hidden"
+                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                      className="pt-3 border-t border-white/10 sm:ps-16 space-y-2 overflow-hidden"
                     >
                       <p className="text-xs text-foreground/90 font-normal leading-relaxed bg-white/5 p-4 rounded-2xl border border-white/5">
                         {rule.fullDetails}
