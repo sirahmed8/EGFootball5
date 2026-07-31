@@ -49,6 +49,15 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
   const appUser = useAuthStore((s) => s.appUser);
   const firebaseUser = useAuthStore((s) => s.firebaseUser);
 
+  const activeRef = React.useRef<HTMLButtonElement | null>(null);
+
+  // Auto-scroll sidebar to the active menu item on navigation
+  React.useEffect(() => {
+    if (activeRef.current) {
+      activeRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [pathname]);
+
   const handleNav = (href: string) => {
     onClose?.();
     if (href === '/community-chat') {
@@ -155,6 +164,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
               return (
                 <button
                   key={link.href}
+                  ref={isActive ? activeRef : null}
                   onClick={() => handleNav(link.href)}
                   className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-start cursor-pointer group ${
                     isActive
@@ -243,10 +253,6 @@ function MobileDrawer() {
 export function DesktopSidebar() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
-  const firebaseUser = useAuthStore((s) => s.firebaseUser);
-  const loading = useAuthStore((s) => s.loading);
-
-  if (loading || !firebaseUser) return null;
 
   return (
     <aside
