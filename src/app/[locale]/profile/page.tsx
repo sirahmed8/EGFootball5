@@ -346,7 +346,7 @@ export default function ProfilePage() {
   const loyaltyBadge = getLoyaltyBadge(confirmedMatches);
 
   return (
-    <div className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-mesh">
+    <div className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-black">
       <div>
         <h1 className="text-4xl font-black text-foreground tracking-tight">{t('title')}</h1>
         <p className="text-muted-foreground mt-2 font-medium">{t('description')}</p>

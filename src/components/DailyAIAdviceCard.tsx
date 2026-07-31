@@ -81,7 +81,7 @@ export function DailyAIAdviceCard() {
 
 
   return (
-    <Card className="global-box global-outline-glow relative overflow-hidden rounded-3xl p-1">
+    <Card className="global-box global-outline-glow relative overflow-hidden rounded-3xl p-1 bg-black">
       <div className="absolute top-0 end-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">

@@ -102,7 +102,7 @@ export default function OwnerDashboard() {
   };
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-10 animate-in fade-in duration-500">
+    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-10 animate-in fade-in duration-500 bg-black">
       <div>
         <h1 className="text-4xl font-black text-foreground">{t('title')}</h1>
         <p className="text-muted-foreground mt-2 font-medium">{t('subtitle')}</p>

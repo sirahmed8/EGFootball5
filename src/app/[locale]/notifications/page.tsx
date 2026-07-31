@@ -76,7 +76,7 @@ export default function NotificationsPage() {
   const filtered = notifications.filter((n) => (filter === 'unread' ? !n.read : true));
 
   return (
-    <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 global-box global-outline-glow p-6 md:p-8 rounded-3xl shadow-xl">
         <div className="space-y-1">

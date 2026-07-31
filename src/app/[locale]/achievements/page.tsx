@@ -81,9 +81,9 @@ export default function AchievementsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
       {/* Level Header Banner */}
-      <div className="stadium-glass p-8 rounded-3xl border-white/10 shadow-2xl space-y-6 relative overflow-hidden">
+      <div className="global-box p-8 rounded-3xl border-white/10 shadow-2xl space-y-6 relative overflow-hidden bg-black">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4 text-center md:text-start">
             <div className="w-20 h-20 rounded-3xl bg-primary/20 border-2 border-primary flex items-center justify-center text-4xl shadow-xl glow-primary-sm">

@@ -60,9 +60,9 @@ export default function SquadChallengesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 stadium-glass p-8 rounded-3xl border-white/10 shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 stadium-glass p-8 rounded-3xl border-white/10 shadow-xl bg-black">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-black">
             <Swords className="w-4 h-4" /> Squad vs Squad Arena
@@ -86,10 +86,10 @@ export default function SquadChallengesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {challenges.map((c) => (
           <motion.div key={c.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="stadium-glass border-white/10 rounded-3xl p-6 shadow-xl space-y-4 card-lift">
+            <Card className="stadium-glass border-white/10 rounded-3xl p-6 shadow-xl space-y-4 card-lift bg-black">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-inner">
+                  <div className="w-12 h-12 rounded-2xl bg-black border border-white/10 flex items-center justify-center text-3xl shadow-inner">
                     {c.squadLogo}
                   </div>
                   <div>
@@ -105,7 +105,7 @@ export default function SquadChallengesPage() {
                 </span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+              <div className="p-4 rounded-2xl bg-black border border-white/10 space-y-1">
                 <div className="text-xs font-bold text-muted-foreground">Match Terms & Stakes</div>
                 <div className="text-sm font-black text-amber-400">{c.wagerTerms}</div>
                 <div className="text-xs text-muted-foreground flex items-center gap-2 pt-1">

@@ -87,9 +87,9 @@
 .dark {
   --background: oklch(0 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.08 0 0 / 80%);
+  --card: oklch(0 0 0);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.08 0 0 / 90%);
+  --popover: oklch(0 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.85 0.25 150);
   --primary-foreground: oklch(0 0 0);
@@ -265,9 +265,7 @@ select:not(.bg-transparent):not(.border-0):not(.border-none):focus {
 
 /* ── Global Card / Box Utility ─────────────────────────────── */
 .global-box, .global-card {
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: #000000;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 1.5rem;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);

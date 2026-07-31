@@ -90,11 +90,11 @@ export default function LiveStreamPage() {
 
   return (
     <div className="min-h-screen bg-black py-8 px-4 md:px-8 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
+      {/* Live Header */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between global-box p-6 rounded-3xl shadow-xl"
+        className="flex items-center justify-between global-box p-6 rounded-3xl shadow-xl bg-black"
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center">

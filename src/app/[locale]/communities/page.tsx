@@ -123,9 +123,9 @@ export default function CommunitiesPage() {
   if (loading) return <CommunitiesPageSkeleton />;
 
   return (
-    <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 stadium-glass p-6 md:p-8 rounded-3xl border-white/10 shadow-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 global-box p-6 md:p-8 rounded-3xl border-white/10 shadow-xl bg-black">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold">
             <Sparkles className="w-4 h-4" /> Football Hub & Squads
