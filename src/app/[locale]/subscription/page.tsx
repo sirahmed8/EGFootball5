@@ -49,7 +49,7 @@ export default function SubscriptionPage() {
               <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase">EGFootball5 VIP Pass</span>
               <h3 className="text-2xl font-black text-foreground mt-1">PITCH PASS PREMIUM</h3>
             </div>
-            <Sparkles className="w-8 h-8 text-amber-400 animate-spin" />
+            <Sparkles className="w-8 h-8 text-amber-400" />
           </div>
 
           <div className="space-y-1">

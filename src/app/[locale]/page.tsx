@@ -95,33 +95,6 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
             </p>
           </MotionDiv>
 
-          {/* Interactive Quick Search Hero Widget */}
-          {/* Primary CTA Buttons */}
-          <MotionDiv 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="pt-4 flex flex-wrap items-center justify-center gap-4"
-          >
-            <Link href="/home">
-              <Button
-                size="lg"
-                className="bg-primary text-black hover:bg-primary/90 font-black text-lg px-9 py-7 rounded-2xl shadow-xl glow-primary hover:scale-105 transition-all cursor-pointer"
-              >
-                {t('browsePitches')}
-              </Button>
-            </Link>
-            <Link href="/matches">
-              <Button
-                size="lg"
-                variant="outline"
-                className="stadium-glass border-white/10 text-foreground hover:bg-white/10 font-black text-lg px-9 py-7 rounded-2xl cursor-pointer hover:scale-105 transition-all"
-              >
-                <Trophy className="w-5 h-5 me-2 text-primary" />
-                {t('publicMatchesBtn')}
-              </Button>
-            </Link>
-          </MotionDiv>
         </MotionDiv>
       </section>
 

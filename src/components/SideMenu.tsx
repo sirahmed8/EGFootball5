@@ -253,6 +253,11 @@ function MobileDrawer() {
 export function DesktopSidebar() {
   const locale = useLocale();
   const isRTL = locale === 'ar';
+  const firebaseUser = useAuthStore((s) => s.firebaseUser);
+  const loading = useAuthStore((s) => s.loading);
+
+  // Only render sidebar for authenticated users
+  if (loading || !firebaseUser) return null;
 
   return (
     <aside

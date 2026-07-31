@@ -106,11 +106,11 @@ export default function GuidePage() {
           >
             <Card
               onClick={() => setSelectedRule(rule)}
-              className="border-white/10 hover:border-emerald-500/50 rounded-3xl p-6 shadow-xl cursor-pointer transition-all hover:scale-[1.02] bg-black h-[210px] flex flex-col justify-between group"
+              className="border border-white/10 hover:border-primary/40 rounded-3xl p-6 shadow-xl cursor-pointer transition-all hover:scale-[1.02] bg-black h-[210px] flex flex-col justify-between group overflow-hidden"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <div className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                     {rule.icon}
                   </div>
                   <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border ${rule.badgeColor}`}>
@@ -118,13 +118,13 @@ export default function GuidePage() {
                   </span>
                 </div>
 
-                <h3 className="text-base font-black text-foreground line-clamp-1">{rule.title}</h3>
+                <h3 className="text-sm font-black text-foreground line-clamp-1">{rule.title}</h3>
                 <p className="text-xs text-muted-foreground font-medium leading-relaxed line-clamp-2">
                   {rule.shortDesc}
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-bold text-emerald-400 group-hover:text-emerald-300">
+              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-bold text-primary group-hover:text-primary/80">
                 <span>View Full Details</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
