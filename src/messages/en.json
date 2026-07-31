@@ -34,6 +34,11 @@
     "markAllRead": "Mark all read",
     "empty": "No notifications yet"
   },
+  "Announcements": {
+    "title": "Official Announcements",
+    "subscribed": "Subscribed to Push Notifications ✓",
+    "subscribe": "Subscribe to Platform Updates"
+  },
   "Landing": {
     "title": "EGFootball5 - 5-a-side Football Booking",
     "highlight": "Book Instantly.",

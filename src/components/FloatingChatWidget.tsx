@@ -471,6 +471,32 @@ export function FloatingChatWidget() {
       const queryText = (textToSend || aiInput).trim();
       if (!queryText && !attachedImage) return;
 
+      // 1-Hour Cooldown Check for Tactical Advice requests
+      const isAdviceReq = queryText.includes('نصيحة') || queryText.includes('Insight') || queryText.includes('Tactical');
+      if (isAdviceReq) {
+        const lastCooldown = localStorage.getItem('ai_tactical_cooldown');
+        if (lastCooldown) {
+          const cooldownTime = Number(lastCooldown);
+          if (Date.now() < cooldownTime) {
+            const minsLeft = Math.ceil((cooldownTime - Date.now()) / 60000);
+            const cooldownMsg: AIMessage = {
+              id: `ai-cooldown-${Date.now()}`,
+              sender: 'ai',
+              text: isArabic
+                ? `⏱️ يمكنك الحصول على نصيحة تكتيكية جديدة بعد **${minsLeft} دقيقة** (تُتاح نصيحة واحدة كل 1 ساعة).`
+                : `⏱️ Next AI Tactical Insight is ready in **${minsLeft} minutes** (1 insight per 1 hour).`,
+              chips: [],
+              timestamp: Date.now(),
+            };
+            setAiMessages((prev) => [...prev, { id: `usr-${Date.now()}`, sender: 'user', text: queryText, timestamp: Date.now() }, cooldownMsg]);
+            setAiInput('');
+            scrollToBottom();
+            return;
+          }
+        }
+        localStorage.setItem('ai_tactical_cooldown', String(Date.now() + 3600000));
+      }
+
       const userMsg: AIMessage = {
         id: `usr-${Date.now()}`,
         sender: 'user',

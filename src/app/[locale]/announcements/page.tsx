@@ -3,8 +3,14 @@
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, BellOff, Megaphone, Calendar, User, ChevronRight, X } from "lucide-react";
+import { Bell, BellOff, Megaphone, Calendar, User, ChevronRight, X, Plus, Sparkles, Undo2, Send } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
+import { collection, getDocs, addDoc, query, orderBy } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { generateAIResponse } from "@/lib/aiService";
 
 type Category = "All" | "Tournaments" | "Stadium Maintenance" | "Special Offers" | "Platform Updates";
 
@@ -16,134 +22,201 @@ interface Announcement {
   content: string;
   date: string;
   author: string;
-  badgeColor: string;
+  badgeColor?: string;
 }
-
-const mockAnnouncements: Announcement[] = [];
 
 const categories: Category[] = ["All", "Tournaments", "Stadium Maintenance", "Special Offers", "Platform Updates"];
 
 export default function AnnouncementsPage() {
   const t = useTranslations("Announcements");
-  const firebaseUser = useAuthStore((s) => s.firebaseUser);
+  const appUser = useAuthStore((s) => s.appUser);
+  const isOwnerOrAdmin = appUser?.role === 'admin' || appUser?.role === 'owner';
+
   const [activeCategory, setActiveCategory] = useState<Category>("All");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredAnnouncements = mockAnnouncements.filter(
+  // Owner Publisher State
+  const [isPublishOpen, setIsPublishOpen] = useState(false);
+  const [pubTitle, setPubTitle] = useState("");
+  const [pubSummary, setPubSummary] = useState("");
+  const [pubCategory, setPubCategory] = useState<Category>("Platform Updates");
+  const [prevTitle, setPrevTitle] = useState("");
+  const [prevSummary, setPrevSummary] = useState("");
+  const [isAiImproving, setIsAiImproving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    async function fetchAnnouncements() {
+      setLoading(true);
+      try {
+        const snap = await getDocs(query(collection(db, "announcements"), orderBy("timestamp", "desc")));
+        if (!snap.empty) {
+          const list = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Announcement));
+          setAnnouncements(list);
+        } else {
+          setAnnouncements([]);
+        }
+      } catch (err) {
+        console.error(err);
+        setAnnouncements([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAnnouncements();
+  }, []);
+
+  const handleAiImprove = async () => {
+    if (!pubTitle.trim() && !pubSummary.trim()) {
+      toast.error("Please enter a title or summary draft to improve!");
+      return;
+    }
+    setIsAiImproving(true);
+    setPrevTitle(pubTitle);
+    setPrevSummary(pubSummary);
+
+    try {
+      const prompt = `Improve this platform announcement draft to sound highly professional, energetic, and engaging for football players in Obour & Cairo:\nTitle: ${pubTitle}\nSummary: ${pubSummary}`;
+      const res = await generateAIResponse(prompt, { locale: 'en' });
+      const parts = res.text.split('\n');
+      if (parts.length >= 2) {
+        setPubTitle(parts[0].replace(/^Title:\s*/i, '').trim());
+        setPubSummary(parts.slice(1).join(' ').replace(/^Summary:\s*/i, '').trim());
+      } else {
+        setPubSummary(res.text.trim());
+      }
+      toast.success("AI Polish applied! Revert anytime with Undo 🪄");
+    } catch (err) {
+      console.error(err);
+      toast.error("AI improvement failed");
+    } finally {
+      setIsAiImproving(false);
+    }
+  };
+
+  const handleUndo = () => {
+    if (prevTitle || prevSummary) {
+      setPubTitle(prevTitle);
+      setPubSummary(prevSummary);
+      toast.info("Reverted to previous draft!");
+    }
+  };
+
+  const handlePublish = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pubTitle.trim() || !pubSummary.trim()) {
+      toast.error("Please fill in both title and summary");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const newDoc = {
+        title: pubTitle.trim(),
+        summary: pubSummary.trim(),
+        content: pubSummary.trim(),
+        category: pubCategory,
+        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        author: appUser?.name || "EGFootball5 Team",
+        timestamp: Date.now(),
+      };
+      const ref = await addDoc(collection(db, "announcements"), newDoc);
+      setAnnouncements((prev) => [{ id: ref.id, ...newDoc }, ...prev]);
+      toast.success("Official Announcement published live! 📢");
+      setIsPublishOpen(false);
+      setPubTitle("");
+      setPubSummary("");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to publish announcement");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const filteredAnnouncements = announcements.filter(
     (a) => activeCategory === "All" || a.category === activeCategory
   );
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white p-4 md:p-8 relative overflow-hidden flex flex-col items-center">
-      {/* Premium Glassmorphic Background */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-20 bg-[url('/stadium-lights.jpg')] bg-cover bg-center" />
-      <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-blue-600/20 blur-[150px] rounded-full z-0 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-purple-600/20 blur-[150px] rounded-full z-0 pointer-events-none" />
-
+    <div className="min-h-screen bg-black text-white p-4 md:p-8 relative overflow-hidden flex flex-col items-center">
       <div className="relative z-10 w-full max-w-5xl space-y-8">
-        
         {/* Header section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-2"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-blue-400">
-              <Megaphone className="w-5 h-5" />
-              <span className="font-semibold">{t("feedTitle", { defaultMessage: "Official Platform News" })}</span>
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-emerald-400 text-xs font-black uppercase">
+              <Megaphone className="w-4 h-4" /> Official News Feed
             </div>
-            <h1 className="text-3xl md:text-5xl font-bold">{t("announcements", { defaultMessage: "Updates & Announcements" })}</h1>
+            <h1 className="text-3xl md:text-5xl font-black text-foreground">Announcements & Updates</h1>
           </motion.div>
 
-          {/* Subscribe Toggle */}
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsSubscribed(!isSubscribed)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-colors ${
-              isSubscribed
-                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/50"
-                : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
-            }`}
-          >
-            {isSubscribed ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
-            {isSubscribed ? t("subscribed", { defaultMessage: "Subscribed" }) : t("subscribe", { defaultMessage: "Subscribe to Updates" })}
-          </motion.button>
+          <div className="flex items-center gap-3">
+            {isOwnerOrAdmin && (
+              <Button
+                onClick={() => setIsPublishOpen(true)}
+                size="lg"
+                className="bg-primary text-black font-black rounded-2xl glow-primary cursor-pointer flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" /> Push Announcement
+              </Button>
+            )}
+
+            <button
+              onClick={() => setIsSubscribed(!isSubscribed)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all text-xs cursor-pointer ${
+                isSubscribed
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/50"
+                  : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
+              }`}
+            >
+              {isSubscribed ? <Bell className="w-4 h-4 text-emerald-400" /> : <BellOff className="w-4 h-4" />}
+              {isSubscribed ? t("subscribed") : t("subscribe")}
+            </button>
+          </div>
         </div>
 
         {/* Categories */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide"
-        >
+        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2.5 rounded-full whitespace-nowrap transition-all ${
+              className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer ${
                 activeCategory === cat
-                  ? "bg-white text-black font-semibold shadow-lg shadow-white/20"
-                  : "bg-white/5 border border-white/10 text-neutral-300 hover:bg-white/10"
+                  ? "bg-primary text-black shadow-lg glow-primary"
+                  : "bg-white/5 border border-white/10 text-muted-foreground hover:text-foreground"
               }`}
             >
               {cat}
             </button>
           ))}
-        </motion.div>
+        </div>
 
         {/* Announcements Feed */}
-        <div className="grid grid-cols-1 gap-6">
-          <AnimatePresence mode="popLayout">
-            {filteredAnnouncements.map((announcement, idx) => (
-              <motion.div
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: idx * 0.05 }}
-                key={announcement.id}
-                onClick={() => setSelectedAnnouncement(announcement)}
-                className="group cursor-pointer rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md p-6 hover:bg-white/10 transition-colors relative overflow-hidden"
+        <div className="space-y-4">
+          {filteredAnnouncements.length === 0 ? (
+            <Card className="global-box border-white/10 rounded-3xl p-12 text-center text-muted-foreground font-bold bg-black">
+              No official announcements published yet.
+            </Card>
+          ) : (
+            filteredAnnouncements.map((a) => (
+              <Card
+                key={a.id}
+                onClick={() => setSelectedAnnouncement(a)}
+                className="global-box border-white/10 rounded-3xl p-6 shadow-xl cursor-pointer hover:border-emerald-500/40 transition-all space-y-3 bg-black"
               >
-                <div className="flex flex-col md:flex-row md:items-center gap-6 relative z-10">
-                  <div className="flex-1 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 text-xs font-bold rounded-md ${announcement.badgeColor} text-white`}>
-                        {announcement.category}
-                      </span>
-                      <div className="flex items-center gap-1 text-sm text-neutral-400">
-                        <Calendar className="w-4 h-4" />
-                        {announcement.date}
-                      </div>
-                    </div>
-                    <h2 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">{announcement.title}</h2>
-                    <p className="text-neutral-300">{announcement.summary}</p>
-                    <div className="flex items-center gap-2 text-sm text-neutral-500">
-                      <User className="w-4 h-4" />
-                      {announcement.author}
-                    </div>
-                  </div>
-                  <div className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-white/5 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors">
-                    <ChevronRight className="w-6 h-6" />
-                  </div>
+                <div className="flex items-center justify-between">
+                  <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase">
+                    {a.category}
+                  </span>
+                  <span className="text-xs font-mono text-muted-foreground">{a.date}</span>
                 </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-          {filteredAnnouncements.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-12 text-neutral-500"
-            >
-              {t("noAnnouncements", { defaultMessage: "No announcements in this category." })}
-            </motion.div>
+                <h3 className="text-xl font-black text-foreground">{a.title}</h3>
+                <p className="text-xs text-muted-foreground font-medium">{a.summary}</p>
+              </Card>
+            ))
           )}
         </div>
       </div>

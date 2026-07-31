@@ -16,7 +16,6 @@ export default function SubscriptionPage() {
     { title: 'Golden VIP Profile Badge', desc: 'Shiny VIP Crown badge displayed on your public player profile card.' },
     { title: 'Free Monthly Cup Pass', desc: 'Free entry voucher into monthly community knockout tournament galas.' },
     { title: 'Instant Weather Refund Guarantee', desc: 'Automatic 100% wallet credit refund if heavy rain cancels your pitch slot.' },
-    { title: '💡 Hourly AI Football Insights', desc: 'Personalized tactical & fitness advice refreshed every 1 hour by AI Coach.' },
   ];
 
   return (
@@ -38,38 +37,32 @@ export default function SubscriptionPage() {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        {/* 3D Animated Pass Preview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        {/* 3D Animated VIP Pass Card */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ rotateY: 5, rotateX: -5 }}
-          className="relative w-full aspect-[1.6/1] rounded-3xl p-8 bg-gradient-to-br from-amber-900/60 via-amber-950 to-black border-2 border-amber-500/50 shadow-[0_0_50px_rgba(245,158,11,0.25)] flex flex-col justify-between overflow-hidden global-box"
+          initial={{ rotateY: -10, rotateX: 5 }}
+          whileHover={{ rotateY: 0, rotateX: 0, scale: 1.02 }}
+          className="global-box border-2 border-amber-500/40 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden bg-black glow-primary-sm"
         >
           <div className="flex justify-between items-start">
-            <div className="flex items-center gap-2">
-              <Crown className="w-8 h-8 text-amber-400" />
-              <div>
-                <h3 className="font-black text-lg text-amber-300">PITCH PASS VIP</h3>
-                <span className="text-[10px] font-bold text-amber-400/80 uppercase tracking-widest">Official Player Card</span>
-              </div>
+            <div>
+              <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase">EGFootball5 VIP Pass</span>
+              <h3 className="text-2xl font-black text-foreground mt-1">PITCH PASS PREMIUM</h3>
             </div>
-            <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 font-black text-xs">
-              MEMBER
-            </span>
+            <Sparkles className="w-8 h-8 text-amber-400 animate-spin" />
           </div>
 
           <div className="space-y-1">
-            <div className="text-xs font-mono text-amber-400/60">CARD NUMBER</div>
-            <div className="text-lg md:text-xl font-black font-mono tracking-widest text-foreground">
-              EG-5582 • 9021 • VIP
+            <div className="text-xs font-mono text-amber-400/60">CARD STATUS</div>
+            <div className="text-lg md:text-xl font-black font-mono tracking-widest text-amber-400">
+              COMING SOON 💳
             </div>
           </div>
 
           <div className="flex justify-between items-end border-t border-amber-500/20 pt-4">
             <div>
               <span className="text-[10px] text-muted-foreground uppercase font-bold block">Status</span>
-              <span className="text-xs font-black text-emerald-400">ACTIVE MEMBER ✓</span>
+              <span className="text-xs font-black text-amber-400">LAUNCHING SOON ⚡</span>
             </div>
             <div className="text-end">
               <span className="text-[10px] text-muted-foreground uppercase font-bold block">Valid Across</span>
@@ -79,7 +72,7 @@ export default function SubscriptionPage() {
         </motion.div>
 
         {/* Subscription Plan & Perks */}
-        <Card className="global-box border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+        <Card className="global-box border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 bg-black">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div>
               <span className="text-xs font-black uppercase text-amber-400">Monthly Membership</span>
@@ -104,20 +97,12 @@ export default function SubscriptionPage() {
           </div>
 
           <Button
-            onClick={() => {
-              setSubscribed(true);
-              toast.success('Congratulations! You are now a Pitch Pass VIP Member 👑');
-            }}
-            disabled={subscribed}
+            disabled={true}
             size="lg"
-            className={`w-full py-6 text-base font-black rounded-2xl cursor-pointer transition-all ${
-              subscribed
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                : 'bg-amber-500 text-black hover:bg-amber-400 shadow-xl glow-primary'
-            }`}
+            className="w-full py-6 text-base font-black rounded-2xl cursor-not-allowed bg-amber-500/20 text-amber-400 border border-amber-500/40"
           >
             <Crown className="w-5 h-5 me-2" />
-            {subscribed ? 'VIP Membership Active ✓' : 'Upgrade to VIP (199 EGP/mo)'}
+            Payment Gateway Launching Soon (SOON)
           </Button>
         </Card>
       </div>

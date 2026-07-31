@@ -102,14 +102,13 @@ export default function GuidePage() {
           return (
             <motion.div
               key={idx}
-              layout
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ layout: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }, delay: idx * 0.05 }}
+              transition={{ delay: idx * 0.05 }}
             >
               <Card
                 onClick={() => setExpandedIdx(isExpanded ? null : idx)}
-                className="global-box border-white/10 hover:border-primary/40 rounded-3xl p-6 shadow-xl cursor-pointer transition-colors space-y-3 overflow-hidden"
+                className="global-box border-white/10 hover:border-primary/40 rounded-3xl p-6 shadow-xl cursor-pointer transition-colors space-y-3 bg-black"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">

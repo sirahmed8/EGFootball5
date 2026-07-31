@@ -2,11 +2,10 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Shirt, ShoppingBag, Sparkles, Check, Truck, Palette, User, Hash, PackageCheck, Layers } from 'lucide-react';
+import { Shirt, Sparkles, Download, Palette, Shield, Sparkle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { SolidSelect } from '@/components/ui/SolidSelect';
 
 export default function JerseyDesignerPage() {
   const [primaryColor, setPrimaryColor] = React.useState('#10B981');
@@ -16,34 +15,55 @@ export default function JerseyDesignerPage() {
   const [squadName, setSquadName] = React.useState('OBOUR EAGLES');
   const [playerName, setPlayerName] = React.useState('AHMED');
   const [number, setNumber] = React.useState('10');
-  const [quantity, setQuantity] = React.useState(10);
-  const [selectedSize, setSelectedSize] = React.useState('L');
-  const [address, setAddress] = React.useState('');
-  const [phone, setPhone] = React.useState('');
-  const [isOrdering, setIsOrdering] = React.useState(false);
+
+  const svgRef = React.useRef<SVGSVGElement>(null);
 
   const colors = [
-    { name: 'Emerald', hex: '#10B981' },
-    { name: 'Cyan', hex: '#06B6D4' },
-    { name: 'Amber', hex: '#F59E0B' },
-    { name: 'Crimson', hex: '#EF4444' },
-    { name: 'Purple', hex: '#8B5CF6' },
-    { name: 'Pink', hex: '#EC4899' },
+    { name: 'Emerald Green', hex: '#10B981' },
+    { name: 'Cyan Neon', hex: '#06B6D4' },
+    { name: 'Amber Gold', hex: '#F59E0B' },
+    { name: 'Crimson Red', hex: '#EF4444' },
+    { name: 'Deep Purple', hex: '#8B5CF6' },
+    { name: 'Hot Pink', hex: '#EC4899' },
     { name: 'Pitch Black', hex: '#171717' },
     { name: 'Pure White', hex: '#FFFFFF' },
   ];
 
-  const handleOrder = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!phone.trim()) {
-      toast.error('Please enter a contact phone number');
-      return;
+  // Function to convert SVG element to downloadable PNG image
+  const handleDownloadImage = () => {
+    if (!svgRef.current) return;
+    try {
+      const svgData = new XMLSerializer().serializeToString(svgRef.current);
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const URL = window.URL || window.webkitURL || window;
+      const blobURL = URL.createObjectURL(svgBlob);
+
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = 700;
+        const context = canvas.getContext('2d');
+        if (context) {
+          context.fillStyle = '#000000';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 50, 50, 500, 600);
+
+          const png = canvas.toDataURL('image/png');
+          const downloadLink = document.createElement('a');
+          downloadLink.href = png;
+          downloadLink.download = `${squadName.replace(/\s+/g, '_')}_Jersey_${number}.png`;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+          toast.success('Jersey image saved to your device! 📸👕');
+        }
+      };
+      image.src = blobURL;
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to export image');
     }
-    setIsOrdering(true);
-    setTimeout(() => {
-      toast.success(`Custom Kit Order placed! 👕 ${quantity} ${selectedSize} jerseys for ${squadName}. Delivery team will call ${phone}.`);
-      setIsOrdering(false);
-    }, 800);
   };
 
   return (
@@ -56,64 +76,86 @@ export default function JerseyDesignerPage() {
       >
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black">
-            <Shirt className="w-4 h-4" /> 3D Custom Kit Studio
+            <Shirt className="w-4 h-4" /> Interactive Kit Creator
           </div>
           <h1 className="text-3xl md:text-5xl font-black text-foreground">
-            Custom Team <span className="text-gradient-primary">Jersey Studio</span>
+            Custom Jersey <span className="text-gradient-primary">Studio</span>
           </h1>
-          <p className="text-sm text-muted-foreground">Design 5-a-side team kits with dynamic patterns, printed numbers, and doorstep delivery across Egypt.</p>
+          <p className="text-sm text-muted-foreground">Design your custom 5-a-side team kit, personalize squad chest sponsor & player back number, and download high-resolution PNG image!</p>
         </div>
+
+        <Button
+          onClick={handleDownloadImage}
+          size="lg"
+          className="bg-primary text-black hover:bg-primary/90 font-black rounded-2xl glow-primary cursor-pointer flex items-center gap-2"
+        >
+          <Download className="w-5 h-5" /> Download Jersey Image (PNG)
+        </Button>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Live SVG Jersey Visualizer */}
+        {/* Live SVG Jersey Preview Canvas */}
         <Card className="global-box border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-between space-y-6">
           <div className="flex items-center justify-between w-full border-b border-white/10 pb-4">
             <span className="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" /> Real-time 2D/3D Kit Preview
+              <Sparkles className="w-4 h-4" /> HD 2D/3D Jersey Visualizer
             </span>
             <span className="text-xs font-mono font-bold text-muted-foreground">{collarStyle.toUpperCase()} COLLAR</span>
           </div>
 
           {/* SVG Shirt Graphic */}
-          <div className="relative w-64 h-80 flex flex-col items-center justify-center">
-            <svg viewBox="0 0 200 240" className="w-full h-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)]">
-              {/* Main Jersey Body */}
+          <div className="relative w-72 h-96 flex items-center justify-center">
+            <svg
+              ref={svgRef}
+              viewBox="0 0 240 280"
+              className="w-full h-full drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)]"
+            >
+              <defs>
+                <linearGradient id="jerseyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor={primaryColor} stopOpacity="1" />
+                  <stop offset="100%" stopColor={primaryColor} stopOpacity="0.8" />
+                </linearGradient>
+              </defs>
+
+              {/* Main Jersey Outline & Sleeves */}
               <path
-                d="M 50 40 L 75 25 L 125 25 L 150 40 L 190 70 L 165 110 L 150 95 L 150 220 L 50 220 L 50 95 L 35 110 L 10 70 Z"
-                fill={primaryColor}
-                stroke="#ffffff22"
-                strokeWidth="2"
+                d="M 60 45 L 90 30 L 150 30 L 180 45 L 225 80 L 195 125 L 180 110 L 180 255 L 60 255 L 60 110 L 45 125 L 15 80 Z"
+                fill="url(#jerseyGrad)"
+                stroke="#ffffff33"
+                strokeWidth="2.5"
               />
 
-              {/* Sleeve Stripes */}
+              {/* Sleeve Accent Trims */}
+              <rect x="22" y="85" width="14" height="30" fill={secondaryColor} transform="rotate(25 22 85)" rx="2" />
+              <rect x="204" y="80" width="14" height="30" fill={secondaryColor} transform="rotate(-25 204 80)" rx="2" />
+
+              {/* Stripes Pattern */}
               {hasStripes && (
                 <>
-                  <rect x="18" y="75" width="12" height="25" fill={secondaryColor} transform="rotate(25 18 75)" opacity="0.9" />
-                  <rect x="170" y="70" width="12" height="25" fill={secondaryColor} transform="rotate(-25 170 70)" opacity="0.9" />
-                  <rect x="50" y="100" width="100" height="12" fill={secondaryColor} opacity="0.3" />
-                  <rect x="50" y="140" width="100" height="12" fill={secondaryColor} opacity="0.3" />
+                  <rect x="60" y="115" width="120" height="15" fill={secondaryColor} opacity="0.35" />
+                  <rect x="60" y="155" width="120" height="15" fill={secondaryColor} opacity="0.35" />
+                  <rect x="60" y="195" width="120" height="15" fill={secondaryColor} opacity="0.35" />
                 </>
               )}
 
-              {/* Collar */}
+              {/* Collar Style */}
               {collarStyle === 'vneck' ? (
-                <path d="M 75 25 L 100 65 L 125 25 Z" fill={secondaryColor} />
+                <path d="M 90 30 L 120 75 L 150 30 Z" fill={secondaryColor} stroke="#ffffff44" strokeWidth="1" />
               ) : (
-                <path d="M 75 25 Q 100 55 125 25 Z" fill={secondaryColor} />
+                <path d="M 90 30 Q 120 65 150 30 Z" fill={secondaryColor} stroke="#ffffff44" strokeWidth="1" />
               )}
             </svg>
 
             {/* Overlay Text (Squad Chest & Player Back) */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center pointer-events-none space-y-2">
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center pointer-events-none space-y-3">
               <div
-                className="px-3 py-1 rounded-md text-[11px] font-black tracking-widest uppercase shadow-md"
+                className="px-4 py-1 rounded-lg text-xs font-black tracking-widest uppercase shadow-lg border border-white/20"
                 style={{ backgroundColor: secondaryColor, color: primaryColor === '#FFFFFF' ? '#000' : '#FFF' }}
               >
-                {squadName || 'TEAM NAME'}
+                {squadName || 'SQUAD NAME'}
               </div>
 
-              <div className="text-5xl font-black font-mono tracking-tighter text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">
+              <div className="text-6xl font-black font-mono tracking-tighter text-white drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)]">
                 {number || '10'}
               </div>
 
@@ -124,60 +166,59 @@ export default function JerseyDesignerPage() {
           </div>
 
           <div className="w-full pt-4 border-t border-white/10 flex items-center justify-between text-xs text-muted-foreground font-bold">
-            <span className="flex items-center gap-1.5"><Truck className="w-4 h-4 text-emerald-400" /> Delivery: 3-5 Days</span>
-            <span className="text-emerald-400 font-mono">100% Breathable Mesh</span>
+            <span className="flex items-center gap-1.5"><Sparkle className="w-4 h-4 text-emerald-400" /> Professional 5-a-side Kit</span>
+            <span className="text-emerald-400 font-mono">Ready to Save & Share</span>
           </div>
         </Card>
 
-        {/* Customization Controls Form */}
-        <Card className="global-box border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl space-y-5">
+        {/* Customizer Controls */}
+        <Card className="global-box border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
           <h3 className="text-xl font-black text-foreground flex items-center gap-2">
-            <Palette className="w-5 h-5 text-primary" /> Customize Kit Specs
+            <Palette className="w-5 h-5 text-primary" /> Personalize Kit Styling
           </h3>
 
-          {/* Color Palettes */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Primary Color</label>
-              <div className="flex flex-wrap gap-2">
-                {colors.map((c) => (
-                  <button
-                    key={c.hex}
-                    type="button"
-                    onClick={() => setPrimaryColor(c.hex)}
-                    className={`w-7 h-7 rounded-full border-2 transition-transform cursor-pointer ${
-                      primaryColor === c.hex ? 'scale-125 border-emerald-400 shadow-lg' : 'border-white/10'
-                    }`}
-                    style={{ backgroundColor: c.hex }}
-                    title={c.name}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Accent Color</label>
-              <div className="flex flex-wrap gap-2">
-                {colors.map((c) => (
-                  <button
-                    key={c.hex}
-                    type="button"
-                    onClick={() => setSecondaryColor(c.hex)}
-                    className={`w-7 h-7 rounded-full border-2 transition-transform cursor-pointer ${
-                      secondaryColor === c.hex ? 'scale-125 border-emerald-400 shadow-lg' : 'border-white/10'
-                    }`}
-                    style={{ backgroundColor: c.hex }}
-                    title={c.name}
-                  />
-                ))}
-              </div>
+          {/* Primary Color */}
+          <div>
+            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Primary Color</label>
+            <div className="flex flex-wrap gap-2.5">
+              {colors.map((c) => (
+                <button
+                  key={c.hex}
+                  type="button"
+                  onClick={() => setPrimaryColor(c.hex)}
+                  className={`w-8 h-8 rounded-full border-2 transition-transform cursor-pointer ${
+                    primaryColor === c.hex ? 'scale-125 border-emerald-400 shadow-xl ring-2 ring-emerald-400/50' : 'border-white/10'
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                  title={c.name}
+                />
+              ))}
             </div>
           </div>
 
-          {/* Collar & Pattern Toggles */}
+          {/* Secondary Color */}
+          <div>
+            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Accent Trim Color</label>
+            <div className="flex flex-wrap gap-2.5">
+              {colors.map((c) => (
+                <button
+                  key={c.hex}
+                  type="button"
+                  onClick={() => setSecondaryColor(c.hex)}
+                  className={`w-8 h-8 rounded-full border-2 transition-transform cursor-pointer ${
+                    secondaryColor === c.hex ? 'scale-125 border-emerald-400 shadow-xl ring-2 ring-emerald-400/50' : 'border-white/10'
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                  title={c.name}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Collar & Stripes Options */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Collar Cut</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase mb-1.5 block">Collar Cut</label>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -195,13 +236,13 @@ export default function JerseyDesignerPage() {
                   onClick={() => setCollarStyle('crew')}
                   className="flex-1 text-xs rounded-xl font-bold"
                 >
-                  Crew Neck
+                  Crew Cut
                 </Button>
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Stripes Pattern</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase mb-1.5 block">Body Stripes</label>
               <Button
                 type="button"
                 size="sm"
@@ -209,20 +250,20 @@ export default function JerseyDesignerPage() {
                 onClick={() => setHasStripes(!hasStripes)}
                 className="w-full text-xs rounded-xl font-bold"
               >
-                {hasStripes ? 'Stripes Enabled ✓' : 'Solid Plain'}
+                {hasStripes ? 'Striped ✓' : 'Solid Plain'}
               </Button>
             </div>
           </div>
 
-          {/* Name & Number */}
-          <form onSubmit={handleOrder} className="space-y-4 pt-2 border-t border-white/10">
+          {/* Squad Name, Player Name & Number */}
+          <div className="space-y-4 pt-4 border-t border-white/10">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Squad Chest Name</label>
                 <input
                   type="text"
                   value={squadName}
-                  onChange={(e) => setSquadName(e.target.value)}
+                  onChange={(e) => setSquadName(e.target.value.toUpperCase())}
                   className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-bold uppercase"
                 />
               </div>
@@ -231,78 +272,30 @@ export default function JerseyDesignerPage() {
                 <input
                   type="text"
                   value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
+                  onChange={(e) => setPlayerName(e.target.value.toUpperCase())}
                   className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-bold uppercase"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Number</label>
-                <input
-                  type="text"
-                  value={number}
-                  onChange={(e) => setNumber(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-bold font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Fit Size</label>
-                <SolidSelect
-                  value={selectedSize}
-                  onChange={(val) => setSelectedSize(val)}
-                  options={[
-                    { value: 'M', label: 'Medium (M)' },
-                    { value: 'L', label: 'Large (L)' },
-                    { value: 'XL', label: 'X-Large (XL)' },
-                    { value: 'XXL', label: 'XX-Large' },
-                  ]}
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Pack Quantity</label>
-                <SolidSelect
-                  value={String(quantity)}
-                  onChange={(val) => setQuantity(Number(val))}
-                  options={[
-                    { value: '5', label: '5 Jerseys' },
-                    { value: '10', label: '10 Jerseys' },
-                    { value: '15', label: '15 Jerseys' },
-                  ]}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <input
-                type="tel"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Phone Number for Delivery"
-                className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-medium"
-              />
+            <div>
+              <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Shirt Number (0-99)</label>
               <input
                 type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="City & District Address"
-                className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-medium"
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+                className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-bold font-mono"
               />
             </div>
 
             <Button
-              type="submit"
-              disabled={isOrdering}
+              onClick={handleDownloadImage}
               size="lg"
               className="w-full py-6 bg-primary text-black hover:bg-primary/90 font-black rounded-2xl glow-primary cursor-pointer flex items-center justify-center gap-2 mt-4 text-base"
             >
-              <ShoppingBag className="w-5 h-5" /> {isOrdering ? 'Processing...' : `Place Custom Kit Order (${quantity} Shirts)`}
+              <Download className="w-5 h-5" /> Save Jersey to Device (PNG)
             </Button>
-          </form>
+          </div>
         </Card>
       </div>
     </div>
