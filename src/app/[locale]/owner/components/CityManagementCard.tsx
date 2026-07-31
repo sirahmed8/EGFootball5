@@ -93,7 +93,7 @@ export function CityManagementCard() {
   };
 
   return (
-    <Card className="bg-card border border-border rounded-3xl shadow-xl mt-8">
+    <div className="global-box border-white/10 rounded-3xl p-6 md:p-8 bg-black shadow-xl mt-8 space-y-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl font-black">
           <MapPin className="w-5 h-5 text-emerald-400 shrink-0" />
@@ -158,6 +158,6 @@ export function CityManagementCard() {
           </div>
         </div>
       </CardContent>
-    </Card>
+    </div>
   );
 }

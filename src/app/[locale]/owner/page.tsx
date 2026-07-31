@@ -12,6 +12,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { PitchCreationForm } from './components/PitchCreationForm';
 import { ExistingPitchesList } from './components/ExistingPitchesList';
 import { CityManagementCard } from './components/CityManagementCard';
+import { SeasonManagementCard } from './components/SeasonManagementCard';
 import { DashboardPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 export default function OwnerDashboard() {
@@ -122,6 +123,8 @@ export default function OwnerDashboard() {
       />
 
       <CityManagementCard />
+
+      <SeasonManagementCard />
     </div>
   );
 }

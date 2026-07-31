@@ -24,7 +24,7 @@ export function HomePageSkeleton() {
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="rounded-3xl border border-white/10 bg-[#0B0F19] p-5 space-y-4 shadow-xl"
+            className="rounded-3xl border border-white/10 bg-black p-5 space-y-4 shadow-xl"
           >
             <Skeleton className="h-56 w-full rounded-2xl" />
             <div className="space-y-3">
@@ -69,7 +69,7 @@ export function MatchesPageSkeleton() {
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-5 shadow-xl"
+            className="rounded-3xl border border-white/10 bg-black p-6 space-y-5 shadow-xl"
           >
             <div className="flex justify-between items-start">
               <div className="space-y-2">
@@ -118,14 +118,14 @@ export function BookPageSkeleton() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-1">
-          <div className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-6 shadow-xl">
+          <div className="rounded-3xl border border-white/10 bg-black p-6 space-y-6 shadow-xl">
             <Skeleton className="h-7 w-40 rounded-xl" />
             <Skeleton className="h-72 w-full rounded-2xl" />
           </div>
         </div>
 
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-6 shadow-xl">
+          <div className="rounded-3xl border border-white/10 bg-black p-6 space-y-6 shadow-xl">
             <div className="flex gap-2 overflow-x-auto pb-2">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} className="h-10 w-24 rounded-full shrink-0" />
@@ -163,7 +163,7 @@ export function CommunitiesPageSkeleton() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-5 shadow-xl">
+          <div key={i} className="rounded-3xl border border-white/10 bg-black p-6 space-y-5 shadow-xl">
             <div className="flex items-center gap-4">
               <SkeletonCircle className="h-14 w-14" />
               <div className="space-y-2 flex-1">
@@ -196,7 +196,7 @@ export function ChallengesPageSkeleton() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-5 shadow-xl">
+          <div key={i} className="rounded-3xl border border-white/10 bg-black p-6 space-y-5 shadow-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <SkeletonCircle className="h-12 w-12" />
@@ -221,7 +221,7 @@ export function TournamentsPageSkeleton() {
         <Skeleton className="h-6 w-1/2 mx-auto rounded-xl" />
       </div>
 
-      <div className="rounded-3xl border border-white/10 bg-[#0B0F19] p-8 space-y-6 shadow-xl">
+      <div className="rounded-3xl border border-white/10 bg-black p-8 space-y-6 shadow-xl">
         <Skeleton className="h-8 w-48 rounded-xl" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
@@ -252,7 +252,7 @@ export function LeaderboardPageSkeleton() {
         <Skeleton className="h-36 w-28 rounded-t-3xl" />
       </div>
 
-      <div className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-4 shadow-xl">
+      <div className="rounded-3xl border border-white/10 bg-black p-6 space-y-4 shadow-xl">
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="flex justify-between items-center p-4 rounded-2xl bg-white/5 border border-white/10">
             <div className="flex items-center gap-4">
@@ -270,7 +270,7 @@ export function LeaderboardPageSkeleton() {
 export function ProfilePageSkeleton() {
   return (
     <div className="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 space-y-8 mt-12 animate-in fade-in duration-300">
-      <div className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 md:p-8 shadow-xl">
+      <div className="rounded-3xl border border-white/10 bg-black p-6 md:p-8 shadow-xl">
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <SkeletonCircle className="h-24 w-24" />
           <div className="space-y-3 text-center sm:text-start flex-1">
@@ -293,7 +293,7 @@ export function ProfilePageSkeleton() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-xl"
+            className="rounded-3xl border border-white/10 bg-black p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-xl"
           >
             <div className="space-y-2.5 flex-1">
               <Skeleton className="h-6 w-48 rounded-lg" />
@@ -320,7 +320,7 @@ export function NotificationsPageSkeleton() {
 
       <div className="space-y-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 flex gap-4 items-start shadow-xl">
+          <div key={i} className="rounded-3xl border border-white/10 bg-black p-6 flex gap-4 items-start shadow-xl">
             <SkeletonCircle className="h-10 w-10 shrink-0" />
             <div className="space-y-2 flex-1">
               <Skeleton className="h-6 w-48 rounded-xl" />
@@ -343,7 +343,7 @@ export function AchievementsPageSkeleton() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-4 shadow-xl">
+          <div key={i} className="rounded-3xl border border-white/10 bg-black p-6 space-y-4 shadow-xl">
             <div className="flex justify-between items-center">
               <SkeletonCircle className="h-12 w-12" />
               <Skeleton className="h-6 w-20 rounded-full" />
@@ -366,7 +366,7 @@ export function VarHighlightsPageSkeleton() {
         <Skeleton className="h-5 w-80 rounded-xl" />
       </div>
 
-      <div className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-6 shadow-xl">
+      <div className="rounded-3xl border border-white/10 bg-black p-6 space-y-6 shadow-xl">
         <Skeleton className="h-80 md:h-[420px] w-full rounded-2xl" />
         <div className="flex justify-between items-center">
           <Skeleton className="h-7 w-60 rounded-xl" />
@@ -389,7 +389,7 @@ export function LiveStreamPageSkeleton() {
         <div className="lg:col-span-2">
           <Skeleton className="h-80 md:h-[450px] w-full rounded-3xl" />
         </div>
-        <div className="lg:col-span-1 rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-4 shadow-xl">
+        <div className="lg:col-span-1 rounded-3xl border border-white/10 bg-black p-6 space-y-4 shadow-xl">
           <Skeleton className="h-7 w-36 rounded-xl" />
           <div className="space-y-3 h-72">
             {[1, 2, 3, 4].map((i) => (
@@ -412,7 +412,7 @@ export function JerseyDesignerPageSkeleton() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Skeleton className="h-96 w-full rounded-3xl" />
-        <div className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-6 shadow-xl">
+        <div className="rounded-3xl border border-white/10 bg-black p-6 space-y-6 shadow-xl">
           <Skeleton className="h-8 w-40 rounded-xl" />
           <Skeleton className="h-12 w-full rounded-xl" />
           <Skeleton className="h-12 w-full rounded-xl" />
@@ -431,7 +431,7 @@ export function SubscriptionPageSkeleton() {
         <Skeleton className="h-6 w-1/2 mx-auto rounded-xl" />
       </div>
 
-      <div className="rounded-3xl border border-amber-500/30 bg-[#0B0F19] p-8 space-y-6 shadow-2xl max-w-2xl mx-auto">
+      <div className="rounded-3xl border border-amber-500/30 bg-black p-8 space-y-6 shadow-2xl max-w-2xl mx-auto">
         <Skeleton className="h-8 w-48 mx-auto rounded-xl" />
         <Skeleton className="h-14 w-36 mx-auto rounded-2xl" />
         <div className="space-y-3 pt-4">
@@ -449,14 +449,14 @@ export function CommunityChatPageSkeleton() {
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-6 mt-12 animate-in fade-in duration-300">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[650px]">
-        <div className="lg:col-span-1 rounded-3xl border border-white/10 bg-[#0B0F19] p-4 space-y-3 shadow-xl">
+        <div className="lg:col-span-1 rounded-3xl border border-white/10 bg-black p-4 space-y-3 shadow-xl">
           <Skeleton className="h-7 w-32 rounded-xl mb-4" />
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="h-12 w-full rounded-2xl" />
           ))}
         </div>
 
-        <div className="lg:col-span-3 rounded-3xl border border-white/10 bg-[#0B0F19] p-6 flex flex-col justify-between shadow-xl">
+        <div className="lg:col-span-3 rounded-3xl border border-white/10 bg-black p-6 flex flex-col justify-between shadow-xl">
           <div className="space-y-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex gap-3">
@@ -504,7 +504,7 @@ export function AnnouncementsPageSkeleton() {
 
       <div className="space-y-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-3 shadow-xl">
+          <div key={i} className="rounded-3xl border border-white/10 bg-black p-6 space-y-3 shadow-xl">
             <Skeleton className="h-6 w-48 rounded-xl" />
             <Skeleton className="h-4 w-full rounded-lg" />
             <Skeleton className="h-4 w-2/3 rounded-lg" />
@@ -542,7 +542,7 @@ export function GuidePageSkeleton() {
 
       <div className="space-y-6">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-3 shadow-xl">
+          <div key={i} className="rounded-3xl border border-white/10 bg-black p-6 space-y-3 shadow-xl">
             <Skeleton className="h-7 w-60 rounded-xl" />
             <Skeleton className="h-4 w-full rounded-lg" />
             <Skeleton className="h-4 w-4/5 rounded-lg" />
@@ -558,7 +558,7 @@ export function CheckoutPageSkeleton() {
     <div className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-8 mt-12 animate-in fade-in duration-300">
       <Skeleton className="h-16 w-full rounded-2xl" />
 
-      <div className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 md:p-8 space-y-6 shadow-xl">
+      <div className="rounded-3xl border border-white/10 bg-black p-6 md:p-8 space-y-6 shadow-xl">
         <Skeleton className="h-8 w-48 rounded-xl" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -583,7 +583,7 @@ export function DashboardPageSkeleton() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-3xl border border-white/10 bg-[#0B0F19] p-6 space-y-3 shadow-xl">
+          <div key={i} className="rounded-3xl border border-white/10 bg-black p-6 space-y-3 shadow-xl">
             <div className="flex justify-between items-center">
               <Skeleton className="h-4 w-24 rounded" />
               <SkeletonCircle className="h-8 w-8" />
@@ -607,7 +607,7 @@ export function UsersPageSkeleton() {
         <Skeleton className="h-10 w-64 rounded-2xl" />
       </div>
 
-      <div className="rounded-3xl border border-white/10 bg-[#0B0F19] overflow-hidden shadow-xl">
+      <div className="rounded-3xl border border-white/10 bg-black overflow-hidden shadow-xl">
         <div className="p-4 border-b border-white/10 flex gap-4">
           <Skeleton className="h-6 w-1/4 rounded" />
           <Skeleton className="h-6 w-1/4 rounded" />

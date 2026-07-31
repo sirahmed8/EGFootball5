@@ -152,12 +152,6 @@ export default function GoalOfTheMonthPage() {
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
             Be the first player to submit an incredible 5-a-side goal clip this month and claim the top spot!
           </p>
-          <Button
-            onClick={() => setIsUploading(true)}
-            className="bg-primary text-black font-black px-6 py-3 rounded-xl glow-primary cursor-pointer"
-          >
-            Submit First Goal
-          </Button>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

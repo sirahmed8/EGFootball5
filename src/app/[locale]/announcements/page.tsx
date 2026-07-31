@@ -221,8 +221,99 @@ export default function AnnouncementsPage() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal Details & Publisher Modal */}
       <AnimatePresence>
+        {isPublishOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsPublishOpen(false)}
+              className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-xl bg-black border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6"
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <h2 className="text-xl font-black text-foreground flex items-center gap-2">
+                  <Megaphone className="w-5 h-5 text-primary" /> Push New Announcement
+                </h2>
+                <button onClick={() => setIsPublishOpen(false)} className="p-2 rounded-full bg-white/5 hover:bg-white/10">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">Title</label>
+                  <input
+                    type="text"
+                    value={pubTitle}
+                    onChange={(e) => setPubTitle(e.target.value)}
+                    placeholder="e.g. Obour Summer Cup Gala Announced!"
+                    className="w-full bg-black border border-white/15 rounded-2xl p-3 text-sm text-foreground focus:border-primary outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground">Category</label>
+                  <select
+                    value={pubCategory}
+                    onChange={(e) => setPubCategory(e.target.value as Category)}
+                    className="w-full bg-black border border-white/15 rounded-2xl p-3 text-sm text-foreground focus:border-primary outline-none"
+                  >
+                    {categories.filter((c) => c !== 'All').map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-muted-foreground">Summary & Content</label>
+                    <div className="flex items-center gap-2">
+                      {prevSummary && (
+                        <button
+                          onClick={handleUndo}
+                          className="text-[11px] font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <Undo2 className="w-3 h-3" /> Undo AI
+                        </button>
+                      )}
+                      <button
+                        onClick={handleAiImprove}
+                        disabled={isAiImproving}
+                        className="text-[11px] font-black text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full cursor-pointer"
+                      >
+                        <Sparkles className="w-3 h-3" /> {isAiImproving ? "AI Improving..." : "✨ AI Improve Text"}
+                      </button>
+                    </div>
+                  </div>
+                  <textarea
+                    rows={4}
+                    value={pubSummary}
+                    onChange={(e) => setPubSummary(e.target.value)}
+                    placeholder="Write announcement details..."
+                    className="w-full bg-black border border-white/15 rounded-2xl p-3 text-sm text-foreground focus:border-primary outline-none"
+                  />
+                </div>
+
+                <Button
+                  onClick={handlePublish}
+                  disabled={submitting}
+                  className="w-full bg-primary text-black font-black rounded-2xl py-6 glow-primary cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Send className="w-4 h-4" /> {submitting ? "Publishing..." : "Publish Official Announcement"}
+                </Button>
+              </div>
+            </motion.div>
+          </>
+        )}
+
         {selectedAnnouncement && (
           <>
             <motion.div
@@ -236,7 +327,7 @@ export default function AnnouncementsPage() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-2xl bg-neutral-900 border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl overflow-y-auto max-h-[90vh]"
+              className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-2xl bg-black border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl overflow-y-auto max-h-[90vh]"
             >
               <button
                 onClick={() => setSelectedAnnouncement(null)}
@@ -246,7 +337,7 @@ export default function AnnouncementsPage() {
               </button>
               
               <div className="space-y-6 mt-2">
-                <span className={`px-3 py-1 text-xs font-bold rounded-md ${selectedAnnouncement.badgeColor} text-white inline-block`}>
+                <span className="px-3 py-1 text-xs font-bold rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 inline-block">
                   {selectedAnnouncement.category}
                 </span>
                 <h2 className="text-3xl font-bold">{selectedAnnouncement.title}</h2>
@@ -255,9 +346,7 @@ export default function AnnouncementsPage() {
                   <span className="flex items-center gap-2"><User className="w-4 h-4" />{selectedAnnouncement.author}</span>
                 </div>
                 <div className="text-neutral-300 leading-relaxed space-y-4">
-                  {selectedAnnouncement.content.split('\n').map((paragraph, i) => (
-                    <p key={i}>{paragraph}</p>
-                  ))}
+                  {selectedAnnouncement.summary}
                 </div>
               </div>
             </motion.div>

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { motion } from 'framer-motion';
 import { Medal, Trophy, Star, Shield, Lock, CheckCircle2, Flame, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface Achievement {
   id: string;
@@ -17,6 +18,19 @@ interface Achievement {
 }
 
 export default function AchievementsPage() {
+  const appUser = useAuthStore((s) => s.appUser);
+  const completedMatches = appUser?.matchesPlayed || 0;
+  const level = Math.floor(completedMatches / 3) + 1;
+  const currentXP = completedMatches * 100;
+  const targetXP = level * 300;
+  const xpPercentage = Math.min(100, Math.round((currentXP / targetXP) * 100));
+
+  const getRankTitle = (lvl: number) => {
+    if (lvl === 1) return 'Rookie Player';
+    if (lvl <= 3) return 'Amateur Baller';
+    if (lvl <= 5) return 'Semi-Pro Striker';
+    return 'Pitch Legend';
+  };
   const achievements: Achievement[] = [
     {
       id: '1',
@@ -91,7 +105,7 @@ export default function AchievementsPage() {
             </div>
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-black uppercase mb-1">
-                <Sparkles className="w-3.5 h-3.5" /> Level 7 Pitch Veteran
+                <Sparkles className="w-3.5 h-3.5" /> Level {level} • {getRankTitle(level)}
               </div>
               <h1 className="text-3xl md:text-4xl font-black text-foreground">
                 Player <span className="text-gradient-primary">Achievements</span>
@@ -103,10 +117,10 @@ export default function AchievementsPage() {
           <div className="w-full md:w-64 space-y-2">
             <div className="flex justify-between text-xs font-bold">
               <span className="text-muted-foreground">XP Progress</span>
-              <span className="text-primary font-black">2,450 / 3,000 XP</span>
+              <span className="text-primary font-black">{currentXP} / {targetXP} XP</span>
             </div>
             <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden p-0.5">
-              <div className="h-full bg-primary rounded-full glow-primary-sm" style={{ width: '81%' }} />
+              <div className="h-full bg-primary rounded-full glow-primary-sm" style={{ width: `${xpPercentage}%` }} />
             </div>
           </div>
         </div>

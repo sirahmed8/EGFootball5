@@ -79,39 +79,41 @@ export default function CeremonyPage() {
         // Query real top players from Firestore users collection
         const usersSnap = await getDocs(collection(db, "users"));
         if (!usersSnap.empty) {
-          const allUsers = usersSnap.docs.map((d) => {
-            const data = d.data();
-            return {
-              name: data.name || data.displayName || "Anonymous Player",
-              position: data.position || "MID",
-              goals: data.goals || Math.floor(Math.random() * 25) + 5,
-              saves: data.saves || Math.floor(Math.random() * 20),
-              rating: data.rating || Number((Math.random() * 1.5 + 8.5).toFixed(1)),
-            };
-          });
+          const allUsers = usersSnap.docs
+            .map((d) => {
+              const data = d.data();
+              return {
+                name: data.name || data.displayName || "Player",
+                position: data.position || "MID",
+                goals: Number(data.goals) || 0,
+                saves: Number(data.saves) || 0,
+                rating: Number(data.rating) || 0,
+              };
+            })
+            .filter((u) => u.goals > 0 || u.saves > 0 || u.rating > 0);
 
-          // Compute Golden Boot
-          const topScorer = [...allUsers].sort((a, b) => b.goals - a.goals)[0];
-          // Compute Golden Glove
-          const topGk = [...allUsers].filter((u) => u.position === 'GK').sort((a, b) => b.saves - a.saves)[0] || allUsers[0];
-          // Compute TOTS (Top GK, DEF, MID, STR)
-          const totsGk = topGk.name;
-          const totsDef = allUsers.filter((u) => u.position === 'DEF').sort((a, b) => b.rating - a.rating);
-          const totsMid = allUsers.filter((u) => u.position === 'MID').sort((a, b) => b.rating - a.rating)[0] || allUsers[1];
-          const totsStr = topScorer.name;
+          if (allUsers.length > 0) {
+            // Compute Golden Boot
+            const topScorer = [...allUsers].sort((a, b) => b.goals - a.goals)[0];
+            // Compute Golden Glove
+            const topGk = [...allUsers].filter((u) => u.position === 'GK').sort((a, b) => b.saves - a.saves)[0] || allUsers[0];
+            // Compute TOTS
+            const totsDef = allUsers.filter((u) => u.position === 'DEF').sort((a, b) => b.rating - a.rating);
+            const totsMid = allUsers.filter((u) => u.position === 'MID').sort((a, b) => b.rating - a.rating)[0] || allUsers[0];
 
-          setSeasonData({
-            targetDate: target,
-            goldenBootWinner: topScorer.name,
-            goldenBootGoals: topScorer.goals,
-            goldenGloveWinner: topGk.name,
-            goldenGloveSheets: topGk.saves,
-            totsGk: totsGk,
-            totsDef1: totsDef[0]?.name || "Ahmed Tarek",
-            totsDef2: totsDef[1]?.name || "Omar Khaled",
-            totsMid: totsMid.name,
-            totsStr: totsStr,
-          });
+            setSeasonData({
+              targetDate: target,
+              goldenBootWinner: topScorer.goals > 0 ? topScorer.name : "Pending Season End",
+              goldenBootGoals: topScorer.goals,
+              goldenGloveWinner: topGk.saves > 0 ? topGk.name : "Pending Season End",
+              goldenGloveSheets: topGk.saves,
+              totsGk: topGk.name,
+              totsDef1: totsDef[0]?.name || "Pending",
+              totsDef2: totsDef[1]?.name || "Pending",
+              totsMid: totsMid?.name || "Pending",
+              totsStr: topScorer.name,
+            });
+          }
         }
       } catch (err) {
         console.error(err);

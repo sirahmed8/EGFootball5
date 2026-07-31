@@ -36,22 +36,23 @@ export default function LeaderboardPage() {
         if (!snap.empty) {
           const list: PlayerRank[] = snap.docs.map((doc, idx) => {
             const data = doc.data();
-            const goals = data.goals || Math.floor(Math.random() * 25) + 5;
-            const assists = data.assists || Math.floor(Math.random() * 18) + 2;
-            const saves = data.saves || Math.floor(Math.random() * 30);
-            const rating = data.rating || Number((Math.random() * 1.5 + 8.5).toFixed(1));
+            const goals = data.goals || 0;
+            const assists = data.assists || 0;
+            const saves = data.saves || 0;
+            const rating = data.rating || 0;
+            const matchesPlayed = data.matchesPlayed || 0;
             return {
               id: doc.id,
               rank: idx + 1,
-              name: data.name || data.displayName || 'Anonymous Player',
+              name: data.name || data.displayName || 'Player',
               avatar: data.photoURL || '⚽',
-              position: data.position || 'MID',
+              position: data.position || 'N/A',
               goals,
               assists,
               ga: goals + assists,
               saves,
               rating,
-              matchesPlayed: data.matchesPlayed || Math.floor(Math.random() * 30) + 10,
+              matchesPlayed,
             };
           });
           setPlayers(list);
