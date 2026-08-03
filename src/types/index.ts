@@ -84,4 +84,8 @@ export interface Booking {
   joinedPlayers?: (JoinedPlayer | { uid: string; name: string })[];
   promoCode?: string;
   discountAmount?: number;
+  originalPrice?: number;
+  reimbursementStatus?: 'pending' | 'settled';
+  settledAt?: number;
+  settledBy?: string;
 }

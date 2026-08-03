@@ -280,7 +280,7 @@ function BookContent() {
     const { duration, totalAmount } = getBookingDetails();
     const appUser = useAuthStore.getState().appUser;
     const isVip = isUserVip(appUser);
-    const { finalPrice } = calculateVipPrice(totalAmount, isVip);
+    const { finalPrice, discountAmount: vipDiscount } = calculateVipPrice(totalAmount, isVip);
     const effectiveTotal = isVip ? finalPrice : totalAmount;
     const effectiveDeposit = Math.round(effectiveTotal / 2);
 
@@ -297,7 +297,9 @@ function BookContent() {
         effectiveTotal,
         effectiveDeposit,
         bookingType,
-        numPeople
+        numPeople,
+        isVip ? vipDiscount : 0,
+        totalAmount
       );
 
       router.push(`/checkout?bookingId=${bookingId}&type=${bookingType}&people=${numPeople}`);

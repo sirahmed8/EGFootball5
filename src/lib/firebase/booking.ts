@@ -30,7 +30,9 @@ export async function lockSlot(
   totalAmount: number, 
   depositAmount: number,
   bookingType: 'private' | 'public',
-  numPeople: number
+  numPeople: number,
+  discountAmount: number = 0,
+  originalPrice: number = totalAmount
 ): Promise<string> {
   // Validate inputs
   if (startSlot < OPENING_HOUR || startSlot >= CLOSING_HOUR || durationHours <= 0) {
@@ -131,6 +133,9 @@ export async function lockSlot(
       duration: durationHours,
       totalAmount,
       depositAmount,
+      discountAmount,
+      originalPrice,
+      reimbursementStatus: discountAmount > 0 ? 'pending' : 'settled',
       status: BookingStatus.LOCKED_TEMPORARY,
       lockedUntil,
       createdAt: now,
@@ -448,7 +453,23 @@ export async function cleanupExpiredBookings(pitchId: string) {
       });
     }));
 
+    return expiredCount;
   } catch (error) {
-    console.error('Error during cleanupExpiredBookings:', error);
+    console.error('Error during cleanup of expired bookings:', error);
+    return 0;
   }
+}
+
+export async function settlePitchReimbursements(bookingIds: string[], adminUid: string) {
+  const { updateDoc, doc } = await import('firebase/firestore');
+  const now = Date.now();
+  await Promise.all(
+    bookingIds.map((id) =>
+      updateDoc(doc(db, 'bookings', id), {
+        reimbursementStatus: 'settled',
+        settledAt: now,
+        settledBy: adminUid,
+      })
+    )
+  );
 }

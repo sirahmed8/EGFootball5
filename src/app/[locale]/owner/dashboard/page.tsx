@@ -150,20 +150,103 @@ export default function OwnerDashboardPage() {
                     className="flex justify-between items-center pb-4 border-b border-white/10 last:border-0 last:pb-0"
                   >
                     <div>
-                      <div className="font-extrabold text-foreground text-sm">
-                        {pitches.find((p) => p.id === b.pitchId)?.name || 'Unknown Pitch'}
+                      <div className="font-extrabold text-foreground text-sm flex items-center gap-2">
+                        <span>{pitches.find((p) => p.id === b.pitchId)?.name || 'Pitch'}</span>
+                        {b.discountAmount && b.discountAmount > 0 ? (
+                          <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black border border-amber-500/30">
+                            -10% VIP Discount
+                          </span>
+                        ) : null}
                       </div>
                       <div className="text-xs text-muted-foreground font-mono font-medium">
                         {b.date} • {b.duration}h
                       </div>
                     </div>
-                    <div className="font-black text-primary font-mono text-base">EGP {b.totalAmount}</div>
+                    <div className="text-end">
+                      <div className="font-black text-primary font-mono text-base">EGP {b.totalAmount}</div>
+                      {b.discountAmount && b.discountAmount > 0 ? (
+                        <div className="text-[10px] text-amber-400 font-bold font-mono">
+                          Subsidy Owed: EGP {b.discountAmount}
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 ))}
               {confirmedBookings.length === 0 && (
                 <div className="text-center text-muted-foreground text-xs italic">
                   {t('noRecentBookings')}
                 </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pitch Owner VIP Discount Subsidy & Settlement Card */}
+        <Card className="stadium-glass border-amber-500/30 rounded-3xl shadow-2xl bg-black/80">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl font-black text-amber-400">
+              <DollarSign className="w-5 h-5 text-amber-400" />
+              <span>تسوية مستحقات الملاعب (VIP Discount Subsidies)</span>
+            </CardTitle>
+            <CardDescription className="text-xs font-medium text-muted-foreground">
+              يخصم النظام 10% للمشتركين الـ VIP. المنصة تسدد هذا الفارق لصاحب الملعب لضمان حصوله على حق الحجز كاملاً.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+              <div>
+                <span className="text-[11px] font-bold text-muted-foreground block uppercase">إجمالي خصومات VIP</span>
+                <span className="text-2xl font-black text-amber-400 font-mono">
+                  EGP {bookings.reduce((sum, b) => sum + (b.discountAmount || 0), 0).toLocaleString()}
+                </span>
+              </div>
+              <div>
+                <span className="text-[11px] font-bold text-muted-foreground block uppercase">مستحقات معلقة للملاعب</span>
+                <span className="text-2xl font-black text-emerald-400 font-mono">
+                  EGP {bookings.filter(b => b.reimbursementStatus === 'pending' || (b.discountAmount && b.discountAmount > 0 && !b.reimbursementStatus)).reduce((sum, b) => sum + (b.discountAmount || 0), 0).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="text-xs font-black text-foreground uppercase tracking-wider">تفاصيل المستحقات حسب الملعب:</h4>
+              {pitches.map((p) => {
+                const pitchBookings = bookings.filter((b) => b.pitchId === p.id && (b.discountAmount || 0) > 0);
+                const pendingBookings = pitchBookings.filter((b) => b.reimbursementStatus === 'pending' || !b.reimbursementStatus);
+                const pendingSum = pendingBookings.reduce((sum, b) => sum + (b.discountAmount || 0), 0);
+
+                return (
+                  <div key={p.id} className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between gap-3 text-xs">
+                    <div className="space-y-0.5">
+                      <div className="font-bold text-foreground text-sm">{p.name}</div>
+                      <div className="text-muted-foreground font-mono">
+                        {pitchBookings.length} حجوزات VIP • مستحق: <strong className="text-amber-400 font-mono">EGP {pendingSum}</strong>
+                      </div>
+                    </div>
+                    {pendingSum > 0 ? (
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          const ids = pendingBookings.map((b) => b.id);
+                          const { settlePitchReimbursements } = await import('@/lib/firebase/booking');
+                          await settlePitchReimbursements(ids, appUser?.uid || 'owner');
+                          toast.success(`تم سداد ومقاصة مبلغ EGP ${pendingSum} لـ ${p.name} بنجاح! 💸`);
+                          window.location.reload();
+                        }}
+                        className="bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-xl text-xs cursor-pointer shadow-md shrink-0"
+                      >
+                        سداد المستحقات (EGP {pendingSum})
+                      </Button>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black border border-emerald-500/30 shrink-0">
+                        خالي من الديون ✓
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+              {pitches.length === 0 && (
+                <div className="text-center text-muted-foreground text-xs py-4">لا توجد ملاعب مسجلة حالياً</div>
               )}
             </div>
           </CardContent>
