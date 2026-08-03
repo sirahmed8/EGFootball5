@@ -77,13 +77,8 @@ function HomeContent() {
     },
   });
 
-  const pitches = useMemo(() => {
-    return rawPitches;
-  }, [rawPitches]);
-
-
   const filteredPitches = useMemo(() => {
-    const list = pitches.filter((pitch) => {
+    const list = rawPitches.filter((pitch) => {
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !q ||
@@ -124,7 +119,7 @@ function HomeContent() {
     }
 
     return list;
-  }, [pitches, searchQuery, maxPrice, selectedFormat, selectedCity, selectedAmenities, sortBy]);
+  }, [rawPitches, searchQuery, maxPrice, selectedFormat, selectedCity, selectedAmenities, sortBy]);
 
   if (loading) {
     return <HomePageSkeleton />;
@@ -234,8 +229,7 @@ function HomeContent() {
           {/* Price Range Slider */}
           <div className="md:col-span-2 space-y-1 bg-background/40 p-2.5 rounded-2xl border border-border">
             <div className="flex justify-between text-[11px] font-extrabold text-muted-foreground">
-              <span>{t('maxRate')}</span>
-              <span className="text-primary font-mono">{maxPrice} EGP</span>
+              <span className="text-primary font-mono">Max Price: {maxPrice} EGP</span>
             </div>
             <input
               type="range"
@@ -295,21 +289,21 @@ function HomeContent() {
 
       {/* Empty State when no pitches found */}
       {filteredPitches.length === 0 && (
-        <div className="p-12 text-center rounded-3xl bg-card/40 border border-border backdrop-blur-xl space-y-4 max-w-lg mx-auto my-12 relative z-10">
-          <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mx-auto">
-            <Search className="w-8 h-8" />
-          </div>
-          <h3 className="text-2xl font-black text-foreground">
-            {rawPitches.length === 0 ? 'No Pitches Available Yet' : t('noPitchesFound')}
+        <div className='text-center py-20 space-y-4'>
+          <div className='w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl mx-auto'>🏟️</div>
+          <h3 className='text-2xl font-black text-foreground'>
+            {rawPitches.length === 0 ? 'No Pitches Available Yet' : 'No Pitches Found'}
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className='text-sm text-muted-foreground max-w-sm mx-auto'>
             {rawPitches.length === 0
               ? 'Platform owners can add new pitches from the Owner Dashboard.'
-              : t('noPitchesDesc')}
+              : 'Try adjusting your filters or search for a different area.'}
           </p>
-          <Button onClick={resetFilters} className="bg-primary text-black font-extrabold rounded-xl px-6 cursor-pointer">
-            {t('showAllPitches')}
-          </Button>
+          {rawPitches.length > 0 && (
+            <Button onClick={resetFilters} className="bg-primary text-black font-extrabold rounded-xl px-6 cursor-pointer">
+              {t('showAllPitches')}
+            </Button>
+          )}
         </div>
       )}
 
@@ -338,10 +332,16 @@ function HomeContent() {
                   </div>
 
                   {/* Rating Tag */}
-                  <div className="absolute top-3 start-3 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full text-amber-400 font-bold text-xs flex items-center gap-1 border border-amber-400/30">
-                    <Star className="w-3.5 h-3.5 fill-amber-400" />
-                    <span>{pitch.rating || 4.9}</span>
-                  </div>
+                  {pitch.rating ? (
+                    <div className="absolute top-3 start-3 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full text-amber-400 font-bold text-xs flex items-center gap-1 border border-amber-400/30">
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                      <span>{pitch.rating}</span>
+                    </div>
+                  ) : (
+                    <div className="absolute top-3 start-3">
+                      <span className="text-xs font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30">New</span>
+                    </div>
+                  )}
                 </div>
 
                 <CardHeader className="p-5 pb-2">

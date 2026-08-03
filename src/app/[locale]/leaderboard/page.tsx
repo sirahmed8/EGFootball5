@@ -1,11 +1,12 @@
 'use client';
 
 import * as React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Award, Trophy, Medal, Star, Flame, Shield, Search, Crown, Sparkles, SlidersHorizontal } from 'lucide-react';
+import { Trophy, Search, Crown, SlidersHorizontal } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { SolidSelect } from '@/components/ui/SolidSelect';
-import { collection, getDocs, query, limit } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 
 interface PlayerRank {
@@ -22,6 +23,36 @@ interface PlayerRank {
   matchesPlayed: number;
 }
 
+/** Returns position-specific badge Tailwind classes */
+function getPositionBadgeClass(position: string): string {
+  const pos = position.toUpperCase();
+  if (pos === 'GK')
+    return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+  if (pos === 'DEF')
+    return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+  if (pos === 'MID')
+    return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+  if (pos === 'STR' || pos === 'FWD')
+    return 'bg-rose-500/20 text-rose-400 border-rose-500/30';
+  return 'bg-white/10 text-muted-foreground border-white/10';
+}
+
+/** Renders a player avatar: Next.js Image if valid URL, else soccer ball emoji */
+function PlayerAvatar({ src, name, size = 32 }: { src: string; name: string; size?: number }) {
+  if (src && src.startsWith('http')) {
+    return (
+      <Image
+        src={src}
+        alt={name}
+        width={size}
+        height={size}
+        className="rounded-full object-cover"
+      />
+    );
+  }
+  return <span className="text-xl leading-none">⚽</span>;
+}
+
 export default function LeaderboardPage() {
   const [metricSort, setMetricSort] = React.useState<string>('goals');
   const [search, setSearch] = React.useState('');
@@ -34,27 +65,37 @@ export default function LeaderboardPage() {
       try {
         const snap = await getDocs(collection(db, 'users'));
         if (!snap.empty) {
-          const list: PlayerRank[] = snap.docs.map((doc, idx) => {
-            const data = doc.data();
-            const goals = data.goals || 0;
-            const assists = data.assists || 0;
-            const saves = data.saves || 0;
-            const rating = data.rating || 0;
-            const matchesPlayed = data.matchesPlayed || 0;
-            return {
-              id: doc.id,
-              rank: idx + 1,
-              name: data.name || data.displayName || 'Player',
-              avatar: data.photoURL || '⚽',
-              position: data.position || 'N/A',
-              goals,
-              assists,
-              ga: goals + assists,
-              saves,
-              rating,
-              matchesPlayed,
-            };
-          });
+          const list: PlayerRank[] = snap.docs
+            .map((doc) => {
+              const data = doc.data();
+              const goals = data.goals || 0;
+              const assists = data.assists || 0;
+              const saves = data.saves || 0;
+              const rating = data.rating || 0;
+              const matchesPlayed = data.matchesPlayed || 0;
+              return {
+                id: doc.id,
+                rank: 0,
+                name: data.name || data.displayName || 'Player',
+                avatar: data.photoURL || '',
+                position: data.position || 'N/A',
+                goals,
+                assists,
+                ga: goals + assists,
+                saves,
+                rating,
+                matchesPlayed,
+              };
+            })
+            // Only include players who have actually played / have stats
+            .filter(
+              (p) =>
+                p.goals > 0 ||
+                p.assists > 0 ||
+                p.saves > 0 ||
+                p.rating > 0 ||
+                p.matchesPlayed > 0
+            );
           setPlayers(list);
         } else {
           setPlayers([]);
@@ -82,7 +123,9 @@ export default function LeaderboardPage() {
     return list.map((p, idx) => ({ ...p, rank: idx + 1 }));
   }, [players, metricSort]);
 
-  const filteredList = sortedPlayers.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
+  const filteredList = sortedPlayers.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
   const topThree = filteredList.slice(0, 3);
 
   const getMetricValue = (p: PlayerRank) => {
@@ -95,7 +138,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
-      {/* Header Banner - Solid Black */}
+      {/* Header Banner */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -108,7 +151,7 @@ export default function LeaderboardPage() {
           Platform <span className="text-gradient-primary">Leaderboard</span>
         </h1>
         <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto font-medium">
-          Recognizing top goalscorers, playmakers, clean sheet keepers, and MVPs across all pitches in Obour & Cairo.
+          Recognizing top goalscorers, playmakers, clean sheet keepers, and MVPs across all pitches in Obour &amp; Cairo.
         </p>
 
         {/* Global Multi-Metric SolidSelect Sort */}
@@ -129,14 +172,37 @@ export default function LeaderboardPage() {
         </div>
       </motion.div>
 
+      {/* Loading Skeletons */}
+      {loading && (
+        <div className="global-box rounded-3xl p-6 border-white/10 shadow-xl space-y-3 bg-black">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-12 rounded-2xl bg-white/5 animate-pulse" />
+          ))}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && filteredList.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="global-box rounded-3xl p-12 border-white/10 shadow-xl bg-black flex flex-col items-center gap-4 text-center"
+        >
+          <Trophy className="w-16 h-16 text-amber-400/50" />
+          <p className="text-lg font-bold text-muted-foreground">
+            No player stats yet. Play matches to appear on the leaderboard!
+          </p>
+        </motion.div>
+      )}
+
       {/* 3D Podium for Top 3 */}
-      {topThree.length >= 3 && (
+      {!loading && topThree.length >= 3 && (
         <div className="grid grid-cols-3 gap-4 md:gap-6 items-end pt-4 max-w-3xl mx-auto text-center">
           {/* 2nd Place */}
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Card className="global-box border-slate-400/40 bg-black rounded-3xl p-4 shadow-xl flex flex-col items-center space-y-2 relative overflow-hidden">
-              <div className="w-12 h-12 rounded-2xl bg-slate-400/20 border border-slate-400/40 flex items-center justify-center text-2xl shadow-inner">
-                ⚽
+              <div className="w-12 h-12 rounded-full bg-slate-400/20 border border-slate-400/40 flex items-center justify-center shadow-inner overflow-hidden">
+                <PlayerAvatar src={topThree[1]?.avatar} name={topThree[1]?.name} size={48} />
               </div>
               <div className="text-sm font-black text-foreground truncate max-w-[120px]">{topThree[1]?.name}</div>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-400/20 text-slate-300">2nd Place</span>
@@ -148,8 +214,8 @@ export default function LeaderboardPage() {
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
             <Card className="global-box border-amber-400/50 bg-black rounded-3xl p-5 shadow-2xl flex flex-col items-center space-y-2 relative overflow-hidden glow-primary-sm">
               <Crown className="w-6 h-6 text-amber-400 animate-bounce" />
-              <div className="w-14 h-14 rounded-2xl bg-amber-400/20 border border-amber-400/50 flex items-center justify-center text-3xl shadow-inner">
-                👑
+              <div className="w-14 h-14 rounded-full bg-amber-400/20 border border-amber-400/50 flex items-center justify-center shadow-inner overflow-hidden">
+                <PlayerAvatar src={topThree[0]?.avatar} name={topThree[0]?.name} size={56} />
               </div>
               <div className="text-base font-black text-foreground truncate max-w-[140px]">{topThree[0]?.name}</div>
               <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-amber-400 text-black shadow-md">#1 Champion</span>
@@ -160,8 +226,8 @@ export default function LeaderboardPage() {
           {/* 3rd Place */}
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Card className="global-box border-amber-700/40 bg-black rounded-3xl p-4 shadow-xl flex flex-col items-center space-y-2 relative overflow-hidden">
-              <div className="w-12 h-12 rounded-2xl bg-amber-700/20 border border-amber-700/40 flex items-center justify-center text-2xl shadow-inner">
-                🥉
+              <div className="w-12 h-12 rounded-full bg-amber-700/20 border border-amber-700/40 flex items-center justify-center shadow-inner overflow-hidden">
+                <PlayerAvatar src={topThree[2]?.avatar} name={topThree[2]?.name} size={48} />
               </div>
               <div className="text-sm font-black text-foreground truncate max-w-[120px]">{topThree[2]?.name}</div>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-700/20 text-amber-500">3rd Place</span>
@@ -172,50 +238,58 @@ export default function LeaderboardPage() {
       )}
 
       {/* Search Bar & Full Table */}
-      <div className="global-box rounded-3xl p-6 border-white/10 shadow-xl space-y-4 bg-black">
-        <div className="relative max-w-md">
-          <Search className="w-4 h-4 absolute start-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search player name..."
-            className="w-full ps-10 pe-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium"
-          />
-        </div>
+      {!loading && filteredList.length > 0 && (
+        <div className="global-box rounded-3xl p-6 border-white/10 shadow-xl space-y-4 bg-black">
+          <div className="relative max-w-md">
+            <Search className="w-4 h-4 absolute start-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search player name..."
+              className="w-full ps-10 pe-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium"
+            />
+          </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-start text-sm">
-            <thead>
-              <tr className="border-b border-white/10 text-muted-foreground text-xs uppercase tracking-wider">
-                <th className="pb-3 text-start">Rank</th>
-                <th className="pb-3 text-start">Player</th>
-                <th className="pb-3 text-center">Position</th>
-                <th className="pb-3 text-center">Matches</th>
-                <th className="pb-3 text-end">Stat Score</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filteredList.map((p) => (
-                <tr key={p.id} className="hover:bg-white/5 transition-colors font-medium">
-                  <td className="py-4 font-black text-base text-primary">#{p.rank}</td>
-                  <td className="py-4 flex items-center gap-3">
-                    <span className="text-xl">⚽</span>
-                    <span className="font-bold text-foreground">{p.name}</span>
-                  </td>
-                  <td className="py-4 text-center">
-                    <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono font-bold text-muted-foreground">
-                      {p.position}
-                    </span>
-                  </td>
-                  <td className="py-4 text-center text-muted-foreground">{p.matchesPlayed}</td>
-                  <td className="py-4 text-end font-black text-emerald-400 text-lg">{getMetricValue(p)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-start text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-muted-foreground text-xs uppercase tracking-wider">
+                  <th className="pb-3 text-start">Rank</th>
+                  <th className="pb-3 text-start">Player</th>
+                  <th className="pb-3 text-center">Position</th>
+                  <th className="pb-3 text-center">Matches</th>
+                  <th className="pb-3 text-end">Stat Score</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filteredList.map((p) => (
+                  <tr key={p.id} className="hover:bg-white/5 transition-colors font-medium">
+                    <td className="py-4 font-black text-base text-primary">#{p.rank}</td>
+                    <td className="py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-white/5 shrink-0">
+                          <PlayerAvatar src={p.avatar} name={p.name} size={32} />
+                        </div>
+                        <span className="font-bold text-foreground">{p.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 text-center">
+                      <span
+                        className={`px-2 py-0.5 rounded-full border text-xs font-mono font-bold ${getPositionBadgeClass(p.position)}`}
+                      >
+                        {p.position}
+                      </span>
+                    </td>
+                    <td className="py-4 text-center text-muted-foreground">{p.matchesPlayed}</td>
+                    <td className="py-4 text-end font-black text-emerald-400 text-lg">{getMetricValue(p)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

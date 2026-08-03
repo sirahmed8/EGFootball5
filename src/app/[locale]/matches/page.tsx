@@ -166,6 +166,8 @@ export default function MatchesPage() {
   const [filter, setFilter] = useState<'all' | 'joined' | 'open'>('all');
   const [selectedPosition, setSelectedPosition] = useState<'GK' | 'DEF' | 'MID' | 'STR'>('STR');
 
+  const [pastMatches, setPastMatches] = useState<Booking[]>([]);
+
   useEffect(() => {
     const matchesQ = query(
       collection(db, 'bookings'),
@@ -177,21 +179,25 @@ export default function MatchesPage() {
       matchesQ,
       (snapshot) => {
         const todayStr = new Date().toISOString().split('T')[0];
-        const fetchedMatches = snapshot.docs
-          .map((doc) => doc.data() as Booking)
-          .filter((match) => match.date >= todayStr);
+        const all = snapshot.docs.map((doc) => doc.data() as Booking);
 
-        fetchedMatches.sort((a, b) => {
+        const upcoming = all.filter((m) => m.date >= todayStr);
+        const past = all.filter((m) => m.date < todayStr);
+
+        upcoming.sort((a, b) => {
           if (a.date !== b.date) return a.date.localeCompare(b.date);
           return a.timeSlot - b.timeSlot;
         });
+        past.sort((a, b) => b.date.localeCompare(a.date));
 
-        setMatches(fetchedMatches);
+        setMatches(upcoming);
+        setPastMatches(past);
         setLoadingData(false);
       },
       (error) => {
         console.error('Error fetching public matches: ', error);
         setMatches([]);
+        setPastMatches([]);
         setLoadingData(false);
       }
     );
@@ -297,12 +303,14 @@ export default function MatchesPage() {
     }
   };
 
-  const shareMatchToWhatsApp = (match: Booking, pitchName?: string) => {
-    const text = isArabic
-      ? `⚽ انضم لمباراتنا الكروية على ملعب ${pitchName || 'Kickoff'} يوم ${match.date} الساعة ${formatTimeSlot(match.timeSlot)}!`
-      : `⚽ Join our football match at ${pitchName || 'Kickoff'} on ${match.date} at ${formatTimeSlot(match.timeSlot)}!`;
-    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
+  const handleShareMatch = async (match: Booking) => {
+    const link = window.location.origin + '/matches?id=' + match.id;
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success('Match link copied! 📋');
+    } catch {
+      toast.error(isArabic ? 'تعذّر نسخ الرابط' : 'Could not copy link');
+    }
   };
 
   const filteredMatches = matches.filter((match) => {
@@ -391,15 +399,11 @@ export default function MatchesPage() {
 
       {/* Match Cards List */}
       {filteredMatches.length === 0 ? (
-        <Card className="stadium-glass border-white/10 backdrop-blur-xl py-16 text-center rounded-3xl">
-          <CardContent className="space-y-4 max-w-md mx-auto pt-6">
-            <span className="text-5xl block">⚽</span>
-            <h3 className="text-2xl font-black text-foreground">
-              {t('noMatchesAvailable')}
-            </h3>
-            <p className="text-muted-foreground text-sm font-medium leading-relaxed">{t('noMatches')}</p>
-          </CardContent>
-        </Card>
+        <div className='text-center py-16 space-y-4'>
+          <div className='text-5xl'>⚽</div>
+          <h3 className='text-xl font-black'>No Open Matches Right Now</h3>
+          <p className='text-sm text-muted-foreground'>Be the first to host a public match and invite players to join!</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredMatches.map((match) => {
@@ -458,12 +462,33 @@ export default function MatchesPage() {
                       </div>
                     </div>
 
-                    {/* Joined Players Badges List */}
-                    <div className="space-y-2">
+                    {/* Capacity Progress Bar */}
+                    <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-xs font-bold text-muted-foreground">
                         <span>{t('joinedPlayersTitle')}</span>
-                        <span className="font-mono text-primary">{currentPlayers}/{match.numPeople}</span>
+                        <span className="font-mono text-primary">{currentPlayers}/{match.numPeople} Players</span>
                       </div>
+                      {(() => {
+                        const pct = Math.min((currentPlayers / match.numPeople) * 100, 100);
+                        const barColor =
+                          pct > 80
+                            ? 'bg-rose-500'
+                            : pct >= 50
+                            ? 'bg-amber-400'
+                            : 'bg-emerald-500';
+                        return (
+                          <div className="w-full h-2 rounded-full bg-muted/60 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Joined Players Badges List */}
+                    <div className="space-y-2">
                       <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pe-1">
                         {match.joinedPlayers?.map((player, idx) => (
                           <span
@@ -512,11 +537,11 @@ export default function MatchesPage() {
                     )}
 
                     <Button
-                      onClick={() => shareMatchToWhatsApp(match, pitch?.name)}
+                      onClick={() => handleShareMatch(match)}
                       variant="outline"
                       size="icon"
                       className="rounded-2xl border-border text-foreground hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/40 p-2.5 shrink-0 cursor-pointer"
-                      title={t('shareWhatsApp')}
+                      title={isArabic ? 'نسخ رابط المباراة' : 'Copy match link'}
                     >
                       <Share2 className="w-4 h-4" />
                     </Button>
@@ -551,6 +576,20 @@ export default function MatchesPage() {
             );
           })}
         </div>
+      )}
+
+      {/* Past Matches — collapsed summary */}
+      {pastMatches.length > 0 && (
+        <details className="group rounded-2xl border border-border/40 bg-card/40 overflow-hidden">
+          <summary className="flex items-center justify-between px-5 py-3.5 cursor-pointer select-none list-none">
+            <span className="text-sm font-extrabold text-muted-foreground">
+              🕐 {isArabic ? 'مباريات سابقة' : 'Past Matches'}
+            </span>
+            <span className="text-xs font-black px-3 py-1 rounded-full bg-muted text-muted-foreground">
+              {pastMatches.length} {isArabic ? 'مباراة' : 'matches'}
+            </span>
+          </summary>
+        </details>
       )}
     </div>
   );
