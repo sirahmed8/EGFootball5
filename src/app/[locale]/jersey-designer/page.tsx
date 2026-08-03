@@ -12,6 +12,8 @@ export default function JerseyDesignerPage() {
   const [secondaryColor, setSecondaryColor] = React.useState('#06B6D4');
   const [collarStyle, setCollarStyle] = React.useState<'vneck' | 'crew'>('vneck');
   const [hasStripes, setHasStripes] = React.useState(true);
+  const [pattern, setPattern] = React.useState<'stripes' | 'sash' | 'chevron' | 'solid'>('stripes');
+  const [badgeIcon, setBadgeIcon] = React.useState<'shield' | 'crown' | 'star' | 'flame'>('shield');
   const [squadName, setSquadName] = React.useState('OBOUR EAGLES');
   const [playerName, setPlayerName] = React.useState('AHMED');
   const [number, setNumber] = React.useState('10');
@@ -76,12 +78,12 @@ export default function JerseyDesignerPage() {
       >
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black">
-            <Shirt className="w-4 h-4" /> Interactive Kit Creator
+            <Shirt className="w-4 h-4" /> Interactive Kit Creator 2.0
           </div>
           <h1 className="text-3xl md:text-5xl font-black text-foreground">
-            Custom Jersey <span className="text-gradient-primary">Studio</span>
+            Custom Jersey <span className="text-gradient-primary">Studio Pro</span>
           </h1>
-          <p className="text-sm text-muted-foreground">Design your custom 5-a-side team kit, personalize squad chest sponsor & player back number, and download high-resolution PNG image!</p>
+          <p className="text-sm text-muted-foreground">Design custom 5-a-side team kits, choose patterns & team badges, personalize player back numbers, and export HD PNG graphics!</p>
         </div>
 
         <Button
@@ -89,7 +91,7 @@ export default function JerseyDesignerPage() {
           size="lg"
           className="bg-primary text-black hover:bg-primary/90 font-black rounded-2xl glow-primary cursor-pointer flex items-center gap-2"
         >
-          <Download className="w-5 h-5" /> Download Jersey Image (PNG)
+          <Download className="w-5 h-5" /> Download Jersey (PNG)
         </Button>
       </motion.div>
 
@@ -98,9 +100,9 @@ export default function JerseyDesignerPage() {
         <Card className="global-box border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-between space-y-6">
           <div className="flex items-center justify-between w-full border-b border-white/10 pb-4">
             <span className="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" /> HD 2D/3D Jersey Visualizer
+              <Sparkles className="w-4 h-4" /> Vector 2D Kit Studio
             </span>
-            <span className="text-xs font-mono font-bold text-muted-foreground">{collarStyle.toUpperCase()} COLLAR</span>
+            <span className="text-xs font-mono font-bold text-muted-foreground">{collarStyle.toUpperCase()} COLLAR • {pattern.toUpperCase()}</span>
           </div>
 
           {/* SVG Shirt Graphic */}
@@ -113,7 +115,7 @@ export default function JerseyDesignerPage() {
               <defs>
                 <linearGradient id="jerseyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor={primaryColor} stopOpacity="1" />
-                  <stop offset="100%" stopColor={primaryColor} stopOpacity="0.8" />
+                  <stop offset="100%" stopColor={primaryColor} stopOpacity="0.85" />
                 </linearGradient>
               </defs>
 
@@ -129,14 +131,28 @@ export default function JerseyDesignerPage() {
               <rect x="22" y="85" width="14" height="30" fill={secondaryColor} transform="rotate(25 22 85)" rx="2" />
               <rect x="204" y="80" width="14" height="30" fill={secondaryColor} transform="rotate(-25 204 80)" rx="2" />
 
-              {/* Stripes Pattern */}
-              {hasStripes && (
+              {/* Pattern Selection Overlay */}
+              {pattern === 'stripes' && (
                 <>
-                  <rect x="60" y="115" width="120" height="15" fill={secondaryColor} opacity="0.35" />
-                  <rect x="60" y="155" width="120" height="15" fill={secondaryColor} opacity="0.35" />
-                  <rect x="60" y="195" width="120" height="15" fill={secondaryColor} opacity="0.35" />
+                  <rect x="60" y="115" width="120" height="15" fill={secondaryColor} opacity="0.4" />
+                  <rect x="60" y="155" width="120" height="15" fill={secondaryColor} opacity="0.4" />
+                  <rect x="60" y="195" width="120" height="15" fill={secondaryColor} opacity="0.4" />
                 </>
               )}
+
+              {pattern === 'sash' && (
+                <polygon points="60,60 180,240 180,255 60,75" fill={secondaryColor} opacity="0.45" />
+              )}
+
+              {pattern === 'chevron' && (
+                <polygon points="60,110 120,140 180,110 180,135 120,165 60,135" fill={secondaryColor} opacity="0.45" />
+              )}
+
+              {/* Crest Badge Badge Graphic */}
+              <g transform="translate(75, 75)">
+                <path d="M 0 0 L 14 0 L 14 14 L 7 19 L 0 14 Z" fill={secondaryColor} stroke="#FFF" strokeWidth="1" />
+                <circle cx="7" cy="7" r="3" fill="#FFF" />
+              </g>
 
               {/* Collar Style */}
               {collarStyle === 'vneck' ? (
@@ -149,7 +165,7 @@ export default function JerseyDesignerPage() {
             {/* Overlay Text (Squad Chest & Player Back) */}
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center pointer-events-none space-y-3">
               <div
-                className="px-4 py-1 rounded-lg text-xs font-black tracking-widest uppercase shadow-lg border border-white/20"
+                className="px-4 py-1 rounded-lg text-xs font-black tracking-widest uppercase shadow-lg border border-white/20 mt-4"
                 style={{ backgroundColor: secondaryColor, color: primaryColor === '#FFFFFF' ? '#000' : '#FFF' }}
               >
                 {squadName || 'SQUAD NAME'}
@@ -176,6 +192,25 @@ export default function JerseyDesignerPage() {
           <h3 className="text-xl font-black text-foreground flex items-center gap-2">
             <Palette className="w-5 h-5 text-primary" /> Personalize Kit Styling
           </h3>
+
+          {/* Pattern Style Selector */}
+          <div>
+            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Kit Pattern Style</label>
+            <div className="grid grid-cols-4 gap-2">
+              {(['solid', 'stripes', 'sash', 'chevron'] as const).map((p) => (
+                <Button
+                  key={p}
+                  type="button"
+                  size="sm"
+                  variant={pattern === p ? 'default' : 'outline'}
+                  onClick={() => setPattern(p)}
+                  className="text-xs rounded-xl font-bold uppercase"
+                >
+                  {p}
+                </Button>
+              ))}
+            </div>
+          </div>
 
           {/* Primary Color */}
           <div>

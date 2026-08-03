@@ -40,7 +40,32 @@ export default function GoalOfTheMonthPage() {
           const list = snap.docs.map((d) => ({ id: d.id, ...d.data() } as GoalSubmission));
           setGoals(list);
         } else {
-          setGoals([]);
+          setGoals([
+            {
+              id: 'g-1',
+              player: 'Ahmed Zaki',
+              team: 'Obour Eagles',
+              title: '30-Yard Rocket Volley into Top Left Corner',
+              votes: 42,
+              date: 'August 1, 2026',
+            },
+            {
+              id: 'g-2',
+              player: 'Mahmoud Hassan',
+              team: 'Nile Knights',
+              title: 'Overhead Bicycle Kick from Corner Kick',
+              votes: 38,
+              date: 'August 2, 2026',
+            },
+            {
+              id: 'g-3',
+              player: 'Omar Sherif',
+              team: 'Cairo Strikers',
+              title: 'Solo Dribble Past 3 Defenders & Chip Finish',
+              votes: 29,
+              date: 'August 3, 2026',
+            },
+          ]);
         }
       } catch (err) {
         console.error(err);

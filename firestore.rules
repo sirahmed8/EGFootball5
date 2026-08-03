@@ -169,5 +169,27 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // VAR Highlights collection
+    match /var_highlights/{clipId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Goal of the Month contest collection
+    match /goal_contest/{goalId} {
+      allow read: if true;
+      allow create: if isAuth() && isNotBlacklisted();
+      allow update: if isAuth();
+      allow delete: if isAdmin();
+    }
+
+    // Squad Arena Challenges collection
+    match /challenges/{challengeId} {
+      allow read: if true;
+      allow create: if isAuth() && isNotBlacklisted();
+      allow update: if isAuth();
+      allow delete: if isAdmin();
+    }
   }
 }

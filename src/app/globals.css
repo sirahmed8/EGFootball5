@@ -313,3 +313,28 @@ select:not(.bg-transparent):not(.border-0):not(.border-none):focus {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+/* ── Stadium Neon & Gradient Utilities ────────────────────── */
+.glow-primary {
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.45);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.45);
+}
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, #10B981 0%, #34D399 50%, #06B6D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 50%, #FEF08A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.pitch-grass-bg {
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.15) 0%, rgba(5, 46, 22, 0.9) 100%);
+}

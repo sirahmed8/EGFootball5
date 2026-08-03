@@ -23,7 +23,41 @@ interface Challenge {
 export default function SquadChallengesPage() {
   const firebaseUser = useAuthStore((s) => s.firebaseUser);
 
-  const [challenges, setChallenges] = React.useState<Challenge[]>([]);
+  const [challenges, setChallenges] = React.useState<Challenge[]>([
+    {
+      id: 'c-1',
+      challengerSquad: 'Obour Eagles 🦅',
+      squadLogo: '🦅',
+      pitchName: 'Obour Stadium Pitch 1',
+      city: 'Obour',
+      date: 'Tonight',
+      time: '9:00 PM',
+      wagerTerms: 'Loser Pays Full Pitch Reservation Fee',
+      accepted: false,
+    },
+    {
+      id: 'c-2',
+      challengerSquad: 'Cairo Strikers ⚡',
+      squadLogo: '⚡',
+      pitchName: 'El Shabab Sports Club',
+      city: 'Obour',
+      date: 'Tomorrow',
+      time: '10:30 PM',
+      wagerTerms: 'Winner Gets Free Sports Drinks + Trophy Points',
+      accepted: false,
+    },
+    {
+      id: 'c-3',
+      challengerSquad: 'Nile Knights 🛡️',
+      squadLogo: '🛡️',
+      pitchName: 'Green Park Turf Pitch',
+      city: 'Obour',
+      date: 'Friday',
+      time: '8:00 PM',
+      wagerTerms: 'Friendly 5v5 Friendly Match',
+      accepted: true,
+    },
+  ]);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [squadName, setSquadName] = React.useState('My Squad');

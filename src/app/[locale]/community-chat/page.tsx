@@ -157,9 +157,28 @@ export default function CommunityChatPage() {
               Loading real-time chat...
             </div>
           ) : messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm space-y-2">
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm space-y-4">
               <Sparkles className="w-8 h-8 text-primary opacity-50 animate-bounce" />
-              <p>Be the first to send a message in #{activeChannel}!</p>
+              <p className="font-bold text-foreground">Be the first to send a message in #{activeChannel}!</p>
+
+              {/* Quick suggestion chips */}
+              <div className="flex flex-wrap gap-2 max-w-md justify-center pt-2">
+                {[
+                  '🧤 Looking for a GK tonight in Obour!',
+                  '⚽ Anyone up for a 5v5 match at 9 PM?',
+                  '⭐ Which stadium has the best turf lights?',
+                  '🏆 Who is joining the Obour Summer Cup?',
+                ].map((chip) => (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => setText(chip)}
+                    className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all cursor-pointer"
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             messages.map((msg) => {

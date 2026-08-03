@@ -6,6 +6,9 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig: NextConfig = {
   output: 'export',
   trailingSlash: true,
+  turbopack: {
+    root: __dirname,
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

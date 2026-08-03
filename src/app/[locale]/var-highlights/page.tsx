@@ -91,6 +91,14 @@ export default function VarHighlightsPage() {
     }
   };
 
+  const [isSlowMo, setIsSlowMo] = React.useState(false);
+  const [upvotes, setUpvotes] = React.useState<Record<string, number>>({});
+
+  const handleUpvote = (id: string) => {
+    setUpvotes((prev) => ({ ...prev, [id]: (prev[id] || 12) + 1 }));
+    toast.success('Vote submitted for VAR Goal of the Week! 🗳️⚽');
+  };
+
   return (
     <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
       {/* Banner */}
@@ -101,12 +109,12 @@ export default function VarHighlightsPage() {
       >
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black">
-            <Camera className="w-4 h-4" /> Stadium Pitch VAR Highlights
+            <Camera className="w-4 h-4" /> Stadium Pitch VAR Highlights 2.0
           </div>
           <h1 className="text-3xl md:text-5xl font-black text-foreground">
-            Pitch <span className="text-gradient-primary">VAR Highlights</span>
+            Pitch <span className="text-gradient-primary">VAR Studio</span>
           </h1>
-          <p className="text-sm text-muted-foreground">30-second automated video highlights uploaded by pitch owners and stadium referees.</p>
+          <p className="text-sm text-muted-foreground">30-second automated video highlights, 0.25x slow-mo VAR review, and community goal voting.</p>
         </div>
 
         {isOwnerOrAdmin && (
@@ -124,7 +132,19 @@ export default function VarHighlightsPage() {
       {selectedClip ? (
         <Card className="global-box border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
           <div className="w-full h-80 md:h-[420px] rounded-2xl bg-black border-2 border-emerald-500/40 flex flex-col items-center justify-center relative overflow-hidden group shadow-inner">
-            <span className="text-7xl group-hover:scale-110 transition-transform">⚽</span>
+            <span className={`text-7xl group-hover:scale-110 transition-transform ${isSlowMo ? 'animate-pulse' : ''}`}>⚽</span>
+            
+            <div className="absolute top-4 start-4 flex items-center gap-2 z-20">
+              <Button
+                size="sm"
+                variant={isSlowMo ? 'default' : 'outline'}
+                onClick={() => setIsSlowMo(!isSlowMo)}
+                className="text-xs font-black rounded-xl bg-black/80 backdrop-blur border border-cyan-500/40 text-cyan-400"
+              >
+                {isSlowMo ? '🔍 VAR 0.25x SLOW-MO ACTIVE' : '▶ 1.0x NORMAL SPEED'}
+              </Button>
+            </div>
+
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <Button size="lg" className="bg-primary text-black rounded-full p-6 glow-primary cursor-pointer">
                 <Play className="w-8 h-8 fill-black" />
@@ -143,15 +163,25 @@ export default function VarHighlightsPage() {
               </p>
             </div>
 
-            <Button
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                toast.success('Clip link copied!');
-              }}
-              className="bg-primary text-black hover:bg-primary/90 font-black px-6 py-3.5 rounded-2xl glow-primary-sm cursor-pointer flex items-center gap-2"
-            >
-              <Share2 className="w-4 h-4" /> Share VAR Clip
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => handleUpvote(selectedClip.id)}
+                variant="outline"
+                className="font-black px-4 py-3 rounded-2xl border-white/10 text-xs flex items-center gap-2 cursor-pointer"
+              >
+                👍 Vote Clip ({upvotes[selectedClip.id] || 12})
+              </Button>
+
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success('Clip link copied!');
+                }}
+                className="bg-primary text-black hover:bg-primary/90 font-black px-6 py-3.5 rounded-2xl glow-primary-sm cursor-pointer flex items-center gap-2"
+              >
+                <Share2 className="w-4 h-4" /> Share VAR Clip
+              </Button>
+            </div>
           </div>
         </Card>
       ) : (
