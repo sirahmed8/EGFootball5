@@ -289,7 +289,27 @@ export default function OwnerUsersPage() {
                       </div>
 
                       {user.role !== 'owner' && (
-                        <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+                        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
+                          {/* VIP Toggle - Mobile */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              const nextVip = !user.isVip;
+                              await toggleVipMutation.mutateAsync({ userId: user.uid, isVip: nextVip });
+                              toast.success(nextVip ? `👑 Gifted VIP to ${user.name}!` : `Revoked VIP from ${user.name}`);
+                            }}
+                            disabled={toggleVipMutation.isPending}
+                            className={`flex-1 h-8 text-xs font-bold rounded-xl border cursor-pointer ${
+                              user.isVip
+                                ? 'border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'
+                                : 'border-white/20 text-muted-foreground hover:bg-white/10'
+                            }`}
+                          >
+                            <Crown className="w-3.5 h-3.5 me-1 text-amber-400" />
+                            {user.isVip ? 'VIP ✓' : '👑 Give VIP'}
+                          </Button>
+
                           {user.role === 'admin' ? (
                             <Button
                               variant="outline"
