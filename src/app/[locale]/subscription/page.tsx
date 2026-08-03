@@ -169,14 +169,6 @@ export default function SubscriptionPage() {
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1">
-            <span className="font-extrabold text-amber-400 block">{isArabic ? '💡 تسعير ذكي وعادل:' : '💡 Smart Value Pricing:'}</span>
-            <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
-              {isArabic
-                ? 'يشمل الاشتراك تغطية خصومات الملاعب (حتى 400 ج.م شهرياً) + تذكرة بطولات مجانية (150 ج.م) + مدرب AI بلا حدود.'
-                : 'Priced to cover average monthly 10% pitch discount subsidies (up to 400 EGP) + free 150 EGP tournament pass + unlimited AI coach.'}
-            </p>
-          </div>
 
           <div className="space-y-3.5">
             {perks.map((perk, idx) => (
