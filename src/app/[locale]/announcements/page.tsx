@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, BellOff, Megaphone, Calendar, User, ChevronRight, X, Plus, Sparkles, Undo2, Send, Tag } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -26,12 +26,20 @@ interface Announcement {
   badgeColor?: string;
 }
 
-const categories: Category[] = ["All", "Tournaments", "Stadium Maintenance", "Special Offers", "Platform Updates"];
-
 export default function AnnouncementsPage() {
   const t = useTranslations("Announcements");
+  const locale = useLocale();
+  const isArabic = locale === "ar";
   const appUser = useAuthStore((s) => s.appUser);
   const isOwnerOrAdmin = appUser?.role === 'admin' || appUser?.role === 'owner';
+
+  const categories: { key: Category; label: string }[] = [
+    { key: "All", label: isArabic ? "الكل" : "All" },
+    { key: "Tournaments", label: isArabic ? "البطولات" : "Tournaments" },
+    { key: "Stadium Maintenance", label: isArabic ? "صيانة الملاعب" : "Stadium Maintenance" },
+    { key: "Special Offers", label: isArabic ? "العروض الخاصة" : "Special Offers" },
+    { key: "Platform Updates", label: isArabic ? "تحديثات المنصة" : "Platform Updates" },
+  ];
 
   const [activeCategory, setActiveCategory] = useState<Category>("All");
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -74,7 +82,7 @@ export default function AnnouncementsPage() {
 
   const handleAiImprove = async () => {
     if (!pubTitle.trim() && !pubSummary.trim()) {
-      toast.error("Please enter a title or summary draft to improve!");
+      toast.error(isArabic ? "يرجى كتابة عنوان أو مسودة أولاً لتحسينها!" : "Please enter a title or summary draft to improve!");
       return;
     }
     setIsAiImproving(true);
@@ -83,7 +91,7 @@ export default function AnnouncementsPage() {
 
     try {
       const prompt = `Improve this platform announcement draft to sound highly professional, energetic, and engaging for football players in Obour & Cairo:\nTitle: ${pubTitle}\nSummary: ${pubSummary}`;
-      const res = await generateAIResponse(prompt, { locale: 'en' });
+      const res = await generateAIResponse(prompt, { locale: isArabic ? 'ar' : 'en' });
       const parts = res.text.split('\n');
       if (parts.length >= 2) {
         setPubTitle(parts[0].replace(/^Title:\s*/i, '').trim());
@@ -91,10 +99,10 @@ export default function AnnouncementsPage() {
       } else {
         setPubSummary(res.text.trim());
       }
-      toast.success("AI Polish applied! Revert anytime with Undo 🪄");
+      toast.success(isArabic ? "تم تطبيق التحسين الذكي! يمكنك التراجع في أي وقت ✨" : "AI Polish applied! Revert anytime with Undo 🪄");
     } catch (err) {
       console.error(err);
-      toast.error("AI improvement failed");
+      toast.error(isArabic ? "فشل التحسين بالذكاء الاصطناعي" : "AI improvement failed");
     } finally {
       setIsAiImproving(false);
     }
@@ -104,14 +112,14 @@ export default function AnnouncementsPage() {
     if (prevTitle || prevSummary) {
       setPubTitle(prevTitle);
       setPubSummary(prevSummary);
-      toast.info("Reverted to previous draft!");
+      toast.info(isArabic ? "تم التراجع للمسودة السابقة" : "Reverted to previous draft!");
     }
   };
 
   const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pubTitle.trim() || !pubSummary.trim()) {
-      toast.error("Please fill in both title and summary");
+      toast.error(isArabic ? "يرجى ملء العنوان والتفاصيل" : "Please fill in both title and summary");
       return;
     }
     setSubmitting(true);
@@ -121,19 +129,19 @@ export default function AnnouncementsPage() {
         summary: pubSummary.trim(),
         content: pubSummary.trim(),
         category: pubCategory,
-        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        date: new Date().toLocaleDateString(isArabic ? "ar-EG" : "en-US", { month: "short", day: "numeric", year: "numeric" }),
         author: appUser?.name || "EGFootball5 Team",
         timestamp: Date.now(),
       };
       const ref = await addDoc(collection(db, "announcements"), newDoc);
       setAnnouncements((prev) => [{ id: ref.id, ...newDoc }, ...prev]);
-      toast.success("Official Announcement published live! 📢");
+      toast.success(isArabic ? "تم نشر الإعلان الرسمي مباشرة! 📢" : "Official Announcement published live! 📢");
       setIsPublishOpen(false);
       setPubTitle("");
       setPubSummary("");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to publish announcement");
+      toast.error(isArabic ? "فشل نشر الإعلان" : "Failed to publish announcement");
     } finally {
       setSubmitting(false);
     }
@@ -144,15 +152,17 @@ export default function AnnouncementsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 md:p-8 relative overflow-hidden flex flex-col items-center">
+    <div className="min-h-screen bg-black text-white p-4 md:p-8 relative overflow-hidden flex flex-col items-center" dir={isArabic ? "rtl" : "ltr"}>
       <div className="relative z-10 w-full max-w-5xl space-y-8">
         {/* Header section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-2">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-emerald-400 text-xs font-black uppercase">
-              <Megaphone className="w-4 h-4" /> Official News Feed
+              <Megaphone className="w-4 h-4" /> {isArabic ? "موجز الأخبار والتحديثات الرسمية" : "Official News Feed"}
             </div>
-            <h1 className="text-3xl md:text-5xl font-black text-foreground">Announcements & Updates</h1>
+            <h1 className="text-3xl md:text-5xl font-black text-foreground">
+              {isArabic ? "الإعلانات والتحديثات الرسمية" : "Announcements & Updates"}
+            </h1>
           </motion.div>
 
           <div className="flex items-center gap-3">
@@ -162,7 +172,7 @@ export default function AnnouncementsPage() {
                 size="lg"
                 className="bg-primary text-black font-black rounded-2xl glow-primary cursor-pointer flex items-center gap-2"
               >
-                <Plus className="w-5 h-5" /> Push Announcement
+                <Plus className="w-5 h-5" /> {isArabic ? "نشر إعلان جديد" : "Push Announcement"}
               </Button>
             )}
 
@@ -175,7 +185,7 @@ export default function AnnouncementsPage() {
               }`}
             >
               {isSubscribed ? <Bell className="w-4 h-4 text-emerald-400" /> : <BellOff className="w-4 h-4" />}
-              {isSubscribed ? t("subscribed") : t("subscribe")}
+              {isSubscribed ? (isArabic ? "مشترك في التنبيهات ✓" : "Subscribed ✓") : (isArabic ? "الاشتراك في التحديثات" : "Subscribe")}
             </button>
           </div>
         </div>
@@ -184,24 +194,30 @@ export default function AnnouncementsPage() {
         <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer ${
-                activeCategory === cat
+              key={cat.key}
+              onClick={() => setActiveCategory(cat.key)}
+              className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+                activeCategory === cat.key
                   ? "bg-primary text-black shadow-lg glow-primary"
                   : "bg-white/5 border border-white/10 text-muted-foreground hover:text-foreground"
               }`}
             >
-              {cat}
+              {cat.label}
             </button>
           ))}
         </div>
 
         {/* Announcements Feed */}
         <div className="space-y-4">
-          {filteredAnnouncements.length === 0 ? (
+          {loading ? (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-28 rounded-3xl bg-white/5 animate-pulse" />
+              ))}
+            </div>
+          ) : filteredAnnouncements.length === 0 ? (
             <Card className="global-box border-white/10 rounded-3xl p-12 text-center text-muted-foreground font-bold bg-black">
-              No official announcements published yet.
+              {isArabic ? "لا توجد إعلانات رسمية منشورة حالياً." : "No official announcements published yet."}
             </Card>
           ) : (
             filteredAnnouncements.map((a) => (
@@ -240,10 +256,11 @@ export default function AnnouncementsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-xl bg-black border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6"
+              dir={isArabic ? "rtl" : "ltr"}
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <h2 className="text-xl font-black text-foreground flex items-center gap-2">
-                  <Megaphone className="w-5 h-5 text-primary" /> Push New Announcement
+                  <Megaphone className="w-5 h-5 text-primary" /> {isArabic ? "نشر إعلان جديد" : "Push New Announcement"}
                 </h2>
                 <button onClick={() => setIsPublishOpen(false)} className="p-2 rounded-full bg-white/5 hover:bg-white/10">
                   <X className="w-5 h-5" />
@@ -252,36 +269,36 @@ export default function AnnouncementsPage() {
 
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Title</label>
+                  <label className="text-xs font-bold text-muted-foreground">{isArabic ? "العنوان" : "Title"}</label>
                   <input
                     type="text"
                     value={pubTitle}
                     onChange={(e) => setPubTitle(e.target.value)}
-                    placeholder="e.g. Obour Summer Cup Gala Announced!"
+                    placeholder={isArabic ? "مثال: الإعلان عن بطولة صيف العبور!" : "e.g. Obour Summer Cup Gala Announced!"}
                     className="w-full bg-black border border-white/15 rounded-2xl p-3 text-sm text-foreground focus:border-primary outline-none"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Category</label>
+                  <label className="text-xs font-bold text-muted-foreground">{isArabic ? "الفئة" : "Category"}</label>
                   <SolidSelect
                     value={pubCategory}
                     onChange={(val) => setPubCategory(val as Category)}
-                    options={categories.filter((c) => c !== 'All').map((c) => ({ value: c, label: c }))}
+                    options={categories.filter((c) => c.key !== 'All').map((c) => ({ value: c.key, label: c.label }))}
                     icon={Tag}
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-muted-foreground">Summary & Content</label>
+                    <label className="text-xs font-bold text-muted-foreground">{isArabic ? "التفاصيل والمحتوى" : "Summary & Content"}</label>
                     <div className="flex items-center gap-2">
                       {prevSummary && (
                         <button
                           onClick={handleUndo}
                           className="text-[11px] font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
                         >
-                          <Undo2 className="w-3 h-3" /> Undo AI
+                          <Undo2 className="w-3 h-3" /> {isArabic ? "تراجع" : "Undo AI"}
                         </button>
                       )}
                       <button
@@ -289,7 +306,7 @@ export default function AnnouncementsPage() {
                         disabled={isAiImproving}
                         className="text-[11px] font-black text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full cursor-pointer"
                       >
-                        <Sparkles className="w-3 h-3" /> {isAiImproving ? "AI Improving..." : "✨ AI Improve Text"}
+                        <Sparkles className="w-3 h-3" /> {isAiImproving ? (isArabic ? "جاري التحسين..." : "AI Improving...") : (isArabic ? "✨ تحسين بالذكاء الاصطناعي" : "✨ AI Improve Text")}
                       </button>
                     </div>
                   </div>
@@ -297,83 +314,9 @@ export default function AnnouncementsPage() {
                     rows={4}
                     value={pubSummary}
                     onChange={(e) => setPubSummary(e.target.value)}
-                    placeholder="Write announcement details..."
+                    placeholder={isArabic ? "اكتب تفاصيل الإعلان..." : "Write announcement details..."}
                     className="w-full bg-black border border-white/15 rounded-2xl p-3 text-sm text-foreground focus:border-primary outline-none"
                   />
-                </div>
-
-                {/* Live Push & Chat Preview Accordion */}
-                <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/5 transition-all">
-                  <button
-                    type="button"
-                    onClick={() => setShowPreview(!showPreview)}
-                    className="w-full flex items-center justify-between p-3.5 text-xs font-bold text-foreground hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Megaphone className="w-4 h-4 text-emerald-400" />
-                      <span>Live Push & Chat Preview</span>
-                    </div>
-                    <span className="text-[11px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
-                      {showPreview ? "Show less ▲" : "Live Push & Chat Preview ▼"}
-                    </span>
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {showPreview && (
-                      <motion.div
-                        key="preview-content"
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeInOut" }}
-                        className="overflow-hidden"
-                      >
-                        <div className="p-4 pt-2 space-y-3 border-t border-white/10">
-                          {/* Sub-tabs */}
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setPreviewTab("push")}
-                              className={`px-3 py-1 rounded-xl text-[10px] font-black transition-all cursor-pointer ${
-                                previewTab === "push"
-                                  ? "bg-emerald-500 text-black shadow-md"
-                                  : "bg-white/5 text-muted-foreground hover:text-foreground"
-                              }`}
-                            >
-                              Push Notif 🔔
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setPreviewTab("chat")}
-                              className={`px-3 py-1 rounded-xl text-[10px] font-black transition-all cursor-pointer ${
-                                previewTab === "chat"
-                                  ? "bg-emerald-500 text-black shadow-md"
-                                  : "bg-white/5 text-muted-foreground hover:text-foreground"
-                              }`}
-                            >
-                              Chat Banner 💬
-                            </button>
-                          </div>
-
-                          {/* Simulated Live Preview */}
-                          <div className="p-3.5 rounded-2xl bg-black border border-emerald-500/30 space-y-2 shadow-inner">
-                            <div className="flex items-center justify-between text-[10px] text-emerald-400 font-black">
-                              <span>📢 [Official Community Broadcast]</span>
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                                {pubCategory}
-                              </span>
-                            </div>
-                            <h4 className="text-sm font-black text-foreground">
-                              {pubTitle.trim() || "Title preview..."}
-                            </h4>
-                            <p className="text-xs text-muted-foreground font-medium leading-relaxed">
-                              {pubSummary.trim() || "Body text preview..."}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
 
                 <Button
@@ -381,7 +324,7 @@ export default function AnnouncementsPage() {
                   disabled={submitting}
                   className="w-full bg-primary text-black font-black rounded-2xl py-6 glow-primary cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <Send className="w-4 h-4" /> {submitting ? "Publishing..." : "Publish Official Announcement"}
+                  <Send className="w-4 h-4" /> {submitting ? (isArabic ? "جاري النشر..." : "Publishing...") : (isArabic ? "نشر الإعلان الرسمي" : "Publish Official Announcement")}
                 </Button>
               </div>
             </motion.div>
@@ -402,10 +345,11 @@ export default function AnnouncementsPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-2xl bg-black border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl overflow-y-auto max-h-[90vh]"
+              dir={isArabic ? "rtl" : "ltr"}
             >
               <button
                 onClick={() => setSelectedAnnouncement(null)}
-                className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                className="absolute top-6 start-6 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>

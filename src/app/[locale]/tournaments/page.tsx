@@ -1,8 +1,9 @@
 'use client';
 
 import * as React from 'react';
+import { useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
-import { Trophy, Crown, Sparkles, Inbox, Users, Calendar } from 'lucide-react';
+import { Trophy, Crown, Sparkles, Inbox, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -41,6 +42,8 @@ interface Tournament {
 }
 
 export default function TournamentsPage() {
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
   const firebaseUser = useAuthStore((s) => s.firebaseUser);
   const appUser = useAuthStore((s) => s.appUser);
   const [tournaments, setTournaments] = React.useState<Tournament[]>([]);
@@ -70,7 +73,7 @@ export default function TournamentsPage() {
 
   const handleRegister = async (tournament: Tournament) => {
     if (!firebaseUser) {
-      toast.error('Please sign in to register your squad');
+      toast.error(isArabic ? 'يرجى تسجيل الدخول لتسجيل فريقك' : 'Please sign in to register your squad');
       return;
     }
     setRegistering(true);
@@ -79,13 +82,13 @@ export default function TournamentsPage() {
         tournamentId: tournament.id,
         tournamentName: tournament.name,
         userId: firebaseUser.uid,
-        playerName: appUser?.name || firebaseUser.displayName || 'Player',
+        playerName: appUser?.name || firebaseUser.displayName || (isArabic ? 'لاعب' : 'Player'),
         registeredAt: serverTimestamp(),
       });
-      toast.success(`Squad registered for ${tournament.name}! 🏆`);
+      toast.success(isArabic ? `تم تسجيل فريقك في ${tournament.name}! 🏆` : `Squad registered for ${tournament.name}! 🏆`);
     } catch (err) {
       console.error(err);
-      toast.error('Registration failed. Please try again.');
+      toast.error(isArabic ? 'فشل التسجيل. يرجى المحاولة مرة أخرى.' : 'Registration failed. Please try again.');
     } finally {
       setRegistering(false);
     }
@@ -97,18 +100,26 @@ export default function TournamentsPage() {
     completed: 'bg-white/10 text-muted-foreground border-white/10',
   };
 
+  const statusLabel: Record<string, string> = {
+    upcoming: isArabic ? 'قادمة قريباً' : 'upcoming',
+    live: isArabic ? 'مباشر الآن' : 'live',
+    completed: isArabic ? 'مكتملة' : 'completed',
+  };
+
   return (
-    <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8" dir={isArabic ? 'rtl' : 'ltr'}>
       {/* Header Banner */}
       <div className="stadium-glass p-8 md:p-12 rounded-3xl border-white/10 shadow-2xl space-y-4 text-center relative overflow-hidden">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-black uppercase">
-          <Trophy className="w-4 h-4 text-amber-400" /> EGFootball5 Tournament Gala
+          <Trophy className="w-4 h-4 text-amber-400" /> {isArabic ? 'بطولات ودوريات EGFootball5' : 'EGFootball5 Tournament Gala'}
         </div>
         <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tight">
-          Amateur <span className="text-gradient-primary">Tournaments & Cups</span>
+          {isArabic ? 'البطولات' : 'Amateur'} <span className="text-gradient-primary">{isArabic ? 'والدوريات الرياضية' : 'Tournaments & Cups'}</span>
         </h1>
         <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto font-medium">
-          Compete in Egypt's premier 5-a-side knockout cups. Real-time bracket trees, live stats, and cash prizes!
+          {isArabic
+            ? 'تنافس في أقوى بطولات الخماسي بالعبور والقاهرة. شجرة مواجهات مباشرة، إحصائيات حية، وجوائز مالية!'
+            : 'Compete in Egypt\'s premier 5-a-side knockout cups. Real-time bracket trees, live stats, and cash prizes!'}
         </p>
       </div>
 
@@ -116,7 +127,7 @@ export default function TournamentsPage() {
       {loading ? (
         <div className="text-center py-20 space-y-3">
           <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
-          <p className="text-xs text-muted-foreground font-medium">Loading tournaments...</p>
+          <p className="text-xs text-muted-foreground font-medium">{isArabic ? 'جاري تحميل البطولات...' : 'Loading tournaments...'}</p>
         </div>
       ) : tournaments.length === 0 ? (
         /* Empty state — no tournaments created yet */
@@ -124,9 +135,11 @@ export default function TournamentsPage() {
           <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-3xl mx-auto">
             <Inbox className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-black text-foreground">No Tournaments Announced Yet</h3>
+          <h3 className="text-xl font-black text-foreground">{isArabic ? 'لا توجد بطولات معلنة حالياً' : 'No Tournaments Announced Yet'}</h3>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            The stadium management will announce upcoming tournaments and cups here. Stay tuned for the next Obour Cup!
+            {isArabic
+              ? 'ستقوم إدارة الملاعب بالإعلان عن البطولات والدوريات القادمة هنا. انتظر بطولة العبور الصيفية!'
+              : 'The stadium management will announce upcoming tournaments and cups here. Stay tuned for the next Obour Cup!'}
           </p>
         </Card>
       ) : (
@@ -149,14 +162,14 @@ export default function TournamentsPage() {
                     </div>
                     {t.status && (
                       <span className={`px-2.5 py-1 rounded-full border text-[10px] font-black uppercase ${statusColor[t.status] || statusColor.upcoming}`}>
-                        {t.status}
+                        {statusLabel[t.status] || t.status}
                       </span>
                     )}
                   </div>
 
                   {t.squadCount != null && (
                     <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground">
-                      <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5 text-primary" /> {t.squadCount} Squads</span>
+                      <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5 text-primary" /> {t.squadCount} {isArabic ? 'فرق' : 'Squads'}</span>
                     </div>
                   )}
 
@@ -167,7 +180,7 @@ export default function TournamentsPage() {
                         onClick={() => setSelectedTournament(t)}
                         className="flex-1 rounded-2xl border-white/10 text-xs font-black"
                       >
-                        <Sparkles className="w-4 h-4 me-1" /> View Bracket
+                        <Sparkles className="w-4 h-4 me-1" /> {isArabic ? 'عرض المواجهات' : 'View Bracket'}
                       </Button>
                     )}
                     {t.status === 'upcoming' && (
@@ -176,7 +189,7 @@ export default function TournamentsPage() {
                         disabled={registering}
                         className="flex-1 bg-primary text-black font-black rounded-2xl glow-primary cursor-pointer"
                       >
-                        <Crown className="w-4 h-4 me-1" /> {registering ? 'Registering...' : 'Register Squad'}
+                        <Crown className="w-4 h-4 me-1" /> {registering ? (isArabic ? 'جاري التسجيل...' : 'Registering...') : (isArabic ? 'تسجيل الفريق' : 'Register Squad')}
                       </Button>
                     )}
                   </div>
@@ -194,10 +207,11 @@ export default function TournamentsPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="w-full max-w-4xl stadium-glass border-white/10 rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6"
+            dir={isArabic ? 'rtl' : 'ltr'}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <h2 className="text-xl font-black text-foreground flex items-center gap-2">
-                <Sparkles className="text-primary" /> {selectedTournament.name} Bracket
+                <Sparkles className="text-primary" /> {isArabic ? 'شجرة مواجهات' : ''} {selectedTournament.name}
               </h2>
               <button
                 onClick={() => setSelectedTournament(null)}

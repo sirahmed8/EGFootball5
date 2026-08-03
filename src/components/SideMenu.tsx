@@ -13,12 +13,10 @@ import {
   UserCircle,
   Menu,
   Award,
-  MessageSquare,
   Medal,
   Bell,
   Sparkles,
   Megaphone,
-  HelpCircle,
   BookOpen,
   ShieldCheck,
   Swords,
@@ -233,7 +231,7 @@ function MobileDrawer() {
       <div
         className={`fixed inset-y-0 z-[100] w-80 max-w-[85vw] bg-black
           shadow-2xl border-white/10 transition-transform duration-300 ease-in-out
-          ${isRTL ? 'end-0 border-s' : 'start-0 border-e'}`}
+          start-0 border-e`}
         style={{
           transform: isOpen
             ? 'translateX(0)'
@@ -250,8 +248,6 @@ function MobileDrawer() {
 
 // ── Desktop Persistent Sidebar ────────────────────────────────────────────────
 export function DesktopSidebar() {
-  const locale = useLocale();
-  const isRTL = locale === 'ar';
   const firebaseUser = useAuthStore((s) => s.firebaseUser);
   const loading = useAuthStore((s) => s.loading);
 
@@ -260,10 +256,7 @@ export function DesktopSidebar() {
 
   return (
     <aside
-      dir={isRTL ? 'rtl' : 'ltr'}
-      className={`hidden md:flex flex-col fixed top-16 bottom-0 z-40 w-64
-        bg-black border-white/10 overflow-hidden
-        ${isRTL ? 'end-0 border-s' : 'start-0 border-e'}`}
+      className="hidden md:flex flex-col fixed top-16 bottom-0 z-40 w-64 bg-black border-e border-white/10 overflow-hidden start-0"
     >
       <SidebarContent isMobile={false} />
     </aside>
