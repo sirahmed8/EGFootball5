@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Star, Shield, Users, Timer, Sparkles, Settings, CheckCircle2, Save, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { Trophy, Shield, Users, Timer, Sparkles, Settings, Star, Award, Crown, HeartHandshake, X } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,6 +17,12 @@ interface SeasonData {
   goldenBootGoals?: number;
   goldenGloveWinner?: string;
   goldenGloveSheets?: number;
+  playmakerWinner?: string;
+  playmakerAssists?: number;
+  mvpWinner?: string;
+  mvpRating?: number;
+  fairplayWinner?: string;
+  championSquad?: string;
   totsGk?: string;
   totsDef1?: string;
   totsDef2?: string;
@@ -24,11 +30,8 @@ interface SeasonData {
   totsStr?: string;
 }
 
-const DEFAULT_TARGET = "";
-
 export default function CeremonyPage() {
   const t = useTranslations("Ceremony");
-  const firebaseUser = useAuthStore((s) => s.firebaseUser);
   const appUser = useAuthStore((s) => s.appUser);
   const isAdminOrOwner = appUser?.role === "admin" || appUser?.role === "owner";
 
@@ -38,6 +41,12 @@ export default function CeremonyPage() {
     goldenBootGoals: 0,
     goldenGloveWinner: "Pending Season End",
     goldenGloveSheets: 0,
+    playmakerWinner: "Pending Season End",
+    playmakerAssists: 0,
+    mvpWinner: "Pending Season End",
+    mvpRating: 0,
+    fairplayWinner: "Pending Season End",
+    championSquad: "Pending Season End",
     totsGk: "Top GK",
     totsDef1: "Top DEF 1",
     totsDef2: "Top DEF 2",
@@ -58,6 +67,12 @@ export default function CeremonyPage() {
   const [editBootGoals, setEditBootGoals] = useState(0);
   const [editGloveWinner, setEditGloveWinner] = useState("");
   const [editGloveSheets, setEditGloveSheets] = useState(0);
+  const [editPlaymaker, setEditPlaymaker] = useState("");
+  const [editAssists, setEditAssists] = useState(0);
+  const [editMvp, setEditMvp] = useState("");
+  const [editMvpRating, setEditMvpRating] = useState(0);
+  const [editFairplay, setEditFairplay] = useState("");
+  const [editChampionSquad, setEditChampionSquad] = useState("");
   const [editGk, setEditGk] = useState("");
   const [editDef1, setEditDef1] = useState("");
   const [editDef2, setEditDef2] = useState("");
@@ -71,9 +86,11 @@ export default function CeremonyPage() {
       try {
         const snap = await getDoc(doc(db, "system", "season"));
         let target = "";
+        let savedData: Partial<SeasonData> = {};
         if (snap.exists()) {
           const data = snap.data() as SeasonData;
           target = data.targetDate || "";
+          savedData = data;
         }
 
         // Query real top players from Firestore users collection
@@ -86,35 +103,45 @@ export default function CeremonyPage() {
                 name: data.name || data.displayName || "Player",
                 position: data.position || "MID",
                 goals: Number(data.goals) || 0,
+                assists: Number(data.assists) || 0,
                 saves: Number(data.saves) || 0,
                 rating: Number(data.rating) || 0,
               };
             })
-            .filter((u) => u.goals > 0 || u.saves > 0 || u.rating > 0);
+            .filter((u) => u.goals > 0 || u.saves > 0 || u.rating > 0 || u.assists > 0);
 
           if (allUsers.length > 0) {
-            // Compute Golden Boot
             const topScorer = [...allUsers].sort((a, b) => b.goals - a.goals)[0];
-            // Compute Golden Glove
             const topGk = [...allUsers].filter((u) => u.position === 'GK').sort((a, b) => b.saves - a.saves)[0] || allUsers[0];
-            // Compute TOTS
+            const topAssister = [...allUsers].sort((a, b) => b.assists - a.assists)[0] || allUsers[0];
+            const topMvp = [...allUsers].sort((a, b) => b.rating - a.rating)[0] || allUsers[0];
             const totsDef = allUsers.filter((u) => u.position === 'DEF').sort((a, b) => b.rating - a.rating);
             const totsMid = allUsers.filter((u) => u.position === 'MID').sort((a, b) => b.rating - a.rating)[0] || allUsers[0];
 
             setSeasonData({
               targetDate: target,
-              goldenBootWinner: topScorer.goals > 0 ? topScorer.name : "Pending Season End",
-              goldenBootGoals: topScorer.goals,
-              goldenGloveWinner: topGk.saves > 0 ? topGk.name : "Pending Season End",
-              goldenGloveSheets: topGk.saves,
-              totsGk: topGk.name,
-              totsDef1: totsDef[0]?.name || "Pending",
-              totsDef2: totsDef[1]?.name || "Pending",
-              totsMid: totsMid?.name || "Pending",
-              totsStr: topScorer.name,
+              goldenBootWinner: savedData.goldenBootWinner || (topScorer?.goals ? topScorer.name : "Pending Season End"),
+              goldenBootGoals: savedData.goldenBootGoals ?? (topScorer?.goals || 0),
+              goldenGloveWinner: savedData.goldenGloveWinner || (topGk?.saves ? topGk.name : "Pending Season End"),
+              goldenGloveSheets: savedData.goldenGloveSheets ?? (topGk?.saves || 0),
+              playmakerWinner: savedData.playmakerWinner || (topAssister?.assists ? topAssister.name : "Pending Season End"),
+              playmakerAssists: savedData.playmakerAssists ?? (topAssister?.assists || 0),
+              mvpWinner: savedData.mvpWinner || (topMvp?.rating ? topMvp.name : "Pending Season End"),
+              mvpRating: savedData.mvpRating ?? (topMvp?.rating || 0),
+              fairplayWinner: savedData.fairplayWinner || "Obour Eagles",
+              championSquad: savedData.championSquad || "Obour Eagles 🦅",
+              totsGk: savedData.totsGk || topGk?.name || "Top GK",
+              totsDef1: savedData.totsDef1 || totsDef[0]?.name || "Top DEF 1",
+              totsDef2: savedData.totsDef2 || totsDef[1]?.name || "Top DEF 2",
+              totsMid: savedData.totsMid || totsMid?.name || "Top MID",
+              totsStr: savedData.totsStr || topScorer?.name || "Top STR",
             });
+            setEditTargetDate(target);
+            return;
           }
         }
+        setSeasonData((prev) => ({ ...prev, targetDate: target }));
+        setEditTargetDate(target);
       } catch (err) {
         console.error(err);
       }
@@ -123,7 +150,7 @@ export default function CeremonyPage() {
   }, []);
 
   useEffect(() => {
-    if (!seasonData.targetDate) return;
+    if (!seasonData.targetDate || seasonData.targetDate.trim() === "") return;
     const interval = setInterval(() => {
       const target = new Date(seasonData.targetDate).getTime();
       const now = new Date().getTime();
@@ -154,6 +181,12 @@ export default function CeremonyPage() {
         goldenBootGoals: editBootGoals,
         goldenGloveWinner: editGloveWinner || seasonData.goldenGloveWinner || "",
         goldenGloveSheets: editGloveSheets,
+        playmakerWinner: editPlaymaker || seasonData.playmakerWinner || "",
+        playmakerAssists: editAssists,
+        mvpWinner: editMvp || seasonData.mvpWinner || "",
+        mvpRating: editMvpRating,
+        fairplayWinner: editFairplay || seasonData.fairplayWinner || "",
+        championSquad: editChampionSquad || seasonData.championSquad || "",
         totsGk: editGk || seasonData.totsGk || "",
         totsDef1: editDef1 || seasonData.totsDef1 || "",
         totsDef2: editDef2 || seasonData.totsDef2 || "",
@@ -236,112 +269,221 @@ export default function CeremonyPage() {
             ))}
           </motion.div>
         ) : (
-          <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-black border border-white/10 max-w-xl mx-auto text-center space-y-3">
-            <div className="flex items-center gap-2 text-amber-400 font-black text-base">
-              <Timer className="w-5 h-5" /> Season Status: Season in Progress
+          <div className="flex flex-col items-center justify-center p-8 rounded-3xl bg-black border border-white/10 max-w-2xl mx-auto text-center space-y-4 shadow-xl">
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mx-auto">
+              <Timer className="w-7 h-7" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              The official season finale date and awards gala countdown will be announced by stadium management once scheduled.
-            </p>
+            <div className="space-y-1">
+              <h2 className="text-xl font-black text-amber-400">Season Status: Season in Progress</h2>
+              <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+                The official season finale date, awards gala countdown, trophy honors (Golden Boot, Golden Glove, Playmaker, MVP, Fair Play, Champion Squad), and Team of the Season (TOTS) roster will be unveiled once scheduled by stadium management.
+              </p>
+            </div>
+            {isAdminOrOwner && (
+              <Button
+                onClick={() => setIsEditModalOpen(true)}
+                className="bg-amber-500 text-black hover:bg-amber-400 font-black rounded-2xl text-xs px-5 py-3 cursor-pointer glow-amber"
+              >
+                <Settings className="w-4 h-4 me-1.5" /> Schedule Season Finale Date
+              </Button>
+            )}
           </div>
         )}
 
-        {/* Awards Showcase */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-          
-          {/* Trophies Column */}
-          <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="group relative overflow-hidden rounded-3xl p-6 md:p-8 bg-black border border-amber-500/20 global-box"
-            >
-              <div className="flex items-start gap-6 relative z-10">
-                <div className="p-4 rounded-2xl bg-amber-500/20 text-amber-400">
-                  <Trophy className="w-10 h-10" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-amber-400">{t("goldenBoot", { defaultMessage: "Golden Boot" })}</h3>
-                  <p className="text-muted-foreground text-sm mt-1">{t("goldenBootDesc", { defaultMessage: "Awarded to the top goalscorer of the season." })}</p>
-                  <div className="mt-4 flex items-center gap-3">
-                    <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-xs">
-                      🏆 {seasonData.goldenBootWinner || "Pending Season End"}
-                    </span>
-                    {seasonData.goldenBootGoals ? (
-                      <span className="text-xs font-bold text-emerald-400">⚽ {seasonData.goldenBootGoals} Goals</span>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="group relative overflow-hidden rounded-3xl p-6 md:p-8 bg-black border border-white/10 global-box"
-            >
-              <div className="flex items-start gap-6 relative z-10">
-                <div className="p-4 rounded-2xl bg-slate-300/20 text-slate-300">
-                  <Shield className="w-10 h-10" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black text-slate-300">{t("goldenGlove", { defaultMessage: "Golden Glove" })}</h3>
-                  <p className="text-muted-foreground text-sm mt-1">{t("goldenGloveDesc", { defaultMessage: "Awarded to the best goalkeeper with the most clean sheets." })}</p>
-                  <div className="mt-4 flex items-center gap-3">
-                    <span className="px-3 py-1 rounded-full bg-slate-400/10 border border-slate-400/30 text-slate-300 font-bold text-xs">
-                      🧤 {seasonData.goldenGloveWinner || "Pending Season End"}
-                    </span>
-                    {seasonData.goldenGloveSheets ? (
-                      <span className="text-xs font-bold text-cyan-400">🛡️ {seasonData.goldenGloveSheets} Clean Sheets</span>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* TOTS Pitch */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-            className="rounded-3xl p-6 bg-black border border-white/10 global-box relative overflow-hidden"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <Users className="w-6 h-6 text-emerald-400" />
-              <h3 className="text-xl font-black text-foreground">{t("tots", { defaultMessage: "Team of the Season (5-a-side)" })}</h3>
+        {/* Awards Showcase — ONLY DISPLAYED WHEN A SEASON IS ACTIVE */}
+        {hasActiveTimer && (
+          <div className="space-y-8 mt-8">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl md:text-3xl font-black text-foreground flex items-center justify-center gap-2">
+                <Trophy className="w-7 h-7 text-amber-400" /> Season Trophy Gala & Awards Showcase
+              </h2>
+              <p className="text-xs text-muted-foreground">Official honors to be awarded at the grand ceremony</p>
             </div>
-            
-            <div className="relative w-full aspect-[3/4] bg-emerald-950/40 rounded-2xl border-2 border-emerald-500/30 overflow-hidden shadow-inner">
-              {/* Pitch Lines */}
-              <div className="absolute top-1/2 left-0 w-full h-[2px] bg-emerald-500/30" />
-              <div className="absolute top-1/2 left-1/2 w-16 h-16 rounded-full border-2 border-emerald-500/30 -translate-x-1/2 -translate-y-1/2" />
-              <div className="absolute top-0 left-1/2 w-32 h-24 border-2 border-t-0 border-emerald-500/30 -translate-x-1/2" />
-              <div className="absolute bottom-0 left-1/2 w-32 h-24 border-2 border-b-0 border-emerald-500/30 -translate-x-1/2" />
-              
-              {/* Players */}
-              {totsPlayers.map((player, idx) => (
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Trophies Column (6 Trophies) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* 1. Golden Boot */}
                 <motion.div
-                  key={idx}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.5 + idx * 0.1, type: "spring" }}
-                  className="absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-                  style={{ top: player.top, left: player.left }}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="group relative overflow-hidden rounded-3xl p-5 bg-black border border-amber-500/30 global-box space-y-3"
                 >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-amber-600 border-2 border-white shadow-lg flex items-center justify-center font-black text-black group-hover:scale-110 transition-transform">
-                    {player.position}
+                  <div className="p-3.5 rounded-2xl bg-amber-500/20 text-amber-400 w-fit">
+                    <Trophy className="w-7 h-7" />
                   </div>
-                  <div className="mt-2 px-2.5 py-1 bg-black/80 backdrop-blur-md rounded-lg text-xs font-bold whitespace-nowrap border border-white/10">
-                    {player.name}
+                  <div>
+                    <h3 className="text-lg font-black text-amber-400">Golden Boot</h3>
+                    <p className="text-muted-foreground text-xs mt-1">Top goalscorer of the season.</p>
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-[11px]">
+                        🏆 {seasonData.goldenBootWinner || "Pending"}
+                      </span>
+                      {seasonData.goldenBootGoals ? (
+                        <span className="text-[11px] font-bold text-emerald-400">⚽ {seasonData.goldenBootGoals} Goals</span>
+                      ) : null}
+                    </div>
                   </div>
                 </motion.div>
-              ))}
+
+                {/* 2. Golden Glove */}
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="group relative overflow-hidden rounded-3xl p-5 bg-black border border-slate-400/30 global-box space-y-3"
+                >
+                  <div className="p-3.5 rounded-2xl bg-slate-400/20 text-slate-300 w-fit">
+                    <Shield className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-300">Golden Glove</h3>
+                    <p className="text-muted-foreground text-xs mt-1">Best goalkeeper clean sheets.</p>
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-1 rounded-full bg-slate-400/10 border border-slate-400/30 text-slate-300 font-bold text-[11px]">
+                        🧤 {seasonData.goldenGloveWinner || "Pending"}
+                      </span>
+                      {seasonData.goldenGloveSheets ? (
+                        <span className="text-[11px] font-bold text-cyan-400">🛡️ {seasonData.goldenGloveSheets} Clean Sheets</span>
+                      ) : null}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* 3. Playmaker Award */}
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="group relative overflow-hidden rounded-3xl p-5 bg-black border border-emerald-500/30 global-box space-y-3"
+                >
+                  <div className="p-3.5 rounded-2xl bg-emerald-500/20 text-emerald-400 w-fit">
+                    <Award className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-emerald-400">Playmaker of the Season</h3>
+                    <p className="text-muted-foreground text-xs mt-1">Player with most goal assists.</p>
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-bold text-[11px]">
+                        🅰️ {seasonData.playmakerWinner || "Pending"}
+                      </span>
+                      {seasonData.playmakerAssists ? (
+                        <span className="text-[11px] font-bold text-emerald-400">🅰️ {seasonData.playmakerAssists} Assists</span>
+                      ) : null}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* 4. Season MVP */}
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="group relative overflow-hidden rounded-3xl p-5 bg-black border border-purple-500/30 global-box space-y-3"
+                >
+                  <div className="p-3.5 rounded-2xl bg-purple-500/20 text-purple-400 w-fit">
+                    <Star className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-purple-400">Season MVP Award</h3>
+                    <p className="text-muted-foreground text-xs mt-1">Highest average match rating.</p>
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 font-bold text-[11px]">
+                        ⭐ {seasonData.mvpWinner || "Pending"}
+                      </span>
+                      {seasonData.mvpRating ? (
+                        <span className="text-[11px] font-bold text-purple-400">⭐ {seasonData.mvpRating} Rating</span>
+                      ) : null}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* 5. Fair Play Award */}
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="group relative overflow-hidden rounded-3xl p-5 bg-black border border-rose-500/30 global-box space-y-3"
+                >
+                  <div className="p-3.5 rounded-2xl bg-rose-500/20 text-rose-400 w-fit">
+                    <HeartHandshake className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-rose-400">Fair Play & Conduct</h3>
+                    <p className="text-muted-foreground text-xs mt-1">Best sportsmanship & discipline.</p>
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-300 font-bold text-[11px]">
+                        🎖️ {seasonData.fairplayWinner || "Pending"}
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* 6. Champion Squad Cup */}
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.45 }}
+                  className="group relative overflow-hidden rounded-3xl p-5 bg-black border border-yellow-500/30 global-box space-y-3"
+                >
+                  <div className="p-3.5 rounded-2xl bg-yellow-500/20 text-yellow-400 w-fit">
+                    <Crown className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-yellow-400">Champion Squad Cup</h3>
+                    <p className="text-muted-foreground text-xs mt-1">Top ranked neighborhood team.</p>
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 font-bold text-[11px]">
+                        👑 {seasonData.championSquad || "Pending"}
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* TOTS Pitch Column */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+                className="rounded-3xl p-6 bg-black border border-white/10 global-box relative overflow-hidden flex flex-col justify-between"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <Users className="w-6 h-6 text-emerald-400" />
+                  <h3 className="text-xl font-black text-foreground">{t("tots", { defaultMessage: "Team of the Season (5-a-side)" })}</h3>
+                </div>
+                
+                <div className="relative w-full aspect-[3/4] bg-emerald-950/40 rounded-2xl border-2 border-emerald-500/30 overflow-hidden shadow-inner">
+                  {/* Pitch Lines */}
+                  <div className="absolute top-1/2 left-0 w-full h-[2px] bg-emerald-500/30" />
+                  <div className="absolute top-1/2 left-1/2 w-16 h-16 rounded-full border-2 border-emerald-500/30 -translate-x-1/2 -translate-y-1/2" />
+                  <div className="absolute top-0 left-1/2 w-32 h-24 border-2 border-t-0 border-emerald-500/30 -translate-x-1/2" />
+                  <div className="absolute bottom-0 left-1/2 w-32 h-24 border-2 border-b-0 border-emerald-500/30 -translate-x-1/2" />
+                  
+                  {/* Players */}
+                  {totsPlayers.map((player, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.5 + idx * 0.1, type: "spring" }}
+                      className="absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+                      style={{ top: player.top, left: player.left }}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-amber-600 border-2 border-white shadow-lg flex items-center justify-center font-black text-black group-hover:scale-110 transition-transform">
+                        {player.position}
+                      </div>
+                      <div className="mt-2 px-2.5 py-1 bg-black/80 backdrop-blur-md rounded-lg text-xs font-bold whitespace-nowrap border border-white/10">
+                        {player.name}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
             </div>
-          </motion.div>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Admin Edit Season Ceremony Modal */}
@@ -359,14 +501,15 @@ export default function CeremonyPage() {
 
             <form onSubmit={handleSaveSeasonSettings} className="space-y-4 text-xs font-bold">
               <div>
-                <label className="text-muted-foreground uppercase block mb-1">Season End Target Date (ISO Format)</label>
+                <label className="text-amber-400 uppercase block mb-1">Season End Target Date (ISO Format)</label>
                 <input
                   type="text"
                   value={editTargetDate}
                   onChange={(e) => setEditTargetDate(e.target.value)}
-                  placeholder="2026-08-31T20:00:00Z"
+                  placeholder="e.g. 2026-08-31T20:00:00Z (Leave empty if Season in Progress)"
                   className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground font-mono"
                 />
+                <span className="text-[10px] text-muted-foreground mt-1 block">Leave empty to keep Season in Progress without countdown.</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
@@ -408,6 +551,29 @@ export default function CeremonyPage() {
                     type="number"
                     value={editGloveSheets}
                     onChange={(e) => setEditGloveSheets(Number(e.target.value))}
+                    className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-emerald-400 uppercase block mb-1">Playmaker Winner</label>
+                  <input
+                    type="text"
+                    value={editPlaymaker}
+                    onChange={(e) => setEditPlaymaker(e.target.value)}
+                    placeholder="Assister Name"
+                    className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground"
+                  />
+                </div>
+                <div>
+                  <label className="text-purple-400 uppercase block mb-1">Season MVP</label>
+                  <input
+                    type="text"
+                    value={editMvp}
+                    onChange={(e) => setEditMvp(e.target.value)}
+                    placeholder="MVP Player Name"
                     className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground"
                   />
                 </div>
