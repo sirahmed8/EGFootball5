@@ -24,6 +24,7 @@ import {
   Camera,
   Shirt,
   Crown,
+  Activity,
 } from 'lucide-react';
 import Image from 'next/image';
 
