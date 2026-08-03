@@ -113,3 +113,36 @@ export function useDeleteUser() {
     },
   });
 }
+
+export function useToggleVipStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, isVip, days = 365 }: { userId: string; isVip: boolean; days?: number }) => {
+      const userRef = doc(db, 'users', userId);
+      const expiry = isVip ? Date.now() + days * 24 * 60 * 60 * 1000 : null;
+      await updateDoc(userRef, {
+        isVip,
+        vipExpiry: expiry,
+        vipTier: isVip ? 'Pitch Pass VIP (Granted by Owner)' : null,
+      });
+    },
+    onMutate: async ({ userId, isVip }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.users.all });
+      const previousUsers = queryClient.getQueryData<AppUser[]>(queryKeys.users.all);
+      queryClient.setQueryData<AppUser[]>(queryKeys.users.all, (old) => {
+        if (!old) return old;
+        return old.map(u => (u.uid === userId ? { ...u, isVip } : u));
+      });
+      return { previousUsers };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousUsers) {
+        queryClient.setQueryData(queryKeys.users.all, context.previousUsers);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+    },
+  });
+}

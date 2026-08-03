@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { useAuthStore } from '@/store/useAuthStore';
 import { User as AppUser } from '@/types';
-import { useUsers, useUpdateUserRole, useToggleBlacklist, useDeleteUser } from '@/hooks/useUserRoles';
+import { useUsers, useUpdateUserRole, useToggleBlacklist, useDeleteUser, useToggleVipStatus } from '@/hooks/useUserRoles';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
-import { User, Shield, ShieldAlert, Ban, CheckCircle, Mail, Trash2 } from 'lucide-react';
+import { User, Shield, ShieldAlert, Ban, CheckCircle, Mail, Trash2, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -22,6 +22,7 @@ export default function OwnerUsersPage() {
   const updateRoleMutation = useUpdateUserRole();
   const toggleBlacklistMutation = useToggleBlacklist();
   const deleteUserMutation = useDeleteUser();
+  const toggleVipMutation = useToggleVipStatus();
 
   const [userToDelete, setUserToDelete] = useState<{ id: string; name: string } | null>(null);
   const [failedImageUids, setFailedImageUids] = useState<Record<string, boolean>>({});
@@ -173,6 +174,27 @@ export default function OwnerUsersPage() {
                             <div className="flex items-center justify-end gap-1.5">
                               {user.role !== 'owner' && (
                                 <>
+                                  {/* VIP Manual Grant / Revoke Button */}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={async () => {
+                                      const nextVip = !user.isVip;
+                                      await toggleVipMutation.mutateAsync({ userId: user.uid, isVip: nextVip });
+                                      toast.success(nextVip ? `👑 Gifted Pitch Pass VIP to ${user.name}!` : `Revoked VIP from ${user.name}`);
+                                    }}
+                                    disabled={toggleVipMutation.isPending}
+                                    className={`h-8 px-2.5 text-xs font-bold rounded-xl border cursor-pointer ${
+                                      user.isVip
+                                        ? 'border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'
+                                        : 'border-white/20 text-muted-foreground hover:bg-white/10'
+                                    }`}
+                                    title={user.isVip ? 'Revoke VIP Status' : 'Grant Free VIP Pass'}
+                                  >
+                                    <Crown className="w-3.5 h-3.5 me-1 text-amber-400" />
+                                    {user.isVip ? 'VIP Active' : 'Give VIP 👑'}
+                                  </Button>
+
                                   {user.role === 'admin' ? (
                                     <Button
                                       variant="outline"
