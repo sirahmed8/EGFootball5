@@ -453,7 +453,7 @@ export async function cleanupExpiredBookings(pitchId: string) {
       });
     }));
 
-    return expiredCount;
+    return expiredBookings.length;
   } catch (error) {
     console.error('Error during cleanup of expired bookings:', error);
     return 0;
