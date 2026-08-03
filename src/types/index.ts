@@ -28,6 +28,10 @@ export interface User {
   goalsCount?: number;
   matchesPlayed?: number;
   mvpBadges?: number;
+  // VIP Subscription
+  isVip?: boolean;
+  vipExpiry?: number;
+  vipTier?: 'monthly' | 'quarterly' | 'yearly';
 }
 
 export interface Pitch {
