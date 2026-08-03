@@ -187,22 +187,28 @@ export default function OwnerDashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl font-black text-amber-400">
               <DollarSign className="w-5 h-5 text-amber-400" />
-              <span>تسوية مستحقات الملاعب (VIP Discount Subsidies)</span>
+              <span>{isArabic ? 'تسوية مستحقات الملاعب (VIP Discount Subsidies)' : 'Pitch Owner Reimbursements (VIP Subsidies)'}</span>
             </CardTitle>
             <CardDescription className="text-xs font-medium text-muted-foreground">
-              يخصم النظام 10% للمشتركين الـ VIP. المنصة تسدد هذا الفارق لصاحب الملعب لضمان حصوله على حق الحجز كاملاً.
+              {isArabic
+                ? 'يخصم النظام 10% للمشتركين الـ VIP. المنصة تسدد هذا الفارق لصاحب الملعب لضمان حصوله على حق الحجز كاملاً.'
+                : 'System grants 10% off to VIP players. The platform reimburses pitch owners to guarantee their full rental rate.'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
               <div>
-                <span className="text-[11px] font-bold text-muted-foreground block uppercase">إجمالي خصومات VIP</span>
+                <span className="text-[11px] font-bold text-muted-foreground block uppercase">
+                  {isArabic ? 'إجمالي خصومات VIP' : 'Total VIP Discounts Granted'}
+                </span>
                 <span className="text-2xl font-black text-amber-400 font-mono">
                   EGP {bookings.reduce((sum, b) => sum + (b.discountAmount || 0), 0).toLocaleString()}
                 </span>
               </div>
               <div>
-                <span className="text-[11px] font-bold text-muted-foreground block uppercase">مستحقات معلقة للملاعب</span>
+                <span className="text-[11px] font-bold text-muted-foreground block uppercase">
+                  {isArabic ? 'مستحقات معلقة للملاعب' : 'Pending Pitch Owner Reimbursements'}
+                </span>
                 <span className="text-2xl font-black text-emerald-400 font-mono">
                   EGP {bookings.filter(b => b.reimbursementStatus === 'pending' || (b.discountAmount && b.discountAmount > 0 && !b.reimbursementStatus)).reduce((sum, b) => sum + (b.discountAmount || 0), 0).toLocaleString()}
                 </span>
@@ -210,7 +216,9 @@ export default function OwnerDashboardPage() {
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-black text-foreground uppercase tracking-wider">تفاصيل المستحقات حسب الملعب:</h4>
+              <h4 className="text-xs font-black text-foreground uppercase tracking-wider">
+                {isArabic ? 'تفاصيل المستحقات حسب الملعب:' : 'Reimbursement Breakdown by Pitch:'}
+              </h4>
               {pitches.map((p) => {
                 const pitchBookings = bookings.filter((b) => b.pitchId === p.id && (b.discountAmount || 0) > 0);
                 const pendingBookings = pitchBookings.filter((b) => b.reimbursementStatus === 'pending' || !b.reimbursementStatus);
@@ -221,7 +229,7 @@ export default function OwnerDashboardPage() {
                     <div className="space-y-0.5">
                       <div className="font-bold text-foreground text-sm">{p.name}</div>
                       <div className="text-muted-foreground font-mono">
-                        {pitchBookings.length} حجوزات VIP • مستحق: <strong className="text-amber-400 font-mono">EGP {pendingSum}</strong>
+                        {pitchBookings.length} {isArabic ? 'حجوزات VIP' : 'VIP Bookings'} • {isArabic ? 'مستحق:' : 'Owed:'} <strong className="text-amber-400 font-mono">EGP {pendingSum}</strong>
                       </div>
                     </div>
                     {pendingSum > 0 ? (
@@ -231,23 +239,25 @@ export default function OwnerDashboardPage() {
                           const ids = pendingBookings.map((b) => b.id);
                           const { settlePitchReimbursements } = await import('@/lib/firebase/booking');
                           await settlePitchReimbursements(ids, appUser?.uid || 'owner');
-                          toast.success(`تم سداد ومقاصة مبلغ EGP ${pendingSum} لـ ${p.name} بنجاح! 💸`);
+                          toast.success(isArabic ? `تم سداد ومقاصة مبلغ EGP ${pendingSum} لـ ${p.name} بنجاح! 💸` : `Successfully settled EGP ${pendingSum} for ${p.name}! 💸`);
                           window.location.reload();
                         }}
                         className="bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-xl text-xs cursor-pointer shadow-md shrink-0"
                       >
-                        سداد المستحقات (EGP {pendingSum})
+                        {isArabic ? `سداد المستحقات (EGP ${pendingSum})` : `Settle Payout (EGP ${pendingSum})`}
                       </Button>
                     ) : (
                       <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black border border-emerald-500/30 shrink-0">
-                        خالي من الديون ✓
+                        {isArabic ? 'خالي من الديون ✓' : 'Settled ✓'}
                       </span>
                     )}
                   </div>
                 );
               })}
               {pitches.length === 0 && (
-                <div className="text-center text-muted-foreground text-xs py-4">لا توجد ملاعب مسجلة حالياً</div>
+                <div className="text-center text-muted-foreground text-xs py-4">
+                  {isArabic ? 'لا توجد ملاعب مسجلة حالياً' : 'No registered pitches found'}
+                </div>
               )}
             </div>
           </CardContent>

@@ -160,13 +160,22 @@ export default function SubscriptionPage() {
         <Card className="global-box border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 bg-black flex flex-col justify-between">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div>
-              <span className="text-xs font-black uppercase text-amber-400">{isArabic ? 'الاشتراك الشهري' : 'Monthly VIP Pass'}</span>
+              <span className="text-xs font-black uppercase text-amber-400">{isArabic ? 'الاشتراك الشهري الممتاز' : 'Monthly VIP Pass'}</span>
               <h2 className="text-2xl font-black text-foreground">Pitch Pass VIP</h2>
             </div>
             <div className="text-end">
-              <span className="text-3xl font-black text-amber-400 font-mono">199 EGP</span>
+              <span className="text-3xl font-black text-amber-400 font-mono">399 EGP</span>
               <span className="text-xs text-muted-foreground block font-bold">{isArabic ? '/ شهرياً' : '/ month'}</span>
             </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs space-y-1">
+            <span className="font-extrabold text-amber-400 block">{isArabic ? '💡 تسعير ذكي وعادل:' : '💡 Smart Value Pricing:'}</span>
+            <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
+              {isArabic
+                ? 'يشمل الاشتراك تغطية خصومات الملاعب (حتى 400 ج.م شهرياً) + تذكرة بطولات مجانية (150 ج.م) + مدرب AI بلا حدود.'
+                : 'Priced to cover average monthly 10% pitch discount subsidies (up to 400 EGP) + free 150 EGP tournament pass + unlimited AI coach.'}
+            </p>
           </div>
 
           <div className="space-y-3.5">
@@ -203,7 +212,7 @@ export default function SubscriptionPage() {
               className="w-full py-6 text-base font-black rounded-2xl bg-amber-500 text-black hover:bg-amber-400 cursor-pointer shadow-lg glow-amber mt-4"
             >
               <Crown className="w-5 h-5 me-2" />
-              {isArabic ? 'اشترك الآن بـ (199 ج.م / شهر)' : 'Subscribe Now (199 EGP / mo)'}
+              {isArabic ? 'اشترك الآن بـ (399 ج.م / شهر)' : 'Subscribe Now (399 EGP / mo)'}
             </Button>
           )}
         </Card>
@@ -232,7 +241,7 @@ export default function SubscriptionPage() {
               <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-1">
                 <div className="flex justify-between items-center font-black text-sm">
                   <span>Pitch Pass VIP (30 Days)</span>
-                  <span className="text-amber-400 font-mono">199 EGP</span>
+                  <span className="text-amber-400 font-mono">399 EGP</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {isArabic ? 'يتضمن: خصم 10% على الحجوزات + 20 دقيقة قفل + شارة تاج ذهبية + دخول بطولات مجاني + AI بلا حدود.' : 'Includes: 10% Off Bookings + 20-Min Lock Buffer + Golden VIP Badge + Free Tournaments + Unlimited AI Coach.'}
