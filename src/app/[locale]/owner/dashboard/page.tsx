@@ -17,6 +17,8 @@ import { toast } from 'sonner';
 export default function OwnerDashboardPage() {
   const router = useRouter();
   const { appUser, loading } = useAuthStore();
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
   const t = useTranslations('Owner');
 
   useEffect(() => {
