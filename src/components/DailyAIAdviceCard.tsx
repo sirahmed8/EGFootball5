@@ -9,11 +9,14 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCw, Lightbulb, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { isUserVip } from '@/lib/vip';
+import { Crown } from 'lucide-react';
+
 export function DailyAIAdviceCard() {
   const { appUser, firebaseUser } = useAuthStore();
   const locale = useLocale();
   const isArabic = locale === 'ar';
-  const t = useTranslations('AiAdvice');
+  const isVip = isUserVip(appUser);
 
   const userUid = firebaseUser?.uid || 'guest';
   const cooldownKey = `ai_advice_cooldown_${userUid}`;
@@ -39,7 +42,7 @@ export function DailyAIAdviceCard() {
 
   useEffect(() => {
     const updateCountdown = () => {
-      if (!cooldownEnd) {
+      if (!cooldownEnd || isVip) {
         setMinsLeft(0);
         return;
       }
@@ -50,14 +53,14 @@ export function DailyAIAdviceCard() {
     updateCountdown();
     const interval = setInterval(updateCountdown, 10000);
     return () => clearInterval(interval);
-  }, [cooldownEnd]);
+  }, [cooldownEnd, isVip]);
 
   const fetchAdvice = async () => {
-    if (minsLeft > 0) {
+    if (minsLeft > 0 && !isVip) {
       toast.error(
         isArabic
-          ? `يمكنك طلب نصيحة جديدة بعد ${minsLeft} دقيقة (تُتاح نصيحة واحدة كل 1 ساعة)`
-          : `Next AI Football Insight ready in ${minsLeft} minutes (1 insight per hour)`
+          ? `يمكنك طلب نصيحة جديدة بعد ${minsLeft} دقيقة (أو اشترك في Pitch Pass VIP للحصول على نصائح غير محدودة!)`
+          : `Next AI Football Insight ready in ${minsLeft} minutes (Upgrade to Pitch Pass VIP for unlimited insights!)`
       );
       return;
     }
@@ -104,16 +107,23 @@ export function DailyAIAdviceCard() {
             <Sparkles className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <CardTitle className="text-base font-bold text-foreground">
-              {isArabic ? '💡 نصائح AI الكروية والتكتيكية' : '💡 Hourly AI Football Insights'}
+            <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
+              <span>{isArabic ? '💡 نصائح AI الكروية والتكتيكية' : '💡 AI Football Insights'}</span>
+              {isVip && (
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black border border-amber-500/30 flex items-center gap-1">
+                  <Crown className="w-3 h-3" /> VIP Unlimited
+                </span>
+              )}
             </CardTitle>
             <p className="text-xs text-muted-foreground font-medium">
-              {isArabic ? 'نصيحة تكتيكية ومحفزة تكتيكية' : 'Personalized tactical & fitness advice'}
+              {isVip
+                ? (isArabic ? 'تحليل تكتيكي غير محدود مع مدرب AI الشخصي' : 'Unlimited tactical analysis with your AI Pro Coach')
+                : (isArabic ? 'نصيحة تكتيكية ومحفزة تكتيكية (واحدة كل ساعة)' : 'Personalized tactical & fitness advice (1/hr)')}
             </p>
           </div>
         </div>
 
-        {isLocked && (
+        {isLocked && !isVip && (
           <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1">
             <Clock className="w-3 h-3" /> {minsLeft}m cooldown
           </span>

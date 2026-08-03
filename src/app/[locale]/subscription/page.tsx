@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useLocale } from 'next-intl';
 import { isUserVip } from '@/lib/vip';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 
 export default function SubscriptionPage() {
@@ -23,7 +23,6 @@ export default function SubscriptionPage() {
 
   const [isSubscribeModalOpen, setIsSubscribeModalOpen] = React.useState(false);
   const [selectedMethod, setSelectedMethod] = React.useState<'vodafone' | 'instapay' | 'card'>('vodafone');
-  const [phoneOrAccount, setPhoneOrAccount] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
 
   const perks = [
@@ -48,9 +47,9 @@ export default function SubscriptionPage() {
       icon: '🏆',
     },
     {
-      title: isArabic ? 'ضمان استرداد فوري وتأمين الطقس' : 'Weather Protection & Priority Support',
-      desc: isArabic ? 'استرداد تلقائي للمحفظة 100% ودعم فني مخصص في حالة إلغاء المباراة بسبب الأمطار.' : 'Automatic 100% wallet credit refund & priority support if heavy rain cancels your slot.',
-      icon: '🛡️',
+      title: isArabic ? 'تحليل تكتيكي غير محدود مع مدرب AI' : 'Unlimited AI Coach Tactical Insights',
+      desc: isArabic ? 'استشارات تكتيكية وتحليل أداء لا محدود بدون مهلة انتظار.' : 'Unlimited real-time tactical & fitness advice without hourly cooldowns.',
+      icon: '🤖',
     },
   ];
 
@@ -102,28 +101,37 @@ export default function SubscriptionPage() {
         {isOwner && (
           <div className="mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-400 text-xs font-black max-w-md mx-auto flex items-center justify-center gap-2 shadow-lg">
             <Crown className="w-5 h-5 text-amber-400" />
-            <span>{isArabic ? '👑 بصفتك المالك: جميع ممزيا VIP مفعلة لديك دائماً ومجاناً!' : '👑 Owner VIP Status: All 5 VIP Features Permanently Unlocked!'}</span>
+            <span>{isArabic ? '👑 بصفتك المالِك: جميع مزايا Pitch Pass VIP مفعّلة بحسابك دائماً ومجاناً!' : '👑 Owner VIP Status: All Pitch Pass VIP Features Permanently Unlocked!'}</span>
           </div>
         )}
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      {/* Real Payment Gateway Prepared Notice */}
+      <div className="p-4 rounded-2xl bg-white/5 border border-amber-500/30 flex items-center gap-3 shadow-md text-xs text-muted-foreground">
+        <Lock className="w-5 h-5 text-amber-400 shrink-0" />
+        <div>
+          <span className="font-bold text-foreground block">{isArabic ? '⚡ بوابة الدفع الإلكتروني جاهزة ومُجهزة' : '⚡ Real Payment Gateway Integration Ready'}</span>
+          <span>{isArabic ? 'بوابة Paymob وكروت البنك مجهزة للتفعيل المباشر. حتى ذلك الحين، جميع المستخدمين في الخطة المجانية، ويمكنك الترقية فورياً عبر فودافون كاش أو إنستا باي.' : 'Paymob & Card sandbox endpoints are prepared. All users start on Free Plan by default. Instant activation is supported via InstaPay & Vodafone Cash.'}</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
         {/* 3D Animated VIP Pass Card */}
         <motion.div
           initial={{ rotateY: -10, rotateX: 5 }}
           whileHover={{ rotateY: 0, rotateX: 0, scale: 1.02 }}
-          className="global-box border-2 border-amber-500/50 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden bg-black glow-primary-sm"
+          className="global-box border-2 border-amber-500/50 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden bg-black glow-primary-sm flex flex-col justify-between"
         >
           <div className="flex justify-between items-start">
             <div>
               <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase">EGFootball5 VIP Pass</span>
-              <h3 className="text-2xl font-black text-foreground mt-1">PITCH PASS PREMIUM</h3>
+              <h3 className="text-2xl font-black text-foreground mt-1">PITCH PASS VIP ELITE</h3>
             </div>
             <Sparkles className="w-8 h-8 text-amber-400 animate-pulse" />
           </div>
 
-          <div className="space-y-1">
-            <div className="text-xs font-mono text-amber-400/60">{isArabic ? 'حالة العضوية' : 'CARD STATUS'}</div>
+          <div className="space-y-2 my-4">
+            <div className="text-xs font-mono text-amber-400/60">{isArabic ? 'حالة العضوية الحالية' : 'CURRENT MEMBERSHIP STATUS'}</div>
             <div className="text-lg md:text-xl font-black font-mono tracking-widest text-amber-400 flex items-center gap-2">
               {isVip ? (
                 <>
@@ -131,29 +139,29 @@ export default function SubscriptionPage() {
                   <span>{isArabic ? 'عضوية VIP مفعلة ⚡' : 'ACTIVE VIP PASS ⚡'}</span>
                 </>
               ) : (
-                <span>INACTIVE (REGULAR)</span>
+                <span className="text-muted-foreground">{isArabic ? 'الخطة المجانية (FREE STARTER)' : 'FREE STARTER PLAN'}</span>
               )}
             </div>
           </div>
 
           <div className="flex justify-between items-end border-t border-amber-500/20 pt-4">
             <div>
-              <span className="text-[10px] text-muted-foreground uppercase font-bold block">{isArabic ? 'مالك البطاقة' : 'Cardholder'}</span>
+              <span className="text-[10px] text-muted-foreground uppercase font-bold block">{isArabic ? 'صاحب الحساب' : 'Cardholder'}</span>
               <span className="text-xs font-black text-amber-400">{appUser?.name || firebaseUser?.displayName || (isArabic ? 'لاعب كيك أوف' : 'Player')}</span>
             </div>
             <div className="text-end">
               <span className="text-[10px] text-muted-foreground uppercase font-bold block">{isArabic ? 'الصلاحية' : 'Valid Across'}</span>
-              <span className="text-xs font-bold text-foreground">{isArabic ? 'جميع ملاعب المنصة' : 'All Partner Turfs'}</span>
+              <span className="text-xs font-bold text-foreground">{isArabic ? 'جميع ملاعب العبور والقاهرة' : 'All Partner Arenas'}</span>
             </div>
           </div>
         </motion.div>
 
         {/* Subscription Plan & Perks */}
-        <Card className="global-box border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 bg-black">
+        <Card className="global-box border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 bg-black flex flex-col justify-between">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div>
-              <span className="text-xs font-black uppercase text-amber-400">{isArabic ? 'الاشتراك الشهري' : 'Monthly Membership'}</span>
-              <h2 className="text-2xl font-black text-foreground">Pitch Pass Premium</h2>
+              <span className="text-xs font-black uppercase text-amber-400">{isArabic ? 'الاشتراك الشهري' : 'Monthly VIP Pass'}</span>
+              <h2 className="text-2xl font-black text-foreground">Pitch Pass VIP</h2>
             </div>
             <div className="text-end">
               <span className="text-3xl font-black text-amber-400 font-mono">199 EGP</span>
@@ -161,7 +169,7 @@ export default function SubscriptionPage() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {perks.map((perk, idx) => (
               <div key={idx} className="flex items-start gap-3">
                 <span className="text-lg shrink-0">{perk.icon}</span>
@@ -174,12 +182,12 @@ export default function SubscriptionPage() {
           </div>
 
           {isVip ? (
-            <div className="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-center space-y-1">
+            <div className="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-center space-y-1 mt-4">
               <div className="text-emerald-400 font-black text-sm flex items-center justify-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4" /> {isArabic ? 'أنت مشترك بالفعل في Pitch Pass VIP!' : 'You are currently a Pitch Pass VIP member!'}
               </div>
               <p className="text-xs text-muted-foreground">
-                {isArabic ? 'جميع المزايا الخمس مفعلة بحسابك تلقائياً عند الحجز والتصفح.' : 'All 5 VIP perks are active on your account automatically.'}
+                {isArabic ? 'جميع المزايا مفعّلة بحسابك تلقائياً.' : 'All VIP perks are active on your account automatically.'}
               </p>
             </div>
           ) : (
@@ -192,10 +200,10 @@ export default function SubscriptionPage() {
                 setIsSubscribeModalOpen(true);
               }}
               size="lg"
-              className="w-full py-6 text-base font-black rounded-2xl bg-amber-500 text-black hover:bg-amber-400 cursor-pointer shadow-lg glow-amber"
+              className="w-full py-6 text-base font-black rounded-2xl bg-amber-500 text-black hover:bg-amber-400 cursor-pointer shadow-lg glow-amber mt-4"
             >
               <Crown className="w-5 h-5 me-2" />
-              {isArabic ? 'اشترك الآن (199 ج.م / شهر)' : 'Subscribe Now (199 EGP / mo)'}
+              {isArabic ? 'اشترك الآن بـ (199 ج.م / شهر)' : 'Subscribe Now (199 EGP / mo)'}
             </Button>
           )}
         </Card>
@@ -227,7 +235,7 @@ export default function SubscriptionPage() {
                   <span className="text-amber-400 font-mono">199 EGP</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {isArabic ? 'يتضمن: خصم 10% على الحجوزات + 20 دقيقة قفل + شارة تاج ذهبية + دخول بطولات مجاني.' : 'Includes: 10% Off Bookings + 20-Min Lock Buffer + Golden VIP Badge + Free Tournaments.'}
+                  {isArabic ? 'يتضمن: خصم 10% على الحجوزات + 20 دقيقة قفل + شارة تاج ذهبية + دخول بطولات مجاني + AI بلا حدود.' : 'Includes: 10% Off Bookings + 20-Min Lock Buffer + Golden VIP Badge + Free Tournaments + Unlimited AI Coach.'}
                 </p>
               </div>
 
@@ -276,6 +284,13 @@ export default function SubscriptionPage() {
                   <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs space-y-1">
                     <span className="text-muted-foreground block">{isArabic ? 'عنوان إنستا باي (IPA):' : 'InstaPay IPA:'}</span>
                     <span className="font-mono font-black text-emerald-400 text-sm block">egfootball5@instapay</span>
+                  </div>
+                )}
+
+                {selectedMethod === 'card' && (
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs space-y-1">
+                    <span className="text-muted-foreground block">{isArabic ? 'بوابة Paymob / الفيزا والماستركارد (بيئة تجريبية جاهزة):' : 'Paymob / Visa & Mastercard Sandbox:'}</span>
+                    <span className="font-mono font-black text-amber-400 text-xs block">Ready for API keys — Click Activate for instant sandbox activation</span>
                   </div>
                 )}
 
