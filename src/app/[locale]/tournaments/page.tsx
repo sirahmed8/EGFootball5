@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
+import { isUserVip } from '@/lib/vip';
 
 interface TournamentMatch {
   team1: string;
@@ -77,15 +78,21 @@ export default function TournamentsPage() {
       return;
     }
     setRegistering(true);
+    const isVip = isUserVip(appUser);
     try {
       await addDoc(collection(db, 'tournament_registrations'), {
         tournamentId: tournament.id,
         tournamentName: tournament.name,
         userId: firebaseUser.uid,
         playerName: appUser?.name || firebaseUser.displayName || (isArabic ? 'لاعب' : 'Player'),
+        isVipPass: isVip,
         registeredAt: serverTimestamp(),
       });
-      toast.success(isArabic ? `تم تسجيل فريقك في ${tournament.name}! 🏆` : `Squad registered for ${tournament.name}! 🏆`);
+      if (isVip) {
+        toast.success(isArabic ? `تم تفعيل قسيمة VIP المجانية وتسجيل فريقك في ${tournament.name}! 👑🏆` : `Free VIP Cup Voucher applied! Squad registered for ${tournament.name}! 👑🏆`);
+      } else {
+        toast.success(isArabic ? `تم تسجيل فريقك في ${tournament.name}! 🏆` : `Squad registered for ${tournament.name}! 🏆`);
+      }
     } catch (err) {
       console.error(err);
       toast.error(isArabic ? 'فشل التسجيل. يرجى المحاولة مرة أخرى.' : 'Registration failed. Please try again.');

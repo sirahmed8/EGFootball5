@@ -19,7 +19,8 @@ import { User as AppUser, Booking, Pitch } from '@/types';
 import { cancelBooking } from '@/lib/firebase/booking';
 import { ProfilePageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { DailyAIAdviceCard } from '@/components/DailyAIAdviceCard';
-import { Trophy, Star, Shield, Award, Zap, Heart, MapPin, ArrowRight } from 'lucide-react';
+import { Trophy, Star, Shield, Award, Zap, Heart, MapPin, ArrowRight, Crown } from 'lucide-react';
+import { isUserVip } from '@/lib/vip';
 
 function BookingCountdown({ lockedUntil }: { lockedUntil: number }) {
   const [timeLeft, setTimeLeft] = useState(0);
@@ -347,9 +348,18 @@ export default function ProfilePage() {
 
   return (
     <div className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-black">
-      <div>
-        <h1 className="text-4xl font-black text-foreground tracking-tight">{t('title')}</h1>
-        <p className="text-muted-foreground mt-2 font-medium">{t('description')}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-black text-foreground tracking-tight flex items-center gap-3">
+            <span>{t('title')}</span>
+            {isUserVip(appUser) && (
+              <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-black inline-flex items-center gap-1.5 glow-amber">
+                <Crown className="w-4 h-4 text-amber-400 animate-pulse" /> Pitch Pass VIP
+              </span>
+            )}
+          </h1>
+          <p className="text-muted-foreground mt-2 font-medium">{t('description')}</p>
+        </div>
       </div>
 
       <DailyAIAdviceCard />

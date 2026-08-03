@@ -21,6 +21,7 @@ interface PlayerRank {
   saves: number;
   rating: number;
   matchesPlayed: number;
+  isVip?: boolean;
 }
 
 /** Returns position-specific badge Tailwind classes */
@@ -85,6 +86,7 @@ export default function LeaderboardPage() {
                 saves,
                 rating,
                 matchesPlayed,
+                isVip: Boolean(data.isVip || data.role === 'owner' || data.role === 'admin'),
               };
             })
             // Only include players who have actually played / have stats
@@ -271,7 +273,10 @@ export default function LeaderboardPage() {
                         <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-white/5 shrink-0">
                           <PlayerAvatar src={p.avatar} name={p.name} size={32} />
                         </div>
-                        <span className="font-bold text-foreground">{p.name}</span>
+                        <span className="font-bold text-foreground flex items-center gap-1.5">
+                          <span>{p.name}</span>
+                          {p.isVip && <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                        </span>
                       </div>
                     </td>
                     <td className="py-4 text-center">

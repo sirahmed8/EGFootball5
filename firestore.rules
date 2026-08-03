@@ -36,7 +36,7 @@ service cloud.firestore {
       allow read: if isAuth() && (request.auth.uid == userId || isAdmin());
       allow create: if isAuth() && request.auth.uid == userId && request.resource.data.role == 'player' && request.resource.data.isBlacklisted == false;
       allow update: if isAuth() && (
-        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBlacklisted'])) ||
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBlacklisted', 'isVip', 'vipExpiry'])) ||
         isAdmin()
       );
       allow delete: if isAdmin();

@@ -19,7 +19,9 @@ import {
   X,
   ShieldCheck,
   ChevronDown,
+  Crown,
 } from 'lucide-react';
+import { isUserVip } from '@/lib/vip';
 import Image from 'next/image';
 
 export function NavbarSettingsMenu() {
@@ -114,8 +116,9 @@ export function NavbarSettingsMenu() {
           </div>
         )}
 
-        <span className="hidden lg:inline text-xs font-bold truncate max-w-[110px]">
+        <span className="hidden lg:inline text-xs font-bold truncate max-w-[110px] flex items-center gap-1">
           {appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'حسابي' : 'Account')}
+          {isUserVip(appUser) && <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
         </span>
         <Settings className="w-4 h-4 text-muted-foreground hover:text-primary transition-colors shrink-0" />
       </button>
@@ -147,8 +150,13 @@ export function NavbarSettingsMenu() {
                   </div>
                 )}
                 <div className="overflow-hidden space-y-0.5">
-                  <p className="font-black text-sm text-foreground truncate">
-                    {appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'لاعب كريم' : 'Player')}
+                  <p className="font-black text-sm text-foreground truncate flex items-center gap-1.5">
+                    <span>{appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'لاعب كريم' : 'Player')}</span>
+                    {isUserVip(appUser) && (
+                      <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-black inline-flex items-center gap-0.5">
+                        <Crown className="w-3 h-3 text-amber-400" /> VIP
+                      </span>
+                    )}
                   </p>
                   <p className="text-[11px] text-muted-foreground truncate">
                     {firebaseUser?.email || (locale === 'ar' ? 'مسجل كزائر' : 'Guest Player')}

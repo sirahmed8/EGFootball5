@@ -27,7 +27,9 @@ import {
   Phone,
   Clock,
   Coffee,
+  Crown,
 } from 'lucide-react';
+import { isUserVip, calculateVipPrice } from '@/lib/vip';
 import Image from 'next/image';
 
 const BLOCKS = Array.from({ length: (CLOSING_HOUR - OPENING_HOUR) * 2 }, (_, i) => OPENING_HOUR + i * 0.5);
@@ -275,7 +277,13 @@ function BookContent() {
     }
     if (!pitch || !date || !selectedRange) return;
 
-    const { duration, totalAmount, depositAmount } = getBookingDetails();
+    const { duration, totalAmount } = getBookingDetails();
+    const appUser = useAuthStore.getState().appUser;
+    const isVip = isUserVip(appUser);
+    const { finalPrice } = calculateVipPrice(totalAmount, isVip);
+    const effectiveTotal = isVip ? finalPrice : totalAmount;
+    const effectiveDeposit = Math.round(effectiveTotal / 2);
+
     const formattedDate = format(date, 'yyyy-MM-dd');
 
     setLoadingLock(selectedRange.start);
@@ -286,8 +294,8 @@ function BookContent() {
         formattedDate,
         selectedRange.start,
         duration,
-        totalAmount,
-        depositAmount,
+        effectiveTotal,
+        effectiveDeposit,
         bookingType,
         numPeople
       );

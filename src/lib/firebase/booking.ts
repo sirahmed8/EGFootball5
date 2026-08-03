@@ -99,8 +99,14 @@ export async function lockSlot(
       }
     }
 
-    // 3. Write updates
-    const lockedUntil = now + 10 * 60 * 1000; // 10 minutes lock
+    // 3. Check VIP status for extended lock buffer (20 min for VIP/Owner vs 15 min regular)
+    const isVipUser = userSnap.exists() && (
+      userSnap.data()?.role === 'owner' ||
+      userSnap.data()?.role === 'admin' ||
+      userSnap.data()?.isVip === true
+    );
+    const lockBufferMs = isVipUser ? 20 * 60 * 1000 : 15 * 60 * 1000;
+    const lockedUntil = now + lockBufferMs;
 
     for (const block of blocks) {
       bookedSlots[block.toString()] = {
