@@ -249,17 +249,8 @@ export default function LoginPage() {
               </Button>
             </motion.div>
 
-            <div className="flex items-center gap-3 px-2">
-              <div className="flex-1 h-px bg-white/10" />
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Legal</span>
-              <div className="flex-1 h-px bg-white/10" />
-            </div>
-
-            <p className="text-center text-[11px] font-medium text-muted-foreground leading-relaxed px-4">
-              By continuing, you agree to 11Players Platform{' '}
-              <a href="/terms" className="text-primary hover:underline font-bold">Terms of Service</a>
-              {' '}and{' '}
-              <a href="/privacy" className="text-primary hover:underline font-bold">Privacy Policy</a>.
+            <p className="text-center text-xs font-medium text-muted-foreground leading-relaxed px-4">
+              By continuing, you agree to EGFootball5 Platform <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
             </p>
           </CardContent>
         </Card>
