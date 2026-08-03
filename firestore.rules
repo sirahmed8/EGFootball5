@@ -185,10 +185,23 @@ service cloud.firestore {
     }
 
     // Squad Arena Challenges collection
-    match /challenges/{challengeId} {
+    match /squad_challenges/{challengeId} {
       allow read: if true;
       allow create: if isAuth() && isNotBlacklisted();
       allow update: if isAuth();
+      allow delete: if isAdmin();
+    }
+
+    // Tournaments collection (admin-managed)
+    match /tournaments/{tournamentId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Tournament Registrations collection
+    match /tournament_registrations/{regId} {
+      allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuth() && isNotBlacklisted();
       allow delete: if isAdmin();
     }
   }

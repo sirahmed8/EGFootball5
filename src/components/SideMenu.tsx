@@ -174,7 +174,6 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
                 >
                   <span className={`flex-shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-black' : 'text-primary'}`}>{link.icon}</span>
                   <span className="truncate flex-1">{link.label}</span>
-                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-black animate-pulse shrink-0" />}
                 </button>
               );
             })}
