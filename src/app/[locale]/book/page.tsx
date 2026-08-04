@@ -599,7 +599,7 @@ function BookContent() {
                       key={block}
                       disabled={disabled}
                       onClick={() => handleSlotClick(block)}
-                      className={`p-4 rounded-2xl text-center text-xs font-bold border transition-all ${styleClass} ${cursorClass}`}
+                      className={`p-4 rounded-2xl text-center text-xs font-bold border transition-all duration-200 ease-out active:scale-95 ${styleClass} ${cursorClass}`}
                     >
                       {formatTime(block)}
                     </button>

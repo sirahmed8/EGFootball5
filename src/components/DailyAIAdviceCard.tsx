@@ -8,9 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCw, Lightbulb, Clock } from 'lucide-react';
 import { toast } from 'sonner';
-
 import { isUserVip } from '@/lib/vip';
 import { Crown } from 'lucide-react';
+import { FormattedMarkdownText } from '@/components/FormattedMarkdownText';
 
 export function DailyAIAdviceCard() {
   const { appUser, firebaseUser } = useAuthStore();
@@ -22,20 +22,18 @@ export function DailyAIAdviceCard() {
   const cooldownKey = `ai_advice_cooldown_${userUid}`;
   const textKey = `ai_advice_text_${userUid}`;
 
-  const [advice, setAdvice] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem(textKey);
-    }
-    return null;
-  });
+  // Fix #29: Move localStorage reads into useEffect to avoid SSR hydration mismatch
+  const [advice, setAdvice] = useState<string | null>(null);
+  const [cooldownEnd, setCooldownEnd] = useState<number>(0);
+  const [mounted, setMounted] = useState(false);
 
-  const [cooldownEnd, setCooldownEnd] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(cooldownKey);
-      return stored ? Number(stored) : 0;
-    }
-    return 0;
-  });
+  useEffect(() => {
+    // Read from localStorage only after mount (client-side)
+    setAdvice(localStorage.getItem(textKey));
+    const stored = localStorage.getItem(cooldownKey);
+    if (stored) setCooldownEnd(Number(stored));
+    setMounted(true);
+  }, [textKey, cooldownKey]);
 
   const [minsLeft, setMinsLeft] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
@@ -81,10 +79,8 @@ export function DailyAIAdviceCard() {
       setAdvice(result.text);
       setCooldownEnd(nextCooldown);
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(cooldownKey, nextCooldown.toString());
-        localStorage.setItem(textKey, result.text);
-      }
+      localStorage.setItem(cooldownKey, nextCooldown.toString());
+      localStorage.setItem(textKey, result.text);
 
       toast.success(isArabic ? 'تم توليد النصيحة التكتيكية بنجاح! ⚽' : 'AI Football Insight generated successfully! ⚽');
     } catch (err: unknown) {
@@ -96,6 +92,9 @@ export function DailyAIAdviceCard() {
   };
 
   const isLocked = minsLeft > 0;
+
+  // Don't render locked state server-side to avoid hydration mismatch
+  if (!mounted) return null;
 
   return (
     <Card className="global-box global-outline-glow relative overflow-hidden rounded-3xl p-1 bg-black">
@@ -134,7 +133,8 @@ export function DailyAIAdviceCard() {
         {advice && (
           <div className="p-3.5 rounded-xl bg-black border border-emerald-500/30 text-sm text-foreground leading-relaxed flex items-start gap-2.5 shadow-inner">
             <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-            <p className="flex-1 font-medium">{advice}</p>
+            {/* Fix #9: Render advice with FormattedMarkdownText so **bold**, bullets etc. display properly */}
+            <FormattedMarkdownText content={advice} className="flex-1 font-medium" />
           </div>
         )}
 

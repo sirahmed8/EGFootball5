@@ -8,7 +8,7 @@ import { User as AppUser } from '@/types';
 export function isUserVip(appUser: AppUser | null | undefined): boolean {
   if (!appUser) return false;
   if (appUser.role === 'owner' || appUser.role === 'admin') return true;
-  if (appUser.isVip && appUser.vipExpiry && appUser.vipExpiry < Date.now()) return false;
+  if (appUser.isVip && appUser.vipExpiry != null && appUser.vipExpiry < Date.now()) return false;
   return Boolean(appUser.isVip);
 }
 

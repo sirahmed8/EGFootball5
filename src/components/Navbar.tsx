@@ -3,6 +3,7 @@
 import { Link } from '@/i18n/routing';
 import { useAuthStore } from '@/store/useAuthStore';
 import { NotificationBell } from './NotificationBell';
+import PresenceIndicator from './PresenceIndicator';
 import { SideMenu } from './SideMenu';
 import { NavbarSettingsMenu } from './NavbarSettingsMenu';
 import Image from 'next/image';
@@ -22,6 +23,7 @@ export function Navbar() {
 
       {/* Controls & Menus */}
       <div className="flex items-center gap-2 md:gap-3">
+        <PresenceIndicator />
         {firebaseUser && <NotificationBell />}
         <NavbarSettingsMenu />
         <SideMenu />

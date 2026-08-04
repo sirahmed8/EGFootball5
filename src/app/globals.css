@@ -124,16 +124,14 @@
   }
   html {
     @apply font-sans bg-background text-foreground;
-    background-color: #000000 !important;
     color-scheme: dark;
   }
-  html:not(.dark) {
-    background-color: #000000 !important;
+  html.dark {
+    background-color: #000000;
     color-scheme: dark;
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #000000 !important;
   }
 }
 
@@ -170,6 +168,7 @@ html.theme-transitioning *::after {
 ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 4px;
+  transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -187,7 +186,7 @@ html.theme-transitioning *::after {
 }
 
 .animate-shimmer {
-  animation: shimmer 2s infinite ease-in-out;
+  animation: shimmer 1.6s infinite linear;
 }
 
 @keyframes marquee {
@@ -196,8 +195,8 @@ html.theme-transitioning *::after {
 }
 
 @keyframes pulseGlow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.06); }
 }
 
 .animate-marquee {
@@ -205,12 +204,9 @@ html.theme-transitioning *::after {
   animation: marquee 25s linear infinite;
 }
 
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
-
 .animate-pulse-glow {
-  animation: pulseGlow 4s infinite ease-in-out;
+  animation: pulseGlow 6s infinite ease-in-out;
+  will-change: opacity, transform;
 }
 
 .stadium-glass {
@@ -244,8 +240,8 @@ input[type="date"]:not(.bg-transparent):not(.border-0):not(.border-none):focus,
 input[type="time"]:not(.bg-transparent):not(.border-0):not(.border-none):focus,
 textarea:not(.bg-transparent):not(.border-0):not(.border-none):focus,
 select:not(.bg-transparent):not(.border-0):not(.border-none):focus {
-  border-color: rgba(16, 185, 129, 0.7);
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+  border-color: var(--ring);
+  box-shadow: 0 0 15px color-mix(in oklch, var(--primary) 30%, transparent);
   outline: none;
 }
 .global-outline-glow {
@@ -261,7 +257,6 @@ select:not(.bg-transparent):not(.border-0):not(.border-none):focus {
 }
 
 .global-box:hover, .global-card:hover {
-  transform: translateY(-2px) scale(1.01);
   border-color: rgba(16, 185, 129, 0.45);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(16, 185, 129, 0.2);
 }
@@ -319,6 +314,10 @@ select:not(.bg-transparent):not(.border-0):not(.border-none):focus {
   box-shadow: 0 0 25px rgba(16, 185, 129, 0.45);
 }
 
+.glow-primary-sm {
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
 .glow-cyan {
   box-shadow: 0 0 25px rgba(6, 182, 212, 0.45);
 }
@@ -326,13 +325,17 @@ select:not(.bg-transparent):not(.border-0):not(.border-none):focus {
 .text-gradient-primary {
   background: linear-gradient(135deg, #10B981 0%, #34D399 50%, #06B6D4 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: #10B981; /* fallback */
 }
 
 .text-gradient-gold {
   background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 50%, #FEF08A 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: #F59E0B; /* fallback */
 }
 
 .pitch-grass-bg {

@@ -3,6 +3,8 @@
 import * as React from 'react';
 import { usePathname } from '@/i18n/routing';
 import { useAuthStore } from '@/store/useAuthStore';
+import { AnimatePresence, motion } from 'framer-motion';
+import { pageVariants } from '@/lib/animations';
 
 export function MainContainer({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,7 +22,19 @@ export function MainContainer({ children }: { children: React.ReactNode }) {
 
   return (
     <main className={`min-h-screen flex flex-col pt-16 md:pt-16 transition-all duration-300 ${hasSidebar ? 'md:ms-64' : ''}`}>
-      {children}
+      {/* Fix #12: AnimatePresence mode="wait" enables exit animations on page navigation */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={pathname}
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="flex-1 flex flex-col"
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
     </main>
   );
 }

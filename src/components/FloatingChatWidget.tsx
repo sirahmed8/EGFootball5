@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useLocale, useTranslations } from 'next-intl';
 import { generateAIResponse } from '@/lib/aiService';
+import { FormattedMarkdownText } from '@/components/FormattedMarkdownText';
 import { db } from '@/lib/firebase/config';
 import {
   collection,
@@ -114,62 +115,6 @@ type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 const EMOJI_LIST = ['❤️', '🔥', '👏', '😂', '👍', '⚽', '🏆', '🎯', '🚀', '💯'];
 const SLOW_MODE_SECONDS = 5;
 
-// Helper: Formatted Markdown Text Component (Renders **bold**, *italics*, line breaks & lists)
-function FormattedMarkdownText({ content, className = '' }: { content: string; className?: string }) {
-  if (!content) return null;
-  const lines = content.split('\n');
-
-  return (
-    <div className={`space-y-1 ${className}`}>
-      {lines.map((line, lineIdx) => {
-        if (!line.trim()) return <div key={lineIdx} className="h-1" />;
-
-        // Parse **bold**, *italics*, and `code`
-        const parts = line.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`)/g);
-
-        const renderedParts = parts.map((part, pIdx) => {
-          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
-            return (
-              <strong key={pIdx} className="font-black text-foreground">
-                {part.slice(2, -2)}
-              </strong>
-            );
-          }
-          if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
-            return (
-              <em key={pIdx} className="italic">
-                {part.slice(1, -1)}
-              </em>
-            );
-          }
-          if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
-            return (
-              <code key={pIdx} className="bg-black/30 text-emerald-300 px-1 py-0.5 rounded font-mono text-[11px]">
-                {part.slice(1, -1)}
-              </code>
-            );
-          }
-          return part;
-        });
-
-        if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
-          return (
-            <div key={lineIdx} className="flex items-start gap-1.5 ms-2">
-              <span className="text-emerald-400 font-bold shrink-0">•</span>
-              <span>{renderedParts}</span>
-            </div>
-          );
-        }
-
-        return (
-          <p key={lineIdx} className="leading-relaxed">
-            {renderedParts}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
 
 export function FloatingChatWidget() {
   const router = useRouter();
@@ -195,6 +140,16 @@ export function FloatingChatWidget() {
     window.addEventListener('open-ai-chat', handleOpenEvent);
     return () => window.removeEventListener('open-ai-chat', handleOpenEvent);
   }, []);
+
+  // Close chat widget on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   // ----------------------------------------------------
   // Tab 1: AI Assistant State & Dynamic Initial Prompt Loading
@@ -299,7 +254,9 @@ export function FloatingChatWidget() {
     const onMove = (moveEvent: MouseEvent | TouchEvent) => {
       if (!isResizing.current) return;
       const currentY = 'touches' in moveEvent ? moveEvent.touches[0].clientY : moveEvent.clientY;
-      const newHeight = Math.min(Math.max(startHeight + (startY - currentY), 380), 800);
+      const maxViewportHeight = typeof window !== 'undefined' ? Math.max(380, window.innerHeight - 80) : 700;
+      const calculatedMax = Math.min(800, maxViewportHeight);
+      const newHeight = Math.min(Math.max(startHeight + (startY - currentY), 380), calculatedMax);
       setModalHeight(newHeight);
     };
 

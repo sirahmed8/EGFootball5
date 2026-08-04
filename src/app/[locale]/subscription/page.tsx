@@ -26,6 +26,19 @@ export default function SubscriptionPage() {
   const [selectedMethod, setSelectedMethod] = React.useState<'vodafone' | 'instapay' | 'card'>('vodafone');
   const [submitting, setSubmitting] = React.useState(false);
 
+  // Fix #24: Escape key handlers for subscription modals
+  React.useEffect(() => {
+    if (!isSubscribeModalOpen && !isSuccessModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsSubscribeModalOpen(false);
+        setIsSuccessModalOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isSubscribeModalOpen, isSuccessModalOpen]);
+
   const perks = [
     {
       title: isArabic ? 'خصم 10% تلقائي على جميع الحجوزات' : '10% Off All Booking Fees',
@@ -164,13 +177,17 @@ export default function SubscriptionPage() {
       {/* Subscribe Modal */}
       <AnimatePresence>
         {isSubscribeModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+            onClick={() => setIsSubscribeModalOpen(false)}
+          >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="w-full max-w-lg stadium-glass border-amber-500/30 rounded-3xl p-6 md:p-8 space-y-5 bg-black relative shadow-2xl"
               dir={isArabic ? 'rtl' : 'ltr'}
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <h3 className="text-xl font-black text-foreground flex items-center gap-2">

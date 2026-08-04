@@ -1,29 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/serverAuth';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 
 export async function POST(req: NextRequest) {
   try {
-    // Only platform Owners can promote users to Admin/Manager roles
+    // Only platform Owners can promote users to Admin/Owner roles
     const authResult = await requireAuth(req, ['owner']);
     if ('response' in authResult) {
       return authResult.response;
     }
 
     const body = await req.json().catch(() => ({}));
-    const { targetEmail, role } = body;
+    const { targetUid, role } = body;
 
-    if (!targetEmail || typeof targetEmail !== 'string') {
-      return NextResponse.json({ error: 'Missing or invalid targetEmail parameter' }, { status: 400 });
+    if (!targetUid || typeof targetUid !== 'string') {
+      return NextResponse.json({ error: 'Missing or invalid targetUid parameter' }, { status: 400 });
     }
 
     if (!role || !['player', 'admin', 'owner'].includes(role)) {
       return NextResponse.json({ error: 'Invalid role parameter' }, { status: 400 });
     }
 
+    // Fix #2: Actually write role change to Firestore user document
+    await updateDoc(doc(db, 'users', targetUid), {
+      role,
+      updatedAt: Date.now(),
+    });
+
     return NextResponse.json({
       success: true,
-      message: `Role promotion request for ${targetEmail} to ${role} validated server-side.`,
-      targetEmail,
+      message: `User ${targetUid} role successfully updated to ${role}.`,
+      targetUid,
       role,
     });
   } catch (error: unknown) {
@@ -31,4 +39,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: errMessage }, { status: 500 });
   }
 }
-

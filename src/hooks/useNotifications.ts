@@ -1,10 +1,20 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collection, query, where, getDocs, doc, updateDoc, writeBatch, limit, orderBy } from 'firebase/firestore';
+import { useEffect } from 'react';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import {
+  collection,
+  query,
+  where,
+  doc,
+  updateDoc,
+  writeBatch,
+  limit,
+  orderBy,
+  onSnapshot,
+} from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { queryKeys } from '@/lib/queryKeys';
-import { DOMAIN_STALE_TIMES } from '@/lib/queryClient';
 
 export interface AppNotification {
   id: string;
@@ -17,25 +27,45 @@ export interface AppNotification {
   type: string;
 }
 
+/**
+ * Real-time notifications hook using onSnapshot.
+ * Bypasses TanStack Query's fetch mechanism in favor of a live listener
+ * that pushes updates directly into the query cache.
+ */
 export function useNotifications(userId?: string) {
-  return useQuery({
-    queryKey: queryKeys.notifications.byUser(userId),
-    queryFn: async (): Promise<AppNotification[]> => {
-      if (!userId) return [];
-      const q = query(
-        collection(db, 'notifications'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc'),
-        limit(50)
-      );
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() } as AppNotification));
-    },
-    enabled: !!userId,
-    staleTime: DOMAIN_STALE_TIMES.notifications,
-    gcTime: 1000 * 60 * 5,
-    networkMode: 'offlineFirst',
-  });
+  const queryClient = useQueryClient();
+  const key = queryKeys.notifications.byUser(userId);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const notifications = snap.docs.map(
+          (d) => ({ id: d.id, ...d.data() } as AppNotification)
+        );
+        queryClient.setQueryData(key, notifications);
+      },
+      (error) => {
+        console.warn('[useNotifications] onSnapshot error:', error);
+      }
+    );
+
+    return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  // Return current cache value (populated by the listener above)
+  const data: AppNotification[] = queryClient.getQueryData(key) ?? [];
+  return { data };
 }
 
 export function useMarkNotificationAsRead() {
@@ -54,7 +84,7 @@ export function useMarkNotificationAsRead() {
 
       queryClient.setQueryData<AppNotification[]>(key, (old) => {
         if (!old) return old;
-        return old.map(n => (n.id === notificationId ? { ...n, read: true } : n));
+        return old.map((n) => (n.id === notificationId ? { ...n, read: true } : n));
       });
 
       return { previousNotifications, key };
@@ -64,11 +94,7 @@ export function useMarkNotificationAsRead() {
         queryClient.setQueryData(context.key, context.previousNotifications);
       }
     },
-    onSettled: (data, error, variables) => {
-      if (variables?.userId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.notifications.byUser(variables.userId) });
-      }
-    },
+    // No invalidation needed — onSnapshot will push the updated state automatically
   });
 }
 
@@ -77,10 +103,10 @@ export function useMarkAllNotificationsAsRead() {
 
   return useMutation({
     mutationFn: async ({ notifications }: { userId: string; notifications: AppNotification[] }) => {
-      const unread = notifications.filter(n => !n.read);
+      const unread = notifications.filter((n) => !n.read);
       if (unread.length === 0) return;
       const batch = writeBatch(db);
-      unread.forEach(n => {
+      unread.forEach((n) => {
         batch.update(doc(db, 'notifications', n.id), { read: true });
       });
       await batch.commit();
@@ -94,7 +120,7 @@ export function useMarkAllNotificationsAsRead() {
 
       queryClient.setQueryData<AppNotification[]>(key, (old) => {
         if (!old) return old;
-        return old.map(n => ({ ...n, read: true }));
+        return old.map((n) => ({ ...n, read: true }));
       });
 
       return { previousNotifications, key };
@@ -104,10 +130,6 @@ export function useMarkAllNotificationsAsRead() {
         queryClient.setQueryData(context.key, context.previousNotifications);
       }
     },
-    onSettled: (data, error, variables) => {
-      if (variables?.userId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.notifications.byUser(variables.userId) });
-      }
-    },
+    // onSnapshot handles the settled state automatically
   });
 }

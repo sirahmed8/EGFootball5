@@ -28,6 +28,8 @@ import {
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { MatchesPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { PitchTacticalBoard } from '@/components/PitchTacticalBoard';
+import { EmergencyGKModal } from '@/components/EmergencyGKModal';
+
 
 const MatchChat = dynamic(() => import('@/components/MatchChat'), { ssr: false });
 
@@ -167,6 +169,12 @@ export default function MatchesPage() {
   const [selectedPosition, setSelectedPosition] = useState<'GK' | 'DEF' | 'MID' | 'STR'>('STR');
 
   const [pastMatches, setPastMatches] = useState<Booking[]>([]);
+  const [gkModal, setGkModal] = useState<{ isOpen: boolean; pitchName: string; timeSlot: string }>({
+    isOpen: false,
+    pitchName: '',
+    timeSlot: '',
+  });
+
 
   useEffect(() => {
     const matchesQ = query(
@@ -547,36 +555,61 @@ export default function MatchesPage() {
                     </Button>
                   </div>
 
-                  {/* Realtime Match Chat Dialog trigger */}
-                  <Dialog>
-                    <DialogTrigger
-                      render={
-                        <Button
-                          variant="ghost"
-                          className="w-full text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-xl py-2 flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <MessageCircle className="w-4 h-4" />
-                          <span>{t('openMatchChat')}</span>
-                        </Button>
+                  {/* Realtime Match Chat Dialog & Emergency GK Call triggers */}
+                  <div className="flex gap-2 pt-1">
+                    <Dialog>
+                      <DialogTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            className="flex-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-xl py-2 flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                            <span>{t('openMatchChat')}</span>
+                          </Button>
+                        }
+                      />
+                      <DialogContent className="sm:max-w-lg p-0 bg-card/95 border-border backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden">
+                        <DialogHeader className="p-4 pb-0">
+                          <DialogTitle className="text-lg font-black text-foreground">
+                            💬 {t('matchChatTitle', { pitchName: pitch?.name || 'Obour Match' })}
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="p-4 pt-2">
+                          <MatchChat matchId={match.id} />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    <Button
+                      onClick={() =>
+                        setGkModal({
+                          isOpen: true,
+                          pitchName: pitch?.name || 'Stadium',
+                          timeSlot: formatTimeSlot(match.timeSlot),
+                        })
                       }
-                    />
-                    <DialogContent className="sm:max-w-lg p-0 bg-card/95 border-border backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden">
-                      <DialogHeader className="p-4 pb-0">
-                        <DialogTitle className="text-lg font-black text-foreground">
-                          💬 {t('matchChatTitle', { pitchName: pitch?.name || 'Obour Match' })}
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="p-4 pt-2">
-                        <MatchChat matchId={match.id} />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                      variant="ghost"
+                      className="text-xs font-black text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl py-2 px-3 flex items-center justify-center gap-1 cursor-pointer"
+                      title={isArabic ? 'استدعاء حارس مرمى طارئ' : 'Emergency GK Call'}
+                    >
+                      🧤 {isArabic ? 'حارس طارئ' : 'Need GK'}
+                    </Button>
+                  </div>
                 </div>
               </Card>
             );
           })}
         </div>
       )}
+
+      {/* Emergency GK Modal render */}
+      <EmergencyGKModal
+        isOpen={gkModal.isOpen}
+        onClose={() => setGkModal({ isOpen: false, pitchName: '', timeSlot: '' })}
+        pitchName={gkModal.pitchName}
+        timeSlot={gkModal.timeSlot}
+      />
 
       {/* Past Matches — collapsed summary */}
       {pastMatches.length > 0 && (
@@ -594,3 +627,4 @@ export default function MatchesPage() {
     </div>
   );
 }
+

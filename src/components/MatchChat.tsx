@@ -21,6 +21,19 @@ export default function MatchChat({ matchId }: { matchId: string }) {
 
   const { messages, loading, typingUsers, sendMessage, setTyping } = useMatchChat(matchId);
 
+  // Clear typing indicator on unmount so other users don't see stale "is typing"
+  useEffect(() => {
+    return () => {
+      if (firebaseUser && appUser) {
+        setTyping(firebaseUser.uid, appUser.name || 'Player', false);
+      }
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);

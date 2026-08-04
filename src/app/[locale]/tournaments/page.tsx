@@ -52,6 +52,16 @@ export default function TournamentsPage() {
   const [selectedTournament, setSelectedTournament] = React.useState<Tournament | null>(null);
   const [registering, setRegistering] = React.useState(false);
 
+  // Fix #24: Close bracket modal on Escape key
+  React.useEffect(() => {
+    if (!selectedTournament) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedTournament(null);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [selectedTournament]);
+
   // Load real tournaments from Firestore
   React.useEffect(() => {
     async function fetchTournaments() {
@@ -209,12 +219,16 @@ export default function TournamentsPage() {
 
       {/* Bracket Viewer Modal */}
       {selectedTournament && selectedTournament.rounds && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setSelectedTournament(null)}
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="w-full max-w-4xl stadium-glass border-white/10 rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6"
             dir={isArabic ? 'rtl' : 'ltr'}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <h2 className="text-xl font-black text-foreground flex items-center gap-2">

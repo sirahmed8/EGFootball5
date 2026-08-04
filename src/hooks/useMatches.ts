@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collection, query, where, getDocs, doc, getDoc, runTransaction } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, runTransaction, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { Booking } from '@/types';
 import { queryKeys } from '@/lib/queryKeys';
@@ -16,7 +16,8 @@ export function usePublicMatches() {
       const q = query(
         collection(db, 'bookings'),
         where('bookingType', '==', 'public'),
-        where('status', '==', 'confirmed')
+        where('status', '==', 'confirmed'),
+        limit(50)
       );
       const snap = await getDocs(q);
       return snap.docs.map(d => ({ id: d.id, ...d.data() } as Booking));

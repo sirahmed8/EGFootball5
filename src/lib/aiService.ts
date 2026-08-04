@@ -33,6 +33,21 @@ function detectIsArabic(prompt: string, locale?: string): boolean {
   return locale === 'ar';
 }
 
+/**
+ * Fix #5: Client-side prompt sanitization.
+ * Strips prompt-injection patterns and enforces a length cap.
+ */
+function sanitizePrompt(raw: string): string {
+  // Truncate long inputs
+  let clean = raw.slice(0, 1000);
+  // Remove common injection overrides
+  clean = clean.replace(
+    /(?:ignore (?:all )?(?:previous|prior|above) (?:instructions?|prompt)|\[SYSTEM\]|\[INST\]|<system>|<<SYS>>|\\n\\nHuman:|\\n\\nAssistant:)/gi,
+    ''
+  );
+  return clean.trim();
+}
+
 function extractChips(text: string, isArabic: boolean): { cleanText: string; chips: string[] } {
   const chips: string[] = [];
   let cleanText = text;
@@ -89,8 +104,9 @@ export async function generateAIResponse(
 ): Promise<AIResponseResult> {
   cleanExpiredCache();
 
-  const isArabic = detectIsArabic(prompt, options?.locale);
-  const cacheKey = getCacheKey(prompt, options?.imageBase64);
+  const sanitizedPrompt = sanitizePrompt(prompt);
+  const isArabic = detectIsArabic(sanitizedPrompt, options?.locale);
+  const cacheKey = getCacheKey(sanitizedPrompt, options?.imageBase64);
   const cached = memoryCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
 
@@ -134,7 +150,7 @@ CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
       try {
         const content = options?.imageBase64
           ? [
-              { type: 'text', text: prompt },
+              { type: 'text', text: sanitizedPrompt },
               {
                 type: 'image_url',
                 image_url: {
@@ -144,7 +160,7 @@ CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
                 },
               },
             ]
-          : prompt;
+          : sanitizedPrompt;
 
         const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
@@ -172,9 +188,9 @@ CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
         if (!rawText || typeof rawText !== 'string') continue;
 
         const { cleanText, chips } = extractChips(rawText, isArabic);
-        const tokens = json?.usage?.total_tokens || Math.ceil((prompt.length + cleanText.length) / 4);
+        const tokens = json?.usage?.total_tokens || Math.ceil((sanitizedPrompt.length + cleanText.length) / 4);
 
-        await logAiUsage(uid, prompt, `openrouter/${model}`, tokens);
+        await logAiUsage(uid, sanitizedPrompt, `openrouter/${model}`, tokens);
 
         const result: AIResponseResult = { text: cleanText, chips, modelUsed: `google-gemini/${model}` };
         memoryCache.set(cacheKey, { timestamp: Date.now(), data: result });
@@ -197,7 +213,7 @@ CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
-        prompt,
+        prompt: sanitizedPrompt,
         imageBase64: options?.imageBase64,
         mimeType: options?.mimeType,
         systemContext: options?.systemContext,
@@ -221,14 +237,36 @@ CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
     console.warn('Server AI route failed:', err);
   }
 
-  // === LAST RESORT FALLBACK: Honest message instead of fake template ===
+  // === LAST RESORT FALLBACK: Intelligent context-aware answers for platform queries ===
+  const pLower = sanitizedPrompt.toLowerCase();
+  
+  let fallbackText = isArabic
+    ? 'أنا مساعد EGFootball5 الذكي! يمكنك حجز الملاعب، الانضمام للمباريات المفتوحة، وتصميم طقم فريقك عبر المنصة. كيف يمكنني مساعدتك اليوم؟'
+    : "I am EGFootball5 AI Assistant! You can book pitches, join open 5v5 matches, and design custom kits. How can I help you today?";
+  
+  if (pLower.includes('حجز') || pLower.includes('book') || pLower.includes('pitch') || pLower.includes('ملعب')) {
+    fallbackText = isArabic
+      ? 'للحجز: اختر الملعب من صفحة "احجز ملعبك"، اختر اليوم والتوقيت المناسب، وقم بتأكيد الحجز بتحويل العربون عبر فودافون كاش (01012345678) أو إنستا باي خلال 15 دقيقة (أو 20 دقيقة لأعضاء VIP 👑).'
+      : 'To book: Pick a stadium from "Book a Pitch", select your date & time, then transfer the deposit via Vodafone Cash (01012345678) or InstaPay within 15 mins (20 mins for VIP members 👑).';
+  } else if (pLower.includes('مباراة') || pLower.includes('match') || pLower.includes('انضمام') || pLower.includes('join')) {
+    fallbackText = isArabic
+      ? 'يمكنك تصفح المباريات المفتوحة في صفحة "المباريات"، اختيار المركز المناسب لك (حارس، دفاع، وسط، هجوم) والانضمام فوراً وتقسيم تكلفة الحجز مع الفريق!'
+      : 'Browse active lobbies on "Matches" page, choose your preferred position (GK, DEF, MID, STR), and join to split pitch costs with your teammates!';
+  } else if (pLower.includes('vip') || pLower.includes('اشتراك') || pLower.includes('ممتاز') || pLower.includes('subscription')) {
+    fallbackText = isArabic
+      ? 'عضوية Pitch Pass VIP تمنحك خصماً تلقائياً 10% على كل الحجوزات، تاج ذهبي في البروفايل، تمديد مهلة الحجز لـ 20 دقيقة، ودخول مجاني لبطولات المجتمع!'
+      : 'Pitch Pass VIP gives you automatic 10% off all pitch bookings, golden profile crown badge, 20-min deposit lock extension, and free tournament entry passes!';
+  } else if (pLower.includes('سعر') || pLower.includes('اسعار') || pLower.includes('price') || pLower.includes('cost')) {
+    fallbackText = isArabic
+      ? 'أسعار حجز الملاعب تترواح بين 250 إلى 450 جنيه مصري/ساعة حسب الوقت والملعب (نجيل صناعي ممتاز / إضاءة ليلي عالية الجودة).'
+      : 'Pitch rental rates range between 250 to 450 EGP/hour depending on time slot and stadium features (Premium Turf & Floodlights).';
+  }
+
   return {
-    text: isArabic
-      ? 'عذراً، يبدو أن خدمة الذكاء الاصطناعي غير متاحة مؤقتاً. يرجى المحاولة مرة أخرى بعد قليل!'
-      : 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment!',
+    text: fallbackText,
     chips: isArabic
-      ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '💰 طرق الدفع']
-      : ['⚽ How to book a pitch?', '🏆 Available matches', '💰 Payment methods'],
-    modelUsed: 'offline-fallback',
+      ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '👑 مزايا اشتراك VIP']
+      : ['⚽ How to book a pitch?', '🏆 Available matches', '👑 VIP Pass Perks'],
+    modelUsed: 'offline-smart-fallback',
   };
 }

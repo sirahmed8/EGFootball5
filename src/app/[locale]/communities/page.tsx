@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { collection, query, getDocs, addDoc, orderBy, limit } from 'firebase/firestore';
+import { collection, query, getDocs, addDoc, orderBy, limit, doc, updateDoc, arrayUnion, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -42,6 +42,7 @@ export default function CommunitiesPage() {
   const [logoEmoji, setLogoEmoji] = React.useState('⚽');
   const [commCategory, setCommCategory] = React.useState('Neighborhood Teams');
   const [creating, setCreating] = React.useState(false);
+  const [joiningId, setJoiningId] = React.useState<string | null>(null);
 
   const mockCommunities: Community[] = [];
 
@@ -104,12 +105,32 @@ export default function CommunitiesPage() {
     }
   };
 
-  const handleJoin = (commName: string) => {
+  const handleJoin = async (comm: Community) => {
     if (!firebaseUser) {
       toast.error('Please sign in to join');
       return;
     }
-    toast.success(`Join request sent to ${commName}!`);
+    if (joiningId) return; // prevent double-tap
+
+    setJoiningId(comm.id);
+    try {
+      await updateDoc(doc(db, 'communities', comm.id), {
+        memberIds: arrayUnion(firebaseUser.uid),
+        membersCount: increment(1),
+      });
+      // Optimistically update local count
+      setCommunities((prev) =>
+        prev.map((c) =>
+          c.id === comm.id ? { ...c, membersCount: c.membersCount + 1 } : c
+        )
+      );
+      toast.success(`You've joined ${comm.name}! 🏆`);
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || 'Failed to join community');
+    } finally {
+      setJoiningId(null);
+    }
   };
 
   const categories = ['All', 'Neighborhood Teams', 'Weekend Warriors', 'Competitive Clubs'];
@@ -224,10 +245,18 @@ export default function CommunitiesPage() {
                 </CardContent>
 
                 <Button
-                  onClick={() => handleJoin(comm.name)}
-                  className="w-full mt-4 bg-primary/20 hover:bg-primary text-primary hover:text-black font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-primary/30"
+                  onClick={() => handleJoin(comm)}
+                  disabled={joiningId === comm.id}
+                  className="w-full mt-4 bg-primary/20 hover:bg-primary text-primary hover:text-black font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <UserPlus className="w-4 h-4" /> Request to Join
+                  {joiningId === comm.id ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                      Joining...
+                    </span>
+                  ) : (
+                    <><UserPlus className="w-4 h-4" /> Request to Join</>
+                  )}
                 </Button>
               </Card>
             </motion.div>

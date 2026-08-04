@@ -80,7 +80,7 @@ export function useMatchChat(matchId: string, initialLimit = 50) {
         const activeTyping: Record<string, string> = {};
         const now = Date.now();
         Object.entries(data).forEach(([uid, val]) => {
-          if (val && val.name && val.timestamp && now - val.timestamp < 10000) {
+          if (val && val.name && val.timestamp && now - val.timestamp < 5000) {
             activeTyping[uid] = val.name;
           }
         });

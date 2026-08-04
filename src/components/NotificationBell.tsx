@@ -11,6 +11,7 @@ import {
 import { Bell, CheckCheck, Inbox } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
+import { badgePopVariant } from '@/lib/animations';
 
 export function NotificationBell() {
   const { appUser } = useAuthStore();
@@ -60,9 +61,10 @@ export function NotificationBell() {
           {unreadCount > 0 && (
             <motion.span
               key="badge"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
+              variants={badgePopVariant}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
               className="absolute top-1 end-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full"
             >
               {unreadCount > 9 ? '9+' : unreadCount}

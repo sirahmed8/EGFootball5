@@ -1,5 +1,5 @@
-import { AchievementsPageSkeleton } from '@/components/skeletons/PageSkeletons';
+import { ProfilePageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 export default function Loading() {
-  return <AchievementsPageSkeleton />;
+  return <ProfilePageSkeleton />;
 }

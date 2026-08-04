@@ -50,6 +50,16 @@ export default function SquadChallengesPage() {
   const [timeStr, setTimeStr] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
 
+  // Fix #23 & #24: Close modal on Escape key
+  React.useEffect(() => {
+    if (!isModalOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsModalOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isModalOpen]);
+
   // Load real challenges from Firestore
   React.useEffect(() => {
     async function fetchChallenges() {
@@ -247,12 +257,16 @@ export default function SquadChallengesPage() {
 
       {/* Post Challenge Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setIsModalOpen(false)}
+        >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-4 shadow-2xl relative"
             dir={isArabic ? 'rtl' : 'ltr'}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h2 className="text-2xl font-black text-foreground">{isArabic ? 'إضافة تحدي بين الفرق' : 'Post Squad Challenge'}</h2>
@@ -287,20 +301,19 @@ export default function SquadChallengesPage() {
                 <div>
                   <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'اليوم' : 'Date'}</label>
                   <input
-                    type="text"
+                    type="date"
                     value={dateStr}
                     onChange={(e) => setDateStr(e.target.value)}
-                    placeholder={isArabic ? 'مثال: الجمعة القادم' : 'e.g. Friday'}
+                    min={new Date().toISOString().split('T')[0]}
                     className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary"
                   />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'الوقت' : 'Time'}</label>
                   <input
-                    type="text"
+                    type="time"
                     value={timeStr}
                     onChange={(e) => setTimeStr(e.target.value)}
-                    placeholder={isArabic ? 'مثال: 9:00 مساءً' : 'e.g. 9:00 PM'}
                     className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary"
                   />
                 </div>

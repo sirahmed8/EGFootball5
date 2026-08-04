@@ -70,10 +70,10 @@ export function PitchTacticalBoard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black">
-            <Sparkles className="w-3.5 h-3.5" /> Interactive Tactics
+            <Sparkles className="w-3.5 h-3.5" /> Interactive Tactics Board
           </div>
           <h2 className="text-2xl font-black text-foreground">5-a-Side Pitch Lineup Board</h2>
-          <p className="text-xs text-muted-foreground">Select team formations & position your squad on the turf</p>
+          <p className="text-xs text-muted-foreground">Select team formations or drag player pins anywhere on the turf</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -92,26 +92,37 @@ export function PitchTacticalBoard() {
       </div>
 
       {/* Turf Graphic Board */}
-      <div className="relative w-full h-96 bg-emerald-950/60 rounded-3xl border-2 border-emerald-500/40 overflow-hidden shadow-inner flex flex-col justify-between p-4">
+      <div className="relative w-full h-96 bg-emerald-950/70 rounded-3xl border-2 border-emerald-500/40 overflow-hidden shadow-inner flex flex-col justify-between p-4">
         {/* Pitch Lines */}
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-0.5 bg-emerald-500/30 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 border border-emerald-500/30 rounded-full pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-20 border-b border-x border-emerald-500/30 rounded-b-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-40 h-20 border-t border-x border-emerald-500/30 rounded-t-3xl pointer-events-none" />
 
-        {/* Player Pins */}
+        {/* Player Pins with Drag Support */}
         {players.map((p) => (
           <motion.div
             key={p.id}
-            initial={{ scale: 0.8 }}
+            drag
+            dragConstraints={{ left: -140, right: 140, top: -140, bottom: 140 }}
+            dragElastic={0.1}
+            whileDrag={{ scale: 1.15, zIndex: 30 }}
             animate={{ left: `${p.x}%`, top: `${p.y}%` }}
-            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer group z-10"
+            transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+            className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-grab active:cursor-grabbing group z-10"
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 border-2 border-black flex items-center justify-center text-black font-black text-xs shadow-xl glow-primary group-hover:scale-110 transition-transform">
+            <div className={`w-11 h-11 rounded-2xl border-2 flex items-center justify-center font-black text-xs shadow-xl transition-all ${
+              p.role === 'GK'
+                ? 'bg-amber-400 border-amber-300 text-black shadow-amber-500/30'
+                : p.role === 'DEF'
+                ? 'bg-blue-500 border-blue-400 text-white shadow-blue-500/30'
+                : p.role === 'MID'
+                ? 'bg-emerald-400 border-emerald-300 text-black shadow-emerald-500/30'
+                : 'bg-rose-500 border-rose-400 text-white shadow-rose-500/30'
+            }`}>
               {p.role}
             </div>
-            <span className="mt-1 px-2 py-0.5 rounded-full bg-black/80 text-[10px] font-bold text-white whitespace-nowrap shadow-md border border-white/10">
+            <span className="mt-1 px-2.5 py-0.5 rounded-full bg-black/90 text-[10px] font-bold text-white whitespace-nowrap shadow-md border border-white/10 group-hover:border-primary">
               {p.name}
             </span>
           </motion.div>
@@ -121,7 +132,7 @@ export function PitchTacticalBoard() {
       {/* Share Action */}
       <div className="flex items-center justify-between pt-2">
         <div className="text-xs text-muted-foreground">
-          Active Formation: <strong className="text-foreground">{formation} Diamond</strong>
+          Active Formation: <strong className="text-foreground">{formation} Diamond</strong> (Drag tokens to fine-tune)
         </div>
         <Button
           onClick={handleShareLineup}

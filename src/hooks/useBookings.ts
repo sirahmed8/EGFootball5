@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { Booking, BookingStatus } from '@/types';
 import { lockSlot, submitReceipt, cancelBooking, confirmBooking, rejectBooking, completeBooking } from '@/lib/firebase/booking';
@@ -16,7 +16,8 @@ export function useUserBookings(userId?: string) {
       const q = query(
         collection(db, 'bookings'),
         where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'desc'),
+        limit(50)
       );
       const snap = await getDocs(q);
       return snap.docs.map(d => ({ id: d.id, ...d.data() } as Booking));

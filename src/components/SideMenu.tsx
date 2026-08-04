@@ -4,6 +4,7 @@ import * as React from 'react';
 import { usePathname, useRouter, Link } from '@/i18n/routing';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/useAuthStore';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
   LayoutDashboard,
@@ -209,6 +210,18 @@ function MobileDrawer() {
     };
   }, [isOpen]);
 
+  // Fix #16: Close drawer on Escape key press
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
+  const slideOffset = isRTL ? '100%' : '-100%';
+
   return (
     <>
       {/* Hamburger Trigger — ONLY visible on mobile screens */}
@@ -220,29 +233,34 @@ function MobileDrawer() {
         <Menu className="w-6 h-6 text-foreground" />
       </button>
 
-      {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-md transition-opacity duration-200"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="drawer-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-md"
+              onClick={() => setIsOpen(false)}
+            />
 
-      {/* Drawer */}
-      <div
-        className={`fixed inset-y-0 z-[100] w-80 max-w-[85vw] bg-black
-          shadow-2xl border-white/10 transition-transform duration-300 ease-in-out
-          start-0 border-e`}
-        style={{
-          transform: isOpen
-            ? 'translateX(0)'
-            : isRTL
-            ? 'translateX(100%)'
-            : 'translateX(-100%)',
-        }}
-      >
-        <SidebarContent onClose={() => setIsOpen(false)} isMobile={true} />
-      </div>
+            {/* Drawer */}
+            <motion.div
+              key="drawer-content"
+              initial={{ x: slideOffset }}
+              animate={{ x: 0 }}
+              exit={{ x: slideOffset }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              className="fixed inset-y-0 z-[100] w-80 max-w-[85vw] bg-black shadow-2xl border-white/10 start-0 border-e"
+            >
+              <SidebarContent onClose={() => setIsOpen(false)} isMobile={true} />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Trophy, Search, Crown, SlidersHorizontal } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { SolidSelect } from '@/components/ui/SolidSelect';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, limit, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 
 interface PlayerRank {
@@ -64,7 +64,14 @@ export default function LeaderboardPage() {
     async function fetchLeaderboard() {
       setLoading(true);
       try {
-        const snap = await getDocs(collection(db, 'users'));
+        // Fix #32: limit to top 100 players to avoid full-collection scan
+        const snap = await getDocs(
+          query(
+            collection(db, 'users'),
+            orderBy('goals', 'desc'),
+            limit(100)
+          )
+        );
         if (!snap.empty) {
           const list: PlayerRank[] = snap.docs
             .map((doc) => {
@@ -215,7 +222,7 @@ export default function LeaderboardPage() {
           {/* 1st Place */}
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
             <Card className="global-box border-amber-400/50 bg-black rounded-3xl p-5 shadow-2xl flex flex-col items-center space-y-2 relative overflow-hidden glow-primary-sm">
-              <Crown className="w-6 h-6 text-amber-400 animate-bounce" />
+              <Crown className="w-6 h-6 text-amber-400" />
               <div className="w-14 h-14 rounded-full bg-amber-400/20 border border-amber-400/50 flex items-center justify-center shadow-inner overflow-hidden">
                 <PlayerAvatar src={topThree[0]?.avatar} name={topThree[0]?.name} size={56} />
               </div>
