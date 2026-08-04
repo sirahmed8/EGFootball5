@@ -116,8 +116,10 @@ export function NavbarSettingsMenu() {
           </div>
         )}
 
-        <span className="hidden lg:inline text-xs font-bold truncate max-w-[110px] flex items-center gap-1">
-          {appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'حسابي' : 'Account')}
+        <span className="hidden lg:flex items-center gap-1.5 text-xs font-bold">
+          <span className="truncate max-w-[150px]">
+            {appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'حسابي' : 'Account')}
+          </span>
           {isUserVip(appUser) && <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
         </span>
         <Settings className="w-4 h-4 text-muted-foreground hover:text-primary transition-colors shrink-0" />
@@ -135,8 +137,8 @@ export function NavbarSettingsMenu() {
             className="absolute top-full mt-2 end-0 w-80 bg-[#0B0F19] border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999] overflow-hidden p-5 space-y-4 text-foreground global-outline-glow"
           >
             {/* Header / User Info Card */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <div className="flex items-center gap-3 overflow-hidden">
+            <div className="flex items-start justify-between pb-3 border-b border-white/10 gap-2">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
                 {firebaseUser?.photoURL ? (
                   <img
                     src={firebaseUser.photoURL}
@@ -149,15 +151,17 @@ export function NavbarSettingsMenu() {
                     {appUser?.name ? appUser.name.charAt(0).toUpperCase() : 'U'}
                   </div>
                 )}
-                <div className="overflow-hidden space-y-0.5">
-                  <p className="font-black text-sm text-foreground truncate flex items-center gap-1.5">
-                    <span>{appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'لاعب كريم' : 'Player')}</span>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-black text-sm text-foreground truncate max-w-[140px]">
+                      {appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'لاعب كريم' : 'Player')}
+                    </span>
                     {isUserVip(appUser) && (
-                      <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-black inline-flex items-center gap-0.5">
+                      <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-black inline-flex items-center gap-0.5 shrink-0">
                         <Crown className="w-3 h-3 text-amber-400" /> VIP
                       </span>
                     )}
-                  </p>
+                  </div>
                   <p className="text-[11px] text-muted-foreground truncate">
                     {firebaseUser?.email || (locale === 'ar' ? 'مسجل كزائر' : 'Guest Player')}
                   </p>

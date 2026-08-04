@@ -69,11 +69,14 @@ export default function MasterAnalyticsPage() {
     queryKey: ['an_ai_logs'],
     queryFn: async () => {
       try {
-        const snap = await getDocs(query(collection(db, 'aiLogs'), orderBy('createdAt', 'desc'), limit(500)));
-        return snap.docs.map(d => d.data());
-      } catch { return []; }
+        const snap = await getDocs(collection(db, 'aiLogs'));
+        return snap.docs.map(d => d.data()).sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
+      } catch {
+        return [];
+      }
     },
     enabled: appUser?.role === 'owner',
+    refetchInterval: 5000, // Live poll every 5s for real-time AI usage updates on analytics page
   });
 
   if (loading || appUser?.role !== 'owner' || bL || pL || uL || aiL) return <DashboardPageSkeleton />;

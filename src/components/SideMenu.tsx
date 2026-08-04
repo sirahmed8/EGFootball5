@@ -123,7 +123,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
               ...(appUser?.role === 'admin' ? [{ href: '/admin/dashboard', label: tNav('adminDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
               ...(appUser?.role === 'owner' ? [{ href: '/owner', label: tNav('ownerDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
               ...(appUser?.role === 'owner' ? [{ href: '/owner/analytics', label: isArabic ? 'إحصائيات وأرباح المنصة' : 'Master Analytics', icon: <Activity size={18} /> }] : []),
-              ...(appUser?.role === 'owner' ? [{ href: '/owner/users', label: tNav('managePlayers'), icon: <ShieldCheck size={18} /> }] : []),
+              ...(appUser?.role === 'admin' || appUser?.role === 'owner' ? [{ href: '/owner/users', label: isArabic ? 'إدارة اللاعبين (VIP)' : 'Manage Players', icon: <ShieldCheck size={18} /> }] : []),
             ],
           },
         ]

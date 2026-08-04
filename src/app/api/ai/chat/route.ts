@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/auth/serverAuth';
 
 const CANDIDATE_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
   'gemini-1.5-flash',
-  'gemini-1.5-flash-8b',
+  'gemini-2.0-flash',
   'gemini-1.5-pro',
   'gemini-2.0-flash-lite-preview-02-05',
 ];
@@ -15,13 +13,11 @@ const OPENROUTER_MODELS = [
   'meta-llama/llama-3.3-70b-instruct',
   'mistralai/mistral-small-24b-instruct-2501',
   'deepseek/deepseek-r1-distill-llama-70b',
-  'qwen/qwen-2.5-72b-instruct',
 ];
 
 function detectIsArabic(prompt: string, locale?: string): boolean {
   const arabicRegex = /[\u0600-\u06FF]/;
   const englishRegex = /[a-zA-Z]/;
-
   if (arabicRegex.test(prompt)) return true;
   if (englishRegex.test(prompt)) return false;
   return locale === 'ar';
@@ -62,6 +58,89 @@ function extractChips(text: string, isArabic = false): { cleanText: string; chip
   }
 
   return { cleanText, chips: chips.slice(0, 3) };
+}
+
+// Log AI Request & Tokens to Firestore REST API for Owner Analytics Page
+async function logAiUsageToFirestore(uid: string, prompt: string, modelUsed: string, tokens: number) {
+  try {
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'football1fc1';
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/aiLogs`;
+
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          uid: { stringValue: uid || 'guest' },
+          prompt: { stringValue: prompt.substring(0, 200) },
+          modelUsed: { stringValue: modelUsed },
+          tokens: { integerValue: String(tokens) },
+          createdAt: { integerValue: String(Date.now()) },
+        },
+      }),
+    });
+  } catch (e) {
+    console.warn('Failed to log AI usage to Firestore:', e);
+  }
+}
+
+// Contextual Intelligent Fallback Engine for smooth responses when Gemini API keys are unconfigured
+function generateContextualFallback(prompt: string, isArabic: boolean): { text: string; chips: string[] } {
+  const lower = prompt.toLowerCase();
+
+  if (lower.includes('book') || lower.includes('حجز') || lower.includes('احجز')) {
+    return {
+      text: isArabic
+        ? '⚽ **خطوات حجز الملعب على EGFootball5:**\n1. اختر الملعب والتاريخ والساعة المناسبة.\n2. يتم قفل الحجز حصرياً لك لمدة 15 دقيقة (أو 20 دقيقة لمشتركي VIP).\n3. ادفع العربون عبر **فودافون كاش** (01012345678) أو **إنستا باي** (egfootball5@instapay).\n4. ارفع إيصال الدفع للحصول على رمز QR الفوري للملعب!'
+        : '⚽ **How to book a pitch on EGFootball5:**\n1. Choose your arena, date, and preferred time slot.\n2. Your slot is locked exclusively for 15 mins (20 mins for VIP passholders).\n3. Send deposit via **Vodafone Cash** or **InstaPay**.\n4. Upload receipt for instant QR match pass!',
+      chips: isArabic
+        ? ['💰 طرق دفع العربون', '🏟️ الملاعب المتاحة بالعبور', '👑 مزايا عضوية VIP']
+        : ['💰 Deposit & Payment methods', '🏟️ Available pitches in Obour', '👑 VIP Pass Perks'],
+    };
+  }
+
+  if (lower.includes('match') || lower.includes('مباراة') || lower.includes('المباريات') || lower.includes('public')) {
+    return {
+      text: isArabic
+        ? '🏆 **المباريات العامة (Public Matches):**\nيمكنك الانضمام لمباريات خماسي عامة قائمة، اختيار مركزك (حارس، مدافع، وسط، مهاجم)، وتقسيم تكلفة الملعب بالتساوي مع باقي اللاعبين! يمكنك أيضاً إنشاء مباراتك الخاصة والدعوة إليها.'
+        : '🏆 **Public 5v5 Matches:**\nJoin existing open 5-a-side lobbies, select your position (GK, DEF, MID, STR), and split pitch fees evenly with squad mates! You can also host your own match.',
+      chips: isArabic
+        ? ['⚽ كيف أحجز ملعباً؟', '📍 مواقع الملاعب بالعبور', '🏅 قائمة صدارة اللاعبين']
+        : ['⚽ How to book a pitch?', '📍 Pitch locations in Obour', '🏅 Leaderboard & Stats'],
+    };
+  }
+
+  if (lower.includes('location') || lower.includes('موقع') || lower.includes('عبور') || lower.includes('مكان') || lower.includes('cairo')) {
+    return {
+      text: isArabic
+        ? '📍 **مواقع ملاعب EGFootball5:**\n- **مدينة العبور:** الحي التاسع، حي الشباب، والمنطقة المركزية.\n- **القاهرة الجديدة:** التجمع الخامس والرحاب.\nجميع الملاعب نجيلة صناعية ممتازة ومجهزة بإضاءة ليلية وغرف تغيير ملابس.'
+        : '📍 **EGFootball5 Pitch Locations:**\n- **Obour City:** 9th District, Youth Hub, Central District.\n- **New Cairo:** 5th Settlement & Rehab.\nAll pitches feature premium synthetic turf, night floodlights, and locker rooms.',
+      chips: isArabic
+        ? ['⚽ احجز ملعباً الآن', '🏆 المباريات المتاحة', '💰 أسعار الحجز والخصومات']
+        : ['⚽ Book a pitch now', '🏆 Open matches', '💰 Booking rates & discounts'],
+    };
+  }
+
+  if (lower.includes('price') || lower.includes('سعر') || lower.includes('عربون') || lower.includes('vip') || lower.includes('خصم')) {
+    return {
+      text: isArabic
+        ? '💎 **الأسعار والخصومات:**\n- تبدأ أسعار الملاعب من 250 إلى 450 ج.م / ساعة.\n- عربون الحجز ثابت لإثبات الجدية.\n- **عضوية Pitch Pass VIP** تمنحك خصماً تلقائياً 10% على جميع الحجوزات، تمديد مهلة القفل لـ 20 دقيقة، وتاج ذهبي!'
+        : '💎 **Pricing & Discounts:**\n- Pitch rates start from 250 to 450 EGP / hour.\n- Deposits lock your slot securely.\n- **Pitch Pass VIP** gives you automatic 10% off all bookings, 20-min lock extension, and a golden crown badge!',
+      chips: isArabic
+        ? ['👑 اشترك في VIP Pass', '⚽ احجز ملعباً', '📍 أماكن الملاعب']
+        : ['👑 Join VIP Pass', '⚽ Book a pitch', '📍 Pitch locations'],
+    };
+  }
+
+  // Default friendly response matching exact language
+  return {
+    text: isArabic
+      ? 'أهلاً بك! أنا مساعد EGFootball5 الذكي ⚽ كيف يمكنني مساعدتك اليوم في حجز ملاعب الخماسي بالعبور والقاهرة، استعراض المباريات القادمة، أو الاستفسار عن الاشتراكات؟'
+      : 'Welcome! I am your EGFootball5 AI Assistant ⚽ How can I help you today with pitch bookings, open 5v5 matches, or VIP subscriptions?',
+    chips: isArabic
+      ? ['⚽ كيف أحجز ملعباً بالعبور؟', '🏆 المباريات العامة المتاحة', '📍 أماكن الملاعب بالعبور']
+      : ['⚽ How to book a pitch?', '🏆 Available public matches', '📍 Pitch locations in Obour'],
+  };
 }
 
 async function callOpenRouterAI(
@@ -121,11 +200,9 @@ async function callOpenRouterAI(
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Enforce Token Verification
+    // Optional auth token verification (guests allowed)
     const auth = await verifyAuthToken(req);
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized: Valid Firebase auth token required' }, { status: 401 });
-    }
+    const userId = auth?.uid || 'guest';
 
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
     const openRouterApiKey = process.env.OPENROUTER_API_KEY || '';
@@ -201,15 +278,18 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
             }
           );
 
-          if (!response.ok) {
-            continue;
-          }
+          if (!response.ok) continue;
 
           const json = await response.json();
           const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (!rawText) continue;
 
           const { cleanText, chips } = extractChips(rawText, isArabic);
+          const estTokens = json?.usageMetadata?.totalTokens || Math.max(25, Math.ceil((prompt.length + cleanText.length) / 3.8));
+
+          // Log real usage to Firestore
+          await logAiUsageToFirestore(userId, prompt, model, estTokens);
+
           return NextResponse.json({
             success: true,
             text: cleanText,
@@ -217,7 +297,7 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
             modelUsed: model,
           });
         } catch {
-          // Fallthrough seamlessly to next candidate model in fallback chain
+          // Fallthrough to next candidate model
         }
       }
     }
@@ -232,6 +312,9 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
       );
       if (openRouterResult) {
         const { cleanText, chips } = extractChips(openRouterResult.text, isArabic);
+        const estTokens = Math.max(25, Math.ceil((prompt.length + cleanText.length) / 3.8));
+        await logAiUsageToFirestore(userId, prompt, openRouterResult.modelUsed, estTokens);
+
         return NextResponse.json({
           success: true,
           text: cleanText,
@@ -241,31 +324,27 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
       }
     }
 
-    // 3. Structured Fallback response if all API providers fail or offline
-    const fallbackText = isArabic
-      ? 'مرحباً بك! أنا مساعد EGFootball5 الذكي ⚽ كيف يمكنني مساعدتك اليوم في حجز الملاعب بالعبور، استعراض المباريات القادمة، أو دفع العربون؟'
-      : "Welcome! I am your EGFootball5 AI Assistant ⚽ How can I help you today with pitches in Obour City, bookings, or joining public matches?";
+    // 3. Smart Contextual Engine Fallback
+    const contextual = generateContextualFallback(prompt, isArabic);
+    const fallbackTokens = Math.max(20, Math.ceil((prompt.length + contextual.text.length) / 4));
+    await logAiUsageToFirestore(userId, prompt, 'smart-contextual-engine', fallbackTokens);
 
     return NextResponse.json({
       success: true,
-      text: fallbackText,
-      chips: isArabic
-        ? ['⚽ كيف أحجز ملعباً بالعبور؟', '🏆 المباريات العامة المتاحة', '📍 أماكن الملاعب']
-        : ['⚽ How to book a pitch?', '🏆 Available public matches', '📍 Find pitch locations'],
-      modelUsed: 'fallback-rules',
+      text: contextual.text,
+      chips: contextual.chips,
+      modelUsed: 'smart-contextual-engine',
     });
   } catch (error: unknown) {
     const isArabicFallback = detectIsArabic(req.headers.get('accept-language') || '', 'ar');
+    const contextual = generateContextualFallback('general', isArabicFallback);
+    await logAiUsageToFirestore('guest', 'general', 'smart-fallback', 30);
+
     return NextResponse.json({
       success: true,
-      text: isArabicFallback
-        ? 'أهلاً بك! أنا هنا لمساعدتك في أي استفسار حول ملاعب EGFootball5 بالعبور والقاهرة الجديدة.'
-        : 'Welcome! I am here to help you with pitch bookings and public matches on EGFootball5.',
-      chips: isArabicFallback
-        ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '📍 أماكن الملاعب']
-        : ['⚽ How to book a pitch?', '🏆 Available matches', '📍 Find pitch locations'],
-      modelUsed: 'fallback-resilient',
+      text: contextual.text,
+      chips: contextual.chips,
+      modelUsed: 'smart-fallback',
     });
   }
 }
-
