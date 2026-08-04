@@ -31,7 +31,7 @@ export interface User {
   // VIP Subscription
   isVip?: boolean;
   vipExpiry?: number;
-  vipTier?: 'monthly' | 'quarterly' | 'yearly';
+  vipTier?: string;
 }
 
 export interface Pitch {
