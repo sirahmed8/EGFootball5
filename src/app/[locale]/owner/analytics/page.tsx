@@ -527,24 +527,7 @@ export default function MasterAnalyticsPage() {
             </Card>
           </div>
 
-          <Card className="stadium-glass border-white/10 rounded-3xl p-6 bg-black space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-              <Bot className="w-5 h-5 text-violet-400" />
-              <h3 className="font-black text-foreground">{isArabic ? 'ملاحظات حول تتبع تكاليف AI' : 'AI Cost Tracking Notes'}</h3>
-            </div>
-            <div className="space-y-3 text-xs text-muted-foreground">
-              <p className="p-3 rounded-xl bg-white/5 border border-white/10 leading-relaxed font-medium">
-                {isArabic
-                  ? 'يتم تتبع طلبات الكوتش عبر مجموعة aiLogs في Firestore. لكل طلب يُحفظ عدد الـ tokens المستهلكة مع وقت الطلب وهوية المستخدم. التكلفة محسوبة بناءً على معدل $0.002 لكل 1000 token كمرجع تقديري.'
-                  : 'AI coaching requests are tracked via the aiLogs Firestore collection. Each request logs tokens consumed, timestamp, and user ID. Cost is estimated at $0.002/1k tokens as a reference rate for Google Gemini Flash API calls.'}
-              </p>
-              <p className="p-3 rounded-xl bg-violet-500/5 border border-violet-500/20 leading-relaxed font-medium text-violet-300">
-                {isArabic
-                  ? 'لتفعيل التتبع الكامل: تأكد أن API endpoint الخاص بالكوتش يكتب مستنداً في aiLogs بحقل tokens لكل طلب.'
-                  : 'To enable full tracking: ensure the AI coach API endpoint writes a document to aiLogs with a tokens field on every request.'}
-              </p>
-            </div>
-          </Card>
+
         </div>
       )}
 
