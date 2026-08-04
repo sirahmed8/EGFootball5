@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/auth/serverAuth';
 
-const CANDIDATE_MODELS = [
+const OPENROUTER_MODELS = [
+  'meta-llama/llama-3.3-70b-instruct',
+  'deepseek/deepseek-r1-distill-llama-70b',
+  'mistralai/mistral-small-24b-instruct-2501',
+];
+
+const GEMINI_MODELS = [
   'gemini-1.5-flash',
   'gemini-2.0-flash',
   'gemini-1.5-pro',
-  'gemini-2.0-flash-lite-preview-02-05',
-];
-
-const OPENROUTER_MODELS = [
-  'google/gemini-2.0-flash-001',
-  'meta-llama/llama-3.3-70b-instruct',
-  'mistralai/mistral-small-24b-instruct-2501',
-  'deepseek/deepseek-r1-distill-llama-70b',
 ];
 
 function detectIsArabic(prompt: string, locale?: string): boolean {
@@ -60,7 +58,7 @@ function extractChips(text: string, isArabic = false): { cleanText: string; chip
   return { cleanText, chips: chips.slice(0, 3) };
 }
 
-// Log AI Request & Tokens to Firestore REST API for Owner Analytics Page
+// Log real AI usage & tokens to Firestore for Owner Analytics Page
 async function logAiUsageToFirestore(uid: string, prompt: string, modelUsed: string, tokens: number) {
   try {
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'football1fc1';
@@ -80,67 +78,8 @@ async function logAiUsageToFirestore(uid: string, prompt: string, modelUsed: str
       }),
     });
   } catch (e) {
-    console.warn('Failed to log AI usage to Firestore:', e);
+    console.warn('Failed to log AI usage:', e);
   }
-}
-
-// Contextual Intelligent Fallback Engine for smooth responses when Gemini API keys are unconfigured
-function generateContextualFallback(prompt: string, isArabic: boolean): { text: string; chips: string[] } {
-  const lower = prompt.toLowerCase();
-
-  if (lower.includes('book') || lower.includes('حجز') || lower.includes('احجز')) {
-    return {
-      text: isArabic
-        ? '⚽ **خطوات حجز الملعب على EGFootball5:**\n1. اختر الملعب والتاريخ والساعة المناسبة.\n2. يتم قفل الحجز حصرياً لك لمدة 15 دقيقة (أو 20 دقيقة لمشتركي VIP).\n3. ادفع العربون عبر **فودافون كاش** (01012345678) أو **إنستا باي** (egfootball5@instapay).\n4. ارفع إيصال الدفع للحصول على رمز QR الفوري للملعب!'
-        : '⚽ **How to book a pitch on EGFootball5:**\n1. Choose your arena, date, and preferred time slot.\n2. Your slot is locked exclusively for 15 mins (20 mins for VIP passholders).\n3. Send deposit via **Vodafone Cash** or **InstaPay**.\n4. Upload receipt for instant QR match pass!',
-      chips: isArabic
-        ? ['💰 طرق دفع العربون', '🏟️ الملاعب المتاحة بالعبور', '👑 مزايا عضوية VIP']
-        : ['💰 Deposit & Payment methods', '🏟️ Available pitches in Obour', '👑 VIP Pass Perks'],
-    };
-  }
-
-  if (lower.includes('match') || lower.includes('مباراة') || lower.includes('المباريات') || lower.includes('public')) {
-    return {
-      text: isArabic
-        ? '🏆 **المباريات العامة (Public Matches):**\nيمكنك الانضمام لمباريات خماسي عامة قائمة، اختيار مركزك (حارس، مدافع، وسط، مهاجم)، وتقسيم تكلفة الملعب بالتساوي مع باقي اللاعبين! يمكنك أيضاً إنشاء مباراتك الخاصة والدعوة إليها.'
-        : '🏆 **Public 5v5 Matches:**\nJoin existing open 5-a-side lobbies, select your position (GK, DEF, MID, STR), and split pitch fees evenly with squad mates! You can also host your own match.',
-      chips: isArabic
-        ? ['⚽ كيف أحجز ملعباً؟', '📍 مواقع الملاعب بالعبور', '🏅 قائمة صدارة اللاعبين']
-        : ['⚽ How to book a pitch?', '📍 Pitch locations in Obour', '🏅 Leaderboard & Stats'],
-    };
-  }
-
-  if (lower.includes('location') || lower.includes('موقع') || lower.includes('عبور') || lower.includes('مكان') || lower.includes('cairo')) {
-    return {
-      text: isArabic
-        ? '📍 **مواقع ملاعب EGFootball5:**\n- **مدينة العبور:** الحي التاسع، حي الشباب، والمنطقة المركزية.\n- **القاهرة الجديدة:** التجمع الخامس والرحاب.\nجميع الملاعب نجيلة صناعية ممتازة ومجهزة بإضاءة ليلية وغرف تغيير ملابس.'
-        : '📍 **EGFootball5 Pitch Locations:**\n- **Obour City:** 9th District, Youth Hub, Central District.\n- **New Cairo:** 5th Settlement & Rehab.\nAll pitches feature premium synthetic turf, night floodlights, and locker rooms.',
-      chips: isArabic
-        ? ['⚽ احجز ملعباً الآن', '🏆 المباريات المتاحة', '💰 أسعار الحجز والخصومات']
-        : ['⚽ Book a pitch now', '🏆 Open matches', '💰 Booking rates & discounts'],
-    };
-  }
-
-  if (lower.includes('price') || lower.includes('سعر') || lower.includes('عربون') || lower.includes('vip') || lower.includes('خصم')) {
-    return {
-      text: isArabic
-        ? '💎 **الأسعار والخصومات:**\n- تبدأ أسعار الملاعب من 250 إلى 450 ج.م / ساعة.\n- عربون الحجز ثابت لإثبات الجدية.\n- **عضوية Pitch Pass VIP** تمنحك خصماً تلقائياً 10% على جميع الحجوزات، تمديد مهلة القفل لـ 20 دقيقة، وتاج ذهبي!'
-        : '💎 **Pricing & Discounts:**\n- Pitch rates start from 250 to 450 EGP / hour.\n- Deposits lock your slot securely.\n- **Pitch Pass VIP** gives you automatic 10% off all bookings, 20-min lock extension, and a golden crown badge!',
-      chips: isArabic
-        ? ['👑 اشترك في VIP Pass', '⚽ احجز ملعباً', '📍 أماكن الملاعب']
-        : ['👑 Join VIP Pass', '⚽ Book a pitch', '📍 Pitch locations'],
-    };
-  }
-
-  // Default friendly response matching exact language
-  return {
-    text: isArabic
-      ? 'أهلاً بك! أنا مساعد EGFootball5 الذكي ⚽ كيف يمكنني مساعدتك اليوم في حجز ملاعب الخماسي بالعبور والقاهرة، استعراض المباريات القادمة، أو الاستفسار عن الاشتراكات؟'
-      : 'Welcome! I am your EGFootball5 AI Assistant ⚽ How can I help you today with pitch bookings, open 5v5 matches, or VIP subscriptions?',
-    chips: isArabic
-      ? ['⚽ كيف أحجز ملعباً بالعبور؟', '🏆 المباريات العامة المتاحة', '📍 أماكن الملاعب بالعبور']
-      : ['⚽ How to book a pitch?', '🏆 Available public matches', '📍 Pitch locations in Obour'],
-  };
 }
 
 async function callOpenRouterAI(
@@ -149,19 +88,12 @@ async function callOpenRouterAI(
   systemInstruction: string,
   imageBase64?: string
 ): Promise<{ text: string; modelUsed: string } | null> {
-  const userContent: Array<{ type: string; text?: string; image_url?: { url: string } }> = [
-    { type: 'text', text: prompt },
-  ];
-
-  if (imageBase64) {
-    const formattedData = imageBase64.startsWith('data:')
-      ? imageBase64
-      : `data:image/jpeg;base64,${imageBase64}`;
-    userContent.push({
-      type: 'image_url',
-      image_url: { url: formattedData },
-    });
-  }
+  const content = imageBase64
+    ? [
+        { type: 'text', text: prompt },
+        { type: 'image_url', image_url: { url: imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}` } },
+      ]
+    : prompt;
 
   for (const model of OPENROUTER_MODELS) {
     try {
@@ -177,9 +109,9 @@ async function callOpenRouterAI(
           model,
           messages: [
             { role: 'system', content: systemInstruction },
-            { role: 'user', content: userContent },
+            { role: 'user', content },
           ],
-          temperature: 0.3,
+          temperature: 0.4,
           max_tokens: 1024,
         }),
       });
@@ -191,8 +123,8 @@ async function callOpenRouterAI(
       if (text && typeof text === 'string' && text.trim().length > 0) {
         return { text, modelUsed: `openrouter/${model}` };
       }
-    } catch {
-      // Continue to next OpenRouter candidate model
+    } catch (err) {
+      console.warn(`OpenRouter model ${model} failed:`, err);
     }
   }
   return null;
@@ -200,12 +132,11 @@ async function callOpenRouterAI(
 
 export async function POST(req: NextRequest) {
   try {
-    // Optional auth token verification (guests allowed)
     const auth = await verifyAuthToken(req);
     const userId = auth?.uid || 'guest';
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
     const openRouterApiKey = process.env.OPENROUTER_API_KEY || '';
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
 
     const body = await req.json().catch(() => ({}));
     const { prompt, imageBase64, mimeType, systemContext, locale } = body;
@@ -228,7 +159,7 @@ CRITICAL LANGUAGE RULE:
 Core Platform Information:
 - Platform Name: EGFootball5 (منصة حجز ملاعب الخماسي والمباريات العامة).
 - Main Locations: Obour City (مدينة العبور: الحي التاسع، حي الشباب، المنطقة المركزية) & New Cairo (القاهرة الجديدة).
-- Booking Flow: Pick pitch -> Select Date & Time Slot -> 15-minute slot lock -> Pay deposit via Vodafone Cash, InstaPay or Cash at pitch -> Instant QR Pass.
+- Booking Flow: Pick pitch -> Select Date & Time Slot -> 15-minute slot lock -> Pay deposit via Vodafone Cash (01012345678), InstaPay (egfootball5@instapay) or Cash at pitch -> Instant QR Pass.
 - Public Matches: Players can create or join public matches (المباريات العامة), choose position (GK, DEF, MID, STR), and split turf costs evenly.
 
 Context Information:
@@ -237,72 +168,7 @@ ${systemContext || 'EGFootball5 enables players to book 5-a-side turfs, discover
 IMPORTANT: At the end of your response, always output 3 short, relevant follow-up prompt chips for the user in this exact format:
 CHIPS: ["Option 1", "Option 2", "Option 3"]`;
 
-    const parts: Array<{ inlineData?: { mimeType: string; data: string }; text?: string }> = [];
-    if (imageBase64) {
-      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
-      parts.push({
-        inlineData: {
-          mimeType: mimeType || 'image/jpeg',
-          data: base64Data,
-        },
-      });
-    }
-    parts.push({ text: prompt });
-
-    const contents = [
-      {
-        role: 'user',
-        parts: [{ text: systemInstruction }, ...parts],
-      },
-    ];
-
-    // 1. Try Google Gemini Candidate Models
-    if (apiKey) {
-      for (const model of CANDIDATE_MODELS) {
-        try {
-          const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-goog-api-key': apiKey,
-              },
-              body: JSON.stringify({
-                contents,
-                generationConfig: {
-                  temperature: 0.3,
-                  maxOutputTokens: 1024,
-                },
-              }),
-            }
-          );
-
-          if (!response.ok) continue;
-
-          const json = await response.json();
-          const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (!rawText) continue;
-
-          const { cleanText, chips } = extractChips(rawText, isArabic);
-          const estTokens = json?.usageMetadata?.totalTokens || Math.max(25, Math.ceil((prompt.length + cleanText.length) / 3.8));
-
-          // Log real usage to Firestore
-          await logAiUsageToFirestore(userId, prompt, model, estTokens);
-
-          return NextResponse.json({
-            success: true,
-            text: cleanText,
-            chips,
-            modelUsed: model,
-          });
-        } catch {
-          // Fallthrough to next candidate model
-        }
-      }
-    }
-
-    // 2. Try OpenRouter API Fallback Chain if Google Gemini API fails
+    // 1. Try OpenRouter AI First (guaranteed working models: meta-llama 70B, deepseek 70B)
     if (openRouterApiKey) {
       const openRouterResult = await callOpenRouterAI(
         openRouterApiKey,
@@ -324,27 +190,64 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
       }
     }
 
-    // 3. Smart Contextual Engine Fallback
-    const contextual = generateContextualFallback(prompt, isArabic);
-    const fallbackTokens = Math.max(20, Math.ceil((prompt.length + contextual.text.length) / 4));
-    await logAiUsageToFirestore(userId, prompt, 'smart-contextual-engine', fallbackTokens);
+    // 2. Try Google Gemini API Fallback
+    if (apiKey && apiKey.startsWith('AIzaSy')) {
+      const parts: Array<{ inlineData?: { mimeType: string; data: string }; text?: string }> = [];
+      if (imageBase64) {
+        parts.push({
+          inlineData: {
+            mimeType: mimeType || 'image/jpeg',
+            data: imageBase64.replace(/^data:image\/\w+;base64,/, ''),
+          },
+        });
+      }
+      parts.push({ text: prompt });
+
+      for (const model of GEMINI_MODELS) {
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey,
+              },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: systemInstruction }, ...parts] }],
+                generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
+              }),
+            }
+          );
+
+          if (!response.ok) continue;
+
+          const json = await response.json();
+          const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawText) continue;
+
+          const { cleanText, chips } = extractChips(rawText, isArabic);
+          const estTokens = json?.usageMetadata?.totalTokens || Math.max(25, Math.ceil((prompt.length + cleanText.length) / 3.8));
+          await logAiUsageToFirestore(userId, prompt, model, estTokens);
+
+          return NextResponse.json({
+            success: true,
+            text: cleanText,
+            chips,
+            modelUsed: model,
+          });
+        } catch {
+          // Continue to next Gemini model
+        }
+      }
+    }
 
     return NextResponse.json({
-      success: true,
-      text: contextual.text,
-      chips: contextual.chips,
-      modelUsed: 'smart-contextual-engine',
-    });
+      error: 'AI Generation Failed',
+    }, { status: 500 });
   } catch (error: unknown) {
-    const isArabicFallback = detectIsArabic(req.headers.get('accept-language') || '', 'ar');
-    const contextual = generateContextualFallback('general', isArabicFallback);
-    await logAiUsageToFirestore('guest', 'general', 'smart-fallback', 30);
-
     return NextResponse.json({
-      success: true,
-      text: contextual.text,
-      chips: contextual.chips,
-      modelUsed: 'smart-fallback',
-    });
+      error: 'Server Error',
+    }, { status: 500 });
   }
 }
