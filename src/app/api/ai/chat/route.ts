@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/auth/serverAuth';
 
+// Google Gemini 2.5 Flash as Primary Model via OpenRouter API
 const OPENROUTER_MODELS = [
+  'google/gemini-2.5-flash',
   'meta-llama/llama-3.3-70b-instruct',
   'deepseek/deepseek-r1-distill-llama-70b',
-  'mistralai/mistral-small-24b-instruct-2501',
 ];
 
-const GEMINI_MODELS = [
+const DIRECT_GEMINI_MODELS = [
   'gemini-1.5-flash',
   'gemini-2.0-flash',
-  'gemini-1.5-pro',
 ];
 
 function detectIsArabic(prompt: string, locale?: string): boolean {
@@ -112,7 +112,7 @@ async function callOpenRouterAI(
             { role: 'user', content },
           ],
           temperature: 0.4,
-          max_tokens: 1024,
+          max_tokens: 512,
         }),
       });
 
@@ -121,10 +121,10 @@ async function callOpenRouterAI(
       const json = await res.json();
       const text = json?.choices?.[0]?.message?.content;
       if (text && typeof text === 'string' && text.trim().length > 0) {
-        return { text, modelUsed: `openrouter/${model}` };
+        return { text, modelUsed: `google-gemini/${model}` };
       }
     } catch (err) {
-      console.warn(`OpenRouter model ${model} failed:`, err);
+      console.warn(`OpenRouter Google Gemini model ${model} failed:`, err);
     }
   }
   return null;
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
 
     const isArabic = detectIsArabic(prompt, locale);
 
-    const systemInstruction = `You are EGFootball5 AI Assistant (مساعد EGFootball5 الذكي), an expert 5-a-side football platform assistant in Egypt.
+    const systemInstruction = `You are EGFootball5 AI Assistant (مساعد EGFootball5 الذكي), an expert 5-a-side football platform assistant powered by Google Gemini AI in Egypt.
 Be enthusiastic, accurate, concise, helpful, and natural.
 
 CRITICAL LANGUAGE RULE:
@@ -168,7 +168,59 @@ ${systemContext || 'EGFootball5 enables players to book 5-a-side turfs, discover
 IMPORTANT: At the end of your response, always output 3 short, relevant follow-up prompt chips for the user in this exact format:
 CHIPS: ["Option 1", "Option 2", "Option 3"]`;
 
-    // 1. Try OpenRouter AI First (guaranteed working models: meta-llama 70B, deepseek 70B)
+    // 1. Try Direct Google Gemini API Key if available and valid AIzaSy key
+    if (apiKey && apiKey.startsWith('AIzaSy')) {
+      const parts: Array<{ inlineData?: { mimeType: string; data: string }; text?: string }> = [];
+      if (imageBase64) {
+        parts.push({
+          inlineData: {
+            mimeType: mimeType || 'image/jpeg',
+            data: imageBase64.replace(/^data:image\/\w+;base64,/, ''),
+          },
+        });
+      }
+      parts.push({ text: prompt });
+
+      for (const model of DIRECT_GEMINI_MODELS) {
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey,
+              },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: systemInstruction }, ...parts] }],
+                generationConfig: { temperature: 0.3, maxOutputTokens: 512 },
+              }),
+            }
+          );
+
+          if (!response.ok) continue;
+
+          const json = await response.json();
+          const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawText) continue;
+
+          const { cleanText, chips } = extractChips(rawText, isArabic);
+          const estTokens = json?.usageMetadata?.totalTokens || Math.max(25, Math.ceil((prompt.length + cleanText.length) / 3.8));
+          await logAiUsageToFirestore(userId, prompt, `google-gemini/${model}`, estTokens);
+
+          return NextResponse.json({
+            success: true,
+            text: cleanText,
+            chips,
+            modelUsed: `google-gemini/${model}`,
+          });
+        } catch {
+          // Fall through to OpenRouter Gemini
+        }
+      }
+    }
+
+    // 2. Try Google Gemini 2.5 Flash via OpenRouter API
     if (openRouterApiKey) {
       const openRouterResult = await callOpenRouterAI(
         openRouterApiKey,
@@ -187,58 +239,6 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
           chips,
           modelUsed: openRouterResult.modelUsed,
         });
-      }
-    }
-
-    // 2. Try Google Gemini API Fallback
-    if (apiKey && apiKey.startsWith('AIzaSy')) {
-      const parts: Array<{ inlineData?: { mimeType: string; data: string }; text?: string }> = [];
-      if (imageBase64) {
-        parts.push({
-          inlineData: {
-            mimeType: mimeType || 'image/jpeg',
-            data: imageBase64.replace(/^data:image\/\w+;base64,/, ''),
-          },
-        });
-      }
-      parts.push({ text: prompt });
-
-      for (const model of GEMINI_MODELS) {
-        try {
-          const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-goog-api-key': apiKey,
-              },
-              body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: systemInstruction }, ...parts] }],
-                generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
-              }),
-            }
-          );
-
-          if (!response.ok) continue;
-
-          const json = await response.json();
-          const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (!rawText) continue;
-
-          const { cleanText, chips } = extractChips(rawText, isArabic);
-          const estTokens = json?.usageMetadata?.totalTokens || Math.max(25, Math.ceil((prompt.length + cleanText.length) / 3.8));
-          await logAiUsageToFirestore(userId, prompt, model, estTokens);
-
-          return NextResponse.json({
-            success: true,
-            text: cleanText,
-            chips,
-            modelUsed: model,
-          });
-        } catch {
-          // Continue to next Gemini model
-        }
       }
     }
 
