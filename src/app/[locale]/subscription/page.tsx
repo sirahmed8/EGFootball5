@@ -107,47 +107,7 @@ export default function SubscriptionPage() {
       </motion.div>
 
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-        {/* 3D Animated VIP Pass Card */}
-        <motion.div
-          initial={{ rotateY: -10, rotateX: 5 }}
-          whileHover={{ rotateY: 0, rotateX: 0, scale: 1.02 }}
-          className="global-box border-2 border-amber-500/50 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden bg-black glow-primary-sm flex flex-col justify-between"
-        >
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase">EGFootball5 VIP Pass</span>
-              <h3 className="text-2xl font-black text-foreground mt-1">PITCH PASS VIP ELITE</h3>
-            </div>
-            <Sparkles className="w-8 h-8 text-amber-400 animate-pulse" />
-          </div>
-
-          <div className="space-y-2 my-4">
-            <div className="text-xs font-mono text-amber-400/60">{isArabic ? 'حالة العضوية الحالية' : 'CURRENT MEMBERSHIP STATUS'}</div>
-            <div className="text-lg md:text-xl font-black font-mono tracking-widest text-amber-400 flex items-center gap-2">
-              {isVip ? (
-                <>
-                  <Crown className="w-5 h-5 text-amber-400" />
-                  <span>{isArabic ? 'عضوية VIP مفعلة ⚡' : 'ACTIVE VIP PASS ⚡'}</span>
-                </>
-              ) : (
-                <span className="text-muted-foreground">{isArabic ? 'الخطة المجانية (FREE STARTER)' : 'FREE STARTER PLAN'}</span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex justify-between items-end border-t border-amber-500/20 pt-4">
-            <div>
-              <span className="text-[10px] text-muted-foreground uppercase font-bold block">{isArabic ? 'صاحب الحساب' : 'Cardholder'}</span>
-              <span className="text-xs font-black text-amber-400">{appUser?.name || firebaseUser?.displayName || (isArabic ? 'لاعب كيك أوف' : 'Player')}</span>
-            </div>
-            <div className="text-end">
-              <span className="text-[10px] text-muted-foreground uppercase font-bold block">{isArabic ? 'الصلاحية' : 'Valid Across'}</span>
-              <span className="text-xs font-bold text-foreground">{isArabic ? 'جميع ملاعب العبور والقاهرة' : 'All Partner Arenas'}</span>
-            </div>
-          </div>
-        </motion.div>
-
+      <div className="max-w-2xl mx-auto w-full">
         {/* Subscription Plan & Perks */}
         <Card className="global-box border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 bg-black flex flex-col justify-between">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
