@@ -33,13 +33,20 @@ service cloud.firestore {
 
     // Users collection
     match /users/{userId} {
-      allow read: if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow read: if true;
       allow create: if isAuth() && request.auth.uid == userId && request.resource.data.role == 'player' && request.resource.data.isBlacklisted == false;
       allow update: if isAuth() && (
         (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isBlacklisted', 'isVip', 'vipExpiry'])) ||
         isAdmin()
       );
       allow delete: if isAdmin();
+    }
+
+    // Usernames uniqueness reservation collection
+    match /usernames/{usernameLower} {
+      allow read: if true;
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isAdmin() || (isAuth() && resource.data.uid == request.auth.uid);
     }
 
     // Pitches collection

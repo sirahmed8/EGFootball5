@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CommunitiesPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { SolidSelect } from '@/components/ui/SolidSelect';
+import { Portal } from '@/components/Portal';
 
 interface Community {
   id: string;
@@ -266,7 +267,8 @@ export default function CommunitiesPage() {
 
       {/* Create Community Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <Portal>
+          <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <h2 className="text-2xl font-black text-foreground flex items-center gap-2">
@@ -345,6 +347,7 @@ export default function CommunitiesPage() {
             </form>
           </motion.div>
         </div>
+        </Portal>
       )}
     </div>
   );

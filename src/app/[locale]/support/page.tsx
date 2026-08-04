@@ -10,6 +10,7 @@ import { HelpCircle, MessageSquare, Plus, CheckCircle2, Clock, Send, ChevronDown
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { SupportPageSkeleton } from '@/components/skeletons/PageSkeletons';
+import { Portal } from '@/components/Portal';
 
 interface SupportTicket {
   id: string;
@@ -175,59 +176,61 @@ export default function SupportPage() {
 
       {/* Ticket Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-4 shadow-2xl relative">
-            <h2 className="text-2xl font-black text-foreground">Create Support Ticket</h2>
+        <Portal>
+          <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-4 shadow-2xl relative">
+              <h2 className="text-2xl font-black text-foreground">Create Support Ticket</h2>
 
-            <form onSubmit={handleSubmitTicket} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Subject</label>
-                <input
-                  type="text"
-                  required
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Summary of issue..."
-                  className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium"
-                />
-              </div>
+              <form onSubmit={handleSubmitTicket} className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Subject</label>
+                  <input
+                    type="text"
+                    required
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    placeholder="Summary of issue..."
+                    className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium"
+                  />
+                </div>
 
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium"
-                >
-                  <option value="Booking Issue" className="bg-neutral-900">Booking Issue</option>
-                  <option value="Payment Deposit" className="bg-neutral-900">Payment Deposit</option>
-                  <option value="Public Match" className="bg-neutral-900">Public Match</option>
-                  <option value="Blacklist Appeal" className="bg-neutral-900">Blacklist Appeal</option>
-                </select>
-              </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Category</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium"
+                  >
+                    <option value="Booking Issue" className="bg-neutral-900">Booking Issue</option>
+                    <option value="Payment Deposit" className="bg-neutral-900">Payment Deposit</option>
+                    <option value="Public Match" className="bg-neutral-900">Public Match</option>
+                    <option value="Blacklist Appeal" className="bg-neutral-900">Blacklist Appeal</option>
+                  </select>
+                </div>
 
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Message Detail</label>
-                <textarea
-                  required
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Provide details about your inquiry..."
-                  className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium h-28 resize-none"
-                />
-              </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Message Detail</label>
+                  <textarea
+                    required
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Provide details about your inquiry..."
+                    className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium h-28 resize-none"
+                  />
+                </div>
 
-              <div className="flex gap-3 pt-2">
-                <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="w-1/2 stadium-glass border-white/10 text-foreground rounded-2xl cursor-pointer">
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={submitting} className="w-1/2 bg-primary text-black font-black rounded-2xl glow-primary cursor-pointer">
-                  {submitting ? 'Submitting...' : 'Submit Ticket 🚀'}
-                </Button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
+                <div className="flex gap-3 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="w-1/2 stadium-glass border-white/10 text-foreground rounded-2xl cursor-pointer">
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={submitting} className="w-1/2 bg-primary text-black font-black rounded-2xl glow-primary cursor-pointer">
+                    {submitting ? 'Submitting...' : 'Submit Ticket 🚀'}
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        </Portal>
       )}
     </div>
   );

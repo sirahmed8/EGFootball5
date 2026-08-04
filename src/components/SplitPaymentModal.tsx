@@ -6,6 +6,8 @@ import { Share2, Copy, Check, Users, DollarSign, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
+import { Portal } from '@/components/Portal';
+
 interface SplitPaymentModalProps {
   totalAmount: number;
   numPlayers: number;
@@ -28,7 +30,8 @@ export function SplitPaymentModal({ totalAmount, numPlayers, isOpen, onClose }: 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <Portal>
+      <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md global-box global-outline-glow rounded-3xl p-6 md:p-8 space-y-5 shadow-2xl relative">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h2 className="text-xl font-black text-foreground flex items-center gap-2">
@@ -63,5 +66,6 @@ export function SplitPaymentModal({ totalAmount, numPlayers, isOpen, onClose }: 
         </Button>
       </motion.div>
     </div>
+    </Portal>
   );
 }

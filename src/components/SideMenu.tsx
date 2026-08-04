@@ -68,6 +68,10 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
       window.dispatchEvent(new CustomEvent('open-ai-chat', { detail: { tab: 'support' } }));
       return;
     }
+    const normalize = (p: string) => p.replace(/\/$/, '') || '/';
+    if (normalize(pathname) === normalize(href)) {
+      return;
+    }
     router.push(href as '/');
   };
 

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, ThumbsUp, Upload, CheckCircle2, Video, Inbox } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Portal } from '@/components/Portal';
 import { toast } from 'sonner';
 import {
   collection,
@@ -237,29 +238,31 @@ export default function GoalOfTheMonthPage() {
 
       {/* Modal */}
       {isSubmitOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-4 bg-black" dir={isArabic ? 'rtl' : 'ltr'}>
-            <h2 className="text-2xl font-black text-foreground">{isArabic ? 'تقديم فيديو الهدف للمسابقة' : 'Submit Goal Video Clip'}</h2>
-            <form onSubmit={handleSubmitGoal} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'عنوان الهدف *' : 'Goal Title *'}</label>
-                <input type="text" required value={goalTitle} onChange={(e) => setGoalTitle(e.target.value)} placeholder={isArabic ? 'مثال: تسديدة صاروخية في المقص' : 'e.g. Long-range Rocket Top Corner'} className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary" />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'رابط الفيديو (YouTube / MP4) *' : 'Video URL (YouTube / MP4) *'}</label>
-                <input type="url" required value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://..." className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary font-mono text-xs" />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'اسم الملعب' : 'Pitch Name'}</label>
-                <input type="text" value={pitchName} onChange={(e) => setPitchName(e.target.value)} placeholder={isArabic ? 'مثال: استاد الأهلي بالعبور' : 'e.g. Obour Eagles Arena'} className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary" />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <Button type="button" variant="outline" onClick={() => setIsSubmitOpen(false)} className="w-1/2 rounded-2xl">{isArabic ? 'إلغاء' : 'Cancel'}</Button>
-                <Button type="submit" disabled={submitting} className="w-1/2 bg-primary text-black font-black rounded-2xl glow-primary">{submitting ? (isArabic ? 'جاري التقديم...' : 'Submitting...') : (isArabic ? 'ارفع المقطع 🚀' : 'Submit Clip 🚀')}</Button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
+        <Portal>
+          <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-4 bg-black" dir={isArabic ? 'rtl' : 'ltr'}>
+              <h2 className="text-2xl font-black text-foreground">{isArabic ? 'تقديم فيديو الهدف للمسابقة' : 'Submit Goal Video Clip'}</h2>
+              <form onSubmit={handleSubmitGoal} className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'عنوان الهدف *' : 'Goal Title *'}</label>
+                  <input type="text" required value={goalTitle} onChange={(e) => setGoalTitle(e.target.value)} placeholder={isArabic ? 'مثال: تسديدة صاروخية في المقص' : 'e.g. Long-range Rocket Top Corner'} className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'رابط الفيديو (YouTube / MP4) *' : 'Video URL (YouTube / MP4) *'}</label>
+                  <input type="url" required value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://..." className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary font-mono text-xs" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'اسم الملعب' : 'Pitch Name'}</label>
+                  <input type="text" value={pitchName} onChange={(e) => setPitchName(e.target.value)} placeholder={isArabic ? 'مثال: استاد الأهلي بالعبور' : 'e.g. Obour Eagles Arena'} className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary" />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setIsSubmitOpen(false)} className="w-1/2 rounded-2xl">{isArabic ? 'إلغاء' : 'Cancel'}</Button>
+                  <Button type="submit" disabled={submitting} className="w-1/2 bg-primary text-black font-black rounded-2xl glow-primary">{submitting ? (isArabic ? 'جاري التقديم...' : 'Submitting...') : (isArabic ? 'ارفع المقطع 🚀' : 'Submit Clip 🚀')}</Button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        </Portal>
       )}
     </div>
   );

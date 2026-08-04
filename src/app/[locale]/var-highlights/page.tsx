@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Camera, Play, Share2, Film, Upload, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Portal } from '@/components/Portal';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore';
@@ -200,7 +201,8 @@ export default function VarHighlightsPage() {
 
       {/* Upload Modal */}
       {isUploadOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <Portal>
+          <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="global-box border-white/10 rounded-3xl p-6 max-w-md w-full space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <h3 className="text-lg font-black text-foreground flex items-center gap-2">
@@ -267,6 +269,7 @@ export default function VarHighlightsPage() {
             </form>
           </motion.div>
         </div>
+        </Portal>
       )}
     </div>
   );

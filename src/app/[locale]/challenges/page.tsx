@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Swords, MapPin, Clock, Plus, CheckCircle2, X, Inbox } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Portal } from '@/components/Portal';
 import { toast } from 'sonner';
 import {
   collection,
@@ -257,10 +258,11 @@ export default function SquadChallengesPage() {
 
       {/* Post Challenge Modal */}
       {isModalOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-          onClick={() => setIsModalOpen(false)}
-        >
+        <Portal>
+          <div
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+            onClick={() => setIsModalOpen(false)}
+          >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -349,6 +351,7 @@ export default function SquadChallengesPage() {
             </form>
           </motion.div>
         </div>
+        </Portal>
       )}
     </div>
   );

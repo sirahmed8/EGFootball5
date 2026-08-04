@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Trophy, Crown, Sparkles, Inbox, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Portal } from '@/components/Portal';
 import { toast } from 'sonner';
 import {
   collection,
@@ -219,10 +220,11 @@ export default function TournamentsPage() {
 
       {/* Bracket Viewer Modal */}
       {selectedTournament && selectedTournament.rounds && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-          onClick={() => setSelectedTournament(null)}
-        >
+        <Portal>
+          <div
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+            onClick={() => setSelectedTournament(null)}
+          >
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -271,6 +273,7 @@ export default function TournamentsPage() {
             </div>
           </motion.div>
         </div>
+        </Portal>
       )}
     </div>
   );

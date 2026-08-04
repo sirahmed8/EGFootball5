@@ -348,18 +348,39 @@ export default function ProfilePage() {
 
   return (
     <div className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-black">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-black text-foreground tracking-tight flex items-center gap-3">
-            <span>{t('title')}</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-4xl font-black text-foreground tracking-tight">
+              {appUser?.name}
+            </h1>
             {isUserVip(appUser) && (
               <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-black inline-flex items-center gap-1.5 glow-amber">
                 <Crown className="w-4 h-4 text-amber-400 animate-pulse" /> Pitch Pass VIP
               </span>
             )}
-          </h1>
-          <p className="text-muted-foreground mt-2 font-medium">{t('description')}</p>
+          </div>
+          {appUser?.username && (
+            <p className="text-amber-400 font-mono font-bold text-sm">
+              @{appUser.username}
+            </p>
+          )}
+          <p className="text-muted-foreground text-sm font-medium">{t('description')}</p>
         </div>
+
+        {appUser?.username && (
+          <Button
+            onClick={() => {
+              const url = `${window.location.origin}/profile/@${appUser.username}`;
+              navigator.clipboard.writeText(url);
+              toast.success('Public profile link copied to clipboard!');
+            }}
+            variant="outline"
+            className="rounded-2xl border-white/10 hover:bg-white/10 font-bold text-xs shrink-0 cursor-pointer"
+          >
+            📋 Copy Profile Link (@{appUser.username})
+          </Button>
+        )}
       </div>
 
       <DailyAIAdviceCard />

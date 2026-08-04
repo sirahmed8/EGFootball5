@@ -11,6 +11,8 @@ export interface JoinedPlayer {
 export interface User {
   uid: string;
   name: string;
+  username?: string;
+  usernameLower?: string;
   email?: string;
   phone: string;
   photoURL?: string;

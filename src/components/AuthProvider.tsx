@@ -9,6 +9,8 @@ import { User as AppUser } from '@/types';
 import { toast } from 'sonner';
 import { usePathname, useRouter } from '@/i18n/routing';
 
+import { SetUsernameModal } from '@/components/SetUsernameModal';
+
 const PUBLIC_PATHS = ['/', '/login', '/privacy', '/terms', '/cookies', '/guide'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -87,5 +89,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [clearAuth, pathname, router]);
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <SetUsernameModal />
+    </>
+  );
 }

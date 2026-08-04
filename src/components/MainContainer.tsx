@@ -22,19 +22,15 @@ export function MainContainer({ children }: { children: React.ReactNode }) {
 
   return (
     <main className={`min-h-screen flex flex-col pt-16 md:pt-16 transition-all duration-300 ${hasSidebar ? 'md:ms-64' : ''}`}>
-      {/* Fix #12: AnimatePresence mode="wait" enables exit animations on page navigation */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={pathname}
-          variants={pageVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          className="flex-1 flex flex-col"
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
+      <motion.div
+        key={pathname}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
+        className="flex-1 flex flex-col"
+      >
+        {children}
+      </motion.div>
     </main>
   );
 }
