@@ -60,28 +60,21 @@ function extractChips(text: string, isArabic: boolean): { cleanText: string; chi
   return { cleanText, chips: chips.slice(0, 3) };
 }
 
-// Log usage to Firestore via direct REST API (no server needed)
+import { db } from '@/lib/firebase/config';
+import { collection, addDoc } from 'firebase/firestore';
+
+// Log usage to Firestore via Firebase JS SDK
 async function logAiUsage(uid: string, prompt: string, modelUsed: string, tokens: number) {
   try {
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'football1fc1';
-    await fetch(
-      `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/aiLogs`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fields: {
-            uid: { stringValue: uid },
-            prompt: { stringValue: prompt.substring(0, 200) },
-            modelUsed: { stringValue: modelUsed },
-            tokens: { integerValue: String(tokens) },
-            createdAt: { integerValue: String(Date.now()) },
-          },
-        }),
-      }
-    );
-  } catch {
-    // Non-critical — silently ignore
+    await addDoc(collection(db, 'aiLogs'), {
+      uid: uid || 'guest',
+      prompt: prompt.substring(0, 200),
+      modelUsed,
+      tokens: Number(tokens) || 50,
+      createdAt: Date.now(),
+    });
+  } catch (err) {
+    console.warn('Failed to write AI log to Firestore:', err);
   }
 }
 

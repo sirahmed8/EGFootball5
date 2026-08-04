@@ -204,5 +204,11 @@ service cloud.firestore {
       allow create: if isAuth() && isNotBlacklisted();
       allow delete: if isAdmin();
     }
+
+    // AI Usage Logs collection
+    match /aiLogs/{logId} {
+      allow read: if isOwner();
+      allow create: if true;
+    }
   }
 }
