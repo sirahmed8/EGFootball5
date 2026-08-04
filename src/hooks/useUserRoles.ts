@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collection, query, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { User as AppUser, Role } from '@/types';
 import { queryKeys } from '@/lib/queryKeys';
@@ -126,6 +126,22 @@ export function useToggleVipStatus() {
         vipExpiry: expiry,
         vipTier: isVip ? 'Pitch Pass VIP (Granted by Owner)' : null,
       });
+
+      if (isVip) {
+        try {
+          const notifRef = doc(collection(db, 'notifications'));
+          await setDoc(notifRef, {
+            userId,
+            title: '👑 🎉 VIP Pass Gifted by Platform Owner!',
+            message: 'Congratulations! You have been gifted free Pitch Pass VIP status by the platform owner! Enjoy 10% auto-discounts on all bookings, 20-min deposit lock, and your golden profile crown!',
+            type: 'vip_gift',
+            read: false,
+            createdAt: Date.now(),
+          });
+        } catch {
+          // Non-blocking notification write
+        }
+      }
     },
     onMutate: async ({ userId, isVip }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.users.all });

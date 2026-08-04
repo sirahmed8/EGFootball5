@@ -22,6 +22,7 @@ export default function SubscriptionPage() {
   const isVip = isUserVip(appUser);
 
   const [isSubscribeModalOpen, setIsSubscribeModalOpen] = React.useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = React.useState(false);
   const [selectedMethod, setSelectedMethod] = React.useState<'vodafone' | 'instapay' | 'card'>('vodafone');
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -68,8 +69,8 @@ export default function SubscriptionPage() {
         vipTier: 'Pitch Pass VIP',
       });
 
-      toast.success(isArabic ? 'تهانينا! تم تفعيل اشتراك Pitch Pass VIP بنجاح! 👑' : 'Congratulations! Pitch Pass VIP subscription activated! 👑');
       setIsSubscribeModalOpen(false);
+      setIsSuccessModalOpen(true);
     } catch (err) {
       console.error(err);
       toast.error(isArabic ? 'فشل التفعيل. يرجى التواصل مع الدعم.' : 'Activation failed. Please contact support.');
@@ -106,7 +107,6 @@ export default function SubscriptionPage() {
         )}
       </motion.div>
 
-
       <div className="max-w-2xl mx-auto w-full">
         {/* Subscription Plan & Perks */}
         <Card className="global-box border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 bg-black flex flex-col justify-between">
@@ -120,7 +120,6 @@ export default function SubscriptionPage() {
               <span className="text-xs text-muted-foreground block font-bold">{isArabic ? '/ شهرياً' : '/ month'}</span>
             </div>
           </div>
-
 
           <div className="space-y-3.5">
             {perks.map((perk, idx) => (
@@ -256,6 +255,66 @@ export default function SubscriptionPage() {
                   </Button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* VIP Activation Celebration Modal */}
+      <AnimatePresence>
+        {isSuccessModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-lg flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              className="w-full max-w-lg bg-black border-2 border-amber-500/60 rounded-3xl p-6 md:p-8 space-y-6 text-center relative shadow-[0_0_60px_rgba(245,158,11,0.35)] overflow-hidden"
+              dir={isArabic ? 'rtl' : 'ltr'}
+            >
+              {/* Gold Ambient Glow Background */}
+              <div className="absolute -top-20 -left-20 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative space-y-4">
+                <div className="w-20 h-20 rounded-3xl bg-amber-500/10 border-2 border-amber-500/40 flex items-center justify-center mx-auto shadow-2xl">
+                  <Crown className="w-10 h-10 text-amber-400 animate-bounce" />
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-xs font-black uppercase text-amber-400 tracking-widest block">
+                    {isArabic ? '👑 تم التفعيل بنجاح!' : '👑 MEMBERSHIP UNLOCKED!'}
+                  </span>
+                  <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
+                    {isArabic ? 'أهلاً بك في عالم VIP الممتاز! 🎉' : 'Welcome to Pitch Pass VIP Elite! 🎉'}
+                  </h2>
+                </div>
+
+                <p className="text-xs text-muted-foreground leading-relaxed max-w-md mx-auto font-medium">
+                  {isArabic
+                    ? 'تهانينا! أصبحت الآن عضواً مميزاً في منصة EGFootball5. تم تفعيل جميع المزايا بحسابك تلقائياً عبر جميع ملاعب العبور والقاهرة.'
+                    : 'Congratulations! All VIP perks have been activated on your profile automatically across all partner arenas in Obour & Cairo.'}
+                </p>
+
+                <div className="p-4 rounded-2xl bg-white/5 border border-amber-500/30 text-start space-y-2.5 text-xs">
+                  <div className="font-extrabold text-amber-400 text-xs border-b border-white/10 pb-2">
+                    {isArabic ? '✨ المزايا المفتوحة بحسابك الآن:' : '✨ Unlocked VIP Perks:'}
+                  </div>
+                  {perks.map((p, i) => (
+                    <div key={i} className="flex items-center gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span className="font-bold text-foreground text-[11px]">{p.title}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <Button
+                  onClick={() => setIsSuccessModalOpen(false)}
+                  className="w-full py-6 text-base font-black rounded-2xl bg-amber-500 text-black hover:bg-amber-400 cursor-pointer shadow-lg glow-amber"
+                >
+                  <Crown className="w-5 h-5 me-2" />
+                  {isArabic ? '⚽ ابدأ باللعب كـ VIP الآن' : '⚽ Start Playing Like a VIP'}
+                </Button>
+              </div>
             </motion.div>
           </div>
         )}
