@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crown, CheckCircle2, Sparkles, Shield, Zap, Award, Clock, Phone, CreditCard, X, Check, Lock } from 'lucide-react';
+import { Crown, CheckCircle2, Sparkles, Shield, Zap, Award, Clock, Phone, CreditCard, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -106,14 +106,6 @@ export default function SubscriptionPage() {
         )}
       </motion.div>
 
-      {/* Real Payment Gateway Prepared Notice */}
-      <div className="p-4 rounded-2xl bg-white/5 border border-amber-500/30 flex items-center gap-3 shadow-md text-xs text-muted-foreground">
-        <Lock className="w-5 h-5 text-amber-400 shrink-0" />
-        <div>
-          <span className="font-bold text-foreground block">{isArabic ? '⚡ بوابة الدفع الإلكتروني جاهزة ومُجهزة' : '⚡ Real Payment Gateway Integration Ready'}</span>
-          <span>{isArabic ? 'بوابة Paymob وكروت البنك مجهزة للتفعيل المباشر. حتى ذلك الحين، جميع المستخدمين في الخطة المجانية، ويمكنك الترقية فورياً عبر فودافون كاش أو إنستا باي.' : 'Paymob & Card sandbox endpoints are prepared. All users start on Free Plan by default. Instant activation is supported via InstaPay & Vodafone Cash.'}</span>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
         {/* 3D Animated VIP Pass Card */}

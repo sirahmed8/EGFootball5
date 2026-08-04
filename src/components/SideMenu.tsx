@@ -122,7 +122,7 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
             items: [
               ...(appUser?.role === 'admin' ? [{ href: '/admin/dashboard', label: tNav('adminDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
               ...(appUser?.role === 'owner' ? [{ href: '/owner', label: tNav('ownerDashboard'), icon: <LayoutDashboard size={18} /> }] : []),
-              ...(appUser?.role === 'owner' ? [{ href: '/owner/analytics', label: isArabic ? '📊 إحصائيات وأرباح المنصة' : '📊 Master Analytics', icon: <Activity size={18} /> }] : []),
+              ...(appUser?.role === 'owner' ? [{ href: '/owner/analytics', label: isArabic ? 'إحصائيات وأرباح المنصة' : 'Master Analytics', icon: <Activity size={18} /> }] : []),
               ...(appUser?.role === 'owner' ? [{ href: '/owner/users', label: tNav('managePlayers'), icon: <ShieldCheck size={18} /> }] : []),
             ],
           },
