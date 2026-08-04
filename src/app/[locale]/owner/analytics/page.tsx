@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useQuery } from '@tanstack/react-query';
-import { Booking, Pitch, User as AppUser } from '@/types';
+import { Booking, Pitch, User as AppUser, BookingStatus } from '@/types';
 import { useLocale } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,9 +79,9 @@ export default function MasterAnalyticsPage() {
   if (loading || appUser?.role !== 'owner' || bL || pL || uL || aiL) return <DashboardPageSkeleton />;
 
   /* ─── KPI Calculations ─── */
-  const confirmed = bookings.filter(b => b.status === 'confirmed');
-  const pending = bookings.filter(b => b.status === 'pending');
-  const cancelled = bookings.filter(b => b.status === 'cancelled');
+  const confirmed = bookings.filter(b => b.status === BookingStatus.CONFIRMED);
+  const pending = bookings.filter(b => b.status === BookingStatus.PENDING_REVIEW || b.status === BookingStatus.LOCKED_TEMPORARY);
+  const cancelled = bookings.filter(b => b.status === BookingStatus.CANCELLED || b.status === BookingStatus.REJECTED);
 
   const grossRevenue = confirmed.reduce((s, b) => s + (b.totalAmount || 0), 0);
 
