@@ -1,10 +1,5 @@
-// Secure Gemini AI Engine with Multi-Model Fallback & Server API Route Integration
+// EGFootball5 AI Engine — Calls Google Gemini 2.5 Flash via OpenRouter directly from client
 import { getAuth } from 'firebase/auth';
-
-interface CacheEntry {
-  timestamp: number;
-  data: AIResponseResult;
-}
 
 export interface AIResponseResult {
   text: string;
@@ -12,87 +7,82 @@ export interface AIResponseResult {
   modelUsed: string;
 }
 
-// 10-minute in-memory cache
-const memoryCache = new Map<string, CacheEntry>();
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+interface CacheEntry {
+  timestamp: number;
+  data: AIResponseResult;
+}
 
-function getCacheKey(prompt: string, imageBase64?: string, systemContext?: string): string {
-  return `${prompt.trim()}_${imageBase64 ? imageBase64.substring(0, 40) : ''}_${systemContext || ''}`;
+// 10-minute in-memory cache (avoids duplicate calls for same prompt)
+const memoryCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 10 * 60 * 1000;
+
+function getCacheKey(prompt: string, imageBase64?: string): string {
+  return `${prompt.trim()}_${imageBase64 ? imageBase64.substring(0, 40) : ''}`;
 }
 
 function cleanExpiredCache() {
   const now = Date.now();
   for (const [key, entry] of memoryCache.entries()) {
-    if (now - entry.timestamp > CACHE_TTL_MS) {
-      memoryCache.delete(key);
-    }
+    if (now - entry.timestamp > CACHE_TTL_MS) memoryCache.delete(key);
   }
 }
 
 function detectIsArabic(prompt: string, locale?: string): boolean {
-  const arabicRegex = /[\u0600-\u06FF]/;
-  const englishRegex = /[a-zA-Z]/;
-
-  if (arabicRegex.test(prompt)) return true;
-  if (englishRegex.test(prompt)) return false;
+  if (/[\u0600-\u06FF]/.test(prompt)) return true;
+  if (/[a-zA-Z]/.test(prompt)) return false;
   return locale === 'ar';
 }
 
-function generateClientFallback(prompt: string, isArabic: boolean): { text: string; chips: string[] } {
-  const lower = prompt.toLowerCase();
+function extractChips(text: string, isArabic: boolean): { cleanText: string; chips: string[] } {
+  const chips: string[] = [];
+  let cleanText = text;
 
-  if (lower.includes('book') || lower.includes('حجز') || lower.includes('احجز')) {
-    return {
-      text: isArabic
-        ? '⚽ **خطوات حجز الملعب:**\n1. اختر الملعب والتاريخ والساعة.\n2. يتم قفل الحجز 15 دقيقة (أو 20 دقيقة لـ VIP).\n3. ادفع العربون عبر فودافون كاش (01012345678) أو إنستا باي (egfootball5@instapay).\n4. احصل على رمز QR الفوري!'
-        : '⚽ **How to book a pitch:**\n1. Pick pitch, date & time slot.\n2. Slot is locked 15 mins (20 mins for VIP).\n3. Pay deposit via Vodafone Cash or InstaPay.\n4. Get instant QR pass!',
-      chips: isArabic
-        ? ['💰 طرق دفع العربون', '🏟️ الملاعب المتاحة', '👑 مزايا عضوية VIP']
-        : ['💰 Payment methods', '🏟️ Available pitches', '👑 VIP Pass Perks'],
-    };
+  const chipsMatch = text.match(/CHIPS:\s*\[([\s\S]*?)\]/) || text.match(/CHIPS:\s*(.*)$/m);
+  if (chipsMatch) {
+    const rawChips = chipsMatch[1].split(/,|\n/);
+    for (const c of rawChips) {
+      const trimmed = c.trim().replace(/^["'\-\d\.]+\s*/, '').replace(/["']/g, '');
+      if (trimmed && trimmed.length < 60 && chips.length < 3) chips.push(trimmed);
+    }
+    cleanText = text.replace(/CHIPS:[\s\S]*$/, '').trim();
   }
 
-  if (lower.includes('match') || lower.includes('مباراة') || lower.includes('المباريات') || lower.includes('public')) {
-    return {
-      text: isArabic
-        ? '🏆 **المباريات العامة (Public Matches):**\nيمكنك الانضمام لمباريات خماسي عامة، اختيار مركزك (حارس، مدافع، وسط، مهاجم)، وتقسيم تكلفة الملعب بالتساوي مع باقي الفريق!'
-        : '🏆 **Public Matches:**\nJoin open 5v5 lobbies, select your position (GK, DEF, MID, STR), and split turf costs evenly with your squad!',
-      chips: isArabic
-        ? ['⚽ كيف أحجز ملعباً؟', '📍 أماكن الملاعب', '🏅 صدارة اللاعبين']
-        : ['⚽ How to book a pitch?', '📍 Pitch locations', '🏅 Leaderboard & Stats'],
-    };
+  if (chips.length < 3) {
+    const defaults = isArabic
+      ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '💰 طرق الدفع']
+      : ['⚽ How to book a pitch?', '🏆 Available matches', '💰 Payment methods'];
+    for (const d of defaults) {
+      if (chips.length >= 3) break;
+      if (!chips.includes(d)) chips.push(d);
+    }
   }
 
-  if (lower.includes('location') || lower.includes('موقع') || lower.includes('عبور') || lower.includes('مكان') || lower.includes('cairo')) {
-    return {
-      text: isArabic
-        ? '📍 **مواقع ملاعب EGFootball5:**\n- **مدينة العبور:** الحي التاسع، حي الشباب، والمنطقة المركزية.\n- **القاهرة الجديدة:** التجمع الخامس والرحاب.\nجميع الملاعب مجهزة بنجيلة صناعية وإضاءة ليلية.'
-        : '📍 **EGFootball5 Pitch Locations:**\n- **Obour City:** 9th District, Youth Hub, Central District.\n- **New Cairo:** 5th Settlement & Rehab.\nAll pitches feature top synthetic turf and floodlights.',
-      chips: isArabic
-        ? ['⚽ احجز ملعباً الآن', '🏆 المباريات المتاحة', '💰 أسعار الحجز']
-        : ['⚽ Book a pitch now', '🏆 Open matches', '💰 Booking rates'],
-    };
-  }
+  return { cleanText, chips: chips.slice(0, 3) };
+}
 
-  if (lower.includes('price') || lower.includes('سعر') || lower.includes('عربون') || lower.includes('vip') || lower.includes('خصم')) {
-    return {
-      text: isArabic
-        ? '💎 **الأسعار والخصومات:**\n- أسعار الملاعب بين 250 و 450 ج.م / ساعة.\n- **عضوية Pitch Pass VIP** تمنحك خصماً تلقائياً 10% على جميع الحجوزات وتاج ذهبي!'
-        : '💎 **Pricing & Discounts:**\n- Pitch rates start from 250 to 450 EGP / hour.\n- **Pitch Pass VIP** gives you automatic 10% off all bookings & golden crown badge!',
-      chips: isArabic
-        ? ['👑 اشترك في VIP Pass', '⚽ احجز ملعباً', '📍 أماكن الملاعب']
-        : ['👑 Join VIP Pass', '⚽ Book a pitch', '📍 Pitch locations'],
-    };
+// Log usage to Firestore via direct REST API (no server needed)
+async function logAiUsage(uid: string, prompt: string, modelUsed: string, tokens: number) {
+  try {
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'football1fc1';
+    await fetch(
+      `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/aiLogs`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            uid: { stringValue: uid },
+            prompt: { stringValue: prompt.substring(0, 200) },
+            modelUsed: { stringValue: modelUsed },
+            tokens: { integerValue: String(tokens) },
+            createdAt: { integerValue: String(Date.now()) },
+          },
+        }),
+      }
+    );
+  } catch {
+    // Non-critical — silently ignore
   }
-
-  return {
-    text: isArabic
-      ? `أهلاً بك! كيف يمكنني مساعدتك في استفسارك حول **"${prompt}"** أو حجز ملاعب الخماسي بالعبور والقاهرة؟`
-      : `Hello! How can I help you regarding **"${prompt}"** or booking 5-a-side turfs in Obour & Cairo?`,
-    chips: isArabic
-      ? ['⚽ كيف أحجز ملعباً بالعبور؟', '🏆 المباريات العامة المتاحة', '📍 أماكن الملاعب']
-      : ['⚽ How to book a pitch?', '🏆 Available public matches', '📍 Pitch locations'],
-  };
 }
 
 export async function generateAIResponse(
@@ -107,22 +97,106 @@ export async function generateAIResponse(
   cleanExpiredCache();
 
   const isArabic = detectIsArabic(prompt, options?.locale);
-  const cacheKey = getCacheKey(prompt, options?.imageBase64, options?.systemContext);
+  const cacheKey = getCacheKey(prompt, options?.imageBase64);
   const cached = memoryCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    return cached.data;
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.data;
+
+  // Get current user uid for logging
+  let uid = 'guest';
+  try {
+    uid = getAuth().currentUser?.uid || 'guest';
+  } catch { /* ignore */ }
+
+  const systemInstruction = `You are EGFootball5 AI Assistant, an expert 5-a-side football platform assistant in Egypt.
+Be enthusiastic, accurate, concise, and natural.
+
+CRITICAL LANGUAGE RULE:
+- If the user writes in ARABIC → reply ONLY in warm, fluent Egyptian Arabic.
+- If the user writes in ENGLISH → reply ONLY in clear, enthusiastic English.
+- Never mix languages. Always match the user's language exactly.
+
+Core Platform Info:
+- Platform: EGFootball5 — 5-a-side pitch booking & public matches.
+- Locations: Obour City (9th District, Youth Hub) & New Cairo (5th Settlement, Rehab).
+- Booking: Pick pitch → Select date & time → 15-min slot lock (20 min for VIP) → Pay deposit via Vodafone Cash (01012345678) or InstaPay (egfootball5@instapay) → Instant QR pass.
+- Public Matches: Join open 5v5 lobbies, choose position (GK, DEF, MID, STR), split turf cost.
+- VIP Pass: 10% automatic discount on all bookings + gold crown badge.
+- Pricing: Pitches 250–450 EGP/hr.
+
+${options?.systemContext ? `User Info: ${options.systemContext}` : ''}
+
+After your response, always output exactly 3 short follow-up prompt chips:
+CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
+
+  // === PRIMARY: OpenRouter → Google Gemini 2.5 Flash ===
+  const openRouterKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || '';
+
+  if (openRouterKey) {
+    const models = [
+      'google/gemini-2.5-flash',
+      'meta-llama/llama-3.3-70b-instruct',
+    ];
+
+    for (const model of models) {
+      try {
+        const content = options?.imageBase64
+          ? [
+              { type: 'text', text: prompt },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: options.imageBase64.startsWith('data:')
+                    ? options.imageBase64
+                    : `data:image/jpeg;base64,${options.imageBase64}`,
+                },
+              },
+            ]
+          : prompt;
+
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${openRouterKey}`,
+            'HTTP-Referer': 'https://egfootball5.web.app',
+            'X-Title': 'EGFootball5',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemInstruction },
+              { role: 'user', content },
+            ],
+            temperature: 0.4,
+            max_tokens: 512,
+          }),
+        });
+
+        if (!res.ok) continue;
+
+        const json = await res.json();
+        const rawText = json?.choices?.[0]?.message?.content;
+        if (!rawText || typeof rawText !== 'string') continue;
+
+        const { cleanText, chips } = extractChips(rawText, isArabic);
+        const tokens = json?.usage?.total_tokens || Math.ceil((prompt.length + cleanText.length) / 4);
+
+        await logAiUsage(uid, prompt, `openrouter/${model}`, tokens);
+
+        const result: AIResponseResult = { text: cleanText, chips, modelUsed: `google-gemini/${model}` };
+        memoryCache.set(cacheKey, { timestamp: Date.now(), data: result });
+        return result;
+      } catch (err) {
+        console.warn(`OpenRouter model ${model} failed:`, err);
+      }
+    }
   }
 
+  // === FALLBACK: Server API Route (works on Vercel with server functions) ===
   try {
-    const auth = getAuth();
-    let token: string | undefined = undefined;
-    try {
-      token = await auth.currentUser?.getIdToken();
-    } catch {
-      // Guest or unauthenticated user
-    }
+    let token: string | undefined;
+    try { token = await getAuth().currentUser?.getIdToken(); } catch { /* guest */ }
 
-    // Call server API route `/api/ai/chat`
     const response = await fetch('/api/ai/chat', {
       method: 'POST',
       headers: {
@@ -144,23 +218,24 @@ export async function generateAIResponse(
         const result: AIResponseResult = {
           text: json.text,
           chips: json.chips || [],
-          modelUsed: json.modelUsed || 'gemini-ai',
+          modelUsed: json.modelUsed || 'gemini-server',
         };
         memoryCache.set(cacheKey, { timestamp: Date.now(), data: result });
         return result;
       }
     }
   } catch (err) {
-    console.warn('Error fetching AI response from server endpoint:', err);
+    console.warn('Server AI route failed:', err);
   }
 
-  // Smart contextual client fallback matching exact prompt
-  const fallback = generateClientFallback(prompt, isArabic);
-  const fallbackResult: AIResponseResult = {
-    text: fallback.text,
-    chips: fallback.chips,
-    modelUsed: 'smart-client-engine',
+  // === LAST RESORT FALLBACK: Honest message instead of fake template ===
+  return {
+    text: isArabic
+      ? 'عذراً، يبدو أن خدمة الذكاء الاصطناعي غير متاحة مؤقتاً. يرجى المحاولة مرة أخرى بعد قليل!'
+      : 'Sorry, the AI assistant is temporarily unavailable. Please try again in a moment!',
+    chips: isArabic
+      ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '💰 طرق الدفع']
+      : ['⚽ How to book a pitch?', '🏆 Available matches', '💰 Payment methods'],
+    modelUsed: 'offline-fallback',
   };
-
-  return fallbackResult;
 }
