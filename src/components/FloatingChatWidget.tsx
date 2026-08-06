@@ -283,11 +283,17 @@ export function FloatingChatWidget() {
       orderBy('createdAt', 'asc'),
       limit(50)
     );
-    const unsubComm = onSnapshot(qComm, (snap) => {
-      const msgs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as CommunityMessage));
-      setCommunityMessages(msgs);
-      if (activeTab === 'community') scrollToBottom();
-    });
+    const unsubComm = onSnapshot(
+      qComm,
+      (snap) => {
+        const msgs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as CommunityMessage));
+        setCommunityMessages(msgs);
+        if (activeTab === 'community') scrollToBottom();
+      },
+      (err) => {
+        console.warn('Community chat snapshot error:', err);
+      }
+    );
 
     return () => unsubComm();
   }, [isOpen, activeTab, scrollToBottom]);
@@ -297,10 +303,16 @@ export function FloatingChatWidget() {
 
     if (isAdmin) {
       const qTickets = query(collection(db, 'support_tickets'), orderBy('updatedAt', 'desc'));
-      const unsubTickets = onSnapshot(qTickets, (snap) => {
-        const tix = snap.docs.map((d) => ({ id: d.id, ...d.data() } as SupportTicket));
-        setSupportTickets(tix);
-      });
+      const unsubTickets = onSnapshot(
+        qTickets,
+        (snap) => {
+          const tix = snap.docs.map((d) => ({ id: d.id, ...d.data() } as SupportTicket));
+          setSupportTickets(tix);
+        },
+        (err) => {
+          console.warn('Admin support tickets snapshot error:', err);
+        }
+      );
       return () => unsubTickets();
     } else {
       const userTicketId = firebaseUser.uid;
@@ -308,11 +320,17 @@ export function FloatingChatWidget() {
         collection(db, 'support_tickets', userTicketId, 'messages'),
         orderBy('createdAt', 'asc')
       );
-      const unsubUserMsgs = onSnapshot(qUserMsgs, (snap) => {
-        const msgs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as SupportMessage));
-        setSupportMessages(msgs);
-        if (activeTab === 'support') scrollToBottom();
-      });
+      const unsubUserMsgs = onSnapshot(
+        qUserMsgs,
+        (snap) => {
+          const msgs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as SupportMessage));
+          setSupportMessages(msgs);
+          if (activeTab === 'support') scrollToBottom();
+        },
+        (err) => {
+          console.warn('User support messages snapshot error:', err);
+        }
+      );
       return () => unsubUserMsgs();
     }
   }, [isOpen, firebaseUser, isAdmin, activeTab, scrollToBottom]);
@@ -323,11 +341,17 @@ export function FloatingChatWidget() {
       collection(db, 'support_tickets', selectedTicketId, 'messages'),
       orderBy('createdAt', 'asc')
     );
-    const unsubStaffMsgs = onSnapshot(qStaffMsgs, (snap) => {
-      const msgs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as SupportMessage));
-      setSupportMessages(msgs);
-      scrollToBottom();
-    });
+    const unsubStaffMsgs = onSnapshot(
+      qStaffMsgs,
+      (snap) => {
+        const msgs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as SupportMessage));
+        setSupportMessages(msgs);
+        scrollToBottom();
+      },
+      (err) => {
+        console.warn('Staff support messages snapshot error:', err);
+      }
+    );
     return () => unsubStaffMsgs();
   }, [isAdmin, selectedTicketId, scrollToBottom]);
 
@@ -638,7 +662,7 @@ export function FloatingChatWidget() {
   const hasUnreadSupport = supportTickets.some((t) => (isAdmin ? t.unreadByStaff : t.unreadByUser));
 
   return (
-    <div className="fixed bottom-6 end-6 md:bottom-8 md:end-8 z-[9999999]">
+    <div className="fixed bottom-4 end-4 sm:bottom-6 sm:end-6 md:bottom-8 md:end-8 z-[999999]">
       <AnimatePresence mode="wait">
         {/* Floating Toggle Button */}
         {!isOpen && (
@@ -650,10 +674,10 @@ export function FloatingChatWidget() {
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="relative p-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-black shadow-2xl glow-primary flex items-center justify-center cursor-pointer group border border-emerald-400/50"
+            className="relative p-3 sm:p-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-black shadow-2xl glow-primary flex items-center justify-center cursor-pointer group border border-emerald-400/50"
             aria-label="Open Floating Chatbot"
           >
-            <Bot className="w-7 h-7 text-black stroke-[2.5]" />
+            <Bot className="w-6 h-6 sm:w-7 sm:h-7 text-black stroke-[2.5]" />
             {hasUnreadSupport && (
               <span className="absolute -top-1 -end-1 flex h-4 w-4">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -671,7 +695,7 @@ export function FloatingChatWidget() {
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 380, damping: 26 }}
             style={{ height: `${modalHeight}px` }}
-            className="w-[calc(100vw-2rem)] sm:w-[420px] stadium-glass border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden relative backdrop-blur-2xl"
+            className="w-[calc(100vw-1.5rem)] sm:w-[420px] max-h-[85vh] stadium-glass border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden relative backdrop-blur-2xl"
           >
             {/* Top Resize Handle */}
             <div

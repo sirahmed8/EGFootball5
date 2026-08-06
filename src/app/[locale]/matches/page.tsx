@@ -337,14 +337,14 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-10 animate-in fade-in duration-500 bg-black">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border/40 pb-6">
-        <div className="space-y-2">
+    <div className="flex-1 max-w-7xl mx-auto w-full py-4 sm:py-6 px-2 sm:px-4 md:px-8 space-y-6 animate-in fade-in duration-500 bg-black max-w-full overflow-x-hidden">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border/40 pb-6 w-full">
+        <div className="space-y-2 min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <Trophy className="w-8 h-8 text-primary drop-shadow-[0_0_10px_rgba(57,255,20,0.5)]" />
-            <h1 className="text-4xl font-black text-foreground tracking-tight">{t('title')}</h1>
+            <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-primary drop-shadow-[0_0_10px_rgba(57,255,20,0.5)] shrink-0" />
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-black text-foreground tracking-tight break-words">{t('title')}</h1>
           </div>
-          <p className="text-muted-foreground text-base max-w-2xl font-medium">{t('subtitle')}</p>
+          <p className="text-muted-foreground text-xs sm:text-sm md:text-base max-w-2xl font-medium leading-relaxed break-words">{t('subtitle')}</p>
         </div>
 
         <CreateMatchModal pitches={availablePitchesList} isArabic={isArabic} firebaseUser={firebaseUser} />
@@ -407,10 +407,10 @@ export default function MatchesPage() {
 
       {/* Match Cards List */}
       {filteredMatches.length === 0 ? (
-        <div className='text-center py-16 space-y-4'>
-          <div className='text-5xl'>⚽</div>
-          <h3 className='text-xl font-black'>No Open Matches Right Now</h3>
-          <p className='text-sm text-muted-foreground'>Be the first to host a public match and invite players to join!</p>
+        <div className="text-center py-12 px-4 space-y-4 max-w-full overflow-hidden">
+          <div className="text-4xl sm:text-5xl">⚽</div>
+          <h3 className="text-xl sm:text-2xl font-black text-foreground break-words leading-tight">No Open Matches Right Now</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto">Be the first to host a public match and invite players to join!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -132,27 +132,27 @@ export function StadiumWeatherCard() {
   }, [activeCity.lat, activeCity.lon]);
 
   return (
-    <Card className="stadium-glass bg-black border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl relative overflow-visible z-20 global-box global-outline-glow">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+    <Card className="stadium-glass bg-black border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl relative overflow-visible z-20 global-box global-outline-glow max-w-full">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-6 max-w-full">
         {/* City & Condition Header */}
-        <div className="flex items-center gap-4 text-center md:text-start">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 text-3xl shadow-inner">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 text-center sm:text-start min-w-0 w-full lg:w-auto">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 text-3xl shadow-inner shrink-0">
             {weather.iconEmoji}
           </div>
-          <div>
-            <div className="inline-flex items-center gap-1.5 text-[11px] font-black text-emerald-400 uppercase tracking-wider mb-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <Sparkles className="w-3.5 h-3.5" /> Live Satellite Weather & Pitch Status
+          <div className="space-y-1 min-w-0 w-full sm:w-auto">
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-black text-emerald-400 uppercase tracking-wider mb-1 max-w-full">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <Sparkles className="w-3.5 h-3.5 shrink-0" /> Live Satellite Weather & Pitch Status
             </div>
-            <div className="flex items-center gap-3">
-              <h3 className="text-xl md:text-2xl font-black text-foreground">{activeCity.name} Turf</h3>
+            <div className="flex flex-col xl:flex-row xl:items-center gap-2 sm:gap-3 max-w-full">
+              <h3 className="text-xl md:text-2xl font-black text-foreground break-words leading-tight">{activeCity.name} Turf</h3>
               <SolidSelect
                 value={selectedCityKey}
                 onChange={(val) => setSelectedCityKey(val)}
                 options={cityOptions}
                 icon={MapPin}
                 iconColor="text-emerald-400"
-                className="w-44"
+                className="w-full sm:w-48 shrink-0"
               />
             </div>
             <p className="text-xs text-muted-foreground font-medium mt-0.5">{weather.conditionText}</p>
@@ -160,26 +160,26 @@ export function StadiumWeatherCard() {
         </div>
 
         {/* Live Weather Metrics */}
-        <div className="flex items-center gap-6 text-center border-t md:border-t-0 md:border-s border-white/10 pt-4 md:pt-0 md:ps-6">
+        <div className="flex items-center gap-4 sm:gap-6 text-center border-t lg:border-t-0 lg:border-s border-white/10 pt-4 lg:pt-0 lg:ps-6 shrink-0 w-full sm:w-auto justify-around sm:justify-start">
           <div>
-            <div className="text-2xl font-black text-foreground flex items-center justify-center gap-1">
-              <Thermometer className="w-4 h-4 text-rose-400" /> {loading ? '--' : `${weather.temp}°C`}
+            <div className="text-xl sm:text-2xl font-black text-foreground flex items-center justify-center gap-1 whitespace-nowrap">
+              <Thermometer className="w-4 h-4 text-rose-400 shrink-0" /> {loading ? '--' : `${weather.temp}°C`}
             </div>
-            <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Temperature</div>
+            <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider whitespace-nowrap">Temperature</div>
           </div>
 
           <div>
-            <div className="text-2xl font-black text-cyan-400 flex items-center justify-center gap-1">
-              <Wind className="w-4 h-4 text-cyan-400" /> {loading ? '--' : `${weather.wind} km/h`}
+            <div className="text-xl sm:text-2xl font-black text-cyan-400 flex items-center justify-center gap-1 whitespace-nowrap">
+              <Wind className="w-4 h-4 text-cyan-400 shrink-0" /> {loading ? '--' : `${weather.wind} km/h`}
             </div>
-            <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Wind Speed</div>
+            <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider whitespace-nowrap">Wind Speed</div>
           </div>
 
           <div className="hidden sm:block">
-            <div className="text-xs font-black text-emerald-400 flex items-center gap-1">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" /> {loading ? 'Checking...' : weather.pitchStatus}
+            <div className="text-xs font-black text-emerald-400 flex items-center justify-center gap-1 whitespace-nowrap">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> {loading ? 'Checking...' : weather.pitchStatus}
             </div>
-            <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Pitch Status</div>
+            <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider whitespace-nowrap">Pitch Status</div>
           </div>
         </div>
       </div>

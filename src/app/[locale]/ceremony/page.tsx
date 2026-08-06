@@ -10,6 +10,7 @@ import { Portal } from '@/components/Portal';
 import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { toast } from "sonner";
+import { CustomDarkDatePicker } from "@/components/ui/CustomDarkDatePicker";
 
 interface SeasonData {
   targetDate: string; // ISO string e.g. "2026-08-31T20:00:00Z"
@@ -85,17 +86,21 @@ export default function CeremonyPage() {
   // Fetch Season Data & Compute Automatic Winners from Live Firestore Stats
   useEffect(() => {
     async function fetchSeasonDocAndStats() {
+      let target = "";
+      let savedData: Partial<SeasonData> = {};
+
       try {
         const snap = await getDoc(doc(db, "system", "season"));
-        let target = "";
-        let savedData: Partial<SeasonData> = {};
         if (snap.exists()) {
           const data = snap.data() as SeasonData;
           target = data.targetDate || "";
           savedData = data;
         }
+      } catch {
+        // Quiet fallback if system doc is missing or restricted
+      }
 
-        // Query real top players from Firestore users collection
+      try {
         const usersSnap = await getDocs(collection(db, "users"));
         if (!usersSnap.empty) {
           const allUsers = usersSnap.docs
@@ -142,11 +147,12 @@ export default function CeremonyPage() {
             return;
           }
         }
-        setSeasonData((prev) => ({ ...prev, targetDate: target }));
-        setEditTargetDate(target);
-      } catch (err) {
-        console.error(err);
+      } catch {
+        // Quiet fallback if users query is restricted
       }
+
+      setSeasonData((prev) => ({ ...prev, targetDate: target }));
+      setEditTargetDate(target);
     }
     fetchSeasonDocAndStats();
   }, [isArabic]);
@@ -510,16 +516,14 @@ export default function CeremonyPage() {
 
               <form onSubmit={handleSaveSeasonSettings} className="space-y-4 text-xs font-bold">
                 <div>
-                  <label className="text-amber-400 uppercase block mb-1">{isArabic ? "تاريخ ختام الموسم (صيغة ISO)" : "Season End Target Date (ISO Format)"}</label>
-                  <input
-                    type="text"
+                  <label className="text-amber-400 uppercase block mb-1">{isArabic ? "تاريخ ختام الموسم" : "Season End Target Date & Time"}</label>
+                  <CustomDarkDatePicker
                     value={editTargetDate}
-                    onChange={(e) => setEditTargetDate(e.target.value)}
-                    placeholder="e.g. 2026-08-31T20:00:00Z"
-                    className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground font-mono"
+                    onChange={(val) => setEditTargetDate(val)}
+                    isArabic={isArabic}
                   />
                   <span className="text-[10px] text-muted-foreground mt-1 block">
-                    {isArabic ? "اتركه فارغاً لإبقاء حالة الموسم مستمراً دون عد تنازلي." : "Leave empty to keep Season in Progress without countdown."}
+                    {isArabic ? "اختر التوقيت لإطلاق الحفل والعد التنازلي، أو اتركه فارغاً لإبقاء الموسم مستمراً." : "Select the target date & time to launch countdown, or clear to keep Season in Progress."}
                   </span>
                 </div>
 

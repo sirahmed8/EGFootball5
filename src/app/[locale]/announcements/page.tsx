@@ -155,37 +155,37 @@ export default function AnnouncementsPage() {
     <div className="min-h-screen bg-black text-white p-4 md:p-8 relative overflow-hidden flex flex-col items-center" dir={isArabic ? "rtl" : "ltr"}>
       <div className="relative z-10 w-full max-w-5xl space-y-8">
         {/* Header section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-2">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 w-full">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-emerald-400 text-xs font-black uppercase">
-              <Megaphone className="w-4 h-4" /> {isArabic ? "موجز الأخبار والتحديثات الرسمية" : "Official News Feed"}
+              <Megaphone className="w-4 h-4 shrink-0" /> <span>{isArabic ? "موجز الأخبار والتحديثات الرسمية" : "Official News Feed"}</span>
             </div>
-            <h1 className="text-3xl md:text-5xl font-black text-foreground">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black text-foreground tracking-tight leading-tight">
               {isArabic ? "الإعلانات والتحديثات الرسمية" : "Announcements & Updates"}
             </h1>
           </motion.div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
             {isOwnerOrAdmin && (
               <Button
                 onClick={() => setIsPublishOpen(true)}
                 size="lg"
-                className="bg-primary text-black font-black rounded-2xl glow-primary cursor-pointer flex items-center gap-2"
+                className="bg-primary text-black font-black rounded-2xl glow-primary cursor-pointer flex items-center justify-center gap-2 px-5 py-3 text-xs sm:text-sm shrink-0"
               >
-                <Plus className="w-5 h-5" /> {isArabic ? "نشر إعلان جديد" : "Push Announcement"}
+                <Plus className="w-5 h-5 shrink-0" /> <span>{isArabic ? "نشر إعلان جديد" : "Push Announcement"}</span>
               </Button>
             )}
 
             <button
               onClick={() => setIsSubscribed(!isSubscribed)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all text-xs cursor-pointer ${
+              className={`flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold transition-all text-xs cursor-pointer shrink-0 whitespace-nowrap ${
                 isSubscribed
                   ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/50"
                   : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
               }`}
             >
-              {isSubscribed ? <Bell className="w-4 h-4 text-emerald-400" /> : <BellOff className="w-4 h-4" />}
-              {isSubscribed ? (isArabic ? "مشترك في التنبيهات ✓" : "Subscribed ✓") : (isArabic ? "الاشتراك في التحديثات" : "Subscribe")}
+              {isSubscribed ? <Bell className="w-4 h-4 text-emerald-400 shrink-0" /> : <BellOff className="w-4 h-4 shrink-0" />}
+              <span>{isSubscribed ? (isArabic ? "مشترك ✓" : "Subscribed ✓") : (isArabic ? "الاشتراك في التحديثات" : "Subscribe")}</span>
             </button>
           </div>
         </div>

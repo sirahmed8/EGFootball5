@@ -143,17 +143,17 @@ export default function SquadChallengesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-black py-4 sm:py-8 px-2 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto space-y-6 w-full max-w-full overflow-x-hidden" dir={isArabic ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 stadium-glass p-8 rounded-3xl border-white/10 shadow-xl bg-black">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-black">
-            <Swords className="w-4 h-4" /> {isArabic ? 'ساحة تحديات الفرق' : 'Squad vs Squad Arena'}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 stadium-glass p-4 sm:p-6 lg:p-8 rounded-3xl border-white/10 shadow-xl bg-black w-full overflow-hidden">
+        <div className="space-y-1 min-w-0 flex-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-black max-w-full truncate">
+            <Swords className="w-4 h-4 shrink-0" /> <span className="truncate">{isArabic ? 'ساحة تحديات الفرق' : 'Squad vs Squad Arena'}</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-black text-foreground">
+          <h1 className="text-xl sm:text-3xl xl:text-5xl font-black text-foreground leading-tight break-words">
             {isArabic ? 'تحديات' : 'Squad'} <span className="text-gradient-primary">{isArabic ? 'الفرق' : 'Challenges'}</span>
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm xl:text-base text-muted-foreground leading-relaxed break-words max-w-2xl">
             {isArabic
               ? 'تحدَّ الفرق المنافسة في مباريات خماسي قوية مع تحديد شرط الخاسر أو الجائزة.'
               : 'Challenge rival neighborhood teams for 5-a-side matches with pitch stakes.'}
@@ -169,9 +169,9 @@ export default function SquadChallengesPage() {
             setIsModalOpen(true);
           }}
           size="lg"
-          className="bg-primary text-black hover:bg-primary/90 font-black px-6 py-6 rounded-2xl glow-primary cursor-pointer flex items-center gap-2"
+          className="bg-primary text-black hover:bg-primary/90 font-black px-5 py-3 rounded-2xl glow-primary cursor-pointer flex items-center justify-center gap-2 shrink-0 w-full sm:w-auto self-start xl:self-auto"
         >
-          <Plus className="w-5 h-5" /> {isArabic ? 'إضافة تحدي جديد' : 'Post Challenge'}
+          <Plus className="w-5 h-5 shrink-0" /> {isArabic ? 'إضافة تحدي جديد' : 'Post Challenge'}
         </Button>
       </div>
 
@@ -183,12 +183,12 @@ export default function SquadChallengesPage() {
         </div>
       ) : challenges.length === 0 ? (
         /* Empty state */
-        <Card className="global-box border-white/10 rounded-3xl p-12 text-center space-y-4 bg-black">
+        <Card className="global-box border-white/10 rounded-3xl p-6 sm:p-12 text-center space-y-4 bg-black max-w-full overflow-hidden">
           <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-3xl mx-auto">
             <Inbox className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-black text-foreground">{isArabic ? 'لا توجد تحديات نشطة حالياً' : 'No Active Challenges Yet'}</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          <h3 className="text-lg sm:text-xl font-black text-foreground">{isArabic ? 'لا توجد تحديات نشطة حالياً' : 'No Active Challenges Yet'}</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto leading-relaxed break-words px-2">
             {isArabic
               ? 'كن أول فريق ينشر تحدياً. اختر الملعب، الموعد، وحدد شرط التحدي!'
               : 'Be the first squad to post a challenge. Challenge a rival team, set the pitch, and define the stakes!'}
@@ -201,53 +201,53 @@ export default function SquadChallengesPage() {
               }
               setIsModalOpen(true);
             }}
-            className="bg-primary text-black font-black rounded-2xl glow-primary mx-auto"
+            className="bg-primary text-black font-black rounded-2xl glow-primary mx-auto cursor-pointer text-xs sm:text-sm"
           >
-            <Plus className="w-4 h-4 me-2" /> {isArabic ? 'نشر أول تحدي' : 'Post the First Challenge'}
+            <Plus className="w-4 h-4 me-2 shrink-0" /> {isArabic ? 'نشر أول تحدي' : 'Post the First Challenge'}
           </Button>
         </Card>
       ) : (
         /* Challenges Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full">
           {challenges.map((c) => (
-            <motion.div key={c.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
-              <Card className="stadium-glass border-white/10 rounded-3xl p-6 shadow-xl space-y-4 card-lift bg-black">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-black border border-white/10 flex items-center justify-center text-3xl shadow-inner">
+            <motion.div key={c.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="min-w-0 w-full">
+              <Card className="stadium-glass border-white/10 rounded-3xl p-4 sm:p-6 shadow-xl space-y-4 card-lift bg-black w-full min-w-0 overflow-hidden">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 min-w-0 w-full">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-black border border-white/10 flex items-center justify-center text-2xl sm:text-3xl shadow-inner shrink-0">
                       {c.squadLogo}
                     </div>
-                    <div>
-                      <h3 className="font-black text-lg text-foreground">{c.challengerSquad}</h3>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-primary" /> {c.city} • {c.pitchName}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-black text-base sm:text-lg text-foreground truncate">{c.challengerSquad}</h3>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+                        <MapPin className="w-3 h-3 text-primary shrink-0" /> <span className="truncate">{c.city} • {c.pitchName}</span>
                       </p>
                     </div>
                   </div>
 
-                  <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] font-black uppercase">
+                  <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] font-black uppercase shrink-0 self-start sm:self-auto">
                     {isArabic ? 'مباراة 5v5' : '5v5 Challenge'}
                   </span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-black border border-white/10 space-y-1">
+                <div className="p-3 sm:p-4 rounded-2xl bg-black border border-white/10 space-y-1">
                   <div className="text-xs font-bold text-muted-foreground">{isArabic ? 'شروط ورهان المباراة' : 'Match Terms & Stakes'}</div>
-                  <div className="text-sm font-black text-amber-400">{c.wagerTerms}</div>
-                  <div className="text-xs text-muted-foreground flex items-center gap-2 pt-1">
-                    <Clock className="w-3.5 h-3.5 text-primary" /> {c.date} - {c.time}
+                  <div className="text-xs sm:text-sm font-black text-amber-400 break-words">{c.wagerTerms}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-2 pt-1 flex-wrap">
+                    <Clock className="w-3.5 h-3.5 text-primary shrink-0" /> <span>{c.date} - {c.time}</span>
                   </div>
                 </div>
 
                 <Button
                   onClick={() => handleAcceptChallenge(c.id, c.challengerSquad)}
                   disabled={c.accepted || acceptingId === c.id}
-                  className={`w-full py-3.5 rounded-2xl font-black transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                  className={`w-full py-3 sm:py-3.5 rounded-2xl font-black transition-all cursor-pointer flex items-center justify-center gap-2 text-xs sm:text-sm ${
                     c.accepted
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                       : 'bg-primary text-black hover:bg-primary/90 glow-primary-sm'
                   }`}
                 >
-                  {c.accepted ? <CheckCircle2 className="w-4 h-4" /> : <Swords className="w-4 h-4" />}
+                  {c.accepted ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <Swords className="w-4 h-4 shrink-0" />}
                   {c.accepted ? (isArabic ? 'تم تأكيد المباراة وموعد الملعب!' : 'Match Locked & Confirmed!') : acceptingId === c.id ? (isArabic ? 'جاري القبول...' : 'Accepting...') : (isArabic ? 'قبول التحدي ⚔️' : 'Accept Challenge ⚔️')}
                 </Button>
               </Card>

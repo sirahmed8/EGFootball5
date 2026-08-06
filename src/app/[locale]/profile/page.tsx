@@ -295,11 +295,17 @@ export default function ProfilePage() {
       collection(db, 'bookings'),
       where('userId', '==', firebaseUser.uid)
     );
-    const unsubscribeBookings = onSnapshot(bookingsQ, (snapshot) => {
-      const bks = snapshot.docs.map((doc) => doc.data() as Booking);
-      bks.sort((a, b) => b.createdAt - a.createdAt);
-      setBookings(bks);
-    });
+    const unsubscribeBookings = onSnapshot(
+      bookingsQ,
+      (snapshot) => {
+        const bks = snapshot.docs.map((doc) => doc.data() as Booking);
+        bks.sort((a, b) => b.createdAt - a.createdAt);
+        setBookings(bks);
+      },
+      (error) => {
+        console.warn('Bookings snapshot listener permissions error:', error);
+      }
+    );
 
     return () => unsubscribeBookings();
   }, [firebaseUser]);
@@ -457,14 +463,14 @@ export default function ProfilePage() {
       </Card>
 
       <Tabs defaultValue="bookings" className="w-full">
-        <TabsList className="bg-muted/50 border border-border mb-6 p-1 rounded-2xl w-full grid grid-cols-3 max-w-md">
-          <TabsTrigger value="bookings" className="data-[state=active]:bg-primary data-[state=active]:text-black font-black rounded-xl cursor-pointer">
+        <TabsList className="bg-muted/50 border border-border mb-6 p-1.5 rounded-2xl w-full grid grid-cols-3 gap-2">
+          <TabsTrigger value="bookings" className="data-[state=active]:bg-primary data-[state=active]:text-black font-black rounded-xl cursor-pointer py-3 text-xs sm:text-sm text-center">
             {t('myBookings')}
           </TabsTrigger>
-          <TabsTrigger value="favorites" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-bold rounded-xl cursor-pointer">
+          <TabsTrigger value="favorites" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-bold rounded-xl cursor-pointer py-3 text-xs sm:text-sm text-center">
             {t('favorites')}
           </TabsTrigger>
-          <TabsTrigger value="details" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-bold rounded-xl cursor-pointer">
+          <TabsTrigger value="details" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-bold rounded-xl cursor-pointer py-3 text-xs sm:text-sm text-center">
             {t('profileDetails')}
           </TabsTrigger>
         </TabsList>
@@ -542,7 +548,7 @@ export default function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="details">
-          <Card className="w-full max-w-md bg-card/80 border-border backdrop-blur-xl rounded-3xl">
+          <Card className="w-full bg-card/80 border-border backdrop-blur-xl rounded-3xl p-2 sm:p-4 shadow-xl">
             <ProfileForm appUser={appUser} firebaseUid={firebaseUser.uid} />
           </Card>
         </TabsContent>

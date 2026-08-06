@@ -130,13 +130,13 @@ export function PitchTacticalBoard() {
       </div>
 
       {/* Share Action */}
-      <div className="flex items-center justify-between pt-2">
-        <div className="text-xs text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+        <div className="text-xs text-muted-foreground leading-normal">
           Active Formation: <strong className="text-foreground">{formation} Diamond</strong> (Drag tokens to fine-tune)
         </div>
         <Button
           onClick={handleShareLineup}
-          className="bg-primary text-black hover:bg-primary/90 font-black px-6 py-3 rounded-2xl glow-primary-sm cursor-pointer flex items-center gap-2"
+          className="w-full sm:w-auto bg-primary text-black hover:bg-primary/90 font-black px-6 py-3 rounded-2xl glow-primary-sm cursor-pointer flex items-center justify-center gap-2 shrink-0"
         >
           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           {copied ? 'Copied Lineup!' : 'Share Lineup on WhatsApp'}

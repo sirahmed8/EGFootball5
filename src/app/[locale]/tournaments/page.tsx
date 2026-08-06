@@ -125,16 +125,16 @@ export default function TournamentsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-mesh py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-mesh py-4 sm:py-8 px-2 sm:px-4 md:px-8 max-w-6xl mx-auto space-y-6 w-full max-w-full overflow-x-hidden" dir={isArabic ? 'rtl' : 'ltr'}>
       {/* Header Banner */}
-      <div className="stadium-glass p-8 md:p-12 rounded-3xl border-white/10 shadow-2xl space-y-4 text-center relative overflow-hidden">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-black uppercase">
-          <Trophy className="w-4 h-4 text-amber-400" /> {isArabic ? 'بطولات ودوريات EGFootball5' : 'EGFootball5 Tournament Gala'}
+      <div className="stadium-glass p-4 sm:p-8 md:p-12 rounded-3xl border-white/10 shadow-2xl space-y-3 sm:space-y-4 text-center relative overflow-hidden w-full">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-black uppercase max-w-full truncate">
+          <Trophy className="w-4 h-4 text-amber-400 shrink-0" /> <span className="truncate">{isArabic ? 'بطولات ودوريات EGFootball5' : 'EGFootball5 Tournament Gala'}</span>
         </div>
-        <h1 className="text-4xl md:text-6xl font-black text-foreground tracking-tight">
+        <h1 className="text-xl sm:text-3xl md:text-5xl font-black text-foreground tracking-tight leading-tight break-words">
           {isArabic ? 'البطولات' : 'Amateur'} <span className="text-gradient-primary">{isArabic ? 'والدوريات الرياضية' : 'Tournaments & Cups'}</span>
         </h1>
-        <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto font-medium">
+        <p className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-xl mx-auto font-medium leading-relaxed break-words">
           {isArabic
             ? 'تنافس في أقوى بطولات الخماسي بالعبور والقاهرة. شجرة مواجهات مباشرة، إحصائيات حية، وجوائز مالية!'
             : 'Compete in Egypt\'s premier 5-a-side knockout cups. Real-time bracket trees, live stats, and cash prizes!'}

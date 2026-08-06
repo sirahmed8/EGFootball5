@@ -92,13 +92,10 @@ export default async function RootLayout({
           <ReactQueryProvider>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
               <AuthProvider>
-                {/* Always-visible desktop sidebar */}
-                <DesktopSidebar />
-
-                {/* Top navbar (mobile bar + desktop bell bar) */}
+                {/* Top navbar */}
                 <Navbar />
 
-                {/* Main content area: below 64px (h-16) top bar */}
+                {/* Main content area */}
                 <MainContainer>
                   {children}
                   <Footer />

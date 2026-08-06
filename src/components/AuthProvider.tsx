@@ -11,7 +11,31 @@ import { usePathname, useRouter } from '@/i18n/routing';
 
 import { SetUsernameModal } from '@/components/SetUsernameModal';
 
-const PUBLIC_PATHS = ['/', '/login', '/privacy', '/terms', '/cookies', '/guide'];
+const PUBLIC_PATHS = [
+  '/',
+  '/login',
+  '/home',
+  '/matches',
+  '/var-highlights',
+  '/live-stream',
+  '/challenges',
+  '/tournaments',
+  '/communities',
+  '/leaderboard',
+  '/jersey-designer',
+  '/subscription',
+  '/goal-of-the-month',
+  '/ceremony',
+  '/announcements',
+  '/guide',
+  '/privacy',
+  '/terms',
+  '/cookies',
+];
+
+const normalizePath = (p: string) => p.replace(/\/$/, '') || '/';
+const isPublicPath = (targetPath: string) =>
+  PUBLIC_PATHS.some((pub) => normalizePath(pub) === normalizePath(targetPath));
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -67,8 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // (e.g. when user deletes site data, clears storage, or logs out while on any page)
   useEffect(() => {
     if (!loading && !firebaseUser) {
-      const isPublic = PUBLIC_PATHS.includes(pathname);
-      if (!isPublic) {
+      if (!isPublicPath(pathname)) {
         router.replace('/');
       }
     }
@@ -79,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const handleStorageChange = () => {
       if (!auth.currentUser) {
         clearAuth();
-        if (!PUBLIC_PATHS.includes(pathname)) {
+        if (!isPublicPath(pathname)) {
           router.replace('/');
         }
       }

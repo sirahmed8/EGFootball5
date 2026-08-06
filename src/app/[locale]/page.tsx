@@ -17,6 +17,10 @@ import { QuickSearchHero } from '@/components/QuickSearchHero';
 import { LiveSlotsMarquee } from '@/components/LiveSlotsMarquee';
 import { MotionDiv } from '@/components/MotionWrapper';
 
+export function generateStaticParams() {
+  return [{ locale: 'ar' }, { locale: 'en' }];
+}
+
 export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);

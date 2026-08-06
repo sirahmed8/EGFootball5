@@ -134,7 +134,7 @@ export function NavbarSettingsMenu() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: -8 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full mt-2 end-0 w-80 bg-[#0B0F19] border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999] overflow-hidden p-5 space-y-4 text-foreground global-outline-glow"
+            className="absolute top-full mt-2 end-0 w-84 sm:w-96 max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-5rem)] overflow-y-auto bg-[#0B0F19] border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999999] p-5 space-y-4 text-foreground global-outline-glow scrollbar-none"
           >
             {/* Header / User Info Card */}
             <div className="flex items-start justify-between pb-3 border-b border-white/10 gap-2">
@@ -153,7 +153,7 @@ export function NavbarSettingsMenu() {
                 )}
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-black text-sm text-foreground truncate max-w-[140px]">
+                    <span className="font-black text-sm text-foreground truncate">
                       {appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'لاعب كريم' : 'Player')}
                     </span>
                     {isUserVip(appUser) && (
@@ -185,13 +185,13 @@ export function NavbarSettingsMenu() {
               {/* Language Switcher */}
               <button
                 onClick={toggleLanguage}
-                className="w-full flex items-center justify-between px-3.5 py-3 global-list-item bg-white/5 border border-white/10 text-sm font-bold text-foreground"
+                className="w-full flex items-center justify-between px-3.5 py-3 global-list-item bg-white/5 border border-white/10 text-sm font-bold text-foreground cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <Languages className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{locale === 'ar' ? 'اللغة العربية' : 'English'}</span>
+                  <span className="truncate">{locale === 'ar' ? 'اللغة العربية' : 'English'}</span>
                 </div>
-                <span className="text-xs text-muted-foreground font-mono bg-neutral-900 px-2.5 py-1 rounded-lg border border-white/10 font-bold">
+                <span className="text-[11px] text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/30 font-extrabold shrink-0 ms-2">
                   {locale === 'ar' ? 'English' : 'العربية'}
                 </span>
               </button>
@@ -200,17 +200,17 @@ export function NavbarSettingsMenu() {
               {mounted && (
                 <button
                   onClick={toggleTheme}
-                  className="w-full flex items-center justify-between px-3.5 py-3 global-list-item bg-white/5 border border-white/10 text-sm font-bold text-foreground"
+                  className="w-full flex items-center justify-between px-3.5 py-3 global-list-item bg-white/5 border border-white/10 text-sm font-bold text-foreground cursor-pointer"
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     {isDark ? (
                       <Sun className="w-4 h-4 text-amber-400 shrink-0" />
                     ) : (
                       <Moon className="w-4 h-4 text-emerald-400 shrink-0" />
                     )}
-                    <span>{isDark ? t('lightMode') : t('darkMode')}</span>
+                    <span className="truncate">{isDark ? t('lightMode') : t('darkMode')}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground font-mono bg-neutral-900 px-2.5 py-1 rounded-lg border border-white/10 font-bold">
+                  <span className="text-[11px] text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/30 font-extrabold shrink-0 ms-2">
                     {isDark ? (locale === 'ar' ? 'نهار' : 'Light') : (locale === 'ar' ? 'ليل' : 'Dark')}
                   </span>
                 </button>

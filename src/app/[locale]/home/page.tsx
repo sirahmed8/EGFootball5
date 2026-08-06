@@ -144,12 +144,12 @@ function HomeContent() {
           <p className="text-muted-foreground text-base max-w-xl font-medium">{t('subtitle')}</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-foreground font-mono font-black bg-emerald-500/10 px-3.5 py-2 rounded-xl border border-emerald-500/30">
+        <div className="flex flex-wrap items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
+          <span className="text-xs text-foreground font-mono font-black bg-emerald-500/10 px-3.5 py-2 rounded-xl border border-emerald-500/30 shrink-0">
             🟢 {t('pitchesAvailable', { count: filteredPitches.length })}
           </span>
 
-          <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border">
+          <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border shrink-0">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-lg transition-colors cursor-pointer ${
@@ -173,10 +173,10 @@ function HomeContent() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="p-5 rounded-3xl bg-card/70 border border-border backdrop-blur-xl space-y-4 shadow-xl relative z-50">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-          {/* Search Input with logical positioning start-3.5, end-3, ps-10 pe-9 */}
-          <div className="md:col-span-4 relative">
+      <div className="p-4 sm:p-5 rounded-3xl bg-card/70 border border-border backdrop-blur-xl space-y-4 shadow-xl relative z-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
+          {/* Search Input */}
+          <div className="sm:col-span-2 lg:col-span-4 relative">
             <Search className="w-4 h-4 absolute start-3.5 top-3.5 text-muted-foreground" />
             <Input
               type="text"
@@ -196,7 +196,7 @@ function HomeContent() {
           </div>
 
           {/* Format / Pitch Capacity Selector */}
-          <div className="md:col-span-3">
+          <div className="sm:col-span-1 lg:col-span-3">
             <SolidSelect
               value={selectedFormat}
               onChange={setSelectedFormat}
@@ -212,7 +212,7 @@ function HomeContent() {
           </div>
 
           {/* Sort Selector */}
-          <div className="md:col-span-3">
+          <div className="sm:col-span-1 lg:col-span-3">
             <SolidSelect
               value={sortBy}
               onChange={(val) => setSortBy(val as 'recommended' | 'price-asc' | 'price-desc' | 'rating')}
@@ -228,7 +228,7 @@ function HomeContent() {
           </div>
 
           {/* Price Range Slider */}
-          <div className="md:col-span-2 space-y-1 bg-background/40 p-2.5 rounded-2xl border border-border">
+          <div className="sm:col-span-2 lg:col-span-2 space-y-1 bg-background/40 p-2.5 rounded-2xl border border-border">
             <div className="flex justify-between text-[11px] font-extrabold text-muted-foreground">
               <span className="text-primary font-mono">Max Price: {maxPrice} EGP</span>
             </div>

@@ -123,7 +123,7 @@
     @apply border-border outline-ring/50;
   }
   html {
-    @apply font-sans bg-background text-foreground;
+    @apply font-sans bg-background text-foreground overflow-x-hidden max-w-full;
     color-scheme: dark;
   }
   html.dark {
@@ -131,7 +131,7 @@
     color-scheme: dark;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden max-w-full relative;
   }
 }
 
@@ -157,8 +157,8 @@ html.theme-transitioning *::after {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -166,13 +166,21 @@ html.theme-transitioning *::after {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
   transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 /* Shimmer Animation for Premium Skeletons */

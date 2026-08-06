@@ -59,48 +59,19 @@ service cloud.firestore {
 
     // Bookings collection
     match /bookings/{bookingId} {
-      allow read: if isAuth() && (request.auth.uid == resource.data.userId || isAdmin() || (resource.data.bookingType == 'public' && resource.data.status == 'confirmed'));
+      allow read: if (resource.data.bookingType == 'public' && resource.data.status == 'confirmed') || (isAuth() && (request.auth.uid == resource.data.userId || isAdmin()));
       allow create: if isAuth() 
                     && isNotBlacklisted()
-                    && request.resource.data.userId == request.auth.uid
-                    && request.resource.data.status == 'locked_temporary'
-                    && request.resource.data.totalAmount > 0
-                    && request.resource.data.depositAmount >= 0
-                    && request.resource.data.duration > 0;
+                    && request.resource.data.userId == request.auth.uid;
       allow update: if isAuth() 
                     && isNotBlacklisted()
                     && (
                       isAdmin() || 
-                      (
-                        request.resource.data.userId == request.auth.uid &&
-                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['receiptUrl', 'status']) &&
-                        request.resource.data.status == 'pending_review' &&
-                        resource.data.status == 'locked_temporary' &&
-                        request.resource.data.receiptUrl is string &&
-                        request.resource.data.receiptUrl.size() > 0
-                      ) ||
-                      (
-                        request.resource.data.userId == request.auth.uid &&
-                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
-                        (request.resource.data.status == 'rejected' || request.resource.data.status == 'cancelled') &&
-                        (resource.data.status == 'locked_temporary' || resource.data.status == 'pending_review')
-                      ) ||
-                      // Allow players to join or leave public matches
+                      request.resource.data.userId == request.auth.uid ||
                       (
                         resource.data.bookingType == 'public' &&
                         resource.data.status == 'confirmed' &&
-                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joinedPlayers']) &&
-                        (
-                          // Join match: user adds themselves and respects max capacity
-                          (
-                            request.resource.data.joinedPlayers.size() <= resource.data.numPeople &&
-                            request.resource.data.joinedPlayers.size() == resource.data.joinedPlayers.size() + 1
-                          ) ||
-                          // Leave match: user removes themselves
-                          (
-                            request.resource.data.joinedPlayers.size() == resource.data.joinedPlayers.size() - 1
-                          )
-                        )
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joinedPlayers'])
                       )
                     );
       allow delete: if isAdmin();
@@ -108,13 +79,7 @@ service cloud.firestore {
 
     match /day_schedules/{dayId} {
       allow read: if true;
-      allow write: if isAuth() && isNotBlacklisted() && (
-        isAdmin() || (
-          // Non-admin writes: restricted to modifying 'slots' field and prevents schedule deletion/wiping
-          ((resource == null && request.resource.data.keys().hasOnly(['slots'])) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['slots'])) &&
-          (resource == null || request.resource.data.slots.size() >= resource.data.slots.size() - 4)
-        )
-      );
+      allow write: if isAuth() && isNotBlacklisted();
     }
 
     // Stats collection for public aggregation
@@ -127,8 +92,8 @@ service cloud.firestore {
     // Notifications collection
     match /notifications/{notificationId} {
       allow read: if isAuth() && resource.data.userId == request.auth.uid;
-      allow create: if isAuth() && (request.auth.uid == request.resource.data.userId || request.resource.data.senderId == request.auth.uid || isAdmin() || isOwner());
-      allow update: if isAuth() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow create: if isAuth();
+      allow update: if isAuth() && resource.data.userId == request.auth.uid;
       allow delete: if isAuth() && resource.data.userId == request.auth.uid;
     }
 
@@ -154,7 +119,11 @@ service cloud.firestore {
     match /communities/{communityId} {
       allow read: if true;
       allow create: if isAuth() && isNotBlacklisted();
-      allow update: if isAuth() && (resource.data.captainUid == request.auth.uid || isAdmin());
+      allow update: if isAuth() && isNotBlacklisted() && (
+        resource.data.captainUid == request.auth.uid || 
+        isAdmin() ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds', 'membersCount'])
+      );
       allow delete: if isAuth() && (resource.data.captainUid == request.auth.uid || isOwner());
     }
 
@@ -216,6 +185,12 @@ service cloud.firestore {
     match /aiLogs/{logId} {
       allow read: if isOwner();
       allow create: if true;
+    }
+
+    // System collection (Season Ceremony settings, system configuration)
+    match /system/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }

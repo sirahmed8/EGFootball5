@@ -6,7 +6,7 @@ import { collection, query, getDocs, addDoc, orderBy, limit, doc, updateDoc, arr
 import { db } from '@/lib/firebase/config';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Search, Plus, Shield, MapPin, Trophy, Sparkles, CheckCircle2, UserPlus, X } from 'lucide-react';
+import { Users, Search, Plus, Shield, MapPin, Trophy, Sparkles, CheckCircle2, UserPlus, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CommunitiesPageSkeleton } from '@/components/skeletons/PageSkeletons';
@@ -136,6 +136,61 @@ export default function CommunitiesPage() {
 
   const categories = ['All', 'Neighborhood Teams', 'Weekend Warriors', 'Competitive Clubs'];
 
+  const tabsRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [startX, setStartX] = React.useState(0);
+  const [scrollLeftState, setScrollLeftState] = React.useState(0);
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+  const [canScrollRight, setCanScrollRight] = React.useState(false);
+
+  const checkScroll = React.useCallback(() => {
+    if (tabsRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabsRef.current;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [checkScroll]);
+
+  const scrollTabs = (direction: 'left' | 'right') => {
+    if (tabsRef.current) {
+      const amount = direction === 'left' ? -180 : 180;
+      tabsRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (tabsRef.current && e.deltaY !== 0) {
+      tabsRef.current.scrollLeft += e.deltaY;
+      checkScroll();
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!tabsRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - tabsRef.current.offsetLeft);
+    setScrollLeftState(tabsRef.current.scrollLeft);
+  };
+
+  const handleMouseLeaveOrUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !tabsRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - tabsRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    tabsRef.current.scrollLeft = scrollLeftState - walk;
+    checkScroll();
+  };
+
   const filtered = communities.filter((c) => {
     const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.city.toLowerCase().includes(search.toLowerCase());
     const matchesCat = category === 'All' || c.category === category;
@@ -145,17 +200,18 @@ export default function CommunitiesPage() {
   if (loading) return <CommunitiesPageSkeleton />;
 
   return (
-    <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-black py-4 sm:py-8 px-2 sm:px-4 md:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 global-box p-6 md:p-8 rounded-3xl border-white/10 shadow-xl bg-black">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold">
-            <Sparkles className="w-4 h-4" /> Football Hub & Squads
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 global-box p-4 sm:p-6 lg:p-8 rounded-3xl border-white/10 shadow-xl bg-black w-full overflow-hidden">
+        <div className="space-y-2 min-w-0 flex-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold max-w-full truncate">
+            <Sparkles className="w-4 h-4 shrink-0" />
+            <span className="truncate">Football Hub & Squads</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-black text-foreground tracking-tight">
+          <h1 className="text-xl sm:text-3xl xl:text-5xl font-black text-foreground tracking-tight leading-tight break-words">
             Football <span className="text-gradient-primary">Communities</span>
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground">
+          <p className="text-xs sm:text-sm xl:text-base text-muted-foreground leading-relaxed break-words max-w-2xl">
             Join local football squads, compete in matches, and build your team reputation.
           </p>
         </div>
@@ -163,92 +219,137 @@ export default function CommunitiesPage() {
         <Button
           onClick={() => setIsModalOpen(true)}
           size="lg"
-          className="bg-primary text-black hover:bg-primary/90 font-black px-6 py-6 rounded-2xl shadow-xl glow-primary cursor-pointer flex items-center gap-2 self-start md:self-auto"
+          className="bg-primary text-black hover:bg-primary/90 font-black px-5 py-3 rounded-2xl shadow-xl glow-primary cursor-pointer flex items-center justify-center gap-2 shrink-0 w-full sm:w-auto"
         >
-          <Plus className="w-5 h-5" /> Create Squad
+          <Plus className="w-5 h-5 shrink-0" /> Create Squad
         </Button>
       </div>
 
       {/* Search & Category Tabs */}
-      <div className="flex flex-col sm:flex-row items-center gap-4">
-        <div className="relative w-full sm:w-80">
+      <div className="space-y-3 w-full">
+        {/* Search Input */}
+        <div className="relative w-full">
           <Search className="w-4 h-4 absolute start-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by squad name or city..."
-            className="w-full ps-10 pe-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium"
+            className="w-full ps-10 pe-4 py-2.5 sm:py-3 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-xs sm:text-sm font-medium transition-colors"
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto w-full pb-2 sm:pb-0">
-          {categories.map((cat) => (
+        {/* Category Filter Pills — Smoothly Scrollable with Controls & Drag */}
+        <div className="relative w-full flex items-center group">
+          {canScrollLeft && (
             <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                category === cat ? 'bg-primary text-black font-black shadow-lg glow-primary-sm' : 'stadium-glass border-white/10 text-muted-foreground hover:text-foreground'
-              }`}
+              onClick={() => scrollTabs('left')}
+              className="absolute start-0 z-20 w-8 h-8 rounded-full bg-black/90 border border-primary/40 text-primary flex items-center justify-center shadow-[0_0_12px_rgba(57,255,20,0.3)] hover:scale-110 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
+              aria-label="Scroll left"
             >
-              {cat}
+              <ChevronLeft className="w-5 h-5" />
             </button>
-          ))}
+          )}
+
+          <div
+            ref={tabsRef}
+            onWheel={handleWheel}
+            onScroll={checkScroll}
+            onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseLeaveOrUp}
+            onMouseUp={handleMouseLeaveOrUp}
+            onMouseMove={handleMouseMove}
+            className={`flex items-center gap-2.5 overflow-x-auto w-full pb-2 pt-1 px-1 transition-all select-none overscroll-x-contain ${
+              isDragging ? 'cursor-grabbing' : 'cursor-grab'
+            }`}
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(57, 255, 20, 0.3) rgba(255, 255, 255, 0.05)',
+            }}
+          >
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={(e) => {
+                  setCategory(cat);
+                  e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }}
+                className={`px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap shrink-0 transition-all cursor-pointer select-none active:scale-95 ${
+                  category === cat
+                    ? 'bg-primary text-black shadow-lg glow-primary-sm scale-[1.02]'
+                    : 'stadium-glass border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/10 hover:border-white/20'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {canScrollRight && (
+            <button
+              onClick={() => scrollTabs('right')}
+              className="absolute end-0 z-20 w-8 h-8 rounded-full bg-black/90 border border-primary/40 text-primary flex items-center justify-center shadow-[0_0_12px_rgba(57,255,20,0.3)] hover:scale-110 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Communities Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-64 stadium-glass rounded-3xl animate-pulse" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
           {filtered.map((comm) => (
-            <motion.div key={comm.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-              <Card className="stadium-glass border-white/10 hover:border-primary/40 transition-all rounded-3xl overflow-hidden card-lift h-full flex flex-col justify-between p-6">
-                <CardContent className="p-0 space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-3xl shadow-inner">
+            <motion.div key={comm.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="min-w-0 w-full">
+              <Card className="stadium-glass border-white/10 hover:border-primary/40 transition-all rounded-3xl overflow-hidden card-lift h-full flex flex-col justify-between p-4 sm:p-6 w-full min-w-0">
+                <CardContent className="p-0 space-y-4 min-w-0 w-full">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 min-w-0 w-full">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-2xl sm:text-3xl shadow-inner shrink-0">
                         {comm.logoEmoji}
                       </div>
-                      <div>
-                        <h3 className="text-xl font-black text-foreground">{comm.name}</h3>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3 text-primary" /> {comm.city}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base sm:text-lg font-black text-foreground truncate">{comm.name}</h3>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
+                          <MapPin className="w-3 h-3 text-primary shrink-0" /> <span className="truncate">{comm.city}</span>
                         </p>
                       </div>
                     </div>
-                    <span className="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-primary">
+                    <span className="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-primary shrink-0 self-start sm:self-auto">
                       {comm.category}
                     </span>
                   </div>
 
-                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{comm.description}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 break-words">{comm.description}</p>
 
-                  <div className="grid grid-cols-2 gap-3 py-2 border-y border-white/10 text-center">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 py-2 border-y border-white/10 text-center">
                     <div>
-                      <div className="text-base font-black text-foreground">{comm.membersCount}</div>
+                      <div className="text-sm sm:text-base font-black text-foreground">{comm.membersCount}</div>
                       <div className="text-[10px] text-muted-foreground uppercase font-bold">Members</div>
                     </div>
                     <div>
-                      <div className="text-base font-black text-emerald-400">{comm.matchesPlayed}</div>
+                      <div className="text-sm sm:text-base font-black text-emerald-400">{comm.matchesPlayed}</div>
                       <div className="text-[10px] text-muted-foreground uppercase font-bold">Matches Played</div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                    <span>Captain: <strong className="text-foreground">{comm.captainName}</strong></span>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 gap-2 flex-wrap">
+                    <span className="truncate">Captain: <strong className="text-foreground">{comm.captainName}</strong></span>
                   </div>
                 </CardContent>
 
                 <Button
                   onClick={() => handleJoin(comm)}
                   disabled={joiningId === comm.id}
-                  className="w-full mt-4 bg-primary/20 hover:bg-primary text-primary hover:text-black font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full mt-4 bg-primary/20 hover:bg-primary text-primary hover:text-black font-extrabold rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-primary/30 disabled:opacity-60 disabled:cursor-not-allowed text-xs sm:text-sm py-2.5"
                 >
                   {joiningId === comm.id ? (
                     <span className="flex items-center gap-2">
@@ -256,7 +357,7 @@ export default function CommunitiesPage() {
                       Joining...
                     </span>
                   ) : (
-                    <><UserPlus className="w-4 h-4" /> Request to Join</>
+                    <><UserPlus className="w-4 h-4 shrink-0" /> Request to Join</>
                   )}
                 </Button>
               </Card>

@@ -36,7 +36,7 @@ export function PitchCreationForm({ newPitch, setNewPitch, handleCreatePitch, t 
                 placeholder={t('imagePlaceholder')} 
                 value={newPitch.imagePreviewUrl || ''} 
                 onChange={e => setNewPitch({...newPitch, imagePreviewUrl: e.target.value})}
-                className="bg-card border-border text-foreground flex-1 rounded-xl"
+                className="bg-card border-border text-foreground flex-1 rounded-xl w-full min-w-0 text-xs sm:text-sm"
               />
               <Input 
                 type="file" 
