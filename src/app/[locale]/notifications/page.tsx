@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useLocale } from 'next-intl';
 import {
   collection,
   query,
@@ -19,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, CheckCheck, Trash2, BellOff, Calendar, Trophy, Info, Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { NotificationsPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface NotificationItem {
   id: string;
@@ -30,12 +32,12 @@ interface NotificationItem {
   userId: string;
 }
 
-function formatRelativeTime(ts: number): string {
+function formatRelativeTime(ts: number, isArabic: boolean): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
-  if (diff < 60) return 'Just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
+  if (diff < 60) return isArabic ? 'الآن' : 'Just now';
+  if (diff < 3600) return isArabic ? `منذ ${Math.floor(diff / 60)} دقيقة` : `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return isArabic ? `منذ ${Math.floor(diff / 3600)} ساعة` : `${Math.floor(diff / 3600)}h ago`;
+  return isArabic ? `منذ ${Math.floor(diff / 86400)} يوم` : `${Math.floor(diff / 86400)}d ago`;
 }
 
 const typeConfig: Record<string, { emoji: string; color: string }> = {
@@ -45,6 +47,8 @@ const typeConfig: Record<string, { emoji: string; color: string }> = {
 };
 
 export default function NotificationsPage() {
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
   const firebaseUser = useAuthStore((s) => s.firebaseUser);
 
   const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
@@ -80,20 +84,26 @@ export default function NotificationsPage() {
   }, [firebaseUser]);
 
   const handleMarkRead = async (id: string) => {
+    const original = [...notifications];
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     try {
       await updateDoc(doc(db, 'notifications', id), { read: true });
     } catch (err) {
       console.error(err);
+      toast.error(isArabic ? 'فشل في تحديث الإشعار' : 'Failed to update notification');
+      setNotifications(original);
     }
   };
 
   const handleDelete = async (id: string) => {
+    const original = [...notifications];
     setNotifications((prev) => prev.filter((n) => n.id !== id));
     try {
       await deleteDoc(doc(db, 'notifications', id));
     } catch (err) {
       console.error(err);
+      toast.error(isArabic ? 'فشل في حذف الإشعار' : 'Failed to delete notification');
+      setNotifications(original);
     }
   };
 
@@ -203,11 +213,7 @@ export default function NotificationsPage() {
 
       {/* Content */}
       {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 rounded-3xl bg-white/5 animate-pulse" />
-          ))}
-        </div>
+        <NotificationsPageSkeleton />
       ) : !firebaseUser ? (
         <Card className="global-box border-white/10 rounded-3xl p-12 text-center space-y-4 bg-black">
           <BellOff className="w-12 h-12 text-muted-foreground mx-auto" />
@@ -260,7 +266,7 @@ export default function NotificationsPage() {
                           </h3>
                           <div className="flex items-center gap-2 shrink-0">
                             <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                              {formatRelativeTime(item.createdAt)}
+                              {formatRelativeTime(item.createdAt, isArabic)}
                             </span>
                             <button
                               onClick={(e) => {

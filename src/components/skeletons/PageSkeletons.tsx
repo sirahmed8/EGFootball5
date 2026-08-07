@@ -647,4 +647,32 @@ export function ChatMessagesSkeleton() {
   );
 }
 
+export function GoalOfTheMonthPageSkeleton() {
+  return (
+    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-12 animate-in fade-in duration-300">
+      <div className="text-center space-y-4 max-w-2xl mx-auto mb-10">
+        <Skeleton className="h-10 md:h-12 w-3/4 mx-auto rounded-2xl" />
+        <Skeleton className="h-4 w-1/2 mx-auto rounded-full" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div
+            key={i}
+            className="rounded-3xl border border-white/10 bg-black p-6 space-y-5 shadow-xl"
+          >
+            <Skeleton className="h-48 w-full rounded-2xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-3/4 rounded-xl" />
+              <Skeleton className="h-4 w-full rounded-lg" />
+            </div>
+            <div className="pt-2 flex gap-2">
+              <Skeleton className="h-10 w-full rounded-xl" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 

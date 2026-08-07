@@ -42,7 +42,6 @@ export default function AnnouncementsPage() {
   ];
 
   const [activeCategory, setActiveCategory] = useState<Category>("All");
-  const [isSubscribed, setIsSubscribed] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +71,7 @@ export default function AnnouncementsPage() {
         }
       } catch (err) {
         console.error(err);
+        toast.error(isArabic ? "حدث خطأ أثناء تحميل الإعلانات" : "Failed to load announcements");
         setAnnouncements([]);
       } finally {
         setLoading(false);
@@ -176,17 +176,6 @@ export default function AnnouncementsPage() {
               </Button>
             )}
 
-            <button
-              onClick={() => setIsSubscribed(!isSubscribed)}
-              className={`flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold transition-all text-xs cursor-pointer shrink-0 whitespace-nowrap ${
-                isSubscribed
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/50"
-                  : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
-              }`}
-            >
-              {isSubscribed ? <Bell className="w-4 h-4 text-emerald-400 shrink-0" /> : <BellOff className="w-4 h-4 shrink-0" />}
-              <span>{isSubscribed ? (isArabic ? "مشترك ✓" : "Subscribed ✓") : (isArabic ? "الاشتراك في التحديثات" : "Subscribe")}</span>
-            </button>
           </div>
         </div>
 
@@ -216,26 +205,45 @@ export default function AnnouncementsPage() {
               ))}
             </div>
           ) : filteredAnnouncements.length === 0 ? (
-            <Card className="global-box border-white/10 rounded-3xl p-12 text-center text-muted-foreground font-bold bg-black">
-              {isArabic ? "لا توجد إعلانات رسمية منشورة حالياً." : "No official announcements published yet."}
-            </Card>
-          ) : (
-            filteredAnnouncements.map((a) => (
-              <Card
-                key={a.id}
-                onClick={() => setSelectedAnnouncement(a)}
-                className="global-box border-white/10 rounded-3xl p-6 shadow-xl cursor-pointer hover:border-emerald-500/40 transition-all space-y-3 bg-black"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase">
-                    {a.category}
-                  </span>
-                  <span className="text-xs font-mono text-muted-foreground">{a.date}</span>
-                </div>
-                <h3 className="text-xl font-black text-foreground">{a.title}</h3>
-                <p className="text-xs text-muted-foreground font-medium">{a.summary}</p>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card className="global-box border-white/10 rounded-3xl p-12 text-center text-muted-foreground font-bold bg-black">
+                {isArabic ? "لا توجد إعلانات رسمية منشورة حالياً." : "No official announcements published yet."}
               </Card>
-            ))
+            </motion.div>
+          ) : (
+            <motion.div 
+              initial="hidden" 
+              animate="show" 
+              variants={{
+                hidden: { opacity: 0 },
+                show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+              }}
+              className="space-y-4"
+            >
+              {filteredAnnouncements.map((a) => (
+                <motion.div 
+                  key={a.id} 
+                  variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+                >
+                  <Card
+                    onClick={() => setSelectedAnnouncement(a)}
+                    className="global-box border-white/10 rounded-3xl p-6 shadow-xl cursor-pointer hover:border-emerald-500/40 transition-all space-y-3 bg-black"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase">
+                        {a.category}
+                      </span>
+                      <span className="text-xs font-mono text-muted-foreground">{a.date}</span>
+                    </div>
+                    <h3 className="text-xl font-black text-foreground">{a.title}</h3>
+                    <p className="text-xs text-muted-foreground font-medium">{a.summary}</p>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
           )}
         </div>
       </div>

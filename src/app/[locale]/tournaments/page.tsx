@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useLocale } from 'next-intl';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Crown, Sparkles, Inbox, Users } from 'lucide-react';
 import { staggerContainer, cardItemVariant } from '@/lib/animations';
 import { Button } from '@/components/ui/button';
@@ -240,15 +240,20 @@ export default function TournamentsPage() {
       )}
 
       {/* Bracket Viewer Modal */}
-      {selectedTournament && selectedTournament.rounds && (
-        <Portal>
-          <div
-            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-            onClick={() => setSelectedTournament(null)}
-          >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+      <AnimatePresence>
+        {selectedTournament && selectedTournament.rounds && (
+          <Portal>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+              onClick={() => setSelectedTournament(null)}
+            >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="w-full max-w-4xl stadium-glass border-white/10 rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6"
             dir={isArabic ? 'rtl' : 'ltr'}
             onClick={(e) => e.stopPropagation()}
@@ -293,9 +298,10 @@ export default function TournamentsPage() {
               ))}
             </div>
           </motion.div>
-        </div>
+        </motion.div>
         </Portal>
       )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Portal } from '@/components/Portal';
 import { toast } from 'sonner';
+import { GoalOfTheMonthPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import {
   collection,
   getDocs,
@@ -183,10 +184,7 @@ export default function GoalOfTheMonthPage() {
 
       {/* Loading */}
       {loading ? (
-        <div className="text-center py-20 space-y-3">
-          <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
-          <p className="text-xs text-muted-foreground font-medium">{isArabic ? 'جاري تحميل الأهداف...' : 'Loading goal submissions...'}</p>
-        </div>
+        <GoalOfTheMonthPageSkeleton />
       ) : submissions.length === 0 ? (
         /* Empty state */
         <Card className="global-box border-white/10 rounded-3xl p-12 text-center space-y-4 bg-black">

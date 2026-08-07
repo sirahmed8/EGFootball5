@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Lock, CheckCircle2, Sparkles } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useAuthStore } from '@/store/useAuthStore';
+import { AchievementsPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface Achievement {
   id: string;
@@ -44,6 +45,9 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default function AchievementsPage() {
   const appUser = useAuthStore((s) => s.appUser);
+  const loading = useAuthStore((s) => s.loading);
+
+  if (loading) return <AchievementsPageSkeleton />;
 
   // Pull real stats from user profile
   const matchesPlayed = appUser?.matchesPlayed || 0;

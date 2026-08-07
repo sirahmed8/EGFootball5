@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { MessageSquare, Send, Users, Shield, Hash, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CommunityChatPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface ChatMessage {
   id: string;
@@ -69,6 +70,10 @@ export default function CommunityChatPage() {
       return;
     }
     if (!text.trim()) return;
+    if (text.length > 500) {
+      toast.error(isArabic ? 'الرسالة طويلة جداً (الحد الأقصى 500 حرف)' : 'Message too long (max 500 characters)');
+      return;
+    }
 
     const msgText = text;
     setText('');
@@ -156,9 +161,7 @@ export default function CommunityChatPage() {
         {/* Message Feed */}
         <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4">
           {loading ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-              {isArabic ? 'جاري التحميل...' : 'Loading real-time chat...'}
-            </div>
+            <CommunityChatPageSkeleton />
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm space-y-4">
               <Sparkles className="w-8 h-8 text-primary opacity-50 animate-bounce" />

@@ -273,7 +273,7 @@ function ProfileForm({ appUser, firebaseUid }: { appUser: AppUser; firebaseUid: 
 }
 
 export default function ProfilePage() {
-
+  const locale = useLocale();
   const { appUser, firebaseUser, loading } = useAuthStore();
   const router = useRouter();
   const t = useTranslations('Profile');
@@ -467,7 +467,7 @@ export default function ProfilePage() {
             {t('myBookings')}
           </TabsTrigger>
           <TabsTrigger value="favorites" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-bold rounded-xl cursor-pointer py-3 text-xs sm:text-sm text-center">
-            {t('favorites')}
+            {locale === 'ar' ? 'الملعب المفضل' : 'Preferred Pitch'}
           </TabsTrigger>
           <TabsTrigger value="details" className="data-[state=active]:bg-background data-[state=active]:text-foreground font-bold rounded-xl cursor-pointer py-3 text-xs sm:text-sm text-center">
             {t('profileDetails')}
@@ -519,7 +519,7 @@ export default function ProfilePage() {
           <Card className="bg-card/70 border-border p-6 rounded-3xl space-y-4 shadow-lg">
             <h3 className="font-extrabold text-foreground text-sm flex items-center gap-2">
               <Heart className="w-4 h-4 text-red-500 fill-red-500" />
-              <span>{t('favPitchesTitle')}</span>
+              <span>{locale === 'ar' ? 'الملعب الأكثر حجزا' : 'Most Booked Pitch'}</span>
             </h3>
 
             {preferredPitchId && pitchesCache[preferredPitchId] ? (

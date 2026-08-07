@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { collection, addDoc, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { HelpCircle, MessageSquare, Plus, CheckCircle2, Clock, Send, ChevronDown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -140,17 +140,19 @@ export default function SupportPage() {
                 <h3 className="font-bold text-foreground text-sm">{faq.q}</h3>
                 <ChevronDown className={`w-4 h-4 text-primary shrink-0 transition-transform duration-300 ${openFaqIdx === idx ? 'rotate-180' : ''}`} />
               </button>
-              {openFaqIdx === idx && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="px-4 pb-4"
-                >
-                  <p className="text-xs text-muted-foreground leading-relaxed border-t border-white/10 pt-3">{faq.a}</p>
-                </motion.div>
-              )}
+              <AnimatePresence>
+                {openFaqIdx === idx && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="px-4 pb-4 overflow-hidden"
+                  >
+                    <p className="text-xs text-muted-foreground leading-relaxed border-t border-white/10 pt-3">{faq.a}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ))}
         </div>
