@@ -21,6 +21,7 @@ interface VarClip {
   time: string;
   videoUrl?: string;
   category?: string;
+  matchId?: string;
 }
 
 export default function VarHighlightsPage() {
@@ -39,6 +40,7 @@ export default function VarHighlightsPage() {
   const [newPlayer, setNewPlayer] = React.useState('');
   const [newPitch, setNewPitch] = React.useState((appUser as any)?.pitchName || appUser?.city || 'Obour Main Stadium');
   const [newVideoUrl, setNewVideoUrl] = React.useState('');
+  const [newMatchId, setNewMatchId] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
 
   React.useEffect(() => {
@@ -77,6 +79,7 @@ export default function VarHighlightsPage() {
         pitch: newPitch.trim() || 'Obour Stadium',
         time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         videoUrl: newVideoUrl.trim() || '',
+        matchId: newMatchId.trim() || undefined,
         timestamp: Date.now(),
       };
       const docRef = await addDoc(collection(db, 'var_highlights'), clipDoc);
@@ -88,6 +91,7 @@ export default function VarHighlightsPage() {
       setNewTitle('');
       setNewPlayer('');
       setNewVideoUrl('');
+      setNewMatchId('');
     } catch (err) {
       console.error(err);
       toast.error(isArabic ? 'فشل نشر اللقطة' : 'Failed to publish VAR clip');
@@ -170,6 +174,11 @@ export default function VarHighlightsPage() {
               <p className="text-xs text-muted-foreground mt-0.5">
                 {isArabic ? 'اللاعب' : 'Player'}: <strong className="text-foreground">{selectedClip.player}</strong> • {isArabic ? 'الملعب' : 'Stadium'}: {selectedClip.pitch} ({selectedClip.time})
               </p>
+              {selectedClip.matchId && (
+                <div className="mt-2 text-[10px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-md inline-flex items-center gap-1">
+                  🔗 Linked to Match ID: {selectedClip.matchId}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -244,12 +253,23 @@ export default function VarHighlightsPage() {
               </div>
 
               <div>
-                <label className="text-muted-foreground uppercase block mb-1">{isArabic ? 'اسم اللاعب' : 'Player Name'}</label>
+                <label className="text-muted-foreground uppercase block mb-1">{isArabic ? 'اللاعب (اختياري)' : 'Featured Player (Optional)'}</label>
                 <input
                   type="text"
                   value={newPlayer}
                   onChange={(e) => setNewPlayer(e.target.value)}
-                  placeholder={isArabic ? 'اسم اللاعب' : 'Player Name'}
+                  placeholder="e.g. Messi or leave empty"
+                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground"
+                />
+              </div>
+
+              <div>
+                <label className="text-muted-foreground uppercase block mb-1">{isArabic ? 'معرف المباراة (اختياري)' : 'Match ID (Optional)'}</label>
+                <input
+                  type="text"
+                  value={newMatchId}
+                  onChange={(e) => setNewMatchId(e.target.value)}
+                  placeholder="Link this clip to a specific match event"
                   className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground"
                 />
               </div>

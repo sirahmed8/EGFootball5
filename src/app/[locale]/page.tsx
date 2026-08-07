@@ -52,16 +52,23 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       {/* ── HERO SECTION ──────────────────────────────────────────────── */}
       <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 py-16">
         <MotionDiv 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut", staggerChildren: 0.15 }}
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { 
+              opacity: 1, 
+              transition: { staggerChildren: 0.15, delayChildren: 0.1 } 
+            }
+          }}
           className="relative z-10 max-w-5xl mx-auto space-y-8"
         >
           {/* Top Badge */}
           <MotionDiv 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
+            variants={{
+              hidden: { opacity: 0, scale: 0.8, y: 20 },
+              visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+            }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs sm:text-sm font-extrabold shadow-sm backdrop-blur-md"
           >
             <Sparkles className="w-4 h-4 text-emerald-400 animate-spin-slow" />
@@ -70,9 +77,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
           {/* Main Hero Headline */}
           <MotionDiv
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            variants={{
+              hidden: { opacity: 0, y: 30 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+            }}
           >
             <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter text-foreground leading-[1.05]">
               EG<span className="text-gradient-primary">Football5</span>
@@ -80,9 +88,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           </MotionDiv>
 
           <MotionDiv
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+            }}
           >
             <p className="text-xl sm:text-3xl font-black text-primary tracking-tight max-w-3xl mx-auto">
               {t('heroSubtitle')}
@@ -90,9 +99,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           </MotionDiv>
 
           <MotionDiv
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+            }}
           >
             <p className="text-muted-foreground text-base sm:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
               {t('heroDescription')}

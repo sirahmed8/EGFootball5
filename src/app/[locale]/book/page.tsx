@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { isUserVip, calculateVipPrice } from '@/lib/vip';
 import Image from 'next/image';
+import { MotionDiv } from '@/components/MotionWrapper';
 
 const BLOCKS = Array.from({ length: (CLOSING_HOUR - OPENING_HOUR) * 2 }, (_, i) => OPENING_HOUR + i * 0.5);
 
@@ -560,7 +561,7 @@ function BookContent() {
 
         {/* Right Column - Interactive Time Grid */}
         <div className="lg:col-span-8 space-y-6">
-          <Card className="bg-card text-card-foreground border-border backdrop-blur-md shadow-xl min-h-[500px] rounded-3xl">
+          <Card className="bg-card text-card-foreground border-border backdrop-blur-md shadow-xl min-h-[500px] rounded-3xl overflow-hidden">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl md:text-2xl font-black flex items-center justify-between">
                 <span>
@@ -575,7 +576,15 @@ function BookContent() {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <MotionDiv 
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: { opacity: 1, transition: { staggerChildren: 0.03 } }
+                }}
+                className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+              >
                 {BLOCKS.map((block) => {
                   const status = getSlotStatus(block);
                   const isSelected = selectedRange && block >= selectedRange.start && block <= selectedRange.end;
@@ -595,17 +604,24 @@ function BookContent() {
                   }
 
                   return (
-                    <button
+                    <MotionDiv
                       key={block}
-                      disabled={disabled}
-                      onClick={() => handleSlotClick(block)}
-                      className={`p-4 rounded-2xl text-center text-xs font-bold border transition-all duration-200 ease-out active:scale-95 ${styleClass} ${cursorClass}`}
+                      variants={{
+                        hidden: { opacity: 0, scale: 0.8 },
+                        visible: { opacity: 1, scale: 1, transition: { duration: 0.2 } }
+                      }}
                     >
-                      {formatTime(block)}
-                    </button>
+                      <button
+                        disabled={disabled}
+                        onClick={() => handleSlotClick(block)}
+                        className={`w-full p-4 rounded-2xl text-center text-xs font-bold border transition-all duration-200 ease-out active:scale-95 ${styleClass} ${cursorClass}`}
+                      >
+                        {formatTime(block)}
+                      </button>
+                    </MotionDiv>
                   );
                 })}
-              </div>
+              </MotionDiv>
             </CardContent>
           </Card>
 

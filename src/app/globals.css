@@ -185,16 +185,21 @@ html.theme-transitioning *::after {
 
 /* Shimmer Animation for Premium Skeletons */
 @keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 .animate-shimmer {
-  animation: shimmer 1.6s infinite linear;
+  animation: shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-skeleton-pulse {
+  animation: skeletonPulse 2.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes marquee {
@@ -209,7 +214,7 @@ html.theme-transitioning *::after {
 
 .animate-marquee {
   display: inline-flex;
-  animation: marquee 25s linear infinite;
+  animation: marquee 35s linear infinite;
 }
 
 .animate-pulse-glow {

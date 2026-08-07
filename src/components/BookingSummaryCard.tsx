@@ -9,6 +9,7 @@ import { ar, enUS } from 'date-fns/locale';
 import { Crown, Sparkles, ShieldCheck } from 'lucide-react';
 import { isUserVip, calculateVipPrice } from '@/lib/vip';
 import { useAuthStore } from '@/store/useAuthStore';
+import { MotionDiv } from '@/components/MotionWrapper';
 
 interface BookingSummaryCardProps {
   selectedRange: { start: number; end: number };
@@ -53,7 +54,11 @@ export function BookingSummaryCard({
   const costPerPerson = (effectiveTotal / Math.max(10, numPeople)).toFixed(2);
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <MotionDiv 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
       <Card className={`stadium-glass shadow-2xl overflow-hidden rounded-3xl ${isVip ? 'border-amber-400 glow-amber' : 'border-primary/40 glow-primary-sm'}`}>
         <div className={`px-6 py-4 border-b backdrop-blur-md flex items-center justify-between ${isVip ? 'bg-amber-500/10 border-amber-500/30' : 'bg-primary/10 border-primary/20'}`}>
           <h3 className="text-lg font-black text-foreground flex items-center gap-2">
@@ -165,6 +170,6 @@ export function BookingSummaryCard({
           </Button>
         </CardContent>
       </Card>
-    </div>
+    </MotionDiv>
   );
 }

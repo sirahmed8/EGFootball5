@@ -90,4 +90,13 @@ export interface Booking {
   reimbursementStatus?: 'pending' | 'settled';
   settledAt?: number;
   settledBy?: string;
+  // Match Event Integrations
+  matchResult?: {
+    teamAScore: number;
+    teamBScore: number;
+    mvpUid?: string;
+    varHighlightId?: string;
+    isVerified?: boolean;
+    goalScorers?: { uid: string; goals: number }[];
+  };
 }
