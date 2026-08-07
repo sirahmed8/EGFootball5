@@ -148,7 +148,7 @@ export default function JerseyDesignerPage() {
 
           {/* SVG Shirt Graphic with 3D Tilt Container */}
           <motion.div
-            style={{ x, y, rotateX, rotateY, z: 100 }}
+            style={{ rotateX, rotateY, z: 100 }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             className="relative w-full max-w-[360px] aspect-[4/5] flex items-center justify-center cursor-crosshair transform-gpu"
@@ -323,8 +323,8 @@ export default function JerseyDesignerPage() {
                       onClick={() => setPattern(p)}
                       className={`text-[10px] h-10 rounded-xl font-bold uppercase transition-all duration-300 ${
                         pattern === p 
-                          ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)]' 
-                          : 'bg-transparent text-white/60 border-white/10 hover:border-white/30 hover:bg-white/5'
+                          ? 'bg-white !text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.4)]' 
+                          : 'bg-transparent !text-white/60 border-white/10 hover:border-white/30 hover:bg-white/5'
                       }`}
                     >
                       {p}
@@ -352,8 +352,8 @@ export default function JerseyDesignerPage() {
                         onClick={() => setBadgeIcon(b.id as any)}
                         className={`flex-1 h-10 rounded-xl transition-all duration-300 ${
                           badgeIcon === b.id 
-                            ? 'bg-primary text-black border-primary shadow-[0_0_15px_var(--primary-glow)]' 
-                            : 'bg-transparent text-white/60 border-white/10 hover:border-white/30 hover:bg-white/5'
+                            ? 'bg-primary !text-black border-primary shadow-[0_0_15px_var(--primary-glow)]' 
+                            : 'bg-transparent !text-white/60 border-white/10 hover:border-white/30 hover:bg-white/5'
                         }`}
                       >
                         <Icon className="w-4 h-4" />
@@ -376,10 +376,10 @@ export default function JerseyDesignerPage() {
                       key={c.hex}
                       type="button"
                       onClick={() => setPrimaryColor(c.hex)}
-                      className={`w-9 h-9 rounded-full transition-all duration-300 relative ${
+                      className={`w-7 h-7 rounded-full transition-all duration-300 relative ${
                         primaryColor === c.hex 
-                          ? 'scale-125 z-10 shadow-[0_0_20px_rgba(255,255,255,0.3)] ring-2 ring-white/50 border-0' 
-                          : 'border-2 border-white/10 hover:scale-110'
+                          ? 'scale-110 z-10 shadow-[0_0_15px_rgba(255,255,255,0.3)] ring-2 ring-white/50 border-0' 
+                          : 'border-2 border-white/10 hover:scale-105'
                       }`}
                       style={{ backgroundColor: c.hex }}
                       title={c.name}
@@ -396,10 +396,10 @@ export default function JerseyDesignerPage() {
                       key={c.hex}
                       type="button"
                       onClick={() => setSecondaryColor(c.hex)}
-                      className={`w-9 h-9 rounded-full transition-all duration-300 relative ${
+                      className={`w-7 h-7 rounded-full transition-all duration-300 relative ${
                         secondaryColor === c.hex 
-                          ? 'scale-125 z-10 shadow-[0_0_20px_rgba(255,255,255,0.3)] ring-2 ring-white/50 border-0' 
-                          : 'border-2 border-white/10 hover:scale-110'
+                          ? 'scale-110 z-10 shadow-[0_0_15px_rgba(255,255,255,0.3)] ring-2 ring-white/50 border-0' 
+                          : 'border-2 border-white/10 hover:scale-105'
                       }`}
                       style={{ backgroundColor: c.hex }}
                       title={c.name}
@@ -420,7 +420,7 @@ export default function JerseyDesignerPage() {
                     type="button"
                     variant="outline"
                     onClick={() => setCollarStyle('vneck')}
-                    className={`flex-1 rounded-xl font-bold h-10 ${collarStyle === 'vneck' ? 'bg-white text-black border-white' : 'bg-transparent text-white/60 border-white/10'}`}
+                    className={`flex-1 rounded-xl font-bold h-10 ${collarStyle === 'vneck' ? 'bg-white !text-black border-white' : 'bg-transparent !text-white/60 border-white/10 hover:bg-white/5'}`}
                   >
                     V-Neck
                   </Button>
@@ -428,7 +428,7 @@ export default function JerseyDesignerPage() {
                     type="button"
                     variant="outline"
                     onClick={() => setCollarStyle('crew')}
-                    className={`flex-1 rounded-xl font-bold h-10 ${collarStyle === 'crew' ? 'bg-white text-black border-white' : 'bg-transparent text-white/60 border-white/10'}`}
+                    className={`flex-1 rounded-xl font-bold h-10 ${collarStyle === 'crew' ? 'bg-white !text-black border-white' : 'bg-transparent !text-white/60 border-white/10 hover:bg-white/5'}`}
                   >
                     Crew Cut
                   </Button>
