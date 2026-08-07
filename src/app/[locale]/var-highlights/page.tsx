@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 import { VarHighlightsPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { useAuthStore } from '@/store/useAuthStore';
 import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '@/lib/firebase/config';
 import { useLocale } from 'next-intl';
 
 interface VarClip {
@@ -39,7 +40,8 @@ export default function VarHighlightsPage() {
   const [newTitle, setNewTitle] = React.useState('');
   const [newPlayer, setNewPlayer] = React.useState('');
   const [newPitch, setNewPitch] = React.useState((appUser as any)?.pitchName || appUser?.city || 'Obour Main Stadium');
-  const [newVideoUrl, setNewVideoUrl] = React.useState('');
+  const [videoFile, setVideoFile] = React.useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = React.useState(0);
   const [newMatchId, setNewMatchId] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -71,31 +73,59 @@ export default function VarHighlightsPage() {
       toast.error(isArabic ? 'يرجى إدخال عنوان المقطع' : 'Please enter a clip title');
       return;
     }
+    if (!videoFile) {
+      toast.error(isArabic ? 'يرجى اختيار مقطع فيديو' : 'Please select a video file');
+      return;
+    }
     setSubmitting(true);
     try {
-      const clipDoc = {
-        title: newTitle.trim(),
-        player: newPlayer.trim() || appUser?.name || 'Featured Player',
-        pitch: newPitch.trim() || 'Obour Stadium',
-        time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        videoUrl: newVideoUrl.trim() || '',
-        matchId: newMatchId.trim() || undefined,
-        timestamp: Date.now(),
-      };
-      const docRef = await addDoc(collection(db, 'var_highlights'), clipDoc);
-      const added = { id: docRef.id, ...clipDoc };
-      setClips((prev) => [added, ...prev]);
-      setSelectedClip(added);
-      toast.success(isArabic ? 'تم نشر لقطة الفار بنجاح! 🎥' : 'VAR Highlight clip published live! 🎥');
-      setIsUploadOpen(false);
-      setNewTitle('');
-      setNewPlayer('');
-      setNewVideoUrl('');
-      setNewMatchId('');
+      const fileRef = ref(storage, `var_highlights/${Date.now()}_${videoFile.name}`);
+      const uploadTask = uploadBytesResumable(fileRef, videoFile);
+
+      uploadTask.on('state_changed', 
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(progress);
+        },
+        (error) => {
+          console.error(error);
+          toast.error(isArabic ? 'فشل رفع الفيديو' : 'Video upload failed');
+          setSubmitting(false);
+        },
+        async () => {
+          try {
+            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+            const clipDoc = {
+              title: newTitle.trim(),
+              player: newPlayer.trim() || appUser?.name || 'Featured Player',
+              pitch: newPitch.trim() || 'Obour Stadium',
+              time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              videoUrl: downloadUrl,
+              matchId: newMatchId.trim() || undefined,
+              timestamp: Date.now(),
+            };
+            const docRef = await addDoc(collection(db, 'var_highlights'), clipDoc);
+            const added = { id: docRef.id, ...clipDoc };
+            setClips((prev) => [added, ...prev]);
+            setSelectedClip(added);
+            toast.success(isArabic ? 'تم نشر لقطة الفار بنجاح! 🎥' : 'VAR Highlight clip published live! 🎥');
+            setIsUploadOpen(false);
+            setNewTitle('');
+            setNewPlayer('');
+            setVideoFile(null);
+            setUploadProgress(0);
+            setNewMatchId('');
+          } catch (err) {
+            console.error(err);
+            toast.error(isArabic ? 'فشل نشر اللقطة' : 'Failed to publish VAR clip');
+          } finally {
+            setSubmitting(false);
+          }
+        }
+      );
     } catch (err) {
       console.error(err);
-      toast.error(isArabic ? 'فشل نشر اللقطة' : 'Failed to publish VAR clip');
-    } finally {
+      toast.error(isArabic ? 'فشل بدء الرفع' : 'Failed to start upload');
       setSubmitting(false);
     }
   };
@@ -285,15 +315,23 @@ export default function VarHighlightsPage() {
               </div>
 
               <div>
-                <label className="text-muted-foreground uppercase block mb-1">{isArabic ? 'رابط الفيديو (MP4 أو يوتيوب)' : 'Video Link (MP4 or Social Video URL)'}</label>
+                <label className="text-muted-foreground uppercase block mb-1">{isArabic ? 'ملف الفيديو (MP4)' : 'Video File (MP4)'}</label>
                 <input
-                  type="text"
-                  value={newVideoUrl}
-                  onChange={(e) => setNewVideoUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-left"
+                  type="file"
+                  accept="video/mp4,video/x-m4v,video/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setVideoFile(e.target.files[0]);
+                    }
+                  }}
+                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-primary file:text-black hover:file:bg-primary/90"
                   dir="ltr"
                 />
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="w-full bg-white/10 rounded-full h-1.5 mt-3">
+                    <div className="bg-primary h-1.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2 pt-2">

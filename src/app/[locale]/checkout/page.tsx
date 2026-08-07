@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import { motion } from 'framer-motion';
 import { useRouter } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import { doc, onSnapshot, getDoc } from 'firebase/firestore';
@@ -34,54 +35,17 @@ import imageCompression from 'browser-image-compression';
 import { CountdownTimer } from '@/components/CountdownTimer';
 
 function DynamicMatchQrCode({ value }: { value: string }) {
-  const size = 21;
-  const matrix: boolean[][] = Array.from({ length: size }, () => Array(size).fill(false));
-
-  const drawFinder = (startX: number, startY: number) => {
-    for (let r = 0; r < 7; r++) {
-      for (let c = 0; c < 7; c++) {
-        if (
-          r === 0 || r === 6 || c === 0 || c === 6 ||
-          (r >= 2 && r <= 4 && c >= 2 && c <= 4)
-        ) {
-          matrix[startY + r][startX + c] = true;
-        }
-      }
-    }
-  };
-
-  drawFinder(0, 0);
-  drawFinder(size - 7, 0);
-  drawFinder(0, size - 7);
-
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) {
-    hash = (hash << 5) - hash + value.charCodeAt(i);
-    hash |= 0;
-  }
-
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      if ((r < 8 && c < 8) || (r < 8 && c >= size - 8) || (r >= size - 8 && c < 8)) {
-        continue;
-      }
-      if (r === 6 || c === 6) {
-        matrix[r][c] = (r + c) % 2 === 0;
-        continue;
-      }
-      const val = Math.abs(Math.sin(r * 12.9898 + c * 78.233 + hash) * 43758.5453);
-      matrix[r][c] = val - Math.floor(val) > 0.45;
-    }
-  }
-
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} className="w-40 h-40 mx-auto bg-white p-2 rounded-2xl border border-border shadow-inner">
-      {matrix.map((row, r) =>
-        row.map((cell, c) => (
-          cell ? <rect key={`${r}-${c}`} x={c} y={r} width={1} height={1} fill="#090d16" rx={0.1} /> : null
-        ))
-      )}
-    </svg>
+    <div className="w-40 h-40 mx-auto bg-white p-2 rounded-2xl border border-border shadow-inner flex items-center justify-center">
+      <img
+        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(value)}&color=090d16`}
+        alt="Match QR Code"
+        width={150}
+        height={150}
+        className="w-full h-full object-contain"
+        crossOrigin="anonymous"
+      />
+    </div>
   );
 }
 
@@ -277,7 +241,12 @@ function CheckoutForm() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Panel: Booking Ticket & Details */}
-        <div className="lg:col-span-5 space-y-6">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="lg:col-span-5 space-y-6"
+        >
           <Card className="stadium-glass border-white/10 shadow-2xl overflow-hidden rounded-3xl">
             <CardHeader className="bg-primary/10 border-b border-white/10 p-5">
               <div className="flex items-center justify-between">
@@ -352,10 +321,15 @@ function CheckoutForm() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Right Panel: Payment Upload Form */}
-        <div className="lg:col-span-7">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="lg:col-span-7"
+        >
           <Card className="w-full bg-card border-border backdrop-blur-xl shadow-xl rounded-3xl">
             <CardHeader className="text-center pb-2 space-y-2">
               <CardTitle className="text-2xl font-black text-foreground">{t('title')}</CardTitle>
@@ -482,7 +456,7 @@ function CheckoutForm() {
               </Button>
             </CardFooter>
           </Card>
-        </div>
+        </motion.div>
       </div>
 
       {/* Dynamic SVG QR Pass Lightbox Modal */}

@@ -9,6 +9,7 @@ import { SolidSelect } from '@/components/ui/SolidSelect';
 import { collection, getDocs, limit, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { LeaderboardPageSkeleton } from '@/components/skeletons/PageSkeletons';
+import { toast } from 'sonner';
 
 interface PlayerRank {
   id: string;
@@ -114,6 +115,8 @@ export default function LeaderboardPage() {
         }
       } catch (err) {
         console.error(err);
+        setPlayers([]);
+        toast.error('Failed to load leaderboard. Please try again.');
       } finally {
         setLoading(false);
       }

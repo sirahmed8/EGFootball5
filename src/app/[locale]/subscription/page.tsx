@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useLocale } from 'next-intl';
 import { isUserVip } from '@/lib/vip';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 
 export default function SubscriptionPage() {
@@ -74,18 +74,21 @@ export default function SubscriptionPage() {
     }
     setSubmitting(true);
     try {
-      const thirtyDays = Date.now() + 30 * 24 * 60 * 60 * 1000;
-      await updateDoc(doc(db, 'users', firebaseUser.uid), {
-        isVip: true,
-        vipExpiry: thirtyDays,
-        vipTier: subscribeTier === 'pro' ? 'Pro Pass' : 'Pitch Pass VIP',
+      await addDoc(collection(db, 'tickets'), {
+        userId: firebaseUser.uid,
+        userName: appUser?.name || 'Player',
+        type: 'SUBSCRIPTION',
+        tier: subscribeTier,
+        method: selectedMethod,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
       });
 
       setSubscribeTier(null);
-      setIsSuccessModalOpen(true);
+      toast.success(isArabic ? 'تم إرسال طلبك. سيتم التفعيل بعد مراجعة التحويل.' : 'Request sent. VIP will be activated after transfer verification.');
     } catch (err) {
       console.error(err);
-      toast.error(isArabic ? 'فشل التفعيل. يرجى التواصل مع الدعم.' : 'Activation failed. Please contact support.');
+      toast.error(isArabic ? 'فشل إرسال الطلب.' : 'Request failed.');
     } finally {
       setSubmitting(false);
     }
@@ -279,8 +282,8 @@ export default function SubscriptionPage() {
 
                 {selectedMethod === 'card' && (
                   <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs space-y-1">
-                    <span className="text-muted-foreground block">{isArabic ? 'بوابة Paymob / الفيزا والماستركارد (بيئة تجريبية جاهزة):' : 'Paymob / Visa & Mastercard Sandbox:'}</span>
-                    <span className="font-mono font-black text-amber-400 text-xs block">Ready for API keys — Click Activate for instant sandbox activation</span>
+                    <span className="text-muted-foreground block">{isArabic ? 'الدفع بالبطاقة البنكية:' : 'Credit/Debit Card:'}</span>
+                    <span className="font-mono font-black text-amber-400 text-xs block">{isArabic ? 'قريباً! يرجى استخدام فودافون كاش أو إنستا باي حالياً.' : 'Coming soon! Please use Vodafone Cash or InstaPay for now.'}</span>
                   </div>
                 )}
 
@@ -288,7 +291,7 @@ export default function SubscriptionPage() {
                   <Button type="button" variant="outline" onClick={() => setSubscribeTier(null)} className="w-1/2 rounded-2xl">
                     {isArabic ? 'إلغاء' : 'Cancel'}
                   </Button>
-                  <Button type="submit" disabled={submitting} className={`w-1/2 text-white font-black rounded-2xl cursor-pointer ${subscribeTier === 'pro' ? 'bg-blue-600 hover:bg-blue-500 glow-primary-sm' : 'bg-amber-500 text-black hover:bg-amber-400 glow-amber'}`}>
+                  <Button type="submit" disabled={submitting || selectedMethod === 'card'} className={`w-1/2 text-white font-black rounded-2xl cursor-pointer ${subscribeTier === 'pro' ? 'bg-blue-600 hover:bg-blue-500 glow-primary-sm' : 'bg-amber-500 text-black hover:bg-amber-400 glow-amber'}`}>
                     {submitting ? (isArabic ? 'جاري التفعيل...' : 'Activating...') : (subscribeTier === 'pro' ? (isArabic ? 'تأكيد الترقية للمحترفين ⚡' : 'Confirm Pro Upgrade ⚡') : (isArabic ? 'تأكيد وتفعيل VIP 👑' : 'Confirm & Activate 👑'))}
                   </Button>
                 </div>

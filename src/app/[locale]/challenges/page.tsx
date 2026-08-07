@@ -14,12 +14,14 @@ import {
   getDocs,
   addDoc,
   updateDoc,
+  deleteDoc,
   doc,
   query,
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { ChallengesPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface Challenge {
   id: string;
@@ -69,7 +71,21 @@ export default function SquadChallengesPage() {
         const snap = await getDocs(
           query(collection(db, 'squad_challenges'), orderBy('createdAt', 'desc'))
         );
-        const list = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Challenge));
+        const list = snap.docs.map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            challengerSquad: data.challengerSquad || 'Unknown',
+            squadLogo: data.squadLogo || '⚽',
+            pitchName: data.pitchName || 'TBD',
+            city: data.city || 'TBD',
+            date: data.date || '',
+            time: data.time || '',
+            wagerTerms: data.wagerTerms || '',
+            accepted: !!data.accepted,
+            postedBy: data.postedBy || '',
+          } as Challenge;
+        });
         setChallenges(list);
       } catch (err) {
         console.error(err);
@@ -98,6 +114,18 @@ export default function SquadChallengesPage() {
       toast.error(isArabic ? 'فشل قبول التحدي. يرجى المحاولة مرة أخرى.' : 'Failed to accept challenge. Please try again.');
     } finally {
       setAcceptingId(null);
+    }
+  };
+
+  const handleDeleteChallenge = async (id: string) => {
+    if (!firebaseUser) return;
+    try {
+      await deleteDoc(doc(db, 'squad_challenges', id));
+      setChallenges((prev) => prev.filter((c) => c.id !== id));
+      toast.success(isArabic ? 'تم سحب التحدي بنجاح' : 'Challenge withdrawn successfully');
+    } catch (err) {
+      console.error(err);
+      toast.error(isArabic ? 'فشل سحب التحدي' : 'Failed to withdraw challenge');
     }
   };
 
@@ -177,9 +205,8 @@ export default function SquadChallengesPage() {
 
       {/* Loading */}
       {loading ? (
-        <div className="text-center py-20 space-y-3">
-          <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
-          <p className="text-xs text-muted-foreground font-medium">{isArabic ? 'جاري تحميل التحديات...' : 'Loading challenges...'}</p>
+        <div className="w-full">
+          <ChallengesPageSkeleton />
         </div>
       ) : challenges.length === 0 ? (
         /* Empty state */
@@ -225,9 +252,20 @@ export default function SquadChallengesPage() {
                     </div>
                   </div>
 
-                  <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] font-black uppercase shrink-0 self-start sm:self-auto">
-                    {isArabic ? 'مباراة 5v5' : '5v5 Challenge'}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {c.postedBy === firebaseUser?.uid && !c.accepted && (
+                      <button
+                        onClick={() => handleDeleteChallenge(c.id)}
+                        className="p-1 rounded-full bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer shrink-0"
+                        title={isArabic ? 'سحب التحدي' : 'Withdraw Challenge'}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                    <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] font-black uppercase shrink-0 self-start sm:self-auto">
+                      {isArabic ? 'مباراة 5v5' : '5v5 Challenge'}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="p-3 sm:p-4 rounded-2xl bg-black border border-white/10 space-y-1">

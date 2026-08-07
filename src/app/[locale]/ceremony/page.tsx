@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Portal } from '@/components/Portal';
 import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { CeremonyPageSkeleton } from "@/components/skeletons/PageSkeletons";
 import { toast } from "sonner";
 import { CustomDarkDatePicker } from "@/components/ui/CustomDarkDatePicker";
 
@@ -82,6 +83,7 @@ export default function CeremonyPage() {
   const [editMid, setEditMid] = useState("");
   const [editStr, setEditStr] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Fetch Season Data & Compute Automatic Winners from Live Firestore Stats
   useEffect(() => {
@@ -96,7 +98,8 @@ export default function CeremonyPage() {
           target = data.targetDate || "";
           savedData = data;
         }
-      } catch {
+      } catch (err) {
+        toast.error(isArabic ? "فشل جلب الإعدادات" : "Failed to fetch settings");
         // Quiet fallback if system doc is missing or restricted
       }
 
@@ -147,8 +150,11 @@ export default function CeremonyPage() {
             return;
           }
         }
-      } catch {
+      } catch (err) {
+        toast.error(isArabic ? "فشل جلب الإحصائيات" : "Failed to fetch stats");
         // Quiet fallback if users query is restricted
+      } finally {
+        setLoading(false);
       }
 
       setSeasonData((prev) => ({ ...prev, targetDate: target }));
@@ -222,6 +228,10 @@ export default function CeremonyPage() {
   ];
 
   const hasActiveTimer = Boolean(seasonData.targetDate && seasonData.targetDate.trim() !== "");
+
+  if (loading) {
+    return <CeremonyPageSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-black text-white p-4 md:p-8 relative overflow-hidden flex flex-col items-center" dir={isArabic ? "rtl" : "ltr"}>
