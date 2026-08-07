@@ -47,15 +47,14 @@ export default function AchievementsPage() {
 
   // Pull real stats from user profile
   const matchesPlayed = appUser?.matchesPlayed || 0;
-  const goals = (appUser as any)?.goals || 0;
-  const assists = (appUser as any)?.assists || 0;
-  const saves = (appUser as any)?.saves || 0;
+  const goals = appUser?.goals || 0;
+  const assists = appUser?.assists || 0;
+  const saves = appUser?.saves || 0;
 
   const level = Math.max(1, Math.floor(matchesPlayed / 3) + 1);
   const currentXP = matchesPlayed * 100 + goals * 30 + assists * 20;
   const targetXP = level * 300;
   const xpPercentage = Math.min(100, Math.round((currentXP / targetXP) * 100));
-  const totalUnlocked = 0; // computed below
 
   const achievements: Achievement[] = [
     {

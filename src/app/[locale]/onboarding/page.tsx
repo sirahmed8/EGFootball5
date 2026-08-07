@@ -24,7 +24,7 @@ export default function OnboardingPage() {
   const [phone, setPhone] = React.useState(appUser?.phone || '');
   const [saving, setSaving] = React.useState(false);
 
-  const positions = [
+  const positions: { id: 'GK' | 'DEF' | 'MID' | 'STR'; label: string; icon: string; desc: string }[] = [
     { id: 'GK', label: 'Goalkeeper', icon: '🧤', desc: 'Shot stopper & defense commander' },
     { id: 'DEF', label: 'Defender', icon: '🛡️', desc: 'Solid rock & tackler' },
     { id: 'MID', label: 'Midfielder', icon: '🎯', desc: 'Playmaker & engine' },
@@ -147,7 +147,7 @@ export default function OnboardingPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.1 }}
                     key={pos.id}
-                    onClick={() => setPosition(pos.id as any)}
+                    onClick={() => setPosition(pos.id)}
                     className={`p-6 rounded-2xl border text-start transition-all cursor-pointer flex items-start gap-4 relative overflow-hidden group ${
                       position === pos.id
                         ? 'bg-primary/20 border-primary shadow-xl glow-primary-sm'

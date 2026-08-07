@@ -16,6 +16,7 @@ interface SupportTicket {
   id: string;
   subject: string;
   category: string;
+  message?: string;
   status: 'open' | 'in_progress' | 'closed';
   createdAt: number;
 }
@@ -32,7 +33,7 @@ export default function SupportPage() {
   const [submitting, setSubmitting] = React.useState(false);
   const [isFormOpen, setIsFormOpen] = React.useState(false);
 
-  const mockTickets: SupportTicket[] = [];
+  const [openFaqIdx, setOpenFaqIdx] = React.useState<number | null>(null);
 
   const faqs = [
     { q: 'How does the 15-minute slot lock work?', a: 'When you select a time slot on the booking calendar, it is locked exclusively for you for 15 minutes to complete your Vodafone Cash or InstaPay deposit.' },
@@ -86,7 +87,7 @@ export default function SupportPage() {
         createdAt: Date.now(),
       };
       const docRef = await addDoc(collection(db, 'support_tickets'), newTicket);
-      setTickets((prev) => [{ id: docRef.id, ...newTicket } as any, ...prev]);
+      setTickets((prev) => [{ id: docRef.id, ...newTicket } as SupportTicket, ...prev]);
       toast.success('Support ticket submitted successfully! 🎟️');
       setIsFormOpen(false);
       setSubject('');
@@ -131,11 +132,25 @@ export default function SupportPage() {
         </h2>
         <div className="space-y-3">
           {faqs.map((faq, idx) => (
-            <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-              <h3 className="font-bold text-foreground text-sm flex items-center justify-between">
-                {faq.q}
-              </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">{faq.a}</p>
+            <div key={idx} className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
+              <button
+                onClick={() => setOpenFaqIdx(openFaqIdx === idx ? null : idx)}
+                className="w-full p-4 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-white/5 transition-colors"
+              >
+                <h3 className="font-bold text-foreground text-sm">{faq.q}</h3>
+                <ChevronDown className={`w-4 h-4 text-primary shrink-0 transition-transform duration-300 ${openFaqIdx === idx ? 'rotate-180' : ''}`} />
+              </button>
+              {openFaqIdx === idx && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="px-4 pb-4"
+                >
+                  <p className="text-xs text-muted-foreground leading-relaxed border-t border-white/10 pt-3">{faq.a}</p>
+                </motion.div>
+              )}
             </div>
           ))}
         </div>
@@ -148,29 +163,37 @@ export default function SupportPage() {
         </h2>
 
         <div className="space-y-3">
-          {tickets.map((t) => (
-            <div key={t.id} className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-              <div>
-                <div className="font-bold text-foreground text-sm">{t.subject}</div>
-                <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
-                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] uppercase font-mono">{t.category}</span>
-                  <span>Created {new Date(t.createdAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
-                  t.status === 'open'
-                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                    : t.status === 'in_progress'
-                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                }`}
-              >
-                {t.status}
-              </span>
+          {tickets.length === 0 ? (
+            <div className="text-center py-10 space-y-2">
+              <MessageSquare className="w-10 h-10 text-muted-foreground/30 mx-auto" />
+              <p className="text-sm text-muted-foreground font-medium">No support tickets yet.</p>
+              <p className="text-xs text-muted-foreground">Submit a ticket above if you have an issue with your booking or account.</p>
             </div>
-          ))}
+          ) : (
+            tickets.map((t) => (
+              <div key={t.id} className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-foreground text-sm">{t.subject}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
+                    <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] uppercase font-mono">{t.category}</span>
+                    <span>Created {new Date(t.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
+                    t.status === 'open'
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                      : t.status === 'in_progress'
+                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                      : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                  }`}
+                >
+                  {t.status}
+                </span>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

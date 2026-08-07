@@ -208,9 +208,30 @@ export default function GoalOfTheMonthPage() {
             return (
               <motion.div key={g.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
                 <Card className="stadium-glass border-white/10 rounded-3xl p-6 shadow-xl space-y-4 bg-black">
-                  <div className="relative aspect-video rounded-2xl bg-black border border-white/10 overflow-hidden flex items-center justify-center">
-                    <Video className="w-12 h-12 text-muted-foreground/40" />
-                    <span className="absolute bottom-3 start-3 text-xs font-black text-white bg-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                  <div className="relative aspect-video rounded-2xl bg-black border border-white/10 overflow-hidden">
+                    {g.videoUrl ? (
+                      g.videoUrl.includes('youtube.com') || g.videoUrl.includes('youtu.be') ? (
+                        <iframe
+                          src={`https://www.youtube.com/embed/${g.videoUrl.includes('youtu.be/') ? g.videoUrl.split('youtu.be/')[1]?.split('?')[0] : g.videoUrl.split('v=')[1]?.split('&')[0]}`}
+                          title={g.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full"
+                        />
+                      ) : (
+                        <video
+                          src={g.videoUrl}
+                          controls
+                          className="w-full h-full object-cover"
+                          preload="metadata"
+                        />
+                      )
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Video className="w-12 h-12 text-muted-foreground/40" />
+                      </div>
+                    )}
+                    <span className="absolute bottom-3 start-3 text-xs font-black text-white bg-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 z-10">
                       ⚽ {g.title}
                     </span>
                   </div>

@@ -21,6 +21,7 @@ import { ProfilePageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { DailyAIAdviceCard } from '@/components/DailyAIAdviceCard';
 import { Trophy, Star, Shield, Award, Zap, Heart, MapPin, ArrowRight, Crown, ShieldCheck } from 'lucide-react';
 import { isUserVip } from '@/lib/vip';
+import { motion } from 'framer-motion';
 
 function BookingCountdown({ lockedUntil }: { lockedUntil: number }) {
   const [timeLeft, setTimeLeft] = useState(0);
@@ -393,45 +394,42 @@ export default function ProfilePage() {
       <DailyAIAdviceCard />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="stadium-glass border-white/10 card-lift rounded-3xl transition-all duration-300 shadow-md">
-          <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
-            <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">{t('totalBookings')}</span>
-            <div className="flex items-baseline gap-2 mt-2">
-              <span className="text-4xl font-black text-foreground font-mono">{totalBookings}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="stadium-glass border-white/10 card-lift rounded-3xl transition-all duration-300 shadow-md">
-          <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
-            <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">{t('matchesPlayed')}</span>
-            <div className="flex items-baseline gap-2 mt-2">
-              <span className="text-4xl font-black text-primary font-mono">{confirmedMatches}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="stadium-glass border-white/10 card-lift rounded-3xl transition-all duration-300 shadow-md">
-          <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
-            <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">{t('preferredPitch')}</span>
-            <span className="text-sm font-black text-foreground mt-2 truncate block" title={preferredPitchName}>
-              ⚽ {preferredPitchName}
-            </span>
-          </CardContent>
-        </Card>
-
-        <Card className="stadium-glass border-white/10 card-lift rounded-3xl transition-all duration-300 shadow-md">
-          <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
-            <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">{t('loyaltyLevel')}</span>
-            <div className="mt-2">
-              <span className="inline-block px-3.5 py-1 rounded-full text-xs font-black bg-primary/20 text-primary border border-primary/40 shadow-xs">
-                {loyaltyBadge}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <motion.div
+        className="grid grid-cols-2 md:grid-cols-4 gap-4"
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+      >
+        {[
+          { label: t('totalBookings'), value: totalBookings, color: 'text-foreground' },
+          { label: t('matchesPlayed'), value: confirmedMatches, color: 'text-primary' },
+          { label: t('preferredPitch'), value: `⚽ ${preferredPitchName}`, color: 'text-foreground', small: true },
+          { label: t('loyaltyLevel'), value: loyaltyBadge, color: 'text-primary', badge: true },
+        ].map((stat, i) => (
+          <motion.div
+            key={i}
+            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+          >
+            <Card className="stadium-glass border-white/10 card-lift rounded-3xl transition-all duration-300 shadow-md h-full">
+              <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
+                <span className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider">{stat.label}</span>
+                <div className="mt-2">
+                  {stat.badge ? (
+                    <span className="inline-block px-3.5 py-1 rounded-full text-xs font-black bg-primary/20 text-primary border border-primary/40">{stat.value}</span>
+                  ) : stat.small ? (
+                    <span className="text-sm font-black text-foreground truncate block" title={String(stat.value)}>{stat.value}</span>
+                  ) : (
+                    <div className="flex items-baseline gap-2">
+                      <span className={`text-4xl font-black font-mono ${stat.color}`}>{stat.value}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </motion.div>
 
       {/* Badges Section */}
       <Card className="stadium-glass border-white/10 p-6 space-y-4 rounded-3xl shadow-xl">
@@ -495,15 +493,25 @@ export default function ProfilePage() {
               </Button>
             </Card>
           ) : (
-            <div className="flex flex-col gap-4">
-              {bookings.map((booking) => (
+          <motion.div
+            className="flex flex-col gap-4"
+            initial="hidden"
+            animate="visible"
+            variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
+          >
+            {bookings.map((booking) => (
+              <motion.div
+                key={booking.id}
+                variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
+                transition={{ type: 'spring', stiffness: 200, damping: 22 }}
+              >
                 <BookingCard
-                  key={booking.id}
                   booking={booking}
                   pitch={pitchesCache[booking.pitchId]}
                 />
-              ))}
-            </div>
+              </motion.div>
+            ))}
+          </motion.div>
           )}
         </TabsContent>
 

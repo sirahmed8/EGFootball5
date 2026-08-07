@@ -15,6 +15,8 @@ import {
   getDocs,
   query,
   orderBy,
+  where,
+  limit,
   addDoc,
   serverTimestamp,
 } from 'firebase/firestore';
@@ -78,6 +80,7 @@ export default function TournamentsPage() {
       } catch (err) {
         console.error(err);
         setTournaments([]);
+        toast.error(isArabic ? 'فشل تحميل البطولات. يرجى المحاولة مجدداً.' : 'Failed to load tournaments. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -94,6 +97,20 @@ export default function TournamentsPage() {
     const isVip = isUserVip(appUser);
     const isEliteVip = isVip && appUser?.vipTier === 'Pitch Pass VIP';
     try {
+      // Prevent duplicate registrations
+      const existing = await getDocs(
+        query(
+          collection(db, 'tournament_registrations'),
+          where('tournamentId', '==', tournament.id),
+          where('userId', '==', firebaseUser.uid),
+          limit(1)
+        )
+      );
+      if (!existing.empty) {
+        toast.info(isArabic ? 'أنت مسجل بالفعل في هذه البطولة!' : 'You are already registered for this tournament!');
+        setRegistering(false);
+        return;
+      }
       await addDoc(collection(db, 'tournament_registrations'), {
         tournamentId: tournament.id,
         tournamentName: tournament.name,

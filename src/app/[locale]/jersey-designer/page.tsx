@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { motion } from 'framer-motion';
-import { Shirt, Sparkles, Download, Palette, Shield, Sparkle, RefreshCw } from 'lucide-react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { Shirt, Sparkles, Download, Palette, Sparkle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -14,14 +14,33 @@ export default function JerseyDesignerPage() {
   const [primaryColor, setPrimaryColor] = React.useState('#10B981');
   const [secondaryColor, setSecondaryColor] = React.useState('#06B6D4');
   const [collarStyle, setCollarStyle] = React.useState<'vneck' | 'crew'>('vneck');
-  const [hasStripes, setHasStripes] = React.useState(true);
-  const [pattern, setPattern] = React.useState<'stripes' | 'sash' | 'chevron' | 'solid'>('stripes');
+  const [pattern, setPattern] = React.useState<'solid' | 'stripes' | 'hoops' | 'checkerboard' | 'halves' | 'sash'>('stripes');
   const [badgeIcon, setBadgeIcon] = React.useState<'shield' | 'crown' | 'star' | 'flame'>('shield');
   const [squadName, setSquadName] = React.useState('OBOUR EAGLES');
   const [playerName, setPlayerName] = React.useState('AHMED');
   const [number, setNumber] = React.useState('10');
 
   const svgRef = React.useRef<SVGSVGElement>(null);
+
+  // 3D Tilt Effect State
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useTransform(y, [-100, 100], [15, -15]);
+  const rotateY = useTransform(x, [-100, 100], [-15, 15]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    x.set(e.clientX - centerX);
+    y.set(e.clientY - centerY);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
 
   const colors = [
     { name: 'Emerald Green', hex: '#10B981' },
@@ -103,86 +122,146 @@ export default function JerseyDesignerPage() {
         <Card className="global-box border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-between space-y-6">
           <div className="flex items-center justify-between w-full border-b border-white/10 pb-4">
             <span className="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" /> {isArabic ? 'استوديو التصميم الثنائي الأبعاد' : 'Vector 2D Kit Studio'}
+              <Sparkles className="w-4 h-4" /> {isArabic ? 'استوديو التصميم ثلاثي الأبعاد' : '3D PRO Kit Studio'}
             </span>
             <span className="text-xs font-mono font-bold text-muted-foreground">{isArabic ? 'ياقة ' : ''}{collarStyle.toUpperCase()}{!isArabic ? ' COLLAR' : ''} • {pattern.toUpperCase()}</span>
           </div>
 
-          {/* SVG Shirt Graphic */}
-          <div className="relative w-72 h-96 flex items-center justify-center">
+          {/* SVG Shirt Graphic with 3D Tilt Container */}
+          <motion.div
+            style={{ x, y, rotateX, rotateY, z: 100 }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            className="relative w-72 h-[420px] flex items-center justify-center cursor-crosshair transform-gpu perspective-1000"
+          >
+
             <svg
               ref={svgRef}
               viewBox="0 0 240 280"
-              className="w-full h-full drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)]"
+              className="w-full h-full drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)]"
+              style={{ filter: 'drop-shadow(0px 20px 30px rgba(0,0,0,0.8))' }}
             >
               <defs>
+                {/* Base Jersey Gradient */}
                 <linearGradient id="jerseyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor={primaryColor} stopOpacity="1" />
-                  <stop offset="100%" stopColor={primaryColor} stopOpacity="0.85" />
+                  <stop offset="100%" stopColor={primaryColor} stopOpacity="0.8" />
                 </linearGradient>
+
+                {/* Shading/Lighting Gradient (Overlay to make it 3D) */}
+                <radialGradient id="shadingGrad" cx="30%" cy="30%" r="70%">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
+                  <stop offset="50%" stopColor="#000000" stopOpacity="0.1" />
+                  <stop offset="100%" stopColor="#000000" stopOpacity="0.6" />
+                </radialGradient>
+
+                {/* Realistic Fabric Noise Texture */}
+                <filter id="fabricNoise">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+                  <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
+                  <feBlend mode="multiply" in2="SourceGraphic" in="noise" />
+                </filter>
+
+                {/* SVG Patterns for perfect repetition */}
+                <pattern id="pat-stripes" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <rect width="20" height="40" fill={secondaryColor} opacity="0.85" />
+                </pattern>
+                <pattern id="pat-hoops" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <rect width="40" height="20" fill={secondaryColor} opacity="0.85" />
+                </pattern>
+                <pattern id="pat-checkerboard" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <rect width="20" height="20" fill={secondaryColor} opacity="0.85" />
+                  <rect x="20" y="20" width="20" height="20" fill={secondaryColor} opacity="0.85" />
+                </pattern>
+                
+                {/* The main jersey shape path to reuse as a clip mask */}
+                <clipPath id="jerseyClip">
+                  <path d="M 60 45 L 90 30 L 150 30 L 180 45 L 225 80 L 195 125 L 180 110 L 180 255 L 60 255 L 60 110 L 45 125 L 15 80 Z" />
+                </clipPath>
               </defs>
 
-              {/* Main Jersey Outline & Sleeves */}
+              {/* 1. Base Layer (Solid Color + Base Gradient) */}
               <path
                 d="M 60 45 L 90 30 L 150 30 L 180 45 L 225 80 L 195 125 L 180 110 L 180 255 L 60 255 L 60 110 L 45 125 L 15 80 Z"
                 fill="url(#jerseyGrad)"
-                stroke="#ffffff33"
-                strokeWidth="2.5"
               />
 
-              {/* Sleeve Accent Trims */}
-              <rect x="22" y="85" width="14" height="30" fill={secondaryColor} transform="rotate(25 22 85)" rx="2" />
-              <rect x="204" y="80" width="14" height="30" fill={secondaryColor} transform="rotate(-25 204 80)" rx="2" />
-
-              {/* Pattern Selection Overlay */}
-              {pattern === 'stripes' && (
-                <>
-                  <rect x="60" y="115" width="120" height="15" fill={secondaryColor} opacity="0.4" />
-                  <rect x="60" y="155" width="120" height="15" fill={secondaryColor} opacity="0.4" />
-                  <rect x="60" y="195" width="120" height="15" fill={secondaryColor} opacity="0.4" />
-                </>
-              )}
-
-              {pattern === 'sash' && (
-                <polygon points="60,60 180,240 180,255 60,75" fill={secondaryColor} opacity="0.45" />
-              )}
-
-              {pattern === 'chevron' && (
-                <polygon points="60,110 120,140 180,110 180,135 120,165 60,135" fill={secondaryColor} opacity="0.45" />
-              )}
-
-              {/* Crest Badge Badge Graphic */}
-              <g transform="translate(75, 75)">
-                <path d="M 0 0 L 14 0 L 14 14 L 7 19 L 0 14 Z" fill={secondaryColor} stroke="#FFF" strokeWidth="1" />
-                <circle cx="7" cy="7" r="3" fill="#FFF" />
+              {/* 2. Pattern Layer (clipped strictly to jersey shape) */}
+              <g clipPath="url(#jerseyClip)">
+                {pattern === 'stripes' && <rect x="0" y="0" width="240" height="280" fill="url(#pat-stripes)" />}
+                {pattern === 'hoops' && <rect x="0" y="0" width="240" height="280" fill="url(#pat-hoops)" />}
+                {pattern === 'checkerboard' && <rect x="0" y="0" width="240" height="280" fill="url(#pat-checkerboard)" />}
+                {pattern === 'halves' && <rect x="120" y="0" width="120" height="280" fill={secondaryColor} opacity="0.85" />}
+                {pattern === 'sash' && <polygon points="0,0 240,240 240,280 0,40" fill={secondaryColor} opacity="0.85" />}
               </g>
+
+              {/* 3. 3D Shading & Lighting Overlay Layer */}
+              <path
+                d="M 60 45 L 90 30 L 150 30 L 180 45 L 225 80 L 195 125 L 180 110 L 180 255 L 60 255 L 60 110 L 45 125 L 15 80 Z"
+                fill="url(#shadingGrad)"
+                style={{ mixBlendMode: 'overlay' }}
+              />
+
+              {/* 4. Fabric Texture Overlay Layer */}
+              <path
+                d="M 60 45 L 90 30 L 150 30 L 180 45 L 225 80 L 195 125 L 180 110 L 180 255 L 60 255 L 60 110 L 45 125 L 15 80 Z"
+                fill="transparent"
+                filter="url(#fabricNoise)"
+                opacity="0.3"
+              />
+
+              {/* 5. Seam Lines and Edges (Adds thickness and realism) */}
+              <path
+                d="M 60 45 L 90 30 L 150 30 L 180 45 L 225 80 L 195 125 L 180 110 L 180 255 L 60 255 L 60 110 L 45 125 L 15 80 Z"
+                fill="none"
+                stroke="#ffffff44"
+                strokeWidth="1.5"
+              />
+              {/* Shoulder/Armpit Seam Lines */}
+              <path d="M 60 45 Q 75 80 60 110" fill="none" stroke="#00000033" strokeWidth="2" />
+              <path d="M 180 45 Q 165 80 180 110" fill="none" stroke="#00000033" strokeWidth="2" />
+              <path d="M 60 250 L 180 250" fill="none" stroke="#00000055" strokeWidth="2" />
+
+              {/* Sleeve Accent Trims */}
+              <rect x="18" y="87" width="16" height="28" fill={secondaryColor} transform="rotate(25 22 85)" rx="3" />
+              <rect x="206" y="80" width="16" height="28" fill={secondaryColor} transform="rotate(-25 204 80)" rx="3" />
+
+              {/* Crest Badge Graphic */}
+              <g transform="translate(150, 75)">
+                <path d="M 0 0 L 16 0 L 16 16 L 8 22 L 0 16 Z" fill={secondaryColor} stroke="#FFF" strokeWidth="1.5" />
+                <circle cx="8" cy="8" r="3.5" fill="#FFF" />
+              </g>
+
+              {/* Sponsor Logo Placeholder (Modern detail) */}
+              <rect x="85" y="125" width="70" height="12" rx="4" fill="#ffffff" opacity="0.2" />
 
               {/* Collar Style */}
               {collarStyle === 'vneck' ? (
-                <path d="M 90 30 L 120 75 L 150 30 Z" fill={secondaryColor} stroke="#ffffff44" strokeWidth="1" />
+                <path d="M 90 30 L 120 75 L 150 30 Z" fill={secondaryColor} stroke="#00000044" strokeWidth="2" />
               ) : (
-                <path d="M 90 30 Q 120 65 150 30 Z" fill={secondaryColor} stroke="#ffffff44" strokeWidth="1" />
+                <path d="M 90 30 Q 120 65 150 30 Z" fill={secondaryColor} stroke="#00000044" strokeWidth="2" />
               )}
             </svg>
 
             {/* Overlay Text (Squad Chest & Player Back) */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center pointer-events-none space-y-3">
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center pointer-events-none space-y-3 pt-12">
               <div
-                className="px-4 py-1 rounded-lg text-xs font-black tracking-widest uppercase shadow-lg border border-white/20 mt-4"
+                className="px-5 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase shadow-2xl border border-white/20 drop-shadow-md"
                 style={{ backgroundColor: secondaryColor, color: primaryColor === '#FFFFFF' ? '#000' : '#FFF' }}
               >
                 {squadName || (isArabic ? 'اسم الفريق' : 'SQUAD NAME')}
               </div>
 
-              <div className="text-6xl font-black font-mono tracking-tighter text-white drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)]">
+              <div className="text-[5rem] font-black font-sans tracking-tighter text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]" style={{ WebkitTextStroke: '2px rgba(0,0,0,0.3)' }}>
                 {number || '10'}
               </div>
 
-              <div className="text-xs font-black tracking-widest uppercase text-white/90 drop-shadow">
+              <div className="text-xs font-black tracking-widest uppercase text-white/90 drop-shadow-md bg-black/40 px-3 py-1 rounded-full backdrop-blur-sm">
                 {playerName || (isArabic ? 'اللاعب' : 'PLAYER')}
               </div>
             </div>
-          </div>
+          </motion.div>
+
 
           <div className="w-full pt-4 border-t border-white/10 flex items-center justify-between text-xs text-muted-foreground font-bold">
             <span className="flex items-center gap-1.5"><Sparkle className="w-4 h-4 text-emerald-400" /> {isArabic ? 'طقم خماسي احترافي' : 'Professional 5-a-side Kit'}</span>
@@ -199,21 +278,22 @@ export default function JerseyDesignerPage() {
           {/* Pattern Style Selector */}
           <div>
             <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">{isArabic ? 'نمط الطقم' : 'Kit Pattern Style'}</label>
-            <div className="grid grid-cols-4 gap-2">
-              {(['solid', 'stripes', 'sash', 'chevron'] as const).map((p) => (
+            <div className="grid grid-cols-3 gap-2">
+              {(['solid', 'stripes', 'hoops', 'checkerboard', 'halves', 'sash'] as const).map((p) => (
                 <Button
                   key={p}
                   type="button"
                   size="sm"
                   variant={pattern === p ? 'default' : 'outline'}
                   onClick={() => setPattern(p)}
-                  className="text-xs rounded-xl font-bold uppercase"
+                  className="text-[10px] rounded-xl font-bold uppercase"
                 >
                   {p}
                 </Button>
               ))}
             </div>
           </div>
+
 
           {/* Primary Color */}
           <div>
@@ -279,18 +359,7 @@ export default function JerseyDesignerPage() {
               </div>
             </div>
 
-            <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase mb-1.5 block">{isArabic ? 'خطوط الجسم' : 'Body Stripes'}</label>
-              <Button
-                type="button"
-                size="sm"
-                variant={hasStripes ? 'default' : 'outline'}
-                onClick={() => setHasStripes(!hasStripes)}
-                className="w-full text-xs rounded-xl font-bold"
-              >
-                {hasStripes ? (isArabic ? 'مخطط ✓' : 'Striped ✓') : (isArabic ? 'سادة' : 'Solid Plain')}
-              </Button>
-            </div>
+
           </div>
 
           {/* Squad Name, Player Name & Number */}

@@ -27,7 +27,12 @@ export interface User {
   preferredSize?: string;
   city?: string;
   onboarded?: boolean;
+  // Player Stats
   goalsCount?: number;
+  goals?: number;
+  assists?: number;
+  saves?: number;
+  rating?: number;
   matchesPlayed?: number;
   mvpBadges?: number;
   // VIP Subscription

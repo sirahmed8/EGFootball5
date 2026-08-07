@@ -5,10 +5,11 @@ import { motion } from 'framer-motion';
 import { Tv, MessageSquare, Send, Radio, Users, Sparkles, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { collection, onSnapshot, query, orderBy, addDoc, getDocs, where } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useLocale } from 'next-intl';
+import { toast } from 'sonner';
 
 interface LiveMatch {
   id: string;
@@ -39,26 +40,28 @@ export default function LiveStreamPage() {
   const [loadingMatch, setLoadingMatch] = React.useState(true);
   const chatEndRef = React.useRef<HTMLDivElement>(null);
 
-  // Fetch live match from Firestore
+  // Subscribe to live match in real-time (so scores update without page refresh)
   React.useEffect(() => {
-    async function fetchLiveMatch() {
-      setLoadingMatch(true);
-      try {
-        const snap = await getDocs(query(collection(db, 'live_matches'), where('status', '==', 'live')));
+    setLoadingMatch(true);
+    const q = query(collection(db, 'live_matches'), where('status', '==', 'live'));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
         if (!snap.empty) {
-          const doc = snap.docs[0];
-          setLiveMatch({ id: doc.id, ...doc.data() } as LiveMatch);
+          const d = snap.docs[0];
+          setLiveMatch({ id: d.id, ...d.data() } as LiveMatch);
         } else {
           setLiveMatch(null);
         }
-      } catch (err) {
+        setLoadingMatch(false);
+      },
+      (err) => {
         console.error(err);
         setLiveMatch(null);
-      } finally {
         setLoadingMatch(false);
       }
-    }
-    fetchLiveMatch();
+    );
+    return () => unsub();
   }, []);
 
   // Subscribe to live chat messages
@@ -78,16 +81,23 @@ export default function LiveStreamPage() {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMsg.trim()) return;
+    if (inputMsg.trim().length > 300) {
+      toast.error(isArabic ? 'الرسالة طويلة جداً (300 حرف كحد أقصى)' : 'Message too long (max 300 characters)');
+      return;
+    }
     const name = appUser?.name || firebaseUser?.displayName || (isArabic ? 'مشجع' : 'Fan');
+    const msgText = inputMsg.trim();
+    setInputMsg('');
     try {
       await addDoc(collection(db, 'live_chat'), {
         name,
-        msg: inputMsg.trim(),
+        msg: msgText,
         timestamp: Date.now(),
       });
-      setInputMsg('');
     } catch (err) {
       console.error(err);
+      setInputMsg(msgText); // restore message on failure
+      toast.error(isArabic ? 'فشل إرسال الرسالة' : 'Failed to send message');
     }
   };
 

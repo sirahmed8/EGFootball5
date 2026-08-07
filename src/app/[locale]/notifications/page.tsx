@@ -113,17 +113,26 @@ export default function NotificationsPage() {
 
   const handleClearAll = async () => {
     if (notifications.length === 0) return;
-    const confirmed = window.confirm('Clear all notifications? This cannot be undone.');
-    if (!confirmed) return;
-    setNotifications([]);
-    toast.success('All notifications cleared');
-    try {
-      const batch = writeBatch(db);
-      notifications.forEach((n) => batch.delete(doc(db, 'notifications', n.id)));
-      await batch.commit();
-    } catch (err) {
-      console.error(err);
-    }
+    toast('Clear all notifications?', {
+      description: 'This action cannot be undone.',
+      action: {
+        label: 'Clear All',
+        onClick: async () => {
+          const snapshot = [...notifications];
+          setNotifications([]);
+          try {
+            const batch = writeBatch(db);
+            snapshot.forEach((n) => batch.delete(doc(db, 'notifications', n.id)));
+            await batch.commit();
+            toast.success('All notifications cleared');
+          } catch (err) {
+            console.error(err);
+            setNotifications(snapshot);
+            toast.error('Failed to clear notifications');
+          }
+        },
+      },
+    });
   };
 
   const filtered = notifications.filter((n) => (filter === 'unread' ? !n.read : true));
