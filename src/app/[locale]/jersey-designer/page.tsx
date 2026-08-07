@@ -161,95 +161,98 @@ export default function JerseyDesignerPage() {
                 style={{ filter: 'drop-shadow(0px 20px 40px rgba(0,0,0,0.95))' }}
               >
                 <defs>
+                  {/* Rich Gradients */}
                   <linearGradient id="jerseyBaseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor={primaryColor} stopOpacity="1" />
-                    <stop offset="60%" stopColor={primaryColor} stopOpacity="0.92" />
-                    <stop offset="100%" stopColor="#000" stopOpacity="0.25" />
+                    <stop offset="65%" stopColor={primaryColor} stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="#000000" stopOpacity="0.35" />
                   </linearGradient>
 
                   <filter id="meshTexture" x="0%" y="0%" width="100%" height="100%">
-                    <feTurbulence type="fractalNoise" baseFrequency="1.8" numOctaves="4" stitchTiles="stitch" result="noise" />
-                    <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.07 0" in="noise" result="tinted" />
+                    <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="3" stitchTiles="stitch" result="noise" />
+                    <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.05 0" in="noise" result="tinted" />
                     <feBlend mode="multiply" in="SourceGraphic" in2="tinted" />
                   </filter>
 
+                  {/* 3D Realism Folds */}
                   <linearGradient id="shadowFolds" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#000" stopOpacity="0.4"/>
-                    <stop offset="10%" stopColor="#000" stopOpacity="0.05"/>
-                    <stop offset="25%" stopColor="#fff" stopOpacity="0.15"/>
-                    <stop offset="35%" stopColor="#000" stopOpacity="0.1"/>
-                    <stop offset="50%" stopColor="#fff" stopOpacity="0.2"/>
-                    <stop offset="65%" stopColor="#000" stopOpacity="0.08"/>
-                    <stop offset="75%" stopColor="#fff" stopOpacity="0.12"/>
-                    <stop offset="90%" stopColor="#000" stopOpacity="0.1"/>
-                    <stop offset="100%" stopColor="#000" stopOpacity="0.45"/>
+                    <stop offset="0%" stopColor="#000" stopOpacity="0.45"/>
+                    <stop offset="12%" stopColor="#000" stopOpacity="0.08"/>
+                    <stop offset="28%" stopColor="#fff" stopOpacity="0.18"/>
+                    <stop offset="42%" stopColor="#000" stopOpacity="0.12"/>
+                    <stop offset="50%" stopColor="#fff" stopOpacity="0.22"/>
+                    <stop offset="62%" stopColor="#000" stopOpacity="0.10"/>
+                    <stop offset="78%" stopColor="#fff" stopOpacity="0.15"/>
+                    <stop offset="88%" stopColor="#000" stopOpacity="0.12"/>
+                    <stop offset="100%" stopColor="#000" stopOpacity="0.5"/>
                   </linearGradient>
 
-                  <radialGradient id="chestHighlight" cx="50%" cy="25%" r="50%">
-                    <stop offset="0%" stopColor="#fff" stopOpacity="0.45"/>
+                  <radialGradient id="chestHighlight" cx="50%" cy="25%" r="55%">
+                    <stop offset="0%" stopColor="#fff" stopOpacity="0.4"/>
                     <stop offset="100%" stopColor="#fff" stopOpacity="0"/>
                   </radialGradient>
 
-                  {/* Jersey shape (Modern athletic fit) */}
+                  {/* Real T-Shirt Shape (Standard Pro Athletic Fit) */}
                   <clipPath id="jerseyClip">
-                    <path d="M 155 20
-                             C 180 15, 220 15, 245 20
-                             C 280 25, 310 40, 335 60
-                             C 355 75, 370 95, 375 110
-                             C 380 120, 365 130, 350 140
-                             C 335 150, 320 155, 310 145
-                             C 305 135, 290 145, 295 180
-                             L 300 420
-                             C 290 435, 200 445, 100 435
-                             L 105 180
-                             C 110 145, 95 135, 90 145
-                             C 80 155, 65 150, 50 140
-                             C 35 130, 20 120, 25 110
-                             C 30 95, 45 75, 65 60
-                             C 90 40, 120 25, 155 20 Z" />
+                    <path d="M 140 25
+                             C 165 18, 235 18, 260 25
+                             C 295 32, 335 52, 365 75
+                             C 375 83, 385 95, 375 110
+                             C 365 125, 345 142, 325 155
+                             C 315 160, 305 150, 295 140
+                             C 290 135, 290 155, 290 190
+                             L 290 415
+                             C 280 430, 200 435, 110 415
+                             L 110 190
+                             C 110 155, 110 135, 105 140
+                             C 95 150, 85 160, 75 155
+                             C 55 142, 35 125, 25 110
+                             C 15 95, 25 83, 35 75
+                             C 65 52, 105 32, 140 25 Z" />
                   </clipPath>
 
-                  <pattern id="pat-stripes" width="55" height="55" patternUnits="userSpaceOnUse">
-                    <rect width="27.5" height="55" fill={secondaryColor} opacity="0.9" />
+                  {/* Patterns */}
+                  <pattern id="pat-stripes" width="50" height="50" patternUnits="userSpaceOnUse">
+                    <rect width="25" height="50" fill={secondaryColor} opacity="0.88" />
                   </pattern>
-                  <pattern id="pat-hoops" width="55" height="55" patternUnits="userSpaceOnUse">
-                    <rect width="55" height="27.5" fill={secondaryColor} opacity="0.9" />
+                  <pattern id="pat-hoops" width="50" height="50" patternUnits="userSpaceOnUse">
+                    <rect width="50" height="25" fill={secondaryColor} opacity="0.88" />
                   </pattern>
-                  <pattern id="pat-checkerboard" width="55" height="55" patternUnits="userSpaceOnUse">
-                    <rect width="27.5" height="27.5" fill={secondaryColor} opacity="0.9" />
-                    <rect x="27.5" y="27.5" width="27.5" height="27.5" fill={secondaryColor} opacity="0.9" />
+                  <pattern id="pat-checkerboard" width="50" height="50" patternUnits="userSpaceOnUse">
+                    <rect width="25" height="25" fill={secondaryColor} opacity="0.88" />
+                    <rect x="25" y="25" width="25" height="25" fill={secondaryColor} opacity="0.88" />
                   </pattern>
                 </defs>
 
                 {/* Base */}
                 <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="url(#jerseyBaseGrad)" />
 
-                {/* Pattern */}
+                {/* Pattern Layer */}
                 <g clipPath="url(#jerseyClip)">
                   {pattern === 'stripes' && <rect x="0" y="0" width="400" height="450" fill="url(#pat-stripes)" />}
                   {pattern === 'hoops' && <rect x="0" y="0" width="400" height="450" fill="url(#pat-hoops)" />}
                   {pattern === 'checkerboard' && <rect x="0" y="0" width="400" height="450" fill="url(#pat-checkerboard)" />}
-                  {pattern === 'halves' && <rect x="200" y="0" width="200" height="450" fill={secondaryColor} opacity="0.9" />}
-                  {pattern === 'sash' && <polygon points="-50,0 450,450 400,500 -100,50" fill={secondaryColor} opacity="0.9" />}
+                  {pattern === 'halves' && <rect x="200" y="0" width="200" height="450" fill={secondaryColor} opacity="0.88" />}
+                  {pattern === 'sash' && <polygon points="-50,0 450,450 400,500 -100,50" fill={secondaryColor} opacity="0.88" />}
                 </g>
 
-                {/* Fabric texture */}
+                {/* Fabric texture overlay */}
                 <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="transparent" filter="url(#meshTexture)" />
 
-                {/* Shading */}
+                {/* Shading Folds */}
                 <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="url(#shadowFolds)" style={{ mixBlendMode: 'multiply' }} />
                 <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="url(#chestHighlight)" style={{ mixBlendMode: 'overlay' }} />
 
-                {/* Raglan Seams */}
-                <path d="M 120 160 Q 140 100 155 20" fill="none" stroke="#000" strokeWidth="2.5" strokeOpacity="0.25" />
-                <path d="M 280 160 Q 260 100 245 20" fill="none" stroke="#000" strokeWidth="2.5" strokeOpacity="0.25" />
+                {/* Realistic Raglan Arm Seams */}
+                <path d="M 125 150 Q 155 80 170 24" fill="none" stroke="#000" strokeWidth="2" strokeOpacity="0.3" />
+                <path d="M 275 150 Q 245 80 230 24" fill="none" stroke="#000" strokeWidth="2" strokeOpacity="0.3" />
 
-                {/* Cuffs */}
-                <path d="M 25 110 L 50 140 L 40 147 L 15 117 Z" fill={secondaryColor} opacity="0.85" style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))' }} />
-                <path d="M 375 110 L 350 140 L 360 147 L 385 117 Z" fill={secondaryColor} opacity="0.85" style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))' }} />
+                {/* Sleeve Cuffs */}
+                <path d="M 25 110 L 40 100 L 75 155 L 60 165 Z" fill={secondaryColor} opacity="0.9" style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.4))' }} />
+                <path d="M 375 110 L 360 100 L 325 155 L 340 165 Z" fill={secondaryColor} opacity="0.9" style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.4))' }} />
 
-                {/* Badge */}
-                <g transform="translate(255, 90) scale(1.6)" style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.6))' }}>
+                {/* Crest/Badge (Safe Left Chest Placement) */}
+                <g transform="translate(245, 95) scale(1.4)" style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.5))' }}>
                   {badgeIcon === 'shield' && (
                     <>
                       <path d="M 0 0 L 16 0 L 16 16 L 8 24 L 0 16 Z" fill={secondaryColor} stroke="#FFF" strokeWidth="1.5" />
@@ -271,32 +274,67 @@ export default function JerseyDesignerPage() {
                 </g>
 
                 {/* Collar */}
-                <g style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.55))' }}>
+                <g style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.5))' }}>
                   {collarStyle === 'vneck' ? (
                     <>
-                      <path d="M 155 20 L 200 100 L 245 20 L 225 15 L 200 75 L 175 15 Z" fill={secondaryColor} stroke="#000" strokeWidth="1" strokeOpacity="0.4" />
-                      <path d="M 155 20 L 200 100 L 245 20 L 225 15 L 200 75 L 175 15 Z" fill="none" stroke="#FFF" strokeWidth="0.8" strokeOpacity="0.25" />
+                      <path d="M 160 22 L 200 95 L 240 22 L 225 18 L 200 70 L 175 18 Z" fill={secondaryColor} stroke="#000" strokeWidth="1" strokeOpacity="0.4" />
+                      <path d="M 160 22 L 200 95 L 240 22 L 225 18 L 200 70 L 175 18 Z" fill="none" stroke="#FFF" strokeWidth="0.8" strokeOpacity="0.25" />
                     </>
                   ) : (
                     <>
-                      <path d="M 155 20 Q 200 80 245 20 L 230 15 Q 200 55 170 15 Z" fill={secondaryColor} stroke="#000" strokeWidth="1" strokeOpacity="0.4" />
-                      <path d="M 155 20 Q 200 80 245 20 L 230 15 Q 200 55 170 15 Z" fill="none" stroke="#FFF" strokeWidth="0.8" strokeOpacity="0.25" />
+                      <path d="M 160 22 Q 200 75 240 22 L 228 18 Q 200 55 172 18 Z" fill={secondaryColor} stroke="#000" strokeWidth="1" strokeOpacity="0.4" />
+                      <path d="M 160 22 Q 200 75 240 22 L 228 18 Q 200 55 172 18 Z" fill="none" stroke="#FFF" strokeWidth="0.8" strokeOpacity="0.25" />
                     </>
                   )}
                 </g>
 
-                {/* Typography */}
-                <text x="200" y="210" textAnchor="middle" fill="#FFFFFF" fontSize="25" fontWeight="900" letterSpacing="5" fontFamily="Arial, sans-serif" style={{ filter: 'drop-shadow(1px 3px 5px rgba(0,0,0,0.85))' }}>
+                {/* Typography (Strictly bounded so it NEVER overflows the jersey) */}
+                <text 
+                  x="200" 
+                  y="195" 
+                  textAnchor="middle" 
+                  fill="#FFFFFF" 
+                  fontSize="17" 
+                  fontWeight="900" 
+                  letterSpacing="3" 
+                  textLength="150" 
+                  lengthAdjust="spacingAndGlyphs"
+                  fontFamily="Arial, sans-serif" 
+                  style={{ filter: 'drop-shadow(1px 2px 4px rgba(0,0,0,0.9))' }}
+                >
                   {squadName || 'SQUAD'}
                 </text>
-                <text x="200" y="330" textAnchor="middle" fill="#FFFFFF" fontSize="108" fontWeight="900" fontFamily="Arial, sans-serif" style={{ filter: 'drop-shadow(3px 6px 10px rgba(0,0,0,0.9))' }}>
+
+                <text 
+                  x="200" 
+                  y="295" 
+                  textAnchor="middle" 
+                  fill="#FFFFFF" 
+                  fontSize="82" 
+                  fontWeight="900" 
+                  fontFamily="Arial, sans-serif" 
+                  style={{ filter: 'drop-shadow(2px 5px 8px rgba(0,0,0,0.95))' }}
+                >
                   {number || '10'}
                 </text>
-                <text x="200" y="378" textAnchor="middle" fill="#FFFFFF" fontSize="15" fontWeight="700" letterSpacing="4" fontFamily="Arial, sans-serif" style={{ filter: 'drop-shadow(1px 2px 4px rgba(0,0,0,0.8))' }}>
+
+                <text 
+                  x="200" 
+                  y="360" 
+                  textAnchor="middle" 
+                  fill="#FFFFFF" 
+                  fontSize="14" 
+                  fontWeight="800" 
+                  letterSpacing="3" 
+                  textLength="130" 
+                  lengthAdjust="spacingAndGlyphs"
+                  fontFamily="Arial, sans-serif" 
+                  style={{ filter: 'drop-shadow(1px 2px 4px rgba(0,0,0,0.85))' }}
+                >
                   {playerName || 'PLAYER'}
                 </text>
               </svg>
-            </motion.div>
+</motion.div>
           </div>
         </div>
 
