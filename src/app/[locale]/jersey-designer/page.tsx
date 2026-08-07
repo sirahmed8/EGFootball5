@@ -42,16 +42,16 @@ export default function JerseyDesignerPage() {
   };
 
   const colors = [
-    { name: 'Emerald Green', hex: '#10B981' },
-    { name: 'Cyan Neon', hex: '#06B6D4' },
-    { name: 'Amber Gold', hex: '#F59E0B' },
-    { name: 'Crimson Red', hex: '#EF4444' },
-    { name: 'Deep Purple', hex: '#8B5CF6' },
-    { name: 'Hot Pink', hex: '#EC4899' },
-    { name: 'Royal Blue', hex: '#2563EB' },
-    { name: 'Pitch Black', hex: '#171717' },
-    { name: 'Pure White', hex: '#FFFFFF' },
-    { name: 'Neon Yellow', hex: '#EAB308' },
+    { name: 'Hyper Venom', hex: '#10B981' },
+    { name: 'Electric Cyan', hex: '#00F0FF' },
+    { name: 'Solar Flare', hex: '#FF3366' },
+    { name: 'Obsidian Black', hex: '#0B0C10' },
+    { name: 'Titanium White', hex: '#F8F9FA' },
+    { name: 'Royal Crimson', hex: '#E63946' },
+    { name: 'Deep Ultraviolet', hex: '#7209B7' },
+    { name: 'Neon Volt', hex: '#CCFF00' },
+    { name: 'Midnight Navy', hex: '#0A2463' },
+    { name: 'Molten Gold', hex: '#FFB703' },
   ];
 
   // Function to convert SVG element to downloadable PNG image
@@ -155,102 +155,111 @@ export default function JerseyDesignerPage() {
           >
             <svg
               ref={svgRef}
-              viewBox="0 0 300 350"
-              className="w-full h-full drop-shadow-[0_30px_40px_rgba(0,0,0,0.8)]"
-              style={{ filter: 'drop-shadow(0px 25px 35px rgba(0,0,0,0.9))' }}
+              viewBox="0 0 400 450"
+              className="w-full h-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.9)]"
+              style={{ filter: 'drop-shadow(0px 15px 30px rgba(0,0,0,0.95))' }}
             >
               <defs>
                 <linearGradient id="jerseyBaseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor={primaryColor} stopOpacity="1" />
-                  <stop offset="100%" stopColor={primaryColor} stopOpacity="0.75" />
+                  <stop offset="40%" stopColor={primaryColor} stopOpacity="0.95" />
+                  <stop offset="100%" stopColor="#000" stopOpacity="0.3" />
                 </linearGradient>
 
-                {/* Advanced Micro-Mesh Texture */}
                 <filter id="meshTexture">
-                  <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch" />
-                  <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.15 0" />
+                  <feTurbulence type="fractalNoise" baseFrequency="1.5" numOctaves="4" stitchTiles="stitch" />
+                  <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
                   <feBlend mode="multiply" in2="SourceGraphic" in="noise" />
                 </filter>
 
-                {/* Realistic Cinematic Lighting / Shadow Folds */}
                 <linearGradient id="shadowFolds" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#000" stopOpacity="0.7"/>
-                  <stop offset="15%" stopColor="#000" stopOpacity="0"/>
-                  <stop offset="25%" stopColor="#000" stopOpacity="0.2"/>
+                  <stop offset="0%" stopColor="#000" stopOpacity="0.6"/>
+                  <stop offset="15%" stopColor="#000" stopOpacity="0.1"/>
+                  <stop offset="25%" stopColor="#fff" stopOpacity="0.15"/>
                   <stop offset="50%" stopColor="#000" stopOpacity="0"/>
-                  <stop offset="75%" stopColor="#000" stopOpacity="0.25"/>
-                  <stop offset="85%" stopColor="#000" stopOpacity="0"/>
-                  <stop offset="100%" stopColor="#000" stopOpacity="0.8"/>
+                  <stop offset="75%" stopColor="#fff" stopOpacity="0.15"/>
+                  <stop offset="85%" stopColor="#000" stopOpacity="0.1"/>
+                  <stop offset="100%" stopColor="#000" stopOpacity="0.7"/>
                 </linearGradient>
 
-                {/* Center Chest Spotlight */}
                 <radialGradient id="chestHighlight" cx="50%" cy="30%" r="50%">
-                  <stop offset="0%" stopColor="#fff" stopOpacity="0.45"/>
+                  <stop offset="0%" stopColor="#fff" stopOpacity="0.3"/>
                   <stop offset="100%" stopColor="#fff" stopOpacity="0"/>
                 </radialGradient>
 
-                {/* Advanced Precision Cut T-Shirt Path */}
+                {/* Professional Modern Athletic Jersey Silhouette */}
                 <clipPath id="jerseyClip">
-                  <path d="M 100 20 C 100 20, 150 45, 200 20 C 230 20, 255 50, 255 50 L 290 85 C 298 93, 290 110, 280 115 L 245 135 C 240 140, 230 140, 230 125 C 225 180, 225 250, 235 320 C 150 335, 150 335, 65 320 C 75 250, 75 180, 70 125 C 70 140, 60 140, 55 135 L 20 115 C 10 110, 2 93, 10 85 L 45 50 C 45 50, 70 20, 100 20 Z" />
+                  <path d="M 160 20 
+                           C 180 20, 220 20, 240 20
+                           C 260 25, 290 40, 310 50
+                           C 330 60, 350 75, 360 90
+                           C 365 100, 370 120, 360 130
+                           C 350 140, 330 135, 320 125
+                           C 310 115, 300 150, 300 180
+                           L 305 400
+                           C 300 410, 200 420, 100 410
+                           L 95 180
+                           C 95 150, 90 115, 80 125
+                           C 70 135, 50 140, 40 130
+                           C 30 120, 35 100, 40 90
+                           C 50 75, 70 60, 90 50
+                           C 110 40, 140 25, 160 20 Z" />
                 </clipPath>
 
-                {/* Patterns */}
-                <pattern id="pat-stripes" width="50" height="50" patternUnits="userSpaceOnUse">
-                  <rect width="25" height="50" fill={secondaryColor} opacity="0.85" />
+                {/* Dynamic Patterns */}
+                <pattern id="pat-stripes" width="60" height="60" patternUnits="userSpaceOnUse">
+                  <rect width="30" height="60" fill={secondaryColor} opacity="0.9" />
                 </pattern>
-                <pattern id="pat-hoops" width="50" height="50" patternUnits="userSpaceOnUse">
-                  <rect width="50" height="25" fill={secondaryColor} opacity="0.85" />
+                <pattern id="pat-hoops" width="60" height="60" patternUnits="userSpaceOnUse">
+                  <rect width="60" height="30" fill={secondaryColor} opacity="0.9" />
                 </pattern>
-                <pattern id="pat-checkerboard" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <rect width="20" height="20" fill={secondaryColor} opacity="0.85" />
-                  <rect x="20" y="20" width="20" height="20" fill={secondaryColor} opacity="0.85" />
+                <pattern id="pat-checkerboard" width="60" height="60" patternUnits="userSpaceOnUse">
+                  <rect width="30" height="30" fill={secondaryColor} opacity="0.9" />
+                  <rect x="30" y="30" width="30" height="30" fill={secondaryColor} opacity="0.9" />
                 </pattern>
               </defs>
 
-              {/* 1. Base Solid Color */}
-              <path d="M 0 0 h 300 v 350 h -300 z" clipPath="url(#jerseyClip)" fill="url(#jerseyBaseGrad)" />
+              {/* Base Jersey */}
+              <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="url(#jerseyBaseGrad)" />
 
-              {/* 2. Custom Pattern Layer */}
+              {/* Pattern Overlay */}
               <g clipPath="url(#jerseyClip)">
-                {pattern === 'stripes' && <rect x="0" y="0" width="300" height="350" fill="url(#pat-stripes)" />}
-                {pattern === 'hoops' && <rect x="0" y="0" width="300" height="350" fill="url(#pat-hoops)" />}
-                {pattern === 'checkerboard' && <rect x="0" y="0" width="300" height="350" fill="url(#pat-checkerboard)" />}
-                {pattern === 'halves' && <rect x="150" y="0" width="150" height="350" fill={secondaryColor} opacity="0.85" />}
-                {pattern === 'sash' && <polygon points="-50,0 350,350 300,400 -100,50" fill={secondaryColor} opacity="0.85" />}
+                {pattern === 'stripes' && <rect x="0" y="0" width="400" height="450" fill="url(#pat-stripes)" />}
+                {pattern === 'hoops' && <rect x="0" y="0" width="400" height="450" fill="url(#pat-hoops)" />}
+                {pattern === 'checkerboard' && <rect x="0" y="0" width="400" height="450" fill="url(#pat-checkerboard)" />}
+                {pattern === 'halves' && <rect x="200" y="0" width="200" height="450" fill={secondaryColor} opacity="0.9" />}
+                {pattern === 'sash' && <polygon points="-50,0 450,450 400,500 -100,50" fill={secondaryColor} opacity="0.9" />}
               </g>
 
-              {/* 3. Texture Mesh Overlay */}
-              <path d="M 0 0 h 300 v 350 h -300 z" clipPath="url(#jerseyClip)" fill="transparent" filter="url(#meshTexture)" />
+              {/* Micro-Mesh Texture */}
+              <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="transparent" filter="url(#meshTexture)" />
 
-              {/* 4. Cinematic Lighting and Volume Shading */}
-              <path d="M 0 0 h 300 v 350 h -300 z" clipPath="url(#jerseyClip)" fill="url(#shadowFolds)" style={{ mixBlendMode: 'multiply' }} />
-              <path d="M 0 0 h 300 v 350 h -300 z" clipPath="url(#jerseyClip)" fill="url(#chestHighlight)" style={{ mixBlendMode: 'overlay' }} />
+              {/* Shadows & Highlights */}
+              <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="url(#shadowFolds)" style={{ mixBlendMode: 'multiply' }} />
+              <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="url(#chestHighlight)" style={{ mixBlendMode: 'overlay' }} />
 
-              {/* 5. 3D Folds and Wrinkles */}
+              {/* Wrinkles */}
               <g clipPath="url(#jerseyClip)">
-                <path d="M 110 130 Q 130 200 100 300" fill="none" stroke="#000" strokeWidth="18" filter="blur(10px)" opacity="0.25" />
-                <path d="M 190 130 Q 170 200 200 300" fill="none" stroke="#000" strokeWidth="18" filter="blur(10px)" opacity="0.25" />
-                <path d="M 75 140 Q 95 200 85 280" fill="none" stroke="#fff" strokeWidth="8" filter="blur(6px)" opacity="0.15" />
-                <path d="M 225 140 Q 205 200 215 280" fill="none" stroke="#fff" strokeWidth="8" filter="blur(6px)" opacity="0.15" />
-                <path d="M 100 20 Q 120 70 150 80" fill="none" stroke="#fff" strokeWidth="12" filter="blur(8px)" opacity="0.3" />
+                <path d="M 130 160 Q 150 250 120 380" fill="none" stroke="#000" strokeWidth="20" filter="blur(12px)" opacity="0.4" />
+                <path d="M 270 160 Q 250 250 280 380" fill="none" stroke="#000" strokeWidth="20" filter="blur(12px)" opacity="0.4" />
+                <path d="M 90 180 Q 120 250 100 350" fill="none" stroke="#fff" strokeWidth="10" filter="blur(8px)" opacity="0.2" />
+                <path d="M 310 180 Q 280 250 300 350" fill="none" stroke="#fff" strokeWidth="10" filter="blur(8px)" opacity="0.2" />
               </g>
 
-              {/* 6. Structural Seams */}
-              <path d="M 70 125 Q 85 70 100 20" fill="none" stroke="#000" strokeWidth="2.5" strokeOpacity="0.4" />
-              <path d="M 230 125 Q 215 70 200 20" fill="none" stroke="#000" strokeWidth="2.5" strokeOpacity="0.4" />
-              <path d="M 66 318 Q 150 330 234 318" fill="none" stroke="#000" strokeWidth="4" strokeOpacity="0.4" />
-              <path d="M 68 316 Q 150 328 232 316" fill="none" stroke="#fff" strokeWidth="1.5" strokeOpacity="0.3" />
+              {/* Seams */}
+              <path d="M 85 145 Q 115 80 160 20" fill="none" stroke="#000" strokeWidth="3" strokeOpacity="0.5" />
+              <path d="M 315 145 Q 285 80 240 20" fill="none" stroke="#000" strokeWidth="3" strokeOpacity="0.5" />
+              <path d="M 100 410 Q 200 420 300 410" fill="none" stroke="#000" strokeWidth="6" strokeOpacity="0.5" />
 
-              {/* 7. Premium Cuffs */}
-              <path d="M 10 90 L 20 115 L 55 135" fill="none" stroke={secondaryColor} strokeWidth="10" strokeLinecap="round" style={{ filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.5))' }} />
-              <path d="M 290 85 L 280 115 L 245 135" fill="none" stroke={secondaryColor} strokeWidth="10" strokeLinecap="round" style={{ filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.5))' }} />
+              {/* Cuffs */}
+              <path d="M 35 110 L 40 130 L 75 125" fill="none" stroke={secondaryColor} strokeWidth="12" strokeLinecap="round" style={{ filter: 'drop-shadow(0px 5px 5px rgba(0,0,0,0.6))' }} />
+              <path d="M 365 110 L 360 130 L 325 125" fill="none" stroke={secondaryColor} strokeWidth="12" strokeLinecap="round" style={{ filter: 'drop-shadow(0px 5px 5px rgba(0,0,0,0.6))' }} />
 
-              {/* 8. Crest / Badge */}
-              <g transform="translate(180, 80) scale(1.3)" style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.6))' }}>
+              {/* Badge */}
+              <g transform="translate(240, 100) scale(1.6)" style={{ filter: 'drop-shadow(0px 5px 8px rgba(0,0,0,0.7))' }}>
                 {badgeIcon === 'shield' && (
                   <>
                     <path d="M 0 0 L 16 0 L 16 16 L 8 24 L 0 16 Z" fill={secondaryColor} stroke="#FFF" strokeWidth="1.5" />
-                    <path d="M 8 24 L 16 16 L 16 0 L 8 8 Z" fill="#000" opacity="0.2" />
                     <circle cx="8" cy="10" r="3" fill="#FFF" />
                   </>
                 )}
@@ -268,53 +277,32 @@ export default function JerseyDesignerPage() {
                 )}
               </g>
 
-              {/* 9. Professional Collar */}
-              <g style={{ filter: 'drop-shadow(0px 6px 8px rgba(0,0,0,0.7))' }}>
+              {/* Collar */}
+              <g style={{ filter: 'drop-shadow(0px 8px 10px rgba(0,0,0,0.8))' }}>
                 {collarStyle === 'vneck' ? (
                   <>
-                    <path d="M 100 20 L 150 75 L 200 20 Z" fill={secondaryColor} stroke="#000" strokeWidth="1.5" strokeOpacity="0.6" />
-                    <path d="M 100 20 L 150 75 L 200 20 Z" fill="none" stroke="#FFF" strokeWidth="1" strokeOpacity="0.4" />
+                    <path d="M 160 20 L 200 90 L 240 20 Z" fill={secondaryColor} stroke="#000" strokeWidth="2" strokeOpacity="0.7" />
+                    <path d="M 160 20 L 200 90 L 240 20 Z" fill="none" stroke="#FFF" strokeWidth="1" strokeOpacity="0.5" />
                   </>
                 ) : (
                   <>
-                    <path d="M 100 20 Q 150 90 200 20 Z" fill={secondaryColor} stroke="#000" strokeWidth="1.5" strokeOpacity="0.6" />
-                    <path d="M 100 20 Q 150 90 200 20 Z" fill="none" stroke="#FFF" strokeWidth="1" strokeOpacity="0.4" />
+                    <path d="M 160 20 Q 200 100 240 20 Z" fill={secondaryColor} stroke="#000" strokeWidth="2" strokeOpacity="0.7" />
+                    <path d="M 160 20 Q 200 100 240 20 Z" fill="none" stroke="#FFF" strokeWidth="1" strokeOpacity="0.5" />
                   </>
                 )}
               </g>
-            </svg>
 
-            {/* High-Fidelity Typography Overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center pointer-events-none space-y-4 pt-16">
-              <motion.div
-                key={squadName}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="px-6 py-2 rounded-xl text-xs font-black tracking-[0.3em] uppercase shadow-2xl border border-white/20 backdrop-blur-md"
-                style={{ backgroundColor: secondaryColor, color: primaryColor === '#FFFFFF' ? '#000' : '#FFF' }}
-              >
-                {squadName || (isArabic ? 'اسم الفريق' : 'SQUAD')}
-              </motion.div>
-
-              <motion.div 
-                key={number}
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="text-[6.5rem] leading-none font-black font-sans tracking-tighter text-white drop-shadow-[0_15px_25px_rgba(0,0,0,0.9)]" 
-                style={{ WebkitTextStroke: '3px rgba(0,0,0,0.5)' }}
-              >
+              {/* Typography Embedded in SVG (so it exports!) */}
+              <text x="200" y="210" textAnchor="middle" fill="#FFFFFF" fontSize="26" fontWeight="900" letterSpacing="6" fontFamily="sans-serif" style={{ filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.8))' }}>
+                {squadName || 'SQUAD'}
+              </text>
+              <text x="200" y="330" textAnchor="middle" fill="#FFFFFF" fontSize="110" fontWeight="900" fontFamily="sans-serif" style={{ filter: 'drop-shadow(4px 8px 12px rgba(0,0,0,0.9))' }}>
                 {number || '10'}
-              </motion.div>
-
-              <motion.div 
-                key={playerName}
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="text-sm font-black tracking-[0.2em] uppercase text-white drop-shadow-[0_4px_6px_rgba(0,0,0,1)] bg-black/50 px-4 py-1.5 rounded-full border border-white/10"
-              >
-                {playerName || (isArabic ? 'اللاعب' : 'PLAYER')}
-              </motion.div>
-            </div>
+              </text>
+              <text x="200" y="380" textAnchor="middle" fill="#FFFFFF" fontSize="16" fontWeight="bold" letterSpacing="4" fontFamily="sans-serif" style={{ filter: 'drop-shadow(1px 2px 4px rgba(0,0,0,0.8))' }}>
+                {playerName || 'PLAYER'}
+              </text>
+            </svg>
           </motion.div>
         </div>
 

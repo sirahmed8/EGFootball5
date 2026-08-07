@@ -246,6 +246,7 @@ export default function MatchesPage() {
     }
 
     setLoadingAction(match.id);
+    const loadingToast = toast.loading(t('joiningMatch') || 'Joining Match...');
     try {
       const bookingRef = doc(db, 'bookings', match.id);
 
@@ -276,10 +277,10 @@ export default function MatchesPage() {
         });
       });
 
-      toast.success(t('joinSuccess'));
+      toast.success(t('joinSuccess'), { id: loadingToast });
     } catch (error: unknown) {
       const err = error as Error;
-      toast.error(err.message || t('errorGeneric'));
+      toast.error(err.message || t('errorGeneric'), { id: loadingToast });
     } finally {
       setLoadingAction(null);
     }
@@ -288,6 +289,7 @@ export default function MatchesPage() {
   const handleLeaveMatch = async (match: Booking) => {
     if (!firebaseUser) return;
     setLoadingAction(match.id);
+    const loadingToast = toast.loading(t('leavingMatch') || 'Leaving Match...');
 
     try {
       const bookingRef = doc(db, 'bookings', match.id);
@@ -306,10 +308,10 @@ export default function MatchesPage() {
         });
       });
 
-      toast.success(t('leaveSuccess'));
+      toast.success(t('leaveSuccess'), { id: loadingToast });
     } catch (error: unknown) {
       const err = error as Error;
-      toast.error(err.message || t('errorGeneric'));
+      toast.error(err.message || t('errorGeneric'), { id: loadingToast });
     } finally {
       setLoadingAction(null);
     }

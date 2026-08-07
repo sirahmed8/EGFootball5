@@ -35,46 +35,47 @@ export function VerifyMatchModal({ isOpen, onClose, match }: VerifyMatchModalPro
     
     setSubmitting(true);
     try {
-      const matchRef = doc(db, 'bookings', match.id);
+      // Optimistic UI Toast
+      toast.info('Verifying match result...', { id: 'verify-toast' });
 
       await runTransaction(db, async (transaction) => {
-        // 1. Mark match as verified and save results
+        const matchRef = doc(db, 'bookings', match.id);
+        const matchDoc = await transaction.get(matchRef);
+        
+        if (!matchDoc.exists()) throw new Error('Match not found.');
+        
+        const data = matchDoc.data() as Booking;
+        if (data.status !== 'completed' && data.status !== 'confirmed') {
+          throw new Error('Match is not completed yet.');
+        }
+
+        // Update match result
         transaction.update(matchRef, {
-          matchResult: {
+          result: {
             teamAScore: Number(teamAScore),
             teamBScore: Number(teamBScore),
             mvpUid: mvpUid || null,
             varHighlightId: varHighlightId || null,
-            isVerified: true,
-          }
+            verifiedAt: Date.now()
+          },
+          status: 'verified' // A new status to indicate results are locked in
         });
 
-        // 2. Update stats for all joined players
-        for (const player of joinedPlayers) {
-          if (!player.uid) continue;
-          const userRef = doc(db, 'users', player.uid);
-          
-          // Using increment ensures we don't need to read each user document first
-          const updateData: any = {
-            matchesPlayed: increment(1)
-          };
-          
-          if (player.uid === mvpUid) {
-            updateData.mvpBadges = increment(1);
-            updateData.rating = increment(10); // +10 points for MVP
-          } else {
-            updateData.rating = increment(3); // +3 points for playing
-          }
-          
-          transaction.update(userRef, updateData);
+        // Award MVP if selected
+        if (mvpUid) {
+          const userRef = doc(db, 'users', mvpUid);
+          transaction.update(userRef, {
+            mvpAwards: increment(1),
+            xp: increment(100) // 100 XP for MVP
+          });
         }
       });
 
-      toast.success('Match results verified and stats updated! 🏆');
+      toast.success('Match results verified and stats updated! 🏆', { id: 'verify-toast' });
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('Failed to verify match.');
+      toast.error(error.message || 'Failed to verify match.', { id: 'verify-toast' });
     } finally {
       setSubmitting(false);
     }

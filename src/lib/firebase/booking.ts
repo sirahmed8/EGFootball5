@@ -34,96 +34,48 @@ export async function lockSlot(
   discountAmount: number = 0,
   originalPrice: number = totalAmount
 ): Promise<string> {
-  // Validate inputs
-  if (startSlot < OPENING_HOUR || startSlot >= CLOSING_HOUR || durationHours <= 0) {
-    throw new Error('Invalid start slot or duration');
-  }
-
-  const bookingId = crypto.randomUUID();
-  const scheduleRef = doc(db, 'day_schedules', `${pitchId}_${date}`);
-  const bookingRef = doc(db, 'bookings', bookingId);
-
-  const blocks = getBlocks(startSlot, durationHours);
-  const endSlot = blocks[blocks.length - 1];
-
-  if (endSlot >= CLOSING_HOUR) {
-    throw new Error('Booking exceeds closing hour');
-  }
+  const scheduleId = `${pitchId}_${date}`;
+  const scheduleRef = doc(db, 'day_schedules', scheduleId);
+  const bookingRef = doc(collection(db, 'bookings'));
+  const bookingId = bookingRef.id;
 
   await runTransaction(db, async (transaction) => {
-    // Check if the user is blacklisted
-    const userRef = doc(db, 'users', userId);
-    const userSnap = await transaction.get(userRef);
-    if (userSnap.exists() && userSnap.data()?.isBlacklisted) {
-      throw new Error('ERROR_BLACKLISTED');
-    }
-
-    const scheduleSnap = await transaction.get(scheduleRef);
-    let bookedSlots: Record<string, { bookingId: string; status: string; lockedUntil?: number; userId: string }> = {};
-
-    if (scheduleSnap.exists()) {
-      bookedSlots = scheduleSnap.data()?.slots || {};
+    const scheduleDoc = await transaction.get(scheduleRef);
+    let slots = scheduleDoc.exists() ? scheduleDoc.data().slots || {} : {};
+    
+    // Check if slots are available
+    const blocks = getBlocks(startSlot, durationHours);
+    for (const block of blocks) {
+      const slotStr = block.toString();
+      if (slots[slotStr] && slots[slotStr].status !== BookingStatus.CANCELLED) {
+        throw new Error('ERROR_SLOT_UNAVAILABLE');
+      }
     }
 
     const now = Date.now();
+    const lockedUntil = now + 10 * 60 * 1000; // 10 minutes lock
 
-    // Clean up expired temporary locks in memory before checking availability
-    for (const key in bookedSlots) {
-      const slot = bookedSlots[key];
-      if (slot.status === BookingStatus.LOCKED_TEMPORARY && slot.lockedUntil && slot.lockedUntil < now) {
-        delete bookedSlots[key];
-      }
-    }
-
-    // 1. Check Availability
+    // Lock the slots in schedule
     for (const block of blocks) {
-      if (bookedSlots[block.toString()]) {
-        throw new Error('ERROR_SLOT_TAKEN');
-      }
-    }
-
-    // 2. Anti-Gap Logic (No 30-min dead gaps)
-    // Check Before Gap
-    const beforeSlot = startSlot - 0.5;
-    if (beforeSlot >= OPENING_HOUR && !bookedSlots[beforeSlot.toString()]) {
-      const twoBeforeSlot = startSlot - 1.0;
-      if (beforeSlot === OPENING_HOUR || bookedSlots[twoBeforeSlot.toString()]) {
-        throw new Error('ERROR_GAP_BEFORE');
-      }
-    }
-
-    // Check After Gap
-    const afterSlot = endSlot + 0.5;
-    if (afterSlot < CLOSING_HOUR && !bookedSlots[afterSlot.toString()]) {
-      const twoAfterSlot = endSlot + 1.0;
-      if (afterSlot === CLOSING_HOUR - 0.5 || bookedSlots[twoAfterSlot.toString()]) {
-         throw new Error('ERROR_GAP_AFTER');
-      }
-    }
-
-    // 3. Check VIP status for extended lock buffer (20 min for VIP/Owner vs 15 min regular)
-    const isVipUser = userSnap.exists() && (
-      userSnap.data()?.role === 'owner' ||
-      userSnap.data()?.role === 'admin' ||
-      userSnap.data()?.isVip === true
-    );
-    const lockBufferMs = isVipUser ? 20 * 60 * 1000 : 15 * 60 * 1000;
-    const lockedUntil = now + lockBufferMs;
-
-    for (const block of blocks) {
-      bookedSlots[block.toString()] = {
+      slots[block.toString()] = {
         bookingId,
         status: BookingStatus.LOCKED_TEMPORARY,
-        lockedUntil,
-        userId
+        lockedUntil
       };
     }
+    
+    // Ensure to either update or set the schedule
+    if (scheduleDoc.exists()) {
+      transaction.update(scheduleRef, { slots });
+    } else {
+      transaction.set(scheduleRef, { id: scheduleId, pitchId, date, slots });
+    }
 
-    // Upsert the schedule document
-    transaction.set(scheduleRef, { slots: bookedSlots }, { merge: true });
+    // Fetch user for name (needed for public matches)
+    const userDoc = await transaction.get(doc(db, 'users', userId));
+    const userName = userDoc.exists() ? (userDoc.data().name || 'Unknown Player') : 'Unknown Player';
 
-    // Create the booking document
-    const userName = userSnap.exists() ? (userSnap.data()?.name || 'Player') : 'Player';
+    // Create Booking Document
     transaction.set(bookingRef, {
       id: bookingId,
       userId,

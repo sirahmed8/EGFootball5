@@ -231,6 +231,10 @@ function ProfileForm({ appUser, firebaseUid }: { appUser: AppUser; firebaseUid: 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    
+    // Optimistic toast
+    const loadingToastId = toast.loading(t('saving') || 'Saving profile...');
+
     try {
       await updateDoc(doc(db, 'users', firebaseUid), {
         name,
@@ -241,11 +245,11 @@ function ProfileForm({ appUser, firebaseUid }: { appUser: AppUser; firebaseUid: 
         await updateProfile(auth.currentUser, { displayName: name });
       }
 
-      toast.success(t('profileSaved'));
-      router.push('/home');
+      toast.success(t('profileSaved'), { id: loadingToastId });
+      // Removed router.push to keep user on their profile page
     } catch (error: unknown) {
       const err = error as Error;
-      toast.error(err.message);
+      toast.error(err.message, { id: loadingToastId });
     } finally {
       setIsSaving(false);
     }
