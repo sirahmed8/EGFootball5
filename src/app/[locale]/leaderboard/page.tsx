@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { SolidSelect } from '@/components/ui/SolidSelect';
 import { collection, getDocs, limit, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { LeaderboardPageSkeleton } from '@/components/skeletons/PageSkeletons';
 
 interface PlayerRank {
   id: string;
@@ -147,6 +148,10 @@ export default function LeaderboardPage() {
     return `${p.rating} Rating`;
   };
 
+  if (loading) {
+    return <LeaderboardPageSkeleton />;
+  }
+
   return (
     <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
       {/* Header Banner */}
@@ -182,15 +187,6 @@ export default function LeaderboardPage() {
           />
         </div>
       </motion.div>
-
-      {/* Loading Skeletons */}
-      {loading && (
-        <div className="global-box rounded-3xl p-6 border-white/10 shadow-xl space-y-3 bg-black">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-12 rounded-2xl bg-white/5 animate-pulse" />
-          ))}
-        </div>
-      )}
 
       {/* Empty State */}
       {!loading && filteredList.length === 0 && (

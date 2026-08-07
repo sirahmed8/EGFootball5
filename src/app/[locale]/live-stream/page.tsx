@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { collection, onSnapshot, query, orderBy, addDoc, getDocs, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useLocale } from 'next-intl';
 
 interface LiveMatch {
   id: string;
@@ -28,6 +29,8 @@ interface ChatMessage {
 }
 
 export default function LiveStreamPage() {
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
   const firebaseUser = useAuthStore((s) => s.firebaseUser);
   const appUser = useAuthStore((s) => s.appUser);
   const [chat, setChat] = React.useState<ChatMessage[]>([]);
@@ -75,7 +78,7 @@ export default function LiveStreamPage() {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMsg.trim()) return;
-    const name = appUser?.name || firebaseUser?.displayName || 'Fan';
+    const name = appUser?.name || firebaseUser?.displayName || (isArabic ? 'مشجع' : 'Fan');
     try {
       await addDoc(collection(db, 'live_chat'), {
         name,
@@ -89,7 +92,7 @@ export default function LiveStreamPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black py-8 px-4 md:px-8 max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-black py-8 px-4 md:px-8 max-w-7xl mx-auto space-y-6" dir={isArabic ? 'rtl' : 'ltr'}>
       {/* Live Header */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
@@ -102,16 +105,16 @@ export default function LiveStreamPage() {
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-black text-foreground">
-              Tournament <span className="text-gradient-primary">Live Stream</span>
+              {isArabic ? 'بث مباريات' : 'Tournament'} <span className="text-gradient-primary">{isArabic ? 'مباشر' : 'Live Stream'}</span>
             </h1>
             <p className="text-xs text-muted-foreground">
-              {loadingMatch ? 'Checking live matches...' : liveMatch ? `${liveMatch.homeTeam} vs ${liveMatch.awayTeam} — Live Now` : 'No broadcast currently active'}
+              {loadingMatch ? (isArabic ? 'جاري التحقق من المباريات المباشرة...' : 'Checking live matches...') : liveMatch ? `${liveMatch.homeTeam} ${isArabic ? 'ضد' : 'vs'} ${liveMatch.awayTeam} — ${isArabic ? 'مباشر الآن' : 'Live Now'}` : (isArabic ? 'لا يوجد بث مباشر حالياً' : 'No broadcast currently active')}
             </p>
           </div>
         </div>
 
         <span className={`px-3.5 py-1 rounded-full text-xs font-black uppercase flex items-center gap-1.5 ${liveMatch ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse' : 'bg-white/5 text-muted-foreground border border-white/10'}`}>
-          {liveMatch ? <><span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" /> Live Broadcast</> : <><WifiOff className="w-3.5 h-3.5" /> Offline</>}
+          {liveMatch ? <><span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" /> {isArabic ? 'بث مباشر' : 'Live Broadcast'}</> : <><WifiOff className="w-3.5 h-3.5" /> {isArabic ? 'أوفلاين' : 'Offline'}</>}
         </span>
       </motion.div>
 
@@ -123,7 +126,7 @@ export default function LiveStreamPage() {
               {loadingMatch ? (
                 <div className="flex flex-col items-center gap-4 text-muted-foreground">
                   <div className="w-16 h-16 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-                  <p className="text-sm font-bold">Checking for live broadcasts...</p>
+                  <p className="text-sm font-bold">{isArabic ? 'جاري التحقق من البث المباشر...' : 'Checking for live broadcasts...'}</p>
                 </div>
               ) : liveMatch ? (
                 <>
@@ -141,7 +144,7 @@ export default function LiveStreamPage() {
                   </div>
                   <div className="text-6xl">⚽</div>
                   <div className="absolute bottom-4 start-4 px-3 py-1 rounded-full bg-black/90 text-[10px] font-mono text-emerald-400 border border-emerald-500/30">
-                    LIVE {liveMatch.minute}&apos; ⏱️
+                    {isArabic ? 'مباشر' : 'LIVE'} {liveMatch.minute}&apos; ⏱️
                   </div>
                 </>
               ) : (
@@ -150,9 +153,9 @@ export default function LiveStreamPage() {
                     📺
                   </div>
                   <div>
-                    <h3 className="font-black text-foreground text-lg">No Live Broadcast</h3>
+                    <h3 className="font-black text-foreground text-lg">{isArabic ? 'لا يوجد بث مباشر' : 'No Live Broadcast'}</h3>
                     <p className="text-muted-foreground text-sm mt-1 max-w-xs">
-                      No tournament match is currently broadcasting. Check back when an admin starts a live session.
+                      {isArabic ? 'لا يوجد مباريات تبث الآن. ارجع لاحقاً عندما يبدأ المشرف بث مباشر.' : 'No tournament match is currently broadcasting. Check back when an admin starts a live session.'}
                     </p>
                   </div>
                 </div>
@@ -166,16 +169,16 @@ export default function LiveStreamPage() {
           <div className="space-y-3 flex-1 overflow-hidden flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <span className="font-black text-sm text-foreground flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-primary" /> Live Fan Chat
+                <MessageSquare className="w-4 h-4 text-primary" /> {isArabic ? 'دردشة الجماهير' : 'Live Fan Chat'}
               </span>
-              <span className="text-[10px] text-emerald-400 font-bold">{chat.length} messages</span>
+              <span className="text-[10px] text-emerald-400 font-bold">{chat.length} {isArabic ? 'رسائل' : 'messages'}</span>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-3 pt-2 scrollbar-none">
               {chat.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground text-center">
                   <MessageSquare className="w-8 h-8 opacity-30" />
-                  <p className="text-xs font-medium">No messages yet. Be the first to cheer!</p>
+                  <p className="text-xs font-medium">{isArabic ? 'لا توجد رسائل بعد. كن أول من يشجع!' : 'No messages yet. Be the first to cheer!'}</p>
                 </div>
               ) : (
                 chat.map((c) => (
@@ -194,12 +197,12 @@ export default function LiveStreamPage() {
               type="text"
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
-              placeholder={firebaseUser ? 'Send message to stream...' : 'Sign in to chat...'}
+              placeholder={firebaseUser ? (isArabic ? 'أرسل رسالة للتشجيع...' : 'Send message to stream...') : (isArabic ? 'سجل الدخول للدردشة...' : 'Sign in to chat...')}
               disabled={!firebaseUser}
               className="flex-1 p-3 rounded-xl bg-white/5 border border-white/10 text-foreground text-xs font-medium focus:outline-none focus:border-primary disabled:opacity-50"
             />
             <Button type="submit" size="icon" disabled={!firebaseUser} className="bg-primary text-black rounded-xl cursor-pointer">
-              <Send className="w-4 h-4" />
+              <Send className={`w-4 h-4 ${isArabic ? 'rotate-180' : ''}`} />
             </Button>
           </form>
         </div>

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useLocale } from 'next-intl';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from 'sonner';
@@ -19,6 +20,8 @@ interface ChatMessage {
 }
 
 export default function CommunityChatPage() {
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
   const firebaseUser = useAuthStore((s) => s.firebaseUser);
   const appUser = useAuthStore((s) => s.appUser);
 
@@ -29,10 +32,10 @@ export default function CommunityChatPage() {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   const channels = [
-    { id: 'general', name: 'General Chat', desc: 'Live platform discussion lounge', icon: '⚽' },
-    { id: 'need-gk', name: 'Goalkeepers Callout', desc: 'Find goalkeepers for matches', icon: '🧤' },
-    { id: 'match-invites', name: 'Match Lobbies', desc: 'Open match announcements', icon: '🏆' },
-    { id: 'pitch-reviews', name: 'Stadium Feedback', desc: 'Pitch and turf reviews', icon: '⭐' },
+    { id: 'general', name: isArabic ? 'الدردشة العامة' : 'General Chat', desc: isArabic ? 'ساحة نقاش المجتمع المباشرة' : 'Live platform discussion lounge', icon: '⚽' },
+    { id: 'need-gk', name: isArabic ? 'مطلوب حارس' : 'Goalkeepers Callout', desc: isArabic ? 'ابحث عن حراس للمباريات' : 'Find goalkeepers for matches', icon: '🧤' },
+    { id: 'match-invites', name: isArabic ? 'دعوات المباريات' : 'Match Lobbies', desc: isArabic ? 'إعلانات المباريات المفتوحة' : 'Open match announcements', icon: '🏆' },
+    { id: 'pitch-reviews', name: isArabic ? 'تقييم الملاعب' : 'Stadium Feedback', desc: isArabic ? 'تقييم أرضيات الملاعب' : 'Pitch and turf reviews', icon: '⭐' },
   ];
 
   React.useEffect(() => {
@@ -62,7 +65,7 @@ export default function CommunityChatPage() {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseUser) {
-      toast.error('Please sign in to send messages');
+      toast.error(isArabic ? 'يرجى تسجيل الدخول' : 'Please sign in to send messages');
       return;
     }
     if (!text.trim()) return;
@@ -72,7 +75,7 @@ export default function CommunityChatPage() {
     try {
       await addDoc(collection(db, 'community_chat', activeChannel, 'messages'), {
         senderId: firebaseUser.uid,
-        senderName: appUser?.name || firebaseUser.displayName || 'Player',
+        senderName: appUser?.name || firebaseUser.displayName || (isArabic ? 'لاعب' : 'Player'),
         senderPosition: appUser?.position || 'MID',
         text: msgText,
         timestamp: Date.now(),
@@ -85,22 +88,22 @@ export default function CommunityChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-mesh py-8 px-4 md:px-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-6 h-[85vh]">
+    <div className="min-h-screen bg-mesh py-8 px-4 md:px-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-6 h-[85vh]" dir={isArabic ? 'rtl' : 'ltr'}>
       {/* Channels Sidebar */}
       <div className="w-full md:w-80 stadium-glass rounded-3xl p-5 border-white/10 shadow-xl flex flex-col justify-between flex-shrink-0">
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-4 border-b border-white/10">
             <div className="flex items-center gap-2">
               <MessageSquare className="text-primary w-5 h-5" />
-              <h2 className="font-black text-lg text-foreground">Community Chat</h2>
+              <h2 className="font-black text-lg text-foreground">{isArabic ? 'مجتمع اللاعبين' : 'Community Chat'}</h2>
             </div>
             <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse">
-              ● Live
+              ● {isArabic ? 'مباشر' : 'Live'}
             </span>
           </div>
 
           <div className="space-y-2">
-            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2">Channels</div>
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2">{isArabic ? 'القنوات' : 'Channels'}</div>
             {channels.map((ch) => (
               <button
                 key={ch.id}
@@ -127,7 +130,7 @@ export default function CommunityChatPage() {
         </div>
 
         <div className="pt-4 border-t border-white/10 text-center">
-          <p className="text-[11px] text-muted-foreground">Respect community guidelines & keep matches fair!</p>
+          <p className="text-[11px] text-muted-foreground">{isArabic ? 'احترم قواعد المجتمع وحافظ على اللعب النظيف!' : 'Respect community guidelines & keep matches fair!'}</p>
         </div>
       </div>
 
@@ -154,20 +157,20 @@ export default function CommunityChatPage() {
         <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4">
           {loading ? (
             <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-              Loading real-time chat...
+              {isArabic ? 'جاري التحميل...' : 'Loading real-time chat...'}
             </div>
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm space-y-4">
               <Sparkles className="w-8 h-8 text-primary opacity-50 animate-bounce" />
-              <p className="font-bold text-foreground">Be the first to send a message in #{activeChannel}!</p>
+              <p className="font-bold text-foreground">{isArabic ? 'كن أول من يرسل في #' : 'Be the first to send a message in #'}{channels.find((c) => c.id === activeChannel)?.name}!</p>
 
               {/* Quick suggestion chips */}
               <div className="flex flex-wrap gap-2 max-w-md justify-center pt-2">
                 {[
-                  '🧤 Looking for a GK tonight in Obour!',
-                  '⚽ Anyone up for a 5v5 match at 9 PM?',
-                  '⭐ Which stadium has the best turf lights?',
-                  '🏆 Who is joining the Obour Summer Cup?',
+                  isArabic ? '🧤 محتاجين حارس النهاردة!' : '🧤 Looking for a GK tonight!',
+                  isArabic ? '⚽ حد جاهز لماتش خماسي 9 بليل؟' : '⚽ Anyone up for a 5v5 match at 9 PM?',
+                  isArabic ? '⭐ إيه أحسن ملعب في العبور؟' : '⭐ Which stadium has the best turf lights?',
+                  isArabic ? '🏆 مين هينزل بطولة الصيف؟' : '🏆 Who is joining the Summer Cup?',
                 ].map((chip) => (
                   <button
                     key={chip}
@@ -215,7 +218,7 @@ export default function CommunityChatPage() {
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={`Message #${channels.find((c) => c.id === activeChannel)?.name}...`}
+            placeholder={isArabic ? `رسالة لـ #${channels.find((c) => c.id === activeChannel)?.name}...` : `Message #${channels.find((c) => c.id === activeChannel)?.name}...`}
             className="flex-1 p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-primary text-sm font-medium"
           />
           <Button
@@ -223,7 +226,7 @@ export default function CommunityChatPage() {
             disabled={!text.trim()}
             className="bg-primary text-black hover:bg-primary/90 font-black px-6 py-3.5 rounded-2xl glow-primary cursor-pointer flex items-center gap-2"
           >
-            <Send className="w-4 h-4" /> Send
+            <Send className={`w-4 h-4 ${isArabic ? 'rotate-180' : ''}`} /> {isArabic ? 'إرسال' : 'Send'}
           </Button>
         </form>
       </div>

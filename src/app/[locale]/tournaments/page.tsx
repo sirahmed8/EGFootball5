@@ -4,10 +4,12 @@ import * as React from 'react';
 import { useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
 import { Trophy, Crown, Sparkles, Inbox, Users } from 'lucide-react';
+import { staggerContainer, cardItemVariant } from '@/lib/animations';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Portal } from '@/components/Portal';
 import { toast } from 'sonner';
+import { TournamentsPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import {
   collection,
   getDocs,
@@ -144,10 +146,7 @@ export default function TournamentsPage() {
 
       {/* Loading */}
       {loading ? (
-        <div className="text-center py-20 space-y-3">
-          <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
-          <p className="text-xs text-muted-foreground font-medium">{isArabic ? 'جاري تحميل البطولات...' : 'Loading tournaments...'}</p>
-        </div>
+        <TournamentsPageSkeleton />
       ) : tournaments.length === 0 ? (
         /* Empty state — no tournaments created yet */
         <Card className="stadium-glass border-white/10 rounded-3xl p-12 text-center space-y-4">
@@ -164,12 +163,16 @@ export default function TournamentsPage() {
       ) : (
         <div className="space-y-8">
           {/* Tournament Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
             {tournaments.map((t) => (
               <motion.div
                 key={t.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
+                variants={cardItemVariant}
               >
                 <Card className="stadium-glass border-white/10 rounded-3xl p-6 shadow-xl card-lift space-y-4 bg-black">
                   <div className="flex items-start justify-between gap-3">
@@ -215,7 +218,7 @@ export default function TournamentsPage() {
                 </Card>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       )}
 

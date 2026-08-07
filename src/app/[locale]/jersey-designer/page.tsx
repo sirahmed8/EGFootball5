@@ -6,8 +6,11 @@ import { Shirt, Sparkles, Download, Palette, Shield, Sparkle, RefreshCw } from '
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { useLocale } from 'next-intl';
 
 export default function JerseyDesignerPage() {
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
   const [primaryColor, setPrimaryColor] = React.useState('#10B981');
   const [secondaryColor, setSecondaryColor] = React.useState('#06B6D4');
   const [collarStyle, setCollarStyle] = React.useState<'vneck' | 'crew'>('vneck');
@@ -58,18 +61,18 @@ export default function JerseyDesignerPage() {
           document.body.appendChild(downloadLink);
           downloadLink.click();
           document.body.removeChild(downloadLink);
-          toast.success('Jersey image saved to your device! 📸👕');
+          toast.success(isArabic ? 'تم حفظ الطقم على جهازك! 📸👕' : 'Jersey image saved to your device! 📸👕');
         }
       };
       image.src = blobURL;
     } catch (err) {
       console.error(err);
-      toast.error('Failed to export image');
+      toast.error(isArabic ? 'فشل في تصدير الصورة' : 'Failed to export image');
     }
   };
 
   return (
-    <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8" dir={isArabic ? 'rtl' : 'ltr'}>
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
@@ -78,12 +81,12 @@ export default function JerseyDesignerPage() {
       >
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black">
-            <Shirt className="w-4 h-4" /> Interactive Kit Creator 2.0
+            <Shirt className="w-4 h-4" /> {isArabic ? 'مصمم الأطقم التفاعلي 2.0' : 'Interactive Kit Creator 2.0'}
           </div>
           <h1 className="text-3xl md:text-5xl font-black text-foreground">
-            Custom Jersey <span className="text-gradient-primary">Studio Pro</span>
+            {isArabic ? 'استوديو الأطقم' : 'Custom Jersey'} <span className="text-gradient-primary">{isArabic ? 'الاحترافي' : 'Studio Pro'}</span>
           </h1>
-          <p className="text-sm text-muted-foreground">Design custom 5-a-side team kits, choose patterns & team badges, personalize player back numbers, and export HD PNG graphics!</p>
+          <p className="text-sm text-muted-foreground">{isArabic ? 'صمم أطقم الخماسي لفريقك، اختر الأنماط والشعارات، وقم بتصدير التصميم بجودة عالية!' : 'Design custom 5-a-side team kits, choose patterns & team badges, personalize player back numbers, and export HD PNG graphics!'}</p>
         </div>
 
         <Button
@@ -91,7 +94,7 @@ export default function JerseyDesignerPage() {
           size="lg"
           className="bg-primary text-black hover:bg-primary/90 font-black rounded-2xl glow-primary cursor-pointer flex items-center gap-2"
         >
-          <Download className="w-5 h-5" /> Download Jersey (PNG)
+          <Download className="w-5 h-5" /> {isArabic ? 'تحميل الطقم (PNG)' : 'Download Jersey (PNG)'}
         </Button>
       </motion.div>
 
@@ -100,9 +103,9 @@ export default function JerseyDesignerPage() {
         <Card className="global-box border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-between space-y-6">
           <div className="flex items-center justify-between w-full border-b border-white/10 pb-4">
             <span className="text-xs font-black uppercase text-emerald-400 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" /> Vector 2D Kit Studio
+              <Sparkles className="w-4 h-4" /> {isArabic ? 'استوديو التصميم الثنائي الأبعاد' : 'Vector 2D Kit Studio'}
             </span>
-            <span className="text-xs font-mono font-bold text-muted-foreground">{collarStyle.toUpperCase()} COLLAR • {pattern.toUpperCase()}</span>
+            <span className="text-xs font-mono font-bold text-muted-foreground">{isArabic ? 'ياقة ' : ''}{collarStyle.toUpperCase()}{!isArabic ? ' COLLAR' : ''} • {pattern.toUpperCase()}</span>
           </div>
 
           {/* SVG Shirt Graphic */}
@@ -168,7 +171,7 @@ export default function JerseyDesignerPage() {
                 className="px-4 py-1 rounded-lg text-xs font-black tracking-widest uppercase shadow-lg border border-white/20 mt-4"
                 style={{ backgroundColor: secondaryColor, color: primaryColor === '#FFFFFF' ? '#000' : '#FFF' }}
               >
-                {squadName || 'SQUAD NAME'}
+                {squadName || (isArabic ? 'اسم الفريق' : 'SQUAD NAME')}
               </div>
 
               <div className="text-6xl font-black font-mono tracking-tighter text-white drop-shadow-[0_6px_12px_rgba(0,0,0,0.9)]">
@@ -176,26 +179,26 @@ export default function JerseyDesignerPage() {
               </div>
 
               <div className="text-xs font-black tracking-widest uppercase text-white/90 drop-shadow">
-                {playerName || 'PLAYER'}
+                {playerName || (isArabic ? 'اللاعب' : 'PLAYER')}
               </div>
             </div>
           </div>
 
           <div className="w-full pt-4 border-t border-white/10 flex items-center justify-between text-xs text-muted-foreground font-bold">
-            <span className="flex items-center gap-1.5"><Sparkle className="w-4 h-4 text-emerald-400" /> Professional 5-a-side Kit</span>
-            <span className="text-emerald-400 font-mono">Ready to Save & Share</span>
+            <span className="flex items-center gap-1.5"><Sparkle className="w-4 h-4 text-emerald-400" /> {isArabic ? 'طقم خماسي احترافي' : 'Professional 5-a-side Kit'}</span>
+            <span className="text-emerald-400 font-mono">{isArabic ? 'جاهز للحفظ والمشاركة' : 'Ready to Save & Share'}</span>
           </div>
         </Card>
 
         {/* Customizer Controls */}
         <Card className="global-box border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
           <h3 className="text-xl font-black text-foreground flex items-center gap-2">
-            <Palette className="w-5 h-5 text-primary" /> Personalize Kit Styling
+            <Palette className="w-5 h-5 text-primary" /> {isArabic ? 'تخصيص تصميم الطقم' : 'Personalize Kit Styling'}
           </h3>
 
           {/* Pattern Style Selector */}
           <div>
-            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Kit Pattern Style</label>
+            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">{isArabic ? 'نمط الطقم' : 'Kit Pattern Style'}</label>
             <div className="grid grid-cols-4 gap-2">
               {(['solid', 'stripes', 'sash', 'chevron'] as const).map((p) => (
                 <Button
@@ -214,7 +217,7 @@ export default function JerseyDesignerPage() {
 
           {/* Primary Color */}
           <div>
-            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Primary Color</label>
+            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">{isArabic ? 'اللون الأساسي' : 'Primary Color'}</label>
             <div className="flex flex-wrap gap-2.5">
               {colors.map((c) => (
                 <button
@@ -233,7 +236,7 @@ export default function JerseyDesignerPage() {
 
           {/* Secondary Color */}
           <div>
-            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Accent Trim Color</label>
+            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">{isArabic ? 'اللون الثانوي (التفاصيل)' : 'Accent Trim Color'}</label>
             <div className="flex flex-wrap gap-2.5">
               {colors.map((c) => (
                 <button
@@ -253,7 +256,7 @@ export default function JerseyDesignerPage() {
           {/* Collar & Stripes Options */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase mb-1.5 block">Collar Cut</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase mb-1.5 block">{isArabic ? 'قصة الياقة' : 'Collar Cut'}</label>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -262,7 +265,7 @@ export default function JerseyDesignerPage() {
                   onClick={() => setCollarStyle('vneck')}
                   className="flex-1 text-xs rounded-xl font-bold"
                 >
-                  V-Neck
+                  {isArabic ? 'ياقة V' : 'V-Neck'}
                 </Button>
                 <Button
                   type="button"
@@ -271,13 +274,13 @@ export default function JerseyDesignerPage() {
                   onClick={() => setCollarStyle('crew')}
                   className="flex-1 text-xs rounded-xl font-bold"
                 >
-                  Crew Cut
+                  {isArabic ? 'دائري' : 'Crew Cut'}
                 </Button>
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase mb-1.5 block">Body Stripes</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase mb-1.5 block">{isArabic ? 'خطوط الجسم' : 'Body Stripes'}</label>
               <Button
                 type="button"
                 size="sm"
@@ -285,7 +288,7 @@ export default function JerseyDesignerPage() {
                 onClick={() => setHasStripes(!hasStripes)}
                 className="w-full text-xs rounded-xl font-bold"
               >
-                {hasStripes ? 'Striped ✓' : 'Solid Plain'}
+                {hasStripes ? (isArabic ? 'مخطط ✓' : 'Striped ✓') : (isArabic ? 'سادة' : 'Solid Plain')}
               </Button>
             </div>
           </div>
@@ -294,7 +297,7 @@ export default function JerseyDesignerPage() {
           <div className="space-y-4 pt-4 border-t border-white/10">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Squad Chest Name</label>
+                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'اسم الفريق (على الصدر)' : 'Squad Chest Name'}</label>
                 <input
                   type="text"
                   value={squadName}
@@ -303,7 +306,7 @@ export default function JerseyDesignerPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Player Back Name</label>
+                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'اسم اللاعب (على الظهر)' : 'Player Back Name'}</label>
                 <input
                   type="text"
                   value={playerName}
@@ -314,7 +317,7 @@ export default function JerseyDesignerPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Shirt Number (0-99)</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'رقم القميص (0-99)' : 'Shirt Number (0-99)'}</label>
               <input
                 type="text"
                 value={number}
@@ -328,7 +331,7 @@ export default function JerseyDesignerPage() {
               size="lg"
               className="w-full py-6 bg-primary text-black hover:bg-primary/90 font-black rounded-2xl glow-primary cursor-pointer flex items-center justify-center gap-2 mt-4 text-base"
             >
-              <Download className="w-5 h-5" /> Save Jersey to Device (PNG)
+              <Download className="w-5 h-5" /> {isArabic ? 'حفظ الطقم على الجهاز (PNG)' : 'Save Jersey to Device (PNG)'}
             </Button>
           </div>
         </Card>
