@@ -13,13 +13,17 @@ export function isUserVip(appUser: AppUser | null | undefined): boolean {
 }
 
 /**
- * Calculate VIP discounted booking price (10% off).
+ * Calculate VIP discounted booking price based on VIP tier (10% for VIP, 5% for Pro).
  */
-export function calculateVipPrice(originalPrice: number, isVip: boolean): { finalPrice: number; discountAmount: number } {
-  if (!isVip || originalPrice <= 0) {
+export function calculateVipPrice(originalPrice: number, appUser: AppUser | null | undefined): { finalPrice: number; discountAmount: number } {
+  if (!isUserVip(appUser) || originalPrice <= 0) {
     return { finalPrice: originalPrice, discountAmount: 0 };
   }
-  const discountAmount = Math.round(originalPrice * 0.10);
+  
+  // Default to 10% for owner/admin/VIP, 5% for Pro Pass
+  const discountRate = appUser?.vipTier === 'Pro Pass' ? 0.05 : 0.10;
+  
+  const discountAmount = Math.round(originalPrice * discountRate);
   const finalPrice = Math.max(0, originalPrice - discountAmount);
   return { finalPrice, discountAmount };
 }

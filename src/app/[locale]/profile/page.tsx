@@ -19,7 +19,7 @@ import { User as AppUser, Booking, Pitch } from '@/types';
 import { cancelBooking } from '@/lib/firebase/booking';
 import { ProfilePageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { DailyAIAdviceCard } from '@/components/DailyAIAdviceCard';
-import { Trophy, Star, Shield, Award, Zap, Heart, MapPin, ArrowRight, Crown } from 'lucide-react';
+import { Trophy, Star, Shield, Award, Zap, Heart, MapPin, ArrowRight, Crown, ShieldCheck } from 'lucide-react';
 import { isUserVip } from '@/lib/vip';
 
 function BookingCountdown({ lockedUntil }: { lockedUntil: number }) {
@@ -361,8 +361,9 @@ export default function ProfilePage() {
               {appUser?.name}
             </h1>
             {isUserVip(appUser) && (
-              <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-black inline-flex items-center gap-1.5 glow-amber">
-                <Crown className="w-4 h-4 text-amber-400 animate-pulse" /> Pitch Pass VIP
+              <span className={`px-3 py-1 rounded-full border text-xs font-black inline-flex items-center gap-1.5 ${appUser.vipTier === 'Pro Pass' ? 'bg-blue-500/20 border-blue-500/40 text-blue-400 glow-primary-sm' : 'bg-amber-500/20 border-amber-500/40 text-amber-400 glow-amber'}`}>
+                {appUser.vipTier === 'Pro Pass' ? <ShieldCheck className="w-4 h-4 text-blue-400" /> : <Crown className="w-4 h-4 text-amber-400 animate-pulse" />} 
+                {appUser.vipTier === 'Pro Pass' ? 'Pro Pass' : 'Pitch Pass VIP'}
               </span>
             )}
           </div>

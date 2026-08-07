@@ -120,7 +120,11 @@ export function NavbarSettingsMenu() {
           <span className="truncate max-w-[150px]">
             {appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'حسابي' : 'Account')}
           </span>
-          {isUserVip(appUser) && <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+          {isUserVip(appUser) && (
+            appUser?.vipTier === 'Pro Pass' 
+              ? <ShieldCheck className="w-3.5 h-3.5 text-blue-400 shrink-0" /> 
+              : <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          )}
         </span>
         <Settings className="w-4 h-4 text-muted-foreground hover:text-primary transition-colors shrink-0" />
       </button>
@@ -157,8 +161,9 @@ export function NavbarSettingsMenu() {
                       {appUser?.name || firebaseUser?.displayName || (locale === 'ar' ? 'لاعب كريم' : 'Player')}
                     </span>
                     {isUserVip(appUser) && (
-                      <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-black inline-flex items-center gap-0.5 shrink-0">
-                        <Crown className="w-3 h-3 text-amber-400" /> VIP
+                      <span className={`px-1.5 py-0.5 rounded-full border text-[10px] font-black inline-flex items-center gap-0.5 shrink-0 ${appUser?.vipTier === 'Pro Pass' ? 'bg-blue-500/20 border-blue-500/40 text-blue-400' : 'bg-amber-500/20 border-amber-500/40 text-amber-400'}`}>
+                        {appUser?.vipTier === 'Pro Pass' ? <ShieldCheck className="w-3 h-3 text-blue-400" /> : <Crown className="w-3 h-3 text-amber-400" />}
+                        {appUser?.vipTier === 'Pro Pass' ? 'PRO' : 'VIP'}
                       </span>
                     )}
                   </div>

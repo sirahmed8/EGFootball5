@@ -280,7 +280,7 @@ function BookContent() {
     const { duration, totalAmount } = getBookingDetails();
     const appUser = useAuthStore.getState().appUser;
     const isVip = isUserVip(appUser);
-    const { finalPrice, discountAmount: vipDiscount } = calculateVipPrice(totalAmount, isVip);
+    const { finalPrice, discountAmount: vipDiscount } = calculateVipPrice(totalAmount, appUser);
     const effectiveTotal = isVip ? finalPrice : totalAmount;
     const effectiveDeposit = Math.round(effectiveTotal / 2);
 

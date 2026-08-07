@@ -16,7 +16,10 @@ export function DailyAIAdviceCard() {
   const { appUser, firebaseUser } = useAuthStore();
   const locale = useLocale();
   const isArabic = locale === 'ar';
-  const isVip = isUserVip(appUser);
+  
+  // Only true VIPs (or admins/owners) get unlimited AI. Pro Pass users still have a cooldown.
+  const isVipUser = isUserVip(appUser);
+  const isUnlimitedAI = isVipUser && appUser?.vipTier !== 'Pro Pass';
 
   const userUid = firebaseUser?.uid || 'guest';
   const cooldownKey = `ai_advice_cooldown_${userUid}`;
@@ -40,7 +43,7 @@ export function DailyAIAdviceCard() {
 
   useEffect(() => {
     const updateCountdown = () => {
-      if (!cooldownEnd || isVip) {
+      if (!cooldownEnd || isUnlimitedAI) {
         setMinsLeft(0);
         return;
       }
@@ -51,10 +54,10 @@ export function DailyAIAdviceCard() {
     updateCountdown();
     const interval = setInterval(updateCountdown, 10000);
     return () => clearInterval(interval);
-  }, [cooldownEnd, isVip]);
+  }, [cooldownEnd, isUnlimitedAI]);
 
   const fetchAdvice = async () => {
-    if (minsLeft > 0 && !isVip) {
+    if (minsLeft > 0 && !isUnlimitedAI) {
       toast.error(
         isArabic
           ? `يمكنك طلب نصيحة جديدة بعد ${minsLeft} دقيقة (أو اشترك في Pitch Pass VIP للحصول على نصائح غير محدودة!)`
@@ -108,21 +111,21 @@ export function DailyAIAdviceCard() {
           <div>
             <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <span>{isArabic ? '💡 نصائح AI الكروية والتكتيكية' : '💡 AI Football Insights'}</span>
-              {isVip && (
+              {isUnlimitedAI && (
                 <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black border border-amber-500/30 flex items-center gap-1">
                   <Crown className="w-3 h-3" /> VIP Unlimited
                 </span>
               )}
             </CardTitle>
             <p className="text-xs text-muted-foreground font-medium">
-              {isVip
+              {isUnlimitedAI
                 ? (isArabic ? 'تحليل تكتيكي غير محدود مع مدرب AI الشخصي' : 'Unlimited tactical analysis with your AI Pro Coach')
                 : (isArabic ? 'نصيحة تكتيكية ومحفزة تكتيكية (واحدة كل ساعة)' : 'Personalized tactical & fitness advice (1/hr)')}
             </p>
           </div>
         </div>
 
-        {isLocked && !isVip && (
+        {isLocked && !isUnlimitedAI && (
           <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1">
             <Clock className="w-3 h-3" /> {minsLeft}m cooldown
           </span>

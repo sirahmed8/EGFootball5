@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Trophy, Search, Crown, SlidersHorizontal } from 'lucide-react';
+import { Trophy, Search, Crown, SlidersHorizontal, ShieldCheck } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { SolidSelect } from '@/components/ui/SolidSelect';
 import { collection, getDocs, limit, query, orderBy } from 'firebase/firestore';
@@ -22,6 +22,7 @@ interface PlayerRank {
   rating: number;
   matchesPlayed: number;
   isVip?: boolean;
+  vipTier?: string;
 }
 
 /** Returns position-specific badge Tailwind classes */
@@ -94,6 +95,7 @@ export default function LeaderboardPage() {
                 rating,
                 matchesPlayed,
                 isVip: Boolean(data.isVip || data.role === 'owner' || data.role === 'admin'),
+                vipTier: data.vipTier,
               };
             })
             // Only include players who have actually played / have stats
@@ -282,7 +284,7 @@ export default function LeaderboardPage() {
                         </div>
                         <span className="font-bold text-foreground flex items-center gap-1.5">
                           <span>{p.name}</span>
-                          {p.isVip && <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                          {p.isVip && (p.vipTier === 'Pro Pass' ? <ShieldCheck className="w-3.5 h-3.5 text-blue-400 shrink-0" /> : <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />)}
                         </span>
                       </div>
                     </td>

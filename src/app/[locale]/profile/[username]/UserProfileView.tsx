@@ -5,7 +5,7 @@ import { getUserByUsername } from '@/lib/username';
 import { User as AppUser } from '@/types';
 import { ProfilePageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { Button } from '@/components/ui/button';
-import { Crown, Star, Shield, AtSign, ArrowLeft, Share2 } from 'lucide-react';
+import { Crown, Star, Shield, AtSign, ArrowLeft, Share2, ShieldCheck } from 'lucide-react';
 import { isUserVip } from '@/lib/vip';
 import { useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
@@ -112,8 +112,8 @@ export function UserProfileView({ username }: { username: string }) {
               )}
             </div>
             {isVip && (
-              <div className="absolute -top-2 -end-2 w-8 h-8 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-lg animate-bounce">
-                <Crown className="w-5 h-5" />
+              <div className={`absolute -top-2 -end-2 w-8 h-8 rounded-full text-white flex items-center justify-center shadow-lg animate-bounce ${targetUser.vipTier === 'Pro Pass' ? 'bg-blue-600' : 'bg-amber-400 text-black'}`}>
+                {targetUser.vipTier === 'Pro Pass' ? <ShieldCheck className="w-5 h-5" /> : <Crown className="w-5 h-5" />}
               </div>
             )}
           </div>
@@ -122,8 +122,8 @@ export function UserProfileView({ username }: { username: string }) {
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
               <h1 className="text-3xl font-black text-foreground">{targetUser.name}</h1>
               {isVip && (
-                <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-black flex items-center gap-1">
-                  <Crown className="w-3.5 h-3.5" /> VIP Member 👑
+                <span className={`px-3 py-1 rounded-full border text-xs font-black flex items-center gap-1 ${targetUser.vipTier === 'Pro Pass' ? 'bg-blue-500/20 border-blue-500/40 text-blue-400' : 'bg-amber-500/20 border-amber-500/40 text-amber-400'}`}>
+                  {targetUser.vipTier === 'Pro Pass' ? <><ShieldCheck className="w-3.5 h-3.5" /> PRO Member ⚡</> : <><Crown className="w-3.5 h-3.5" /> VIP Member 👑</>}
                 </span>
               )}
             </div>

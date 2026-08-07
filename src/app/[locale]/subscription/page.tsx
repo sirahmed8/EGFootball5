@@ -21,23 +21,22 @@ export default function SubscriptionPage() {
   const isOwner = appUser?.role === 'owner' || appUser?.role === 'admin';
   const isVip = isUserVip(appUser);
 
-  const [isSubscribeModalOpen, setIsSubscribeModalOpen] = React.useState(false);
+  const [subscribeTier, setSubscribeTier] = React.useState<'pro' | 'vip' | null>(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = React.useState(false);
   const [selectedMethod, setSelectedMethod] = React.useState<'vodafone' | 'instapay' | 'card'>('vodafone');
   const [submitting, setSubmitting] = React.useState(false);
 
-  // Fix #24: Escape key handlers for subscription modals
   React.useEffect(() => {
-    if (!isSubscribeModalOpen && !isSuccessModalOpen) return;
+    if (!subscribeTier && !isSuccessModalOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsSubscribeModalOpen(false);
+        setSubscribeTier(null);
         setIsSuccessModalOpen(false);
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isSubscribeModalOpen, isSuccessModalOpen]);
+  }, [subscribeTier, isSuccessModalOpen]);
 
   const perks = [
     {
@@ -79,10 +78,10 @@ export default function SubscriptionPage() {
       await updateDoc(doc(db, 'users', firebaseUser.uid), {
         isVip: true,
         vipExpiry: thirtyDays,
-        vipTier: 'Pitch Pass VIP',
+        vipTier: subscribeTier === 'pro' ? 'Pro Pass' : 'Pitch Pass VIP',
       });
 
-      setIsSubscribeModalOpen(false);
+      setSubscribeTier(null);
       setIsSuccessModalOpen(true);
     } catch (err) {
       console.error(err);
@@ -120,55 +119,69 @@ export default function SubscriptionPage() {
         )}
       </motion.div>
 
-      <div className="max-w-2xl mx-auto w-full">
-        {/* Subscription Plan & Perks */}
-        <Card className="global-box border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 bg-black flex flex-col justify-between">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <div>
-              <span className="text-xs font-black uppercase text-amber-400">{isArabic ? 'الاشتراك الشهري الممتاز' : 'Monthly VIP Pass'}</span>
-              <h2 className="text-2xl font-black text-foreground">Pitch Pass VIP</h2>
-            </div>
-            <div className="text-end">
-              <span className="text-3xl font-black text-amber-400 font-mono">399 EGP</span>
-              <span className="text-xs text-muted-foreground block font-bold">{isArabic ? '/ شهرياً' : '/ month'}</span>
-            </div>
+      <div className="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+        
+        {/* Basic Tier */}
+        <Card className="global-box border-white/10 rounded-3xl p-6 md:p-8 space-y-6 bg-black/50 flex flex-col justify-between opacity-80 hover:opacity-100 transition-opacity">
+          <div className="border-b border-white/10 pb-4">
+            <span className="text-xs font-black uppercase text-muted-foreground">{isArabic ? 'لاعب مبتدئ' : 'Basic Player'}</span>
+            <h2 className="text-2xl font-black text-foreground">Free Tier</h2>
+            <div className="mt-2 text-3xl font-black text-white font-mono">0 EGP</div>
           </div>
+          <div className="space-y-3.5 flex-1">
+            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400" /><span className="text-xs text-muted-foreground">Standard 5-a-side bookings</span></div>
+            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400" /><span className="text-xs text-muted-foreground">10-min deposit lock</span></div>
+            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-400" /><span className="text-xs text-muted-foreground">1 AI Tactical tip per hour</span></div>
+          </div>
+          <Button disabled variant="outline" className="w-full mt-4 bg-white/5 border-white/10 rounded-2xl">{isArabic ? 'باقتك الحالية' : 'Current Plan'}</Button>
+        </Card>
 
-          <div className="space-y-3.5">
+        {/* Pro Tier */}
+        <Card className="global-box border-blue-500/30 rounded-3xl p-6 md:p-8 space-y-6 bg-black flex flex-col justify-between shadow-[0_0_30px_rgba(59,130,246,0.1)] hover:border-blue-500/50 transition-all">
+          <div className="border-b border-white/10 pb-4">
+            <span className="text-xs font-black uppercase text-blue-400">{isArabic ? 'لاعب محترف' : 'Pro Player'}</span>
+            <h2 className="text-2xl font-black text-foreground text-blue-100">Pro Pass</h2>
+            <div className="mt-2"><span className="text-3xl font-black text-blue-400 font-mono">199 EGP</span><span className="text-xs text-muted-foreground">/mo</span></div>
+          </div>
+          <div className="space-y-3.5 flex-1">
+            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /><span className="text-xs text-muted-foreground font-medium">5% Off All Booking Fees</span></div>
+            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /><span className="text-xs text-muted-foreground font-medium">15-Min Deposit Lock Buffer</span></div>
+            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /><span className="text-xs text-muted-foreground font-medium">Blue Pro Profile Badge</span></div>
+            <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /><span className="text-xs text-muted-foreground font-medium">Priority Support</span></div>
+          </div>
+          <Button onClick={() => setSubscribeTier('pro')} className="w-full mt-4 bg-blue-600 text-white hover:bg-blue-500 font-black rounded-2xl glow-primary-sm border-0">{isArabic ? 'ترقية لمحترف' : 'Upgrade to Pro'}</Button>
+        </Card>
+
+        {/* VIP Tier */}
+        <Card className="global-box border-amber-500/50 rounded-3xl p-6 md:p-8 space-y-6 bg-gradient-to-b from-amber-500/10 to-black flex flex-col justify-between shadow-[0_0_40px_rgba(245,158,11,0.2)] transform md:-translate-y-4">
+          <div className="absolute top-0 right-0 p-4 opacity-20"><Crown className="w-24 h-24 text-amber-500 blur-sm" /></div>
+          <div className="border-b border-amber-500/20 pb-4 relative z-10">
+            <span className="text-xs font-black uppercase text-amber-400 flex items-center gap-1"><Crown className="w-3 h-3"/> {isArabic ? 'لاعب VIP' : 'Elite VIP'}</span>
+            <h2 className="text-2xl font-black text-white">Pitch Pass VIP</h2>
+            <div className="mt-2"><span className="text-4xl font-black text-amber-400 font-mono drop-shadow-md">399 EGP</span><span className="text-xs text-amber-500/70">/mo</span></div>
+          </div>
+          <div className="space-y-3.5 flex-1 relative z-10">
             {perks.map((perk, idx) => (
-              <div key={idx} className="flex items-start gap-3">
-                <span className="text-lg shrink-0">{perk.icon}</span>
-                <div>
-                  <h4 className="text-xs font-black text-foreground">{perk.title}</h4>
-                  <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">{perk.desc}</p>
-                </div>
+              <div key={idx} className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <span className="text-xs text-amber-100/80 font-bold leading-relaxed">{perk.title}</span>
               </div>
             ))}
           </div>
-
           {isVip ? (
-            <div className="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-center space-y-1 mt-4">
-              <div className="text-emerald-400 font-black text-sm flex items-center justify-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" /> {isArabic ? 'أنت مشترك بالفعل في Pitch Pass VIP!' : 'You are currently a Pitch Pass VIP member!'}
+            <div className="p-3 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-center relative z-10 mt-4">
+              <div className="text-emerald-400 font-black text-sm flex items-center justify-center gap-1">
+                <CheckCircle2 className="w-4 h-4" /> {appUser?.vipTier || 'Active VIP'}
               </div>
-              <p className="text-xs text-muted-foreground">
-                {isArabic ? 'جميع المزايا مفعّلة بحسابك تلقائياً.' : 'All VIP perks are active on your account automatically.'}
-              </p>
             </div>
           ) : (
             <Button
-              onClick={() => {
-                if (!firebaseUser) {
-                  toast.error(isArabic ? 'يرجى تسجيل الدخول أولاً للاشتراك' : 'Please sign in first to subscribe');
-                  return;
-                }
-                setIsSubscribeModalOpen(true);
-              }}
+              onClick={() => setSubscribeTier('vip')}
               size="lg"
-              className="w-full py-6 text-base font-black rounded-2xl bg-amber-500 text-black hover:bg-amber-400 cursor-pointer shadow-lg glow-amber mt-4"
+              className="w-full mt-4 py-6 text-sm font-black rounded-2xl bg-amber-500 text-black hover:bg-amber-400 cursor-pointer shadow-lg shadow-amber-500/30 relative z-10"
             >
               <Crown className="w-5 h-5 me-2" />
-              {isArabic ? 'اشترك الآن بـ (399 ج.م / شهر)' : 'Subscribe Now (399 EGP / mo)'}
+              {isArabic ? 'اشترك VIP الآن' : 'Get Pitch Pass VIP'}
             </Button>
           )}
         </Card>
@@ -176,35 +189,43 @@ export default function SubscriptionPage() {
 
       {/* Subscribe Modal */}
       <AnimatePresence>
-        {isSubscribeModalOpen && (
+        {subscribeTier !== null && (
           <div
             className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-            onClick={() => setIsSubscribeModalOpen(false)}
+            onClick={() => setSubscribeTier(null)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-lg stadium-glass border-amber-500/30 rounded-3xl p-6 md:p-8 space-y-5 bg-black relative shadow-2xl"
+              className={`w-full max-w-lg stadium-glass rounded-3xl p-6 md:p-8 space-y-5 bg-black relative shadow-2xl ${subscribeTier === 'pro' ? 'border-blue-500/30' : 'border-amber-500/30'}`}
               dir={isArabic ? 'rtl' : 'ltr'}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <h3 className="text-xl font-black text-foreground flex items-center gap-2">
-                  <Crown className="w-5 h-5 text-amber-400" /> {isArabic ? 'تفعيل اشتراك Pitch Pass VIP' : 'Activate Pitch Pass VIP'}
+                  {subscribeTier === 'pro' ? (
+                    <><Sparkles className="w-5 h-5 text-blue-400" /> {isArabic ? 'تفعيل اشتراك Pro Pass' : 'Activate Pro Pass'}</>
+                  ) : (
+                    <><Crown className="w-5 h-5 text-amber-400" /> {isArabic ? 'تفعيل اشتراك Pitch Pass VIP' : 'Activate Pitch Pass VIP'}</>
+                  )}
                 </h3>
-                <button onClick={() => setIsSubscribeModalOpen(false)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer">
+                <button onClick={() => setSubscribeTier(null)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-1">
+              <div className={`p-4 rounded-2xl border space-y-1 ${subscribeTier === 'pro' ? 'bg-blue-500/10 border-blue-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
                 <div className="flex justify-between items-center font-black text-sm">
-                  <span>Pitch Pass VIP (30 Days)</span>
-                  <span className="text-amber-400 font-mono">399 EGP</span>
+                  <span>{subscribeTier === 'pro' ? 'Pro Pass' : 'Pitch Pass VIP'} (30 Days)</span>
+                  <span className={`${subscribeTier === 'pro' ? 'text-blue-400' : 'text-amber-400'} font-mono`}>
+                    {subscribeTier === 'pro' ? '199 EGP' : '399 EGP'}
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {isArabic ? 'يتضمن: خصم 10% على الحجوزات + 20 دقيقة قفل + شارة تاج ذهبية + دخول بطولات مجاني + AI بلا حدود.' : 'Includes: 10% Off Bookings + 20-Min Lock Buffer + Golden VIP Badge + Free Tournaments + Unlimited AI Coach.'}
+                  {subscribeTier === 'pro'
+                    ? (isArabic ? 'يتضمن: خصم 5% على الحجوزات + 15 دقيقة قفل + شارة Pro زرقاء + دعم أولوية.' : 'Includes: 5% Off Bookings + 15-Min Lock Buffer + Blue Pro Badge + Priority Support.')
+                    : (isArabic ? 'يتضمن: خصم 10% على الحجوزات + 20 دقيقة قفل + شارة تاج ذهبية + دخول بطولات مجاني + AI بلا حدود.' : 'Includes: 10% Off Bookings + 20-Min Lock Buffer + Golden VIP Badge + Free Tournaments + Unlimited AI Coach.')}
                 </p>
               </div>
 
@@ -264,11 +285,11 @@ export default function SubscriptionPage() {
                 )}
 
                 <div className="flex gap-3 pt-2">
-                  <Button type="button" variant="outline" onClick={() => setIsSubscribeModalOpen(false)} className="w-1/2 rounded-2xl">
+                  <Button type="button" variant="outline" onClick={() => setSubscribeTier(null)} className="w-1/2 rounded-2xl">
                     {isArabic ? 'إلغاء' : 'Cancel'}
                   </Button>
-                  <Button type="submit" disabled={submitting} className="w-1/2 bg-amber-500 text-black font-black rounded-2xl glow-amber cursor-pointer">
-                    {submitting ? (isArabic ? 'جاري التفعيل...' : 'Activating...') : (isArabic ? 'تأكيد وتفعيل VIP 👑' : 'Confirm & Activate 👑')}
+                  <Button type="submit" disabled={submitting} className={`w-1/2 text-white font-black rounded-2xl cursor-pointer ${subscribeTier === 'pro' ? 'bg-blue-600 hover:bg-blue-500 glow-primary-sm' : 'bg-amber-500 text-black hover:bg-amber-400 glow-amber'}`}>
+                    {submitting ? (isArabic ? 'جاري التفعيل...' : 'Activating...') : (subscribeTier === 'pro' ? (isArabic ? 'تأكيد الترقية للمحترفين ⚡' : 'Confirm Pro Upgrade ⚡') : (isArabic ? 'تأكيد وتفعيل VIP 👑' : 'Confirm & Activate 👑'))}
                   </Button>
                 </div>
               </form>

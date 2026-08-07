@@ -48,7 +48,7 @@ export function BookingSummaryCard({
   const appUser = useAuthStore((s) => s.appUser);
   const isVip = isUserVip(appUser);
 
-  const { finalPrice, discountAmount } = calculateVipPrice(totalAmount, isVip);
+  const { finalPrice, discountAmount } = calculateVipPrice(totalAmount, appUser);
   const effectiveTotal = isVip ? finalPrice : totalAmount;
   const costPerPerson = (effectiveTotal / Math.max(10, numPeople)).toFixed(2);
 
@@ -67,19 +67,23 @@ export function BookingSummaryCard({
           </h3>
 
           {isVip && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 text-xs font-black">
-              <Crown className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-              {isArabic ? 'عضوية VIP 👑' : 'VIP Pass 👑'}
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-black ${appUser?.vipTier === 'Pro Pass' ? 'bg-blue-500/20 text-blue-400 border-blue-500/40' : 'bg-amber-500/20 text-amber-400 border-amber-500/40'}`}>
+              {appUser?.vipTier === 'Pro Pass' ? <ShieldCheck className="w-3.5 h-3.5 text-blue-400 animate-pulse" /> : <Crown className="w-3.5 h-3.5 text-amber-400 animate-pulse" />}
+              {appUser?.vipTier === 'Pro Pass' ? (isArabic ? 'عضوية Pro ⚡' : 'Pro Pass ⚡') : (isArabic ? 'عضوية VIP 👑' : 'VIP Pass 👑')}
             </span>
           )}
         </div>
 
         <CardContent className="p-6 space-y-6">
           {isVip && (
-            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs font-bold text-amber-400">
+            <div className={`p-3.5 rounded-2xl border flex items-center justify-between text-xs font-bold ${appUser?.vipTier === 'Pro Pass' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400'}`}>
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>{isArabic ? `تم تطبيق خصم VIP 10% (-${discountAmount} ج.م) + مهلة قفل 20 دقيقة!` : `10% VIP Discount Applied (-${discountAmount} EGP) + 20-Min Lock Buffer!`}</span>
+                <Sparkles className="w-4 h-4 shrink-0" />
+                <span>
+                  {appUser?.vipTier === 'Pro Pass'
+                    ? (isArabic ? `تم تطبيق خصم Pro 5% (-${discountAmount} ج.م) + مهلة قفل 15 دقيقة!` : `5% Pro Discount Applied (-${discountAmount} EGP) + 15-Min Lock Buffer!`)
+                    : (isArabic ? `تم تطبيق خصم VIP 10% (-${discountAmount} ج.م) + مهلة قفل 20 دقيقة!` : `10% VIP Discount Applied (-${discountAmount} EGP) + 20-Min Lock Buffer!`)}
+                </span>
               </div>
             </div>
           )}
@@ -154,10 +158,10 @@ export function BookingSummaryCard({
             onClick={handleConfirmBooking}
             disabled={loadingLock || isBlacklisted}
             className={`w-full py-6 text-lg font-black text-black rounded-2xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] shadow-xl cursor-pointer ${
-              isVip ? 'bg-amber-400 hover:bg-amber-300 glow-amber' : 'bg-primary hover:bg-primary/90 glow-primary'
+              isVip ? (appUser?.vipTier === 'Pro Pass' ? 'bg-blue-400 hover:bg-blue-300 glow-primary-sm' : 'bg-amber-400 hover:bg-amber-300 glow-amber') : 'bg-primary hover:bg-primary/90 glow-primary'
             }`}
           >
-            {loadingLock ? tBook('locking') : (isVip ? (isArabic ? 'تأكيد وقفل الموعد (VIP 👑)' : 'Lock Pitch Slot (VIP 👑)') : tBook('confirmBookingBtn'))}
+            {loadingLock ? tBook('locking') : (isVip ? (appUser?.vipTier === 'Pro Pass' ? (isArabic ? 'تأكيد وقفل الموعد (Pro ⚡)' : 'Lock Pitch Slot (Pro ⚡)') : (isArabic ? 'تأكيد وقفل الموعد (VIP 👑)' : 'Lock Pitch Slot (VIP 👑)')) : tBook('confirmBookingBtn'))}
           </Button>
         </CardContent>
       </Card>
