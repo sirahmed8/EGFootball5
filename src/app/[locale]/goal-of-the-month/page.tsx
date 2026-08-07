@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
-import { Sparkles, ThumbsUp, Upload, CheckCircle2, Video, Inbox } from 'lucide-react';
+import { Sparkles, ThumbsUp, Upload, CheckCircle2, Video, Inbox, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Portal } from '@/components/Portal';
@@ -47,6 +47,15 @@ export default function GoalOfTheMonthPage() {
   const [videoUrl, setVideoUrl] = React.useState('');
   const [pitchName, setPitchName] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!isSubmitOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsSubmitOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isSubmitOpen]);
 
   // Load real goal contest submissions from Firestore
   React.useEffect(() => {
@@ -239,9 +248,23 @@ export default function GoalOfTheMonthPage() {
       {/* Modal */}
       {isSubmitOpen && (
         <Portal>
-          <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-4 bg-black" dir={isArabic ? 'rtl' : 'ltr'}>
-              <h2 className="text-2xl font-black text-foreground">{isArabic ? 'تقديم فيديو الهدف للمسابقة' : 'Submit Goal Video Clip'}</h2>
+          <div 
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+            onClick={() => setIsSubmitOpen(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-4 bg-black relative" 
+              dir={isArabic ? 'rtl' : 'ltr'}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <h2 className="text-2xl font-black text-foreground">{isArabic ? 'تقديم فيديو الهدف للمسابقة' : 'Submit Goal Video Clip'}</h2>
+                <button onClick={() => setIsSubmitOpen(false)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
               <form onSubmit={handleSubmitGoal} className="space-y-4">
                 <div>
                   <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'عنوان الهدف *' : 'Goal Title *'}</label>

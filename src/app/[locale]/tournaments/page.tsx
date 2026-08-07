@@ -90,16 +90,17 @@ export default function TournamentsPage() {
     }
     setRegistering(true);
     const isVip = isUserVip(appUser);
+    const isEliteVip = isVip && appUser?.vipTier === 'Pitch Pass VIP';
     try {
       await addDoc(collection(db, 'tournament_registrations'), {
         tournamentId: tournament.id,
         tournamentName: tournament.name,
         userId: firebaseUser.uid,
         playerName: appUser?.name || firebaseUser.displayName || (isArabic ? 'لاعب' : 'Player'),
-        isVipPass: isVip,
+        isVipPass: isEliteVip,
         registeredAt: serverTimestamp(),
       });
-      if (isVip) {
+      if (isEliteVip) {
         toast.success(isArabic ? `تم تفعيل قسيمة VIP المجانية وتسجيل فريقك في ${tournament.name}! 👑🏆` : `Free VIP Cup Voucher applied! Squad registered for ${tournament.name}! 👑🏆`);
       } else {
         toast.success(isArabic ? `تم تسجيل فريقك في ${tournament.name}! 🏆` : `Squad registered for ${tournament.name}! 🏆`);
