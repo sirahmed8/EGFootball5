@@ -174,37 +174,39 @@ export default function JerseyDesignerPage() {
                   </filter>
 
                   <linearGradient id="shadowFolds" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#000" stopOpacity="0.55"/>
-                    <stop offset="15%" stopColor="#000" stopOpacity="0.08"/>
-                    <stop offset="30%" stopColor="#fff" stopOpacity="0.12"/>
-                    <stop offset="50%" stopColor="#000" stopOpacity="0"/>
-                    <stop offset="70%" stopColor="#fff" stopOpacity="0.12"/>
-                    <stop offset="85%" stopColor="#000" stopOpacity="0.08"/>
-                    <stop offset="100%" stopColor="#000" stopOpacity="0.6"/>
+                    <stop offset="0%" stopColor="#000" stopOpacity="0.4"/>
+                    <stop offset="10%" stopColor="#000" stopOpacity="0.05"/>
+                    <stop offset="25%" stopColor="#fff" stopOpacity="0.15"/>
+                    <stop offset="35%" stopColor="#000" stopOpacity="0.1"/>
+                    <stop offset="50%" stopColor="#fff" stopOpacity="0.2"/>
+                    <stop offset="65%" stopColor="#000" stopOpacity="0.08"/>
+                    <stop offset="75%" stopColor="#fff" stopOpacity="0.12"/>
+                    <stop offset="90%" stopColor="#000" stopOpacity="0.1"/>
+                    <stop offset="100%" stopColor="#000" stopOpacity="0.45"/>
                   </linearGradient>
 
                   <radialGradient id="chestHighlight" cx="50%" cy="25%" r="50%">
-                    <stop offset="0%" stopColor="#fff" stopOpacity="0.25"/>
+                    <stop offset="0%" stopColor="#fff" stopOpacity="0.45"/>
                     <stop offset="100%" stopColor="#fff" stopOpacity="0"/>
                   </radialGradient>
 
-                  {/* Jersey shape */}
+                  {/* Jersey shape (Modern athletic fit) */}
                   <clipPath id="jerseyClip">
-                    <path d="M 160 20
-                             C 180 20, 220 20, 240 20
-                             C 260 25, 290 40, 310 50
-                             C 330 60, 350 75, 360 90
-                             C 365 100, 370 120, 360 130
-                             C 350 140, 330 135, 320 125
-                             C 310 115, 300 150, 300 180
-                             L 305 400
-                             C 300 410, 200 420, 100 410
-                             L 95 180
-                             C 95 150, 90 115, 80 125
-                             C 70 135, 50 140, 40 130
-                             C 30 120, 35 100, 40 90
-                             C 50 75, 70 60, 90 50
-                             C 110 40, 140 25, 160 20 Z" />
+                    <path d="M 155 20
+                             C 180 15, 220 15, 245 20
+                             C 280 25, 310 40, 335 60
+                             C 355 75, 370 95, 375 110
+                             C 380 120, 365 130, 350 140
+                             C 335 150, 320 155, 310 145
+                             C 305 135, 290 145, 295 180
+                             L 300 420
+                             C 290 435, 200 445, 100 435
+                             L 105 180
+                             C 110 145, 95 135, 90 145
+                             C 80 155, 65 150, 50 140
+                             C 35 130, 20 120, 25 110
+                             C 30 95, 45 75, 65 60
+                             C 90 40, 120 25, 155 20 Z" />
                   </clipPath>
 
                   <pattern id="pat-stripes" width="55" height="55" patternUnits="userSpaceOnUse">
@@ -238,17 +240,16 @@ export default function JerseyDesignerPage() {
                 <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="url(#shadowFolds)" style={{ mixBlendMode: 'multiply' }} />
                 <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="url(#chestHighlight)" style={{ mixBlendMode: 'overlay' }} />
 
-                {/* Seams */}
-                <path d="M 85 145 Q 115 80 160 20" fill="none" stroke="#000" strokeWidth="2.5" strokeOpacity="0.4" />
-                <path d="M 315 145 Q 285 80 240 20" fill="none" stroke="#000" strokeWidth="2.5" strokeOpacity="0.4" />
-                <path d="M 100 410 Q 200 420 300 410" fill="none" stroke="#000" strokeWidth="5" strokeOpacity="0.4" />
+                {/* Raglan Seams */}
+                <path d="M 120 160 Q 140 100 155 20" fill="none" stroke="#000" strokeWidth="2.5" strokeOpacity="0.25" />
+                <path d="M 280 160 Q 260 100 245 20" fill="none" stroke="#000" strokeWidth="2.5" strokeOpacity="0.25" />
 
                 {/* Cuffs */}
-                <path d="M 35 110 L 40 130 L 75 125" fill="none" stroke={secondaryColor} strokeWidth="11" strokeLinecap="round" style={{ filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.5))' }} />
-                <path d="M 365 110 L 360 130 L 325 125" fill="none" stroke={secondaryColor} strokeWidth="11" strokeLinecap="round" style={{ filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.5))' }} />
+                <path d="M 25 110 L 50 140 L 40 147 L 15 117 Z" fill={secondaryColor} opacity="0.85" style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))' }} />
+                <path d="M 375 110 L 350 140 L 360 147 L 385 117 Z" fill={secondaryColor} opacity="0.85" style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))' }} />
 
                 {/* Badge */}
-                <g transform="translate(240, 100) scale(1.6)" style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.6))' }}>
+                <g transform="translate(255, 90) scale(1.6)" style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.6))' }}>
                   {badgeIcon === 'shield' && (
                     <>
                       <path d="M 0 0 L 16 0 L 16 16 L 8 24 L 0 16 Z" fill={secondaryColor} stroke="#FFF" strokeWidth="1.5" />
@@ -270,16 +271,16 @@ export default function JerseyDesignerPage() {
                 </g>
 
                 {/* Collar */}
-                <g style={{ filter: 'drop-shadow(0px 6px 8px rgba(0,0,0,0.7))' }}>
+                <g style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.55))' }}>
                   {collarStyle === 'vneck' ? (
                     <>
-                      <path d="M 160 20 L 200 90 L 240 20 Z" fill={secondaryColor} stroke="#000" strokeWidth="2" strokeOpacity="0.6" />
-                      <path d="M 160 20 L 200 90 L 240 20 Z" fill="none" stroke="#FFF" strokeWidth="0.8" strokeOpacity="0.4" />
+                      <path d="M 155 20 L 200 100 L 245 20 L 225 15 L 200 75 L 175 15 Z" fill={secondaryColor} stroke="#000" strokeWidth="1" strokeOpacity="0.4" />
+                      <path d="M 155 20 L 200 100 L 245 20 L 225 15 L 200 75 L 175 15 Z" fill="none" stroke="#FFF" strokeWidth="0.8" strokeOpacity="0.25" />
                     </>
                   ) : (
                     <>
-                      <path d="M 160 20 Q 200 100 240 20 Z" fill={secondaryColor} stroke="#000" strokeWidth="2" strokeOpacity="0.6" />
-                      <path d="M 160 20 Q 200 100 240 20 Z" fill="none" stroke="#FFF" strokeWidth="0.8" strokeOpacity="0.4" />
+                      <path d="M 155 20 Q 200 80 245 20 L 230 15 Q 200 55 170 15 Z" fill={secondaryColor} stroke="#000" strokeWidth="1" strokeOpacity="0.4" />
+                      <path d="M 155 20 Q 200 80 245 20 L 230 15 Q 200 55 170 15 Z" fill="none" stroke="#FFF" strokeWidth="0.8" strokeOpacity="0.25" />
                     </>
                   )}
                 </g>
