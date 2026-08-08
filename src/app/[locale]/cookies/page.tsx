@@ -7,6 +7,15 @@ export default async function CookiePolicyPage({ params }: { params: Promise<{ l
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Cookies' });
 
+  const sections = [
+    { title: t('sec1Title'), desc: t('sec1Desc') },
+    { title: t('sec2Title'), desc: t('sec2Desc') },
+    { title: t('sec3Title'), desc: t('sec3Desc') },
+    { title: t('sec4Title'), desc: t('sec4Desc') },
+    { title: t('sec5Title'), desc: t('sec5Desc') },
+    { title: t('sec6Title'), desc: t('sec6Desc') },
+  ];
+
   return (
     <div className="flex-1 max-w-4xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-mesh">
       <div className="stadium-glass border-white/10 p-6 md:p-10 rounded-3xl shadow-2xl space-y-8">
@@ -23,25 +32,12 @@ export default async function CookiePolicyPage({ params }: { params: Promise<{ l
         </div>
 
         <div className="prose prose-invert max-w-none text-muted-foreground space-y-6 text-sm md:text-base leading-relaxed font-medium">
-          <section className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-            <h2 className="text-xl font-black text-foreground">{t('sec1Title')}</h2>
-            <p className="text-muted-foreground">{t('sec1Desc')}</p>
-          </section>
-
-          <section className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-            <h2 className="text-xl font-black text-foreground">{t('sec2Title')}</h2>
-            <p className="text-muted-foreground">{t('sec2Desc')}</p>
-          </section>
-
-          <section className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-            <h2 className="text-xl font-black text-foreground">{t('sec3Title')}</h2>
-            <p className="text-muted-foreground">{t('sec3Desc')}</p>
-          </section>
-
-          <section className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-            <h2 className="text-xl font-black text-foreground">{t('sec4Title')}</h2>
-            <p className="text-muted-foreground">{t('sec4Desc')}</p>
-          </section>
+          {sections.map((section, i) => (
+            <section key={i} className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+              <h2 className="text-xl font-black text-foreground">{section.title}</h2>
+              <p className="text-muted-foreground">{section.desc}</p>
+            </section>
+          ))}
         </div>
       </div>
     </div>
