@@ -31,13 +31,33 @@ export const rtdb = getDatabase(
   process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "https://football1fc1-default-rtdb.europe-west1.firebasedatabase.app"
 );
 
-// Initialize Analytics safely on the client side only
+// Initialize Analytics safely on the client side only if user has consented
 let analytics: Analytics | null = null;
-if (typeof window !== "undefined") {
-  isSupported().then((supported) => {
+
+export async function initAnalyticsIfConsented(): Promise<Analytics | null> {
+  if (typeof window === "undefined") return null;
+  if (analytics) return analytics;
+
+  try {
+    const rawConsent = localStorage.getItem("egfootball5_cookie_consent");
+    if (!rawConsent) return null;
+    const parsed = JSON.parse(rawConsent);
+    if (parsed?.analytics !== true) return null;
+
+    const supported = await isSupported();
     if (supported) {
       analytics = getAnalytics(app);
+      return analytics;
     }
-  });
+  } catch (err) {
+    console.error("Failed to initialize consented analytics:", err);
+  }
+  return null;
 }
+
+if (typeof window !== "undefined") {
+  initAnalyticsIfConsented();
+}
+
 export { analytics };
+

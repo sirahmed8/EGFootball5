@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from '@/i18n/routing';
+import { useRouter, Link } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import { doc, onSnapshot, getDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { submitReceipt } from '@/lib/firebase/booking';
 import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
+import QRCode from 'qrcode';
 import {
   MapPin,
   Calendar,
@@ -35,16 +36,45 @@ import imageCompression from 'browser-image-compression';
 import { CountdownTimer } from '@/components/CountdownTimer';
 
 function DynamicMatchQrCode({ value }: { value: string }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+    QRCode.toDataURL(value, {
+      width: 160,
+      margin: 1,
+      color: {
+        dark: '#090d16',
+        light: '#ffffff',
+      },
+    })
+      .then((url) => {
+        if (!isCancelled) setDataUrl(url);
+      })
+      .catch((err) => {
+        console.error('Failed to generate match QR:', err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [value]);
+
   return (
     <div className="w-40 h-40 mx-auto bg-white p-2 rounded-2xl border border-border shadow-inner flex items-center justify-center">
-      <img
-        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(value)}&color=090d16`}
-        alt="Match QR Code"
-        width={150}
-        height={150}
-        className="w-full h-full object-contain"
-        crossOrigin="anonymous"
-      />
+      {dataUrl ? (
+        <img
+          src={dataUrl}
+          alt="Match Admission Pass QR Code"
+          width={150}
+          height={150}
+          className="w-full h-full object-contain"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground font-mono">
+          Generating...
+        </div>
+      )}
     </div>
   );
 }
@@ -60,6 +90,7 @@ function CheckoutForm() {
   const t = useTranslations('Checkout');
   const tBook = useTranslations('Book');
   const tErrors = useTranslations('Errors');
+  const tForm = useTranslations('FormConsent');
   const locale = useLocale();
   const isArabic = locale === 'ar';
 
@@ -71,6 +102,7 @@ function CheckoutForm() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [agreedToSlotPolicy, setAgreedToSlotPolicy] = useState(false);
 
   const [copiedVodafone, setCopiedVodafone] = useState(false);
   const [copiedInstapay, setCopiedInstapay] = useState(false);
@@ -145,6 +177,11 @@ function CheckoutForm() {
 
   const handleUpload = async () => {
     if (!file || !firebaseUser || !bookingId) return;
+
+    if (!agreedToSlotPolicy) {
+      toast.error(tForm('slotHoldNotice'));
+      return;
+    }
 
     setUploading(true);
     setProgress(0);
@@ -446,11 +483,32 @@ function CheckoutForm() {
               </div>
             </CardContent>
 
-            <CardFooter className="p-6 pt-0">
+            <CardFooter className="p-6 pt-0 flex flex-col gap-4">
+              {/* Slot Hold & Refund Policy Consent */}
+              <div className="w-full flex items-start gap-3 p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-muted-foreground leading-relaxed">
+                <input
+                  type="checkbox"
+                  id="slot-hold-consent"
+                  checked={agreedToSlotPolicy}
+                  onChange={(e) => setAgreedToSlotPolicy(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded accent-primary cursor-pointer shrink-0"
+                />
+                <label htmlFor="slot-hold-consent" className="cursor-pointer select-none">
+                  <span>{tForm('slotHoldNotice')} </span>
+                  <Link
+                    href="/refund"
+                    target="_blank"
+                    className="text-primary underline hover:text-primary/80 ltr:ml-1 rtl:mr-1 font-semibold"
+                  >
+                    (Refund Policy)
+                  </Link>
+                </label>
+              </div>
+
               <Button
-                className="w-full bg-primary text-black font-black hover:bg-primary/90 shadow-[0_0_25px_rgba(57,255,20,0.3)] text-lg h-14 rounded-2xl transition-all cursor-pointer"
+                className="w-full bg-primary text-black font-black hover:bg-primary/90 shadow-lg text-lg h-14 rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleUpload}
-                disabled={!file || uploading}
+                disabled={!file || uploading || !agreedToSlotPolicy}
               >
                 {uploading ? t('uploading') : t('submitBtn')}
               </Button>

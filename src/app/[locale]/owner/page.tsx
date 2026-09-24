@@ -102,6 +102,11 @@ export default function OwnerDashboard() {
     }
   };
 
+  // Strict route protection: never render owner settings if unauthenticated or unauthorized
+  if (loading || !appUser || appUser.role !== 'owner') {
+    return <DashboardPageSkeleton />;
+  }
+
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-10 animate-in fade-in duration-500 bg-black">
       <div>

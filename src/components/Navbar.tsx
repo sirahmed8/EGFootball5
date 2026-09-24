@@ -16,7 +16,7 @@ export function Navbar() {
       {/* Brand / Logo */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <Link href="/" className="flex items-center gap-2 font-black text-lg sm:text-xl tracking-tighter text-foreground hover:opacity-90 transition-opacity">
-          <Image src="/favicon.jpg" alt="EGFootball5 Logo" width={32} height={32} className="rounded-full object-cover shadow-md shrink-0" priority={true} />
+          <Image src="/favicon.jpg" alt="EGFootball5 platform emblem" width={32} height={32} className="rounded-xl object-cover shadow-md shrink-0" priority={true} />
           <span className="hidden min-[380px]:inline truncate">EG<span className="text-gradient-primary">Football5</span></span>
         </Link>
       </div>

@@ -77,23 +77,33 @@ Recently, the platform underwent a **1000x comprehensive transformation & featur
 
 ---
 
-## 📡 API Endpoints
+## 📡 API Endpoints & Security Pipeline
 
-- `POST /api/admin/role`: Super-admin endpoint to upgrade/change user roles.
-- `POST /api/ai/chat`: AI Assistant conversational engine supporting streaming responses.
-- `POST /api/ai/tts`: AI Assistant text-to-speech audio synthesis.
+All endpoints are protected by `src/lib/security/apiSecurity.ts` and `src/lib/security/sanitize.ts`:
+- `POST /api/admin/role`: Super-admin endpoint to upgrade/change user roles. Enforces UID/IP rate limits, origin validation, and sanitized inputs.
+- `POST /api/ai/chat`: AI Assistant conversational engine. Internal server proxy isolating AI keys from client bundles; rate-limited and sanitized.
+- `POST /api/ai/tts`: AI Assistant text-to-speech audio synthesis with origin checks and payload sanitization.
+
+---
+
+## 🛡️ Security & Legal Compliance Architecture
+
+- **Egyptian Personal Data Protection Law (Law No. 151 of 2020)**: Analytics tracking gated strictly behind prior user consent; zero advertising or cross-site tracking; interactive `CookieConsentBanner` and persistent preferences modal.
+- **Egyptian Consumer Protection Law (Law No. 181 of 2018)**: Clear, legally binding Refund & Cancellation Policy; elimination of unverified superlative claims and mock reviews; explicit checkbox consent before account creation and booking submissions.
+- **Private In-App QR Generation**: Match admission passes generated purely client-side via `qrcode`, eliminating third-party QR server token leakage.
+- **Corporate Entity**: EGFootball Sports Tech LLC (CR: 194820, Tax ID: 712-492-301, Obour City, Egypt).
 
 ---
 
 ## 🗺️ Complete 18-Step Page & Route Map
 
 1. `/[locale]/` — Landing Page (Hero, Stats, Featured Stadiums, Live Slots Marquee, AI Chat Widget)
-2. `/[locale]/login` — Authentication Portal (Google SSO / Email / Password)
+2. `/[locale]/login` — Authentication Portal (Google SSO / Email / Password) with explicit Terms/Privacy/Refund consent
 3. `/[locale]/onboarding` — Interactive 4-Step Player Setup Wizard
 4. `/[locale]/communities` — Football Squads & Local Clubs Hub
 5. `/[locale]/home` — Pitch Discovery & Stadium Weather Tracker
 6. `/[locale]/book` — Slot Selection Matrix & Hold Timer
-7. `/[locale]/checkout` — Payment Receipt Upload, Deposit Verification & QR Pass
+7. `/[locale]/checkout` — Payment Receipt Upload, In-App Private QR Pass & Slot Hold Consent
 8. `/[locale]/matches` — Public Match Lobbies & 5-a-Side Tactical Board
 9. `/[locale]/leaderboard` — 3D Podium Hall of Fame & Monthly Awards
 10. `/[locale]/community-chat` — Live Real-time Regional Chatroom Channels
@@ -110,3 +120,4 @@ Recently, the platform underwent a **1000x comprehensive transformation & featur
 21. `/[locale]/terms` — Terms of Service
 22. `/[locale]/privacy` — Privacy Policy
 23. `/[locale]/cookies` — Cookie Policy
+24. `/[locale]/refund` — Refund & Cancellation Policy (Law No. 181 of 2018)

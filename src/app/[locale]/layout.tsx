@@ -10,6 +10,7 @@ import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { ClientChatWidget } from '@/components/ClientChatWidget';
+import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 import { MainContainer } from '@/components/MainContainer';
 import { NextIntlClientProvider } from 'next-intl';
 
@@ -103,6 +104,7 @@ export default async function RootLayout({
 
                 <Toaster />
                 <ClientChatWidget />
+                <CookieConsentBanner />
               </AuthProvider>
             </ThemeProvider>
           </ReactQueryProvider>

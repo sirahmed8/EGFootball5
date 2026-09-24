@@ -125,86 +125,26 @@ CRITICAL LANGUAGE RULE:
 - Never mix languages. Always match the user's language exactly.
 
 Core Platform Info:
-- Platform: EGFootball5 — 5-a-side pitch booking & public matches.
-- Locations: Obour City (9th District, Youth Hub) & New Cairo (5th Settlement, Rehab).
-- Booking: Pick pitch → Select date & time → 15-min slot lock (20 min for VIP) → Pay deposit via Vodafone Cash (01012345678) or InstaPay (egfootball5@instapay) → Instant QR pass.
+- Platform: EGFootball5: 5-a-side pitch booking and public matches.
+- Locations: Obour City (9th District, Youth Hub) and New Cairo (5th Settlement, Rehab).
+- Booking: Pick pitch -> Select date and time -> 15-min slot lock (20 min for VIP) -> Pay deposit via Vodafone Cash (01012345678) or InstaPay (egfootball5@instapay) -> Instant QR pass.
 - Public Matches: Join open 5v5 lobbies, choose position (GK, DEF, MID, STR), split turf cost.
-- VIP Pass: 10% automatic discount on all bookings + gold crown badge.
-- Pricing: Pitches 250–450 EGP/hr.
+- VIP Pass: 10% automatic discount on all bookings + gold badge.
+- Pricing: Pitches 250 to 450 EGP/hr.
 
 ${options?.systemContext ? `User Info: ${options.systemContext}` : ''}
 
 After your response, always output exactly 3 short follow-up prompt chips:
 CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
 
-  // === PRIMARY: OpenRouter → Google Gemini 2.5 Flash ===
-  const openRouterKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || '';
-
-  if (openRouterKey) {
-    const models = [
-      'google/gemini-2.5-flash',
-      'meta-llama/llama-3.3-70b-instruct',
-    ];
-
-    for (const model of models) {
-      try {
-        const content = options?.imageBase64
-          ? [
-              { type: 'text', text: sanitizedPrompt },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: options.imageBase64.startsWith('data:')
-                    ? options.imageBase64
-                    : `data:image/jpeg;base64,${options.imageBase64}`,
-                },
-              },
-            ]
-          : sanitizedPrompt;
-
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${openRouterKey}`,
-            'HTTP-Referer': 'https://egfootball5.web.app',
-            'X-Title': 'EGFootball5',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: systemInstruction },
-              { role: 'user', content },
-            ],
-            temperature: 0.4,
-            max_tokens: 512,
-          }),
-        });
-
-        if (!res.ok) continue;
-
-        const json = await res.json();
-        const rawText = json?.choices?.[0]?.message?.content;
-        if (!rawText || typeof rawText !== 'string') continue;
-
-        const { cleanText, chips } = extractChips(rawText, isArabic);
-        const tokens = json?.usage?.total_tokens || Math.ceil((sanitizedPrompt.length + cleanText.length) / 4);
-
-        await logAiUsage(uid, sanitizedPrompt, `openrouter/${model}`, tokens);
-
-        const result: AIResponseResult = { text: cleanText, chips, modelUsed: `google-gemini/${model}` };
-        memoryCache.set(cacheKey, { timestamp: Date.now(), data: result });
-        return result;
-      } catch (err) {
-        console.warn(`OpenRouter model ${model} failed:`, err);
-      }
-    }
-  }
-
-  // === FALLBACK: Server API Route (works on Vercel with server functions) ===
+  // === SECURE SERVER ROUTE: Route via protected Next.js API endpoint with auth & rate limits ===
   try {
     let token: string | undefined;
-    try { token = await getAuth().currentUser?.getIdToken(); } catch { /* guest */ }
+    try {
+      token = await getAuth().currentUser?.getIdToken();
+    } catch {
+      /* guest session */
+    }
 
     const response = await fetch('/api/ai/chat', {
       method: 'POST',
@@ -234,8 +174,9 @@ CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
       }
     }
   } catch (err) {
-    console.warn('Server AI route failed:', err);
+    console.warn('Server AI route unavailable:', err);
   }
+
 
   // === LAST RESORT FALLBACK: Intelligent context-aware answers for platform queries ===
   const pLower = sanitizedPrompt.toLowerCase();
@@ -254,8 +195,8 @@ CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
       : 'Browse active lobbies on "Matches" page, choose your preferred position (GK, DEF, MID, STR), and join to split pitch costs with your teammates!';
   } else if (pLower.includes('vip') || pLower.includes('اشتراك') || pLower.includes('ممتاز') || pLower.includes('subscription')) {
     fallbackText = isArabic
-      ? 'عضوية Pitch Pass VIP تمنحك خصماً تلقائياً 10% على كل الحجوزات، تاج ذهبي في البروفايل، تمديد مهلة الحجز لـ 20 دقيقة، ودخول مجاني لبطولات المجتمع!'
-      : 'Pitch Pass VIP gives you automatic 10% off all pitch bookings, golden profile crown badge, 20-min deposit lock extension, and free tournament entry passes!';
+      ? 'عضوية Pitch Pass VIP تمنحك خصماً تلقائياً 10% على كل الحجوزات، شارة ذهبية في البروفايل، تمديد مهلة الحجز لـ 20 دقيقة، ودخول مجاني لبطولات المجتمع!'
+      : 'Pitch Pass VIP gives you automatic 10% off all pitch bookings, gold profile badge, 20-min deposit lock extension, and free tournament entry passes!';
   } else if (pLower.includes('سعر') || pLower.includes('اسعار') || pLower.includes('price') || pLower.includes('cost')) {
     fallbackText = isArabic
       ? 'أسعار حجز الملاعب تترواح بين 250 إلى 450 جنيه مصري/ساعة حسب الوقت والملعب (نجيل صناعي ممتاز / إضاءة ليلي عالية الجودة).'
@@ -265,8 +206,9 @@ CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
   return {
     text: fallbackText,
     chips: isArabic
-      ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '👑 مزايا اشتراك VIP']
-      : ['⚽ How to book a pitch?', '🏆 Available matches', '👑 VIP Pass Perks'],
+      ? ['كيف أحجز ملعباً؟', 'المباريات المتاحة', 'مزايا اشتراك VIP']
+      : ['How to book a pitch?', 'Available matches', 'VIP Pass Perks'],
     modelUsed: 'offline-smart-fallback',
   };
 }
+

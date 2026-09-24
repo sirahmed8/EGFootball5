@@ -29,7 +29,7 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="text-start space-y-1.5">
-          <span className="inline-flex items-center gap-1.5 text-xs font-black text-primary uppercase tracking-wider bg-primary/10 px-3.5 py-1.5 rounded-full border border-primary/30">
+          <span className="inline-flex items-center gap-1.5 text-xs font-black text-primary uppercase tracking-wider bg-primary/10 px-3.5 py-1.5 rounded-xl border border-primary/30">
             <Zap className="w-3.5 h-3.5 text-primary" />
             {isArabic ? 'الملاعب المتاحة' : 'Featured Stadiums'}
           </span>
@@ -38,7 +38,7 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
           </h3>
         </div>
         <Link href="/home">
-          <Button variant="outline" className="border-primary/40 text-primary hover:bg-primary/10 font-bold rounded-2xl gap-2 cursor-pointer">
+          <Button variant="outline" className="border-primary/40 text-primary hover:bg-primary/10 font-bold rounded-xl gap-2 cursor-pointer">
             {isArabic ? 'تصفح كل الملاعب' : 'View All Pitches'}
             <ArrowRight className="w-4 h-4 rtl:rotate-180" />
           </Button>
@@ -83,13 +83,10 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-black/40" />
 
                 {/* Rating badge */}
-                {stadium.rating && (
-                  <div className="absolute top-3 end-3 bg-background/90 text-amber-400 font-black text-xs px-3.5 py-1.5 rounded-full border border-amber-500/40 flex items-center gap-1.5 shadow-md backdrop-blur-md">
+                {stadium.rating && stadium.rating > 0 && (
+                  <div className="absolute top-3 end-3 bg-background/90 text-amber-400 font-black text-xs px-3 py-1.5 rounded-xl border border-amber-500/40 flex items-center gap-1.5 shadow-md backdrop-blur-md">
                     <Star className="w-3.5 h-3.5 fill-amber-400" />
                     <span>{stadium.rating}</span>
-                    {stadium.reviewsCount && (
-                      <span className="text-muted-foreground text-[10px]">({stadium.reviewsCount})</span>
-                    )}
                   </div>
                 )}
               </div>
@@ -108,7 +105,7 @@ export function FeaturedStadiums({ isArabic }: { isArabic: boolean }) {
 
                   <div className="flex flex-wrap gap-2 pt-1">
                     <span className="global-badge">
-                      ⚽ {stadium.capacity || '5v5'} {stadium.surfaceType || (isArabic ? 'نجيل صناعي' : 'Turf')}
+                      {stadium.capacity || '5v5'} {stadium.surfaceType || (isArabic ? 'نجيل صناعي' : 'Turf')}
                     </span>
                     <span className="global-badge text-primary border-primary/30 bg-primary/10">
                       <ShieldCheck className="w-3.5 h-3.5 text-primary" />

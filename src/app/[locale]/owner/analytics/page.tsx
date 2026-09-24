@@ -171,6 +171,11 @@ export default function MasterAnalyticsPage() {
     { id: 'ai', label: isArabic ? 'استخدام AI' : 'AI Usage' },
   ] as const;
 
+  // Strict route protection: never render owner analytics if unauthenticated or unauthorized
+  if (loading || !appUser || appUser.role !== 'owner' || bL || pL || uL) {
+    return <DashboardPageSkeleton />;
+  }
+
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-black" dir={isArabic ? 'rtl' : 'ltr'}>
 

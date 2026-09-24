@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Share2, Copy, Check, Users, DollarSign, QrCode } from 'lucide-react';
+import { Share2, Copy, Check, Users, DollarSign, QrCode, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -25,7 +25,7 @@ export function SplitPaymentModal({ totalAmount, numPlayers, isOpen, onClose }: 
   const handleCopy = () => {
     navigator.clipboard.writeText(`Hey team! Here is our 5-a-side match payment link. Pay your ${costPerPerson} EGP share here: ${shareUrl}`);
     setCopied(true);
-    toast.success('Split payment link copied to clipboard! 📲');
+    toast.success('Split payment link copied to clipboard!');
     setTimeout(() => setCopied(false), 2500);
   };
 
@@ -35,9 +35,16 @@ export function SplitPaymentModal({ totalAmount, numPlayers, isOpen, onClose }: 
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md global-box global-outline-glow rounded-3xl p-6 md:p-8 space-y-5 shadow-2xl relative">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h2 className="text-xl font-black text-foreground flex items-center gap-2">
-            <span>💸</span> Split Payment Link
+            <DollarSign className="w-5 h-5 text-primary" />
+            <span>Split Payment Link</span>
           </h2>
-          <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground font-bold">✕ Close</button>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-center space-y-1">

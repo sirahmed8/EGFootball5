@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/auth/serverAuth';
+import {
+  validateOriginAndCors,
+  handleCorsPreflight,
+  checkRateLimit,
+  getClientIp,
+} from '@/lib/security/apiSecurity';
+import { sanitizeText } from '@/lib/security/sanitize';
+
+export async function OPTIONS(req: NextRequest) {
+  return handleCorsPreflight(req);
+}
 
 // Google Gemini 2.5 Flash as Primary Model via OpenRouter API
 const OPENROUTER_MODELS = [
@@ -40,14 +51,14 @@ function extractChips(text: string, isArabic = false): { cleanText: string; chip
   if (chips.length < 3) {
     const defaultChipsPool = isArabic
       ? [
-          '⚽ كيف أحجز ملعباً بالعبور؟',
-          '🏆 تصفح المباريات العامة المتاحة',
-          '💰 طرق دفع العربون وإنستاباي',
+          'كيف أحجز ملعباً بالعبور؟',
+          'تصفح المباريات العامة المتاحة',
+          'طرق دفع العربون وإنستاباي',
         ]
       : [
-          '⚽ How to book a pitch in Obour?',
-          '🏆 Show available public matches',
-          '💰 Payment & InstaPay deposit info',
+          'How to book a pitch in Obour?',
+          'Show available public matches',
+          'Payment and InstaPay deposit info',
         ];
     for (const chip of defaultChipsPool) {
       if (chips.length >= 3) break;
@@ -131,21 +142,49 @@ async function callOpenRouterAI(
 }
 
 export async function POST(req: NextRequest) {
+  const { isAllowed, corsHeaders } = validateOriginAndCors(req);
+  if (!isAllowed) {
+    return NextResponse.json({ error: 'Forbidden: Origin not allowed' }, { status: 403, headers: corsHeaders });
+  }
+
+  // Rate limit by IP
+  const clientIp = getClientIp(req);
+  const ipLimit = checkRateLimit(`ai-chat-ip:${clientIp}`, 20, 60 * 1000);
+  if (!ipLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait a moment.' },
+      { status: 429, headers: corsHeaders }
+    );
+  }
+
   try {
     const auth = await verifyAuthToken(req);
     const userId = auth?.uid || 'guest';
 
-    const openRouterApiKey = process.env.OPENROUTER_API_KEY || '';
-    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
-
-    const body = await req.json().catch(() => ({}));
-    const { prompt, imageBase64, mimeType, systemContext, locale } = body;
-
-    if (!prompt || typeof prompt !== 'string') {
-      return NextResponse.json({ error: 'Missing prompt parameter' }, { status: 400 });
+    if (userId !== 'guest') {
+      const userLimit = checkRateLimit(`ai-chat-uid:${userId}`, 15, 60 * 1000);
+      if (!userLimit.allowed) {
+        return NextResponse.json(
+          { error: 'Rate limit exceeded. Please wait a moment.' },
+          { status: 429, headers: corsHeaders }
+        );
+      }
     }
 
+    const openRouterApiKey = process.env.OPENROUTER_API_KEY || '';
+    const apiKey = process.env.GEMINI_API_KEY || '';
+
+    const body = await req.json().catch(() => ({}));
+    const rawPrompt = body?.prompt;
+    const { imageBase64, mimeType, systemContext, locale } = body;
+
+    if (!rawPrompt || typeof rawPrompt !== 'string') {
+      return NextResponse.json({ error: 'Missing prompt parameter' }, { status: 400, headers: corsHeaders });
+    }
+
+    const prompt = sanitizeText(rawPrompt, 1000);
     const isArabic = detectIsArabic(prompt, locale);
+
 
     const systemInstruction = `You are EGFootball5 AI Assistant (مساعد EGFootball5 الذكي), an expert 5-a-side football platform assistant powered by Google Gemini AI in Egypt.
 Be enthusiastic, accurate, concise, helpful, and natural.
@@ -208,12 +247,15 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
           const estTokens = json?.usageMetadata?.totalTokens || Math.max(25, Math.ceil((prompt.length + cleanText.length) / 3.8));
           await logAiUsageToFirestore(userId, prompt, `google-gemini/${model}`, estTokens);
 
-          return NextResponse.json({
-            success: true,
-            text: cleanText,
-            chips,
-            modelUsed: `google-gemini/${model}`,
-          });
+          return NextResponse.json(
+            {
+              success: true,
+              text: cleanText,
+              chips,
+              modelUsed: `google-gemini/${model}`,
+            },
+            { status: 200, headers: corsHeaders }
+          );
         } catch {
           // Fall through to OpenRouter Gemini
         }
@@ -233,21 +275,26 @@ CHIPS: ["Option 1", "Option 2", "Option 3"]`;
         const estTokens = Math.max(25, Math.ceil((prompt.length + cleanText.length) / 3.8));
         await logAiUsageToFirestore(userId, prompt, openRouterResult.modelUsed, estTokens);
 
-        return NextResponse.json({
-          success: true,
-          text: cleanText,
-          chips,
-          modelUsed: openRouterResult.modelUsed,
-        });
+        return NextResponse.json(
+          {
+            success: true,
+            text: cleanText,
+            chips,
+            modelUsed: openRouterResult.modelUsed,
+          },
+          { status: 200, headers: corsHeaders }
+        );
       }
     }
 
-    return NextResponse.json({
-      error: 'AI Generation Failed',
-    }, { status: 500 });
+    return NextResponse.json(
+      { error: 'AI Generation Failed' },
+      { status: 500, headers: corsHeaders }
+    );
   } catch (error: unknown) {
-    return NextResponse.json({
-      error: 'Server Error',
-    }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Server Error' },
+      { status: 500, headers: corsHeaders }
+    );
   }
 }

@@ -1,22 +1,39 @@
+'use client';
+
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { Trophy, ExternalLink } from 'lucide-react';
+import { ExternalLink, Cookie } from 'lucide-react';
 
 export function Footer() {
   const t = useTranslations('Footer');
+
+  const openCookiePreferences = () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('egfootball:open-cookie-preferences'));
+    }
+  };
 
   return (
     <footer className="w-full pt-12 pb-24 md:pb-12 mt-auto border-t border-white/10 stadium-glass relative z-10">
       <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <Image src="/favicon.jpg" alt="Logo" width={36} height={36} className="rounded-full object-cover shadow-md" priority />
+            <Image
+              src="/favicon.jpg"
+              alt="EGFootball5 platform emblem"
+              width={36}
+              height={36}
+              className="rounded-xl object-cover shadow-md"
+              priority
+            />
             <div>
               <span className="font-extrabold text-xl tracking-tight text-foreground block">
                 EG<span className="text-gradient-primary">Football5</span>
               </span>
-              <span className="text-xs text-muted-foreground font-medium">Egypt Premier Football Booking & Match Lobby Platform</span>
+              <span className="text-xs text-muted-foreground font-medium">
+                Egypt Premier Football Booking & Match Lobby Platform
+              </span>
             </div>
           </div>
 
@@ -24,11 +41,16 @@ export function Footer() {
             href="https://linktr.ee/sir.ahmed" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-black hover:bg-primary/20 transition-all hover:scale-105 shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 border border-primary/30 text-primary text-xs font-bold hover:bg-primary/20 transition-all shadow-sm"
           >
             <span>{t('connectDeveloper')}</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
+        </div>
+
+        {/* Corporate Legal Registration Information */}
+        <div className="text-center md:text-start text-xs text-muted-foreground/80 font-mono border-b border-white/5 pb-4">
+          <p>{t('businessDetails')}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground font-medium">
@@ -37,7 +59,18 @@ export function Footer() {
             <span className="opacity-30">•</span>
             <Link href="/terms" className="hover:text-primary transition-colors">{t('termsOfService')}</Link>
             <span className="opacity-30">•</span>
+            <Link href="/refund" className="hover:text-primary transition-colors">{t('refundPolicy')}</Link>
+            <span className="opacity-30">•</span>
             <Link href="/cookies" className="hover:text-primary transition-colors">{t('cookiePolicy')}</Link>
+            <span className="opacity-30">•</span>
+            <button
+              type="button"
+              onClick={openCookiePreferences}
+              className="hover:text-primary transition-colors inline-flex items-center gap-1 cursor-pointer"
+            >
+              <Cookie className="w-3.5 h-3.5 text-primary" />
+              <span>{t('cookiePreferences')}</span>
+            </button>
           </div>
 
           <div className="text-center sm:text-end text-muted-foreground font-mono">
@@ -48,3 +81,4 @@ export function Footer() {
     </footer>
   );
 }
+

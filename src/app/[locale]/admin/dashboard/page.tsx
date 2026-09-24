@@ -204,6 +204,11 @@ export default function AdminDashboard() {
   const uniquePlayerIds = Array.from(new Set(bookings.map(b => b.userId)));
   const uniquePlayers = uniquePlayerIds.map(id => usersCache[id]).filter(Boolean);
 
+  // Strict route protection: never render admin UI if unauthenticated or unauthorized
+  if (loading || !appUser || (appUser.role !== 'admin' && appUser.role !== 'owner')) {
+    return <DashboardPageSkeleton />;
+  }
+
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 mt-6 animate-in fade-in zoom-in-95 duration-500 bg-mesh">
       <div>

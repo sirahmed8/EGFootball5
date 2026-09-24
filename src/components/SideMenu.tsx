@@ -136,12 +136,12 @@ function SidebarContent({ onClose, isMobile }: { onClose?: () => void; isMobile:
       {isMobile && (
         <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 shrink-0 bg-black">
           <div className="flex items-center gap-2 font-black text-base tracking-tight text-foreground">
-            <Image src="/favicon.jpg" alt="Logo" width={28} height={28} className="rounded-full object-cover shadow-md shrink-0" priority={true} />
+            <Image src="/favicon.jpg" alt="EGFootball5 platform emblem" width={28} height={28} className="rounded-xl object-cover shadow-md shrink-0" priority={true} />
             <span className="truncate">EG<span className="text-gradient-primary">Football5</span></span>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-foreground transition-colors cursor-pointer shrink-0"
+            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-foreground transition-colors cursor-pointer shrink-0"
             aria-label="Close menu"
           >
             <X size={20} />

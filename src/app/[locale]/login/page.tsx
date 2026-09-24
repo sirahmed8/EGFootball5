@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
-import { useRouter } from '@/i18n/routing';
+import { useEffect, useCallback, useState } from 'react';
+import { useRouter, Link } from '@/i18n/routing';
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -17,11 +17,13 @@ import { toast } from 'sonner';
 import { User as AppUser } from '@/types';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Zap, Trophy, MapPin } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
   const t = useTranslations('Login');
+  const tForm = useTranslations('FormConsent');
+  const [agreedToLegal, setAgreedToLegal] = useState(false);
 
   const processUserSignIn = useCallback(async (user: FirebaseUser) => {
     const userRef = doc(db, 'users', user.uid);
@@ -115,6 +117,11 @@ export default function LoginPage() {
   }, [processUserSignIn]);
 
   const handleGoogleSignIn = async () => {
+    if (!agreedToLegal) {
+      toast.error(tForm('agreeRequired'));
+      return;
+    }
+
     const provider = new GoogleAuthProvider();
     try {
       const { user } = await signInWithPopup(auth, provider);
@@ -177,10 +184,10 @@ export default function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 20 }}
-              className="mx-auto w-24 h-24 bg-primary/10 border border-primary/20 rounded-3xl flex items-center justify-center shadow-lg shadow-primary/20 glow-primary group hover:scale-110 transition-transform duration-300"
+              className="mx-auto w-20 h-20 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 glow-primary group hover:scale-105 transition-transform duration-300"
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-primary-foreground font-black text-2xl shadow-inner">
-                ⚽
+              <div className="w-12 h-12 rounded-xl bg-primary text-black flex items-center justify-center shadow-inner">
+                <Trophy className="w-6 h-6 text-black" />
               </div>
             </motion.div>
             
@@ -194,25 +201,46 @@ export default function LoginPage() {
             </div>
           </CardHeader>
 
-          <CardContent className="flex flex-col gap-8 p-6 md:p-10">
+          <CardContent className="flex flex-col gap-6 p-6 md:px-10 md:pb-10">
             {/* Features Pills */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: '🏟️', label: 'Top Pitches' },
-                { icon: '⚡', label: 'Instant Lock' },
-                { icon: '🏆', label: 'Matches' }
+                { icon: <MapPin className="w-5 h-5 text-primary" />, label: 'Top Pitches' },
+                { icon: <Zap className="w-5 h-5 text-amber-400" />, label: 'Instant Lock' },
+                { icon: <Trophy className="w-5 h-5 text-primary" />, label: 'Matches' }
               ].map((feat, idx) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + idx * 0.1 }}
-                  className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white/5 border border-white/10 text-center hover:bg-white/10 transition-colors"
+                  className="flex flex-col items-center justify-center p-3.5 rounded-xl bg-white/5 border border-white/10 text-center hover:bg-white/10 transition-colors"
                 >
-                  <span className="text-xl mb-1">{feat.icon}</span>
+                  <span className="mb-1.5">{feat.icon}</span>
                   <span className="text-[10px] sm:text-xs font-bold text-foreground/90 uppercase tracking-wider">{feat.label}</span>
                 </motion.div>
               ))}
+            </div>
+
+            {/* Explicit Form Consent Checkbox */}
+            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-muted-foreground leading-relaxed">
+              <input
+                type="checkbox"
+                id="legal-consent"
+                checked={agreedToLegal}
+                onChange={(e) => setAgreedToLegal(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded accent-primary cursor-pointer shrink-0"
+              />
+              <label htmlFor="legal-consent" className="cursor-pointer select-none">
+                <span>{tForm('agreeTermsPrivacyRefund')} </span>
+                <span className="block mt-1 space-x-2 rtl:space-x-reverse font-semibold">
+                  <Link href="/terms" className="text-primary underline hover:text-primary/80">Terms</Link>
+                  <span>•</span>
+                  <Link href="/privacy" className="text-primary underline hover:text-primary/80">Privacy</Link>
+                  <span>•</span>
+                  <Link href="/refund" className="text-primary underline hover:text-primary/80">Refund</Link>
+                </span>
+              </label>
             </div>
 
             <motion.div
@@ -224,9 +252,9 @@ export default function LoginPage() {
                 type="button"
                 size="lg"
                 onClick={handleGoogleSignIn}
-                className="w-full bg-primary text-black hover:bg-primary/90 font-black shadow-xl glow-primary transition-all duration-300 text-lg h-16 rounded-2xl flex items-center justify-center gap-4 cursor-pointer"
+                className="w-full bg-primary text-black hover:bg-primary/90 font-black shadow-xl glow-primary transition-all duration-300 text-lg h-14 rounded-xl flex items-center justify-center gap-3 cursor-pointer"
               >
-                <svg className="w-6 h-6" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -248,10 +276,6 @@ export default function LoginPage() {
                 <ArrowRight className="w-5 h-5 opacity-50" />
               </Button>
             </motion.div>
-
-            <p className="text-center text-xs font-medium text-muted-foreground leading-relaxed px-4">
-              By continuing, you agree to EGFootball5 Platform <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
-            </p>
           </CardContent>
         </Card>
       </motion.div>

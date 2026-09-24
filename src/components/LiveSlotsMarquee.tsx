@@ -88,8 +88,10 @@ export function LiveSlotsMarquee() {
         </span>
         {[...openSlots, ...openSlots].map((slot, idx) => (
           <span key={idx} className="flex items-center gap-3 shrink-0">
-            <span className="bg-white/5 hover:bg-white/10 px-3.5 py-1 rounded-full border border-white/10 hover:border-primary/40 text-foreground shadow-sm transition-all duration-200 hover:scale-[1.03] cursor-pointer">
-              ⚽ {slot.pitchName} — <strong className="text-primary font-mono">{slot.slotTime}</strong> ({t('open')})
+            <span className="bg-white/5 hover:bg-white/10 px-3.5 py-1 rounded-xl border border-white/10 hover:border-primary/40 text-foreground shadow-sm transition-all duration-200 hover:scale-[1.02] cursor-pointer inline-flex items-center gap-1.5">
+              <span className="text-foreground font-semibold">{slot.pitchName}:</span>
+              <strong className="text-primary font-mono">{slot.slotTime}</strong>
+              <span className="text-muted-foreground text-[10px]">({t('open')})</span>
             </span>
             {idx < (openSlots.length * 2) - 1 && <span className="opacity-30">•</span>}
           </span>
