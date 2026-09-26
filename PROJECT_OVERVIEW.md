@@ -121,3 +121,11 @@ All endpoints are protected by `src/lib/security/apiSecurity.ts` and `src/lib/se
 22. `/[locale]/privacy` — Privacy Policy
 23. `/[locale]/cookies` — Cookie Policy
 24. `/[locale]/refund` — Refund & Cancellation Policy (Law No. 181 of 2018)
+
+---
+
+## 🖥️ Desktop Development & Web App Shortcuts
+- **`EGFootball5.lnk` / `launch_egfootball.vbs`**: One-click silent Windows launcher on the Desktop with the platform icon. Checks if dev server is active; if not, starts `npm run dev` invisibly and opens the default browser immediately upon readiness.
+- **`Stop EGFootball5.lnk` / `stop_egfootball.vbs`**: Graceful dev server shutdown utility terminating processes on ports 3000-3002 with an auto-closing status notification.
+- **`public/app-icon.ico`**: 6-layer high-resolution Windows icon derived from `public/favicon.jpg`.
+
