@@ -121,6 +121,10 @@ All endpoints are protected by `src/lib/security/apiSecurity.ts` and `src/lib/se
 22. `/[locale]/privacy` — Privacy Policy
 23. `/[locale]/cookies` — Cookie Policy
 24. `/[locale]/refund` — Refund & Cancellation Policy (Law No. 181 of 2018)
+25. `/[locale]/not-found` & `/not-found` — Bespoke branded 404 Out-of-Bounds page with recovery navigation
+26. `/[locale]/error` — Runtime Error Boundary with inline retry trigger and support desk routing
+27. `/api/health` — Static health monitoring and environment verification telemetry
+28. `/robots.txt` & `/sitemap.xml` — Technical SEO crawling directives and bilingual hreflang index
 
 ---
 

@@ -1,0 +1,12 @@
+# EGFootball5 Robots Policy
+User-agent: *
+Allow: /
+Allow: /ar/
+Allow: /en/
+Disallow: /ar/admin/
+Disallow: /en/admin/
+Disallow: /ar/owner/
+Disallow: /en/owner/
+Disallow: /api/
+
+Sitemap: https://egfootball5.web.app/sitemap.xml

@@ -35,11 +35,18 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const isArabic = locale === 'ar';
   
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://egfootball5.web.app'),
     title: t('title') || (isArabic ? 'EGFootball5 - حجز ملاعب خماسي بالعبور' : 'EGFootball5 - Pitch Booking Platform'),
-    description: t('description') || (isArabic ? 'المنصة الأولى لحجز ملاعب الخماسي والمباريات العامة بمدينة العبور' : 'The #1 5-a-side football booking platform in Obour City'),
+    description: t('description') || (isArabic ? 'منصة حجز ملاعب الخماسي والمباريات العامة بمدينة العبور' : 'Premier 5-a-side football pitch booking and match lobbies in Obour City'),
     manifest: '/manifest.json',
     icons: { icon: '/favicon.jpg' },
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        'ar-EG': '/ar',
+        'en-US': '/en',
+      },
+    },
     openGraph: {
       title: 'EGFootball5 - 5-a-side Football Booking',
       description: 'Book turf pitches, organize public matches, and lock slots seamlessly in Obour City.',
@@ -49,7 +56,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
           url: '/favicon.jpg',
           width: 512,
           height: 512,
-          alt: 'EGFootball5 Logo',
+          alt: 'EGFootball5 Platform Emblem',
         },
       ],
       locale: locale === 'ar' ? 'ar_EG' : 'en_US',
@@ -58,7 +65,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     twitter: {
       card: 'summary',
       title: 'EGFootball5 - Pitch Booking',
-      description: 'The ultimate 5-a-side football platform in Obour City.',
+      description: '5-a-side football platform in Obour City.',
       images: ['/favicon.jpg'],
     },
   };
@@ -85,9 +92,34 @@ export default async function RootLayout({
   const isRTL = locale === 'ar';
   const activeFontClass = isRTL ? cairo.className : geistSans.className;
   const fontVariables = `${geistSans.variable} ${cairo.variable}`;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SportsActivityLocation',
+    name: 'EGFootball5',
+    alternateName: 'Kickoff',
+    description: isRTL
+      ? 'منصة حجز ملاعب الخماسي والمباريات العامة بمدينة العبور'
+      : '5-a-side football pitch booking platform and match lobbies in Obour City, Egypt',
+    url: 'https://egfootball5.web.app',
+    logo: 'https://egfootball5.web.app/favicon.jpg',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Building 14, Youth Avenue, 9th District',
+      addressLocality: 'Obour City',
+      addressRegion: 'Qalyubia',
+      addressCountry: 'EG',
+    },
+    priceRange: 'EGP 300 - EGP 600',
+  };
 
   return (
     <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning className="bg-background text-foreground dark" style={{ backgroundColor: '#0b0f17' }}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`${fontVariables} ${activeFontClass} antialiased bg-background text-foreground min-h-screen`}>
         <NextIntlClientProvider messages={messages}>
           <ReactQueryProvider>
