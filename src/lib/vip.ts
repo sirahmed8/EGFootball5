@@ -1,9 +1,26 @@
 import { User as AppUser } from '@/types';
+import {
+  getUserSubscriptionTier,
+  calculateSubscriptionDiscount,
+  getReservationLockMinutes,
+  canAccessUnlimitedAiCoach,
+  canCreatePrivateMatchLobby,
+  hasFreeTournamentVoucher,
+  getUserBadgeType,
+} from '@/lib/subscription/featureGating';
+
+export {
+  getUserSubscriptionTier,
+  calculateSubscriptionDiscount,
+  getReservationLockMinutes,
+  canAccessUnlimitedAiCoach,
+  canCreatePrivateMatchLobby,
+  hasFreeTournamentVoucher,
+  getUserBadgeType,
+};
 
 /**
- * Checks if a user has active VIP access.
- * Owner and Admin roles AUTOMATICALLY have full VIP access.
- * Regular users must have isVip: true (and not expired if vipExpiry is set).
+ * Checks if a user has active VIP access (Pro or VIP tier, or Owner/Admin).
  */
 export function isUserVip(appUser: AppUser | null | undefined): boolean {
   if (!appUser) return false;
@@ -13,24 +30,25 @@ export function isUserVip(appUser: AppUser | null | undefined): boolean {
 }
 
 /**
- * Calculate VIP discounted booking price based on VIP tier (10% for VIP, 5% for Pro).
+ * Calculate VIP discounted booking price based on tier (10% for VIP, 5% for Pro).
  */
-export function calculateVipPrice(originalPrice: number, appUser: AppUser | null | undefined): { finalPrice: number; discountAmount: number } {
-  if (!isUserVip(appUser) || originalPrice <= 0) {
-    return { finalPrice: originalPrice, discountAmount: 0 };
-  }
-  
-  // Default to 10% for owner/admin/VIP, 5% for Pro Pass
-  const discountRate = appUser?.vipTier === 'Pro Pass' ? 0.05 : 0.10;
-  
-  const discountAmount = Math.round(originalPrice * discountRate);
-  const finalPrice = Math.max(0, originalPrice - discountAmount);
-  return { finalPrice, discountAmount };
+export function calculateVipPrice(
+  originalPrice: number,
+  appUser: AppUser | null | undefined
+): { finalPrice: number; discountAmount: number } {
+  const result = calculateSubscriptionDiscount(originalPrice, appUser);
+  return {
+    finalPrice: result.finalPriceEgp,
+    discountAmount: result.discountAmountEgp,
+  };
 }
 
 /**
- * Get VIP lock buffer duration in minutes (20 min for VIP/Owner, 15 min for regular).
+ * Get VIP lock buffer duration in minutes (25 min for VIP/Owner, 20 min for Pro, 15 min for regular).
  */
-export function getVipLockMinutes(isVip: boolean): number {
-  return isVip ? 20 : 15;
+export function getVipLockMinutes(isVip: boolean, appUser?: AppUser | null): number {
+  if (appUser) {
+    return getReservationLockMinutes(appUser);
+  }
+  return isVip ? 25 : 15;
 }

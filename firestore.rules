@@ -150,10 +150,20 @@ service cloud.firestore {
       allow delete: if isAdmin() || (isAuth() && resource.data.userId == request.auth.uid);
     }
 
-    // Subscription Requests
+    // Subscription Requests (Legacy)
     match /subscription_requests/{requestId} {
       allow read: if isAuth() && (request.auth.uid == resource.data.userId || isAdmin());
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Subscriptions collection (Production Tiered Subscriptions)
+    match /subscriptions/{subscriptionId} {
+      allow read: if isAuth() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow create: if isAuth() 
+                    && isNotBlacklisted() 
+                    && request.resource.data.userId == request.auth.uid 
+                    && request.resource.data.status == 'pending_review';
       allow update, delete: if isAdmin();
     }
 

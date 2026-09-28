@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTheme } from 'next-themes';
-import { usePathname, useRouter } from '@/i18n/routing';
+import { usePathname, useRouter, Link } from '@/i18n/routing';
 import { useLocale, useTranslations } from 'next-intl';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
@@ -180,6 +180,25 @@ export function NavbarSettingsMenu() {
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Subscription Link / CTA */}
+            <Link
+              href="/subscription"
+              onClick={() => setIsOpen(false)}
+              className="w-full flex items-center justify-between p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 hover:border-amber-500/50 text-xs font-black transition-all cursor-pointer group"
+            >
+              <div className="flex items-center gap-2">
+                <Crown className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                <span className="text-foreground">
+                  {isUserVip(appUser)
+                    ? (locale === 'ar' ? 'إدارة اشتراكك' : 'Manage Subscription')
+                    : (locale === 'ar' ? 'ترقية لـ Pitch Pass VIP' : 'Upgrade to Pitch Pass VIP')}
+                </span>
+              </div>
+              <span className="text-[10px] text-amber-400 font-bold bg-amber-500/20 px-2 py-0.5 rounded-full">
+                {isUserVip(appUser) ? (appUser?.vipTier || 'VIP') : (locale === 'ar' ? 'وفر 10%' : 'Save 10%')}
+              </span>
+            </Link>
 
             {/* Controls */}
             <div className="space-y-2">

@@ -74,6 +74,7 @@ Recently, the platform underwent a **1000x comprehensive transformation & featur
 | `community_chat` | Real-time chat messages by channel | Public read, Authenticated create |
 | `announcements` | Official platform news & updates | Public read, Admin write |
 | `leaderboard` | Top scorers, goalkeepers & MVP rankings | Public read, Admin write |
+| `subscriptions` | Tiered player subscription orders (Pro Pass, Pitch Pass VIP) in EGP with payment receipts | Authenticated user create & own read, Admin approve/reject/delete |
 
 ---
 
@@ -125,6 +126,19 @@ All endpoints are protected by `src/lib/security/apiSecurity.ts` and `src/lib/se
 26. `/[locale]/error` — Runtime Error Boundary with inline retry trigger and support desk routing
 27. `/api/health` — Static health monitoring and environment verification telemetry
 28. `/robots.txt` & `/sitemap.xml` — Technical SEO crawling directives and bilingual hreflang index
+29. `/[locale]/subscription` — Tiered Subscription Plans (Free, Pro Pass @ 99 EGP, Pitch Pass VIP @ 199 EGP) with mobile wallet / InstaPay verification and ROI benefits calculator
+
+---
+
+## 💎 Production Subscription & Monetization Engine (Egyptian Pound)
+- **Monetization Model**:
+  - **Free Tier (0 EGP)**: Essential 5v5 pitch bookings, 15-min lock buffer, public match lobbies, 1 AI advice tip per 2 hours.
+  - **Pro Pass (99 EGP / mo or 249 EGP / 3 mo)**: 5% automatic booking discount, 20-min lock buffer, Blue Pro profile badge, private match lobbies, unlimited AI coach tips, priority support.
+  - **Pitch Pass VIP (199 EGP / mo or 499 EGP / 3 mo)**: 10% automatic booking discount, 25-min lock buffer, Golden VIP Crown badge everywhere, 100% free monthly tournament voucher, private match lobbies, unlimited AI coach insights, dedicated VIP line.
+- **Payment Architecture**:
+  - Direct Egyptian mobile wallet (**Vodafone Cash: 01012345678**) and **InstaPay (egfootball5@instapay)** with one-click copy and transfer verification.
+  - Disabled Credit Card gateway button explicitly labelled with "Soon / قريباً" per business requirements.
+  - Real Firestore persistence in `subscriptions` with strict Zod validation, idempotency keys, and atomic batch admin approval/rejection.
 
 ---
 

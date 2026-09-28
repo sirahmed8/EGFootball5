@@ -29,7 +29,7 @@ import {
   Coffee,
   Crown,
 } from 'lucide-react';
-import { isUserVip, calculateVipPrice } from '@/lib/vip';
+import { isUserVip, calculateVipPrice, getReservationLockMinutes } from '@/lib/vip';
 import Image from 'next/image';
 import { MotionDiv } from '@/components/MotionWrapper';
 
@@ -284,6 +284,7 @@ function BookContent() {
     const { finalPrice, discountAmount: vipDiscount } = calculateVipPrice(totalAmount, appUser);
     const effectiveTotal = isVip ? finalPrice : totalAmount;
     const effectiveDeposit = Math.round(effectiveTotal / 2);
+    const lockMinutes = getReservationLockMinutes(appUser);
 
     const formattedDate = format(date, 'yyyy-MM-dd');
 
@@ -300,7 +301,8 @@ function BookContent() {
         bookingType,
         numPeople,
         isVip ? vipDiscount : 0,
-        totalAmount
+        totalAmount,
+        lockMinutes
       );
 
       router.push(`/checkout?bookingId=${bookingId}&type=${bookingType}&people=${numPeople}`);

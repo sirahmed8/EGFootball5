@@ -12,18 +12,20 @@ import { DashboardPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { confirmBooking, rejectBooking, cleanupExpiredBookings } from '@/lib/firebase/booking';
 import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useToggleBlacklist } from '@/hooks/useUserRoles';
 import { AdminOverviewCards } from '../components/AdminOverviewCards';
 
 const VerificationQueue = dynamic(() => import('../components/VerificationQueue').then(m => m.VerificationQueue), { ssr: false });
+const SubscriptionApprovals = dynamic(() => import('../components/SubscriptionApprovals').then(m => m.SubscriptionApprovals), { ssr: false });
 const LiveSchedule = dynamic(() => import('../components/LiveSchedule').then(m => m.LiveSchedule), { ssr: false });
 const PitchSettings = dynamic(() => import('../components/PitchSettings').then(m => m.PitchSettings), { ssr: false });
 const PlayersList = dynamic(() => import('../components/PlayersList').then(m => m.PlayersList), { ssr: false });
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const locale = useLocale();
   const { appUser, firebaseUser, loading } = useAuthStore();
   const t = useTranslations('Admin');
   const toggleBlacklistMutation = useToggleBlacklist();
@@ -219,9 +221,12 @@ export default function AdminDashboard() {
       <AdminOverviewCards revenue={revenue} pendingCount={pendingReview.length} t={t} />
 
       <Tabs defaultValue="verification" className="w-full">
-        <TabsList className="stadium-glass border-white/10 mb-6 p-1.5 rounded-2xl w-full grid grid-cols-2 md:grid-cols-4 max-w-2xl">
+        <TabsList className="stadium-glass border-white/10 mb-6 p-1.5 rounded-2xl w-full grid grid-cols-2 md:grid-cols-5 max-w-3xl">
           <TabsTrigger value="verification" className="data-[state=active]:bg-primary data-[state=active]:text-black font-black rounded-xl cursor-pointer transition-all">
             {t('verificationQueue')}
+          </TabsTrigger>
+          <TabsTrigger value="subscriptions" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black font-black rounded-xl cursor-pointer transition-all">
+            {t('subscriptionsTab')}
           </TabsTrigger>
           <TabsTrigger value="schedule" className="data-[state=active]:bg-white/10 data-[state=active]:text-foreground font-bold rounded-xl cursor-pointer transition-all">
             {t('liveSchedule')}
@@ -243,6 +248,13 @@ export default function AdminDashboard() {
             handleReject={handleReject}
             setActiveReceiptUrl={setActiveReceiptUrl}
             t={t}
+          />
+        </TabsContent>
+
+        <TabsContent value="subscriptions">
+          <SubscriptionApprovals
+            setActiveReceiptUrl={setActiveReceiptUrl}
+            isArabic={locale === 'ar'}
           />
         </TabsContent>
 

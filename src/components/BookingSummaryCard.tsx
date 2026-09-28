@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { useTranslations, useLocale } from 'next-intl';
 import { ar, enUS } from 'date-fns/locale';
 import { Crown, Sparkles, ShieldCheck } from 'lucide-react';
-import { isUserVip, calculateVipPrice } from '@/lib/vip';
+import { isUserVip, calculateVipPrice, getReservationLockMinutes } from '@/lib/vip';
 import { useAuthStore } from '@/store/useAuthStore';
 import { MotionDiv } from '@/components/MotionWrapper';
 
@@ -86,8 +86,8 @@ export function BookingSummaryCard({
                 <Sparkles className="w-4 h-4 shrink-0" />
                 <span>
                   {appUser?.vipTier === 'Pro Pass'
-                    ? (isArabic ? `تم تطبيق خصم Pro 5% (-${discountAmount} ج.م) + مهلة قفل 15 دقيقة!` : `5% Pro Discount Applied (-${discountAmount} EGP) + 15-Min Lock Buffer!`)
-                    : (isArabic ? `تم تطبيق خصم VIP 10% (-${discountAmount} ج.م) + مهلة قفل 20 دقيقة!` : `10% VIP Discount Applied (-${discountAmount} EGP) + 20-Min Lock Buffer!`)}
+                    ? (isArabic ? `تم تطبيق خصم Pro 5% (-${discountAmount} ج.م) + مهلة قفل ${getReservationLockMinutes(appUser)} دقيقة!` : `5% Pro Discount Applied (-${discountAmount} EGP) + ${getReservationLockMinutes(appUser)}-Min Lock Buffer!`)
+                    : (isArabic ? `تم تطبيق خصم VIP 10% (-${discountAmount} ج.م) + مهلة قفل ${getReservationLockMinutes(appUser)} دقيقة!` : `10% VIP Discount Applied (-${discountAmount} EGP) + ${getReservationLockMinutes(appUser)}-Min Lock Buffer!`)}
                 </span>
               </div>
             </div>

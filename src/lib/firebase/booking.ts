@@ -32,7 +32,8 @@ export async function lockSlot(
   bookingType: 'private' | 'public',
   numPeople: number,
   discountAmount: number = 0,
-  originalPrice: number = totalAmount
+  originalPrice: number = totalAmount,
+  lockDurationMinutes: number = 15
 ): Promise<string> {
   const scheduleId = `${pitchId}_${date}`;
   const scheduleRef = doc(db, 'day_schedules', scheduleId);
@@ -53,7 +54,7 @@ export async function lockSlot(
     }
 
     const now = Date.now();
-    const lockedUntil = now + 10 * 60 * 1000; // 10 minutes lock
+    const lockedUntil = now + Math.max(5, lockDurationMinutes) * 60 * 1000;
 
     // Lock the slots in schedule
     for (const block of blocks) {
