@@ -147,3 +147,30 @@ All endpoints are protected by `src/lib/security/apiSecurity.ts` and `src/lib/se
 - **`Stop EGFootball5.lnk` / `stop_egfootball.vbs`**: Graceful dev server shutdown utility terminating processes on ports 3000-3002 with an auto-closing status notification.
 - **`public/app-icon.ico`**: 6-layer high-resolution Windows icon derived from `public/favicon.jpg`.
 
+---
+
+## 🏛️ Senior Modular Architecture & Anti-Monolith Decomposition (<300 lines/file)
+Every oversized file across the application has been decomposed into domain-specific, maintainable units adhering strictly to the <300 lines rule while preserving 100% of business logic:
+- **`book/page.tsx`** (formerly 670 lines): Decomposed into `BookingPitchHeader`, `BookingCalendarPicker`, `BookingPromoCode`, `BookingSlotGrid`, `BookingAddons`, and `useBookingPitchSchedule` hook.
+- **`matches/page.tsx`** (formerly 722 lines): Decomposed into `CreateMatchModal`, `MatchFilters`, `EmptyMatchesState`, `MatchCard`, `PastMatchesSection`, and `useMatchActions` hook.
+- **`FloatingChatWidget.tsx`** (formerly 1,332 lines): Decomposed into `AIChatSection`, `AIChatInputBar`, `AIChatMessageItem`, `CommunityChatSection`, `CommunityInputBar`, `CommunityMessageItem`, `StaffSupportSection`, `AdminTicketList`, and `SupportThreadView`.
+- **`PageSkeletons.tsx`** (formerly 679 lines): Decomposed into 4 focused modules (`CorePageSkeletons`, `SocialCommunitySkeletons`, `FeatureGameSkeletons`, `DashboardSkeletons`).
+- **`ceremony/page.tsx`** (formerly 634 lines): Decomposed into `CeremonyCountdown`, `CeremonyAwardsGrid`, `CeremonyTotsPitch`, and `CeremonyAdminModal`.
+- **`checkout/page.tsx`** (formerly 579 lines): Decomposed into `DynamicMatchQrCode`, `CheckoutQrModal`, `CheckoutTicketCard`, `PaymentMethodsCard`, and `ReceiptUploadForm`.
+- **`profile/page.tsx`** (formerly 572 lines): Decomposed into `BookingCard`, `ProfileStatsHeader`, `ProfileForm`, and `ProfileFavoritesTab`.
+- **`home/page.tsx`** (formerly 560 lines): Decomposed into `HomeFilterBar`, `PitchGridCard`, `PitchListCard`, and `PitchPreviewModal`.
+- **`owner/analytics/page.tsx`** (formerly 542 lines): Decomposed into `AnalyticsOverviewTab`, `SubscriptionsTab`, `VipGiftsTab`, `PitchesAnalyticsTab`, and `AiUsageTab`.
+- **`jersey-designer/page.tsx`** (formerly 541 lines): Decomposed into `JerseyPreview3D` and `JerseyCustomizerControls`.
+- **`communities/page.tsx`** (formerly 483 lines): Decomposed into `CommunityCard`, `CategoryFilterBar`, and `CreateCommunityModal`.
+- **`booking.ts`** (formerly 429 lines): Modularized into `booking.ts` and `booking-helpers.ts`.
+
+---
+
+## ⚡ 100% Route Loading Skeleton Coverage (`loading.tsx`)
+All 34 application routes feature dedicated, precision geometric skeleton loaders mirroring exact layout geometries:
+- Authentication & Onboarding: `login/loading.tsx`, `onboarding/loading.tsx`
+- Core & Booking: `home/loading.tsx`, `book/loading.tsx`, `checkout/loading.tsx`, `matches/loading.tsx`, `profile/loading.tsx`, `profile/[username]/loading.tsx`
+- Administration & Ownership: `admin/dashboard/loading.tsx`, `owner/loading.tsx`, `owner/dashboard/loading.tsx`, `owner/analytics/loading.tsx`, `owner/users/loading.tsx`
+- Social & Gaming: `communities/loading.tsx`, `community-chat/loading.tsx`, `leaderboard/loading.tsx`, `tournaments/loading.tsx`, `challenges/loading.tsx`, `achievements/loading.tsx`, `ceremony/loading.tsx`, `jersey-designer/loading.tsx`, `goal-of-the-month/loading.tsx`, `var-highlights/loading.tsx`, `live-stream/loading.tsx`
+- Informational & Legal: `guide/loading.tsx`, `notifications/loading.tsx`, `announcements/loading.tsx`, `support/loading.tsx`, `subscription/loading.tsx`, `privacy/loading.tsx`, `terms/loading.tsx`, `refund/loading.tsx`, `cookies/loading.tsx`.
+
