@@ -27,7 +27,9 @@
     "liveStream": "Live Matches & Streams",
     "varHighlights": "Pitch VAR Highlights",
     "jerseyDesigner": "Custom Jersey Designer",
-    "subscription": "Pitch Pass Premium"
+    "subscription": "Pitch Pass Premium",
+    "skipToContent": "Skip to main content",
+    "searchPlaceholder": "Search pitches, matches, or navigate (Ctrl+K)..."
   },
   "Notifications": {
     "title": "Notifications",
@@ -442,11 +444,17 @@
     "favoritePitchesTitle": "Favorite Pitches for Quick Re-booking",
     "quickBook": "Quick Book",
     "close": "Close",
-    "confirmCancel": "Confirm Cancel",
-    "canceling": "Canceling...",
     "profileSaved": "Profile updated successfully!",
     "favPitchesTitle": "Favorite Pitches for Quick Re-booking",
-    "noBookingsDesc": "No pitch bookings found yet. Pick your favorite arena and start playing!"
+    "noBookingsDesc": "No pitch bookings found yet. Pick your favorite arena and start playing!",
+    "privacyAndGdpr": "Data Privacy & GDPR Art. 17",
+    "gdprNotice": "Under Egyptian Personal Data Protection Law No. 151 of 2020 and GDPR Article 17, you have the statutory right to permanently erase your account, profile data, and personal preferences.",
+    "requestDataDeletion": "Permanently Erase My Account & Data",
+    "dataDeletionModalTitle": "Confirm Account & Data Erasure",
+    "dataDeletionModalDesc": "This action is permanent and irreversible. Your profile, personal credentials, and player history will be permanently deleted from EGFootball5 in accordance with Egyptian Law No. 151 of 2020 and GDPR Art. 17.",
+    "confirmDeleteData": "Yes, Permanently Delete My Data",
+    "deletingAccount": "Erasing account data...",
+    "dataDeletionSuccess": "Your account and personal data have been completely erased. You have been signed out."
   },
   "Owner": {
     "title": "Owner Dashboard",
@@ -608,8 +616,11 @@
     "cookiePolicy": "Cookie Policy",
     "refundPolicy": "Refund Policy",
     "cookiePreferences": "Cookie Preferences",
-    "businessDetails": "EGFootball Sports Tech LLC • CR: 194820 • Tax ID: 712-492-301 • Obour City, Egypt",
-    "rightsReserved": "© 2026 EGFootball Sports Tech LLC. All rights reserved."
+    "businessDetails": "EGFootball Sports Tech LLC • CR: 194820 • Tax ID: 712-492-301 • Building 14, Youth Ave, Obour City, Egypt",
+    "supportEmail": "Support: support@egfootball5.com",
+    "supportPhone": "Tel: +20 100 123 4567",
+    "dpoContact": "DPO: dpo@egfootball5.com",
+    "rightsReserved": "© {year} EGFootball Sports Tech LLC. All rights reserved."
   },
   "MatchChat": {
     "title": "Match Chat",
@@ -731,5 +742,20 @@
     "offers": "Offers",
     "updates": "Updates",
     "noAnnouncements": "No announcements posted yet."
+  },
+  "ThankYou": {
+    "badge": "Request Received",
+    "title": "Thank You! Your Request Has Been Submitted",
+    "subtitle": "We have safely logged your confirmation and transfer details into our verification queue.",
+    "responseTimePromise": "Response Time Guarantee: Our pitch operations team reviews deposits and support inquiries within 2 hours.",
+    "step1Title": "1. Receipt Verification",
+    "step1Desc": "Pitch management matches your transfer proof with the designated stadium schedule.",
+    "step2Title": "2. In-App Notification",
+    "step2Desc": "Once approved, an instant match pass notification is pushed to your account.",
+    "step3Title": "3. Stadium Admission",
+    "step3Desc": "Show your digital pass or QR voucher to the pitch coordinator upon arrival.",
+    "viewBookings": "View My Bookings",
+    "exploreMatches": "Explore Public Matches",
+    "contactSupport": "Need urgent help? Contact Support"
   }
 }

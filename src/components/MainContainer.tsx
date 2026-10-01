@@ -25,7 +25,7 @@ export function MainContainer({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen pt-16 w-full max-w-full overflow-x-hidden">
       <DesktopSidebar />
-      <main className={`flex-1 min-w-0 flex flex-col overflow-x-hidden ${hasSidebar ? 'xl:ps-56 sm:xl:ps-60' : ''}`}>
+      <main id="main-content" className={`flex-1 min-w-0 flex flex-col overflow-x-hidden ${hasSidebar ? 'xl:ps-56 sm:xl:ps-60' : ''}`}>
         <motion.div
           key={pathname}
           initial={{ opacity: 0 }}

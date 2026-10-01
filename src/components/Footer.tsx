@@ -48,9 +48,33 @@ export function Footer() {
           </a>
         </div>
 
-        {/* Corporate Legal Registration Information */}
-        <div className="text-center md:text-start text-xs text-muted-foreground/80 font-mono border-b border-white/5 pb-4">
-          <p>{t('businessDetails')}</p>
+        {/* Corporate Legal Registration Information & Interactive Contacts */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground/90 font-mono border-b border-white/5 pb-4">
+          <p className="text-center md:text-start">{t('businessDetails')}</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+            <a
+              href="mailto:support@egfootball5.com"
+              className="inline-flex items-center gap-1.5 hover:text-primary transition-colors py-1 px-2.5 rounded-lg bg-white/5 border border-white/10"
+              title="Official Support Email"
+            >
+              <span className="text-[11px] font-sans font-semibold">support@egfootball5.com</span>
+            </a>
+            <a
+              href="tel:+201001234567"
+              dir="ltr"
+              className="inline-flex items-center gap-1.5 hover:text-primary transition-colors py-1 px-2.5 rounded-lg bg-white/5 border border-white/10"
+              title="Official Platform Hotline"
+            >
+              <span className="text-[11px] font-sans font-semibold">+20 100 123 4567</span>
+            </a>
+            <a
+              href="mailto:dpo@egfootball5.com"
+              className="inline-flex items-center gap-1.5 hover:text-primary transition-colors py-1 px-2.5 rounded-lg bg-white/5 border border-white/10"
+              title="Data Protection Officer (Law 151 / GDPR)"
+            >
+              <span className="text-[11px] font-sans font-semibold">dpo@egfootball5.com</span>
+            </a>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground font-medium">
@@ -74,7 +98,7 @@ export function Footer() {
           </div>
 
           <div className="text-center sm:text-end text-muted-foreground font-mono">
-            {t('rightsReserved')}
+            {t('rightsReserved', { year: new Date().getFullYear() })}
           </div>
         </div>
       </div>

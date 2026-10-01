@@ -127,6 +127,9 @@ All endpoints are protected by `src/lib/security/apiSecurity.ts` and `src/lib/se
 27. `/api/health` — Static health monitoring and environment verification telemetry
 28. `/robots.txt` & `/sitemap.xml` — Technical SEO crawling directives and bilingual hreflang index
 29. `/[locale]/subscription` — Tiered Subscription Plans (Free, Pro Pass @ 99 EGP, Pitch Pass VIP @ 199 EGP) with mobile wallet / InstaPay verification and ROI benefits calculator
+30. `/[locale]/thank-you` — Dedicated confirmation route with 2-hour response time guarantee and next-step action cards
+31. `/llms.txt` — Standard machine-readable AI context file for LLM search engines (Perplexity, SearchGPT, Claude, Gemini)
+32. **Commercial UX Utilities**: SkipLink, GlobalCommandMenu (Ctrl+K), ReadingProgressBar, MobileStickyCta, and ScrollToTop.
 
 ---
 

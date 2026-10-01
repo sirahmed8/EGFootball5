@@ -9,6 +9,10 @@ import { DesktopSidebar } from "@/components/SideMenu";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { SkipLink } from "@/components/SkipLink";
+import { GlobalCommandMenu } from "@/components/GlobalCommandMenu";
+import { ReadingProgressBar } from "@/components/ReadingProgressBar";
+import { MobileStickyCta } from "@/components/MobileStickyCta";
 import { ClientChatWidget } from '@/components/ClientChatWidget';
 import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 import { MainContainer } from '@/components/MainContainer';
@@ -94,22 +98,64 @@ export default async function RootLayout({
   const fontVariables = `${geistSans.variable} ${cairo.variable}`;
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'SportsActivityLocation',
-    name: 'EGFootball5',
-    alternateName: 'Kickoff',
-    description: isRTL
-      ? 'منصة حجز ملاعب الخماسي والمباريات العامة بمدينة العبور'
-      : '5-a-side football pitch booking platform and match lobbies in Obour City, Egypt',
-    url: 'https://egfootball5.web.app',
-    logo: 'https://egfootball5.web.app/favicon.jpg',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'Building 14, Youth Avenue, 9th District',
-      addressLocality: 'Obour City',
-      addressRegion: 'Qalyubia',
-      addressCountry: 'EG',
-    },
-    priceRange: 'EGP 300 - EGP 600',
+    '@graph': [
+      {
+        '@type': 'SportsActivityLocation',
+        '@id': 'https://egfootball5.web.app/#location',
+        name: 'EGFootball5',
+        alternateName: 'Kickoff',
+        description: isRTL
+          ? 'منصة حجز ملاعب الخماسي والمباريات العامة بمدينة العبور'
+          : '5-a-side football pitch booking platform and match lobbies in Obour City, Egypt',
+        url: 'https://egfootball5.web.app',
+        logo: 'https://egfootball5.web.app/favicon.jpg',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Building 14, Youth Avenue, 9th District',
+          addressLocality: 'Obour City',
+          addressRegion: 'Qalyubia',
+          addressCountry: 'EG',
+        },
+        priceRange: 'EGP 300 - EGP 600',
+        telephone: '+201001234567',
+      },
+      {
+        '@type': 'Organization',
+        '@id': 'https://egfootball5.web.app/#organization',
+        name: 'EGFootball Sports Tech LLC',
+        legalName: 'شركة إيجي فوتبول لخدمات تكنولوجيا الرياضة وحجز الملاعب ش.م.م',
+        taxID: '712-492-301',
+        vatID: '194820',
+        url: 'https://egfootball5.web.app',
+        logo: 'https://egfootball5.web.app/favicon.jpg',
+        contactPoint: [
+          {
+            '@type': 'ContactPoint',
+            telephone: '+201001234567',
+            contactType: 'customer service',
+            email: 'support@egfootball5.com',
+            availableLanguage: ['Arabic', 'English'],
+          },
+          {
+            '@type': 'ContactPoint',
+            contactType: 'data protection officer',
+            email: 'dpo@egfootball5.com',
+            availableLanguage: ['Arabic', 'English'],
+          },
+        ],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': 'https://egfootball5.web.app/#website',
+        url: 'https://egfootball5.web.app',
+        name: 'EGFootball5',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: 'https://egfootball5.web.app/home?q={search_term_string}',
+          'query-input': 'required name=search_term_string',
+        },
+      },
+    ],
   };
 
   return (
@@ -125,6 +171,10 @@ export default async function RootLayout({
           <ReactQueryProvider>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
               <AuthProvider>
+                <SkipLink />
+                <ReadingProgressBar />
+                <GlobalCommandMenu />
+
                 {/* Top navbar */}
                 <Navbar />
 
@@ -134,6 +184,8 @@ export default async function RootLayout({
                   <Footer />
                 </MainContainer>
 
+                <ScrollToTop />
+                <MobileStickyCta />
                 <Toaster />
                 <ClientChatWidget />
                 <CookieConsentBanner />

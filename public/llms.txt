@@ -1,0 +1,40 @@
+# EGFootball5 (Kickoff) Platform
+> Egypt Premier 5-a-Side Football Pitch Booking, Match Lobby & Stadium Management Infrastructure.
+> Official Web Platform: https://egfootball5.web.app
+> Operating Entity: EGFootball Sports Tech LLC (CR: 194820, Tax ID: 712-492-301, Obour City, Egypt)
+
+## System Overview & Mission
+EGFootball5 is an enterprise sports technology platform that automates 5-a-side and 7-a-side football turf reservations, match coordination, player lobbies, and stadium schedule locks across Cairo, Obour City, and nationwide Egyptian sports venues.
+
+## Core Architectural Capabilities
+- **Real-Time 15-Minute Slot Locks**: Prevents double-booking via atomic Firestore transactions (`/databases/{db}/documents/day_schedules`).
+- **Match Lobbies & Squad Coordination**: Interactive 5-a-side tactical board, WhatsApp squad invites, and public player matching (GK, DEF, MID, STR).
+- **Egyptian Payment Gateways**: Verifiable manual deposit proofs for Vodafone Cash and InstaPay with client-generated idempotency keys.
+- **Pitch Pass & Subscriptions**: Tiered passes (Pro Pass & Pitch Pass VIP) in Egyptian Pounds (EGP) with booking discounts and extended reservation locks.
+- **Multilingual & High Accessibility**: Arabic (RTL) and English (LTR) with WCAG AAA high-contrast dark mode and zero layout shift.
+- **Compliance & Privacy Shield**: Compliant with Egyptian Personal Data Protection Law (Law No. 151 of 2020), Consumer Protection Law (Law No. 181 of 2018), and GDPR Article 17 self-serve data erasure.
+
+## Platform Routes & Documentation
+- Home & Turf Discovery: https://egfootball5.web.app/home
+- Booking Schedule Matrix: https://egfootball5.web.app/book
+- Public Matches & Lobbies: https://egfootball5.web.app/matches
+- Community Squads & Clubs: https://egfootball5.web.app/communities
+- Leaderboards & Monthly Awards: https://egfootball5.web.app/leaderboard
+- Membership & VIP Passes: https://egfootball5.web.app/subscription
+- Pitch Rules & Charter: https://egfootball5.web.app/guide
+- Privacy Policy: https://egfootball5.web.app/privacy
+- Terms of Service: https://egfootball5.web.app/terms
+- Refund & Cancellation Policy: https://egfootball5.web.app/refund
+- Cookie Policy: https://egfootball5.web.app/cookies
+
+## Key APIs & Data Schemas
+- `POST /api/admin/role`: Super-admin privilege management with IP and UID rate limiting.
+- `POST /api/ai/chat`: Secure server-side AI sports advisory proxy with payload sanitization.
+- `POST /api/ai/tts`: AI speech synthesis endpoint with origin validation.
+- `GET /api/health`: Platform health diagnostics and connectivity verification.
+
+## Contact & Corporate Verification
+- Support Email: support@egfootball5.com
+- Data Protection Officer: dpo@egfootball5.com
+- Hotline: +20 100 123 4567
+- Headquarters: Building 14, Youth Avenue, 9th District, Obour City, Egypt

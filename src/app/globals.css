@@ -354,3 +354,47 @@ select:not(.bg-transparent):not(.border-0):not(.border-none):focus {
 .pitch-grass-bg {
   background: radial-gradient(circle at center, rgba(16, 185, 129, 0.15) 0%, rgba(5, 46, 22, 0.9) 100%);
 }
+
+/* ── Commercial App Print Stylesheet ───────────────────────── */
+@media print {
+  header,
+  footer,
+  aside,
+  nav,
+  .stadium-glass,
+  button,
+  .sr-only,
+  #egfootball-chat-container,
+  [aria-label="Open menu"],
+  [aria-label="Scroll back to top"] {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .global-card,
+  .global-box,
+  .bg-card {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  a {
+    color: #000000 !important;
+    text-decoration: underline !important;
+  }
+}
