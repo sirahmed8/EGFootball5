@@ -12,6 +12,7 @@ import { createSubscriptionOrder } from '@/lib/subscription/subscriptionService'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase/config';
 import { SubscribePaymentDetails } from './SubscribePaymentDetails';
+import { PriorityAccessModal } from './PriorityAccessModal';
 
 interface SubscribeModalProps {
   isOpen: boolean;
@@ -36,11 +37,17 @@ export function SubscribeModal({
   const [receiptFile, setReceiptFile] = React.useState<File | null>(null);
   const [copiedText, setCopiedText] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [showPriorityModal, setShowPriorityModal] = React.useState(false);
 
   const pricing = SUBSCRIPTION_PRICING[tier];
   const isQuarterly = cycle === 'quarterly';
-  const amountEgp = isQuarterly ? pricing.quarterlyEgp : pricing.monthlyEgp;
-  const durationDays = isQuarterly ? 90 : 30;
+  const isAnnual = cycle === 'annual';
+  const amountEgp = isAnnual
+    ? pricing.annualEgp
+    : isQuarterly
+    ? pricing.quarterlyEgp
+    : pricing.monthlyEgp;
+  const durationDays = isAnnual ? 365 : isQuarterly ? 90 : 30;
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -157,6 +164,7 @@ export function SubscribeModal({
               isArabic={isArabic}
               copyToClipboard={copyToClipboard}
               copiedText={copiedText}
+              onOpenPriorityAccess={() => setShowPriorityModal(true)}
             />
 
             {/* Submission Form */}
@@ -225,6 +233,14 @@ export function SubscribeModal({
               </div>
             </form>
           </motion.div>
+
+          <PriorityAccessModal
+            isOpen={showPriorityModal}
+            onClose={() => setShowPriorityModal(false)}
+            tier={tier}
+            cycle={cycle}
+            isArabic={isArabic}
+          />
         </div>
       )}
     </AnimatePresence>

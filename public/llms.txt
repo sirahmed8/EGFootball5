@@ -21,6 +21,7 @@ EGFootball5 is an enterprise sports technology platform that automates 5-a-side 
 - Community Squads & Clubs: https://egfootball5.web.app/communities
 - Leaderboards & Monthly Awards: https://egfootball5.web.app/leaderboard
 - Membership & VIP Passes: https://egfootball5.web.app/subscription
+- Pricing & Comparison Matrix: https://egfootball5.web.app/pricing
 - Pitch Rules & Charter: https://egfootball5.web.app/guide
 - Privacy Policy: https://egfootball5.web.app/privacy
 - Terms of Service: https://egfootball5.web.app/terms

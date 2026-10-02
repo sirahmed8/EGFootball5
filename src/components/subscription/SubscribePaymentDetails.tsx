@@ -14,6 +14,7 @@ interface SubscribePaymentDetailsProps {
   isArabic: boolean;
   copyToClipboard: (text: string) => void;
   copiedText: string | null;
+  onOpenPriorityAccess?: () => void;
 }
 
 export function SubscribePaymentDetails({
@@ -23,6 +24,7 @@ export function SubscribePaymentDetails({
   isArabic,
   copyToClipboard,
   copiedText,
+  onOpenPriorityAccess,
 }: SubscribePaymentDetailsProps) {
   return (
     <div className="space-y-4">
@@ -76,18 +78,17 @@ export function SubscribePaymentDetails({
             <span>InstaPay</span>
           </button>
 
-          {/* Disabled Credit Card */}
+          {/* Clickable Credit Card Priority Access */}
           <button
             type="button"
-            disabled
-            aria-disabled="true"
-            title={isArabic ? 'بوابة الدفع قريباً' : 'Payment Gateway Soon'}
-            className="p-3 rounded-xl border border-white/5 bg-white/[0.01] text-muted-foreground/40 flex flex-col items-center gap-1.5 cursor-not-allowed select-none relative"
+            onClick={() => onOpenPriorityAccess?.()}
+            title={isArabic ? 'انقر للتسجيل في قائمة الأولوية' : 'Click to join Priority Access'}
+            className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/[0.05] hover:bg-amber-500/[0.1] text-amber-300 flex flex-col items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] relative"
           >
-            <CreditCard className="w-4 h-4 opacity-40" />
-            <span className="text-[11px]">{isArabic ? 'بطاقة بنكية' : 'Bank Card'}</span>
-            <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
-              {isArabic ? 'قريباً' : 'Soon'}
+            <CreditCard className="w-4 h-4 text-amber-400" />
+            <span className="text-[11px] font-bold">{isArabic ? 'فيزا / كارت' : 'Card'}</span>
+            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              {isArabic ? 'قريباً • سجل' : 'Priority'}
             </span>
           </button>
         </div>

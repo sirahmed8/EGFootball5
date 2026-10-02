@@ -79,6 +79,8 @@ export function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground font-medium">
           <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link href="/pricing" className="hover:text-primary transition-colors font-bold text-foreground">{t('pricing')}</Link>
+            <span className="opacity-30">•</span>
             <Link href="/privacy" className="hover:text-primary transition-colors">{t('privacyPolicy')}</Link>
             <span className="opacity-30">•</span>
             <Link href="/terms" className="hover:text-primary transition-colors">{t('termsOfService')}</Link>

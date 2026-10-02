@@ -4,10 +4,9 @@ import * as React from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
-import { Sparkles, ThumbsUp, Upload, CheckCircle2, Video, Inbox, X } from 'lucide-react';
+import { Sparkles, ThumbsUp, Upload, CheckCircle2, Video, Inbox } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Portal } from '@/components/Portal';
 import { toast } from 'sonner';
 import { GoalOfTheMonthPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import {
@@ -21,6 +20,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { GoalSubmissionModal } from './components/GoalSubmissionModal';
 
 interface GoalSubmission {
   id: string;
@@ -42,21 +42,9 @@ export default function GoalOfTheMonthPage() {
   const [loading, setLoading] = React.useState(true);
   const [votingId, setVotingId] = React.useState<string | null>(null);
 
-  // Form State for clip submission
+  // Form State for clip submission modal
   const [isSubmitOpen, setIsSubmitOpen] = React.useState(false);
-  const [goalTitle, setGoalTitle] = React.useState('');
-  const [videoUrl, setVideoUrl] = React.useState('');
-  const [pitchName, setPitchName] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
-
-  React.useEffect(() => {
-    if (!isSubmitOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsSubmitOpen(false);
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [isSubmitOpen]);
 
   // Load real goal contest submissions from Firestore
   React.useEffect(() => {
@@ -114,22 +102,21 @@ export default function GoalOfTheMonthPage() {
     }
   };
 
-  const handleSubmitGoal = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitGoal = async (data: { title: string; videoUrl: string; pitchName: string }) => {
     if (!firebaseUser) {
       toast.error(isArabic ? 'يرجى تسجيل الدخول لتقديم مقطع الهدف' : 'Please sign in to submit a goal clip');
       return;
     }
-    if (!goalTitle.trim() || !videoUrl.trim()) {
+    if (!data.title.trim() || !data.videoUrl.trim()) {
       toast.error(isArabic ? 'يرجى إدخال عنوان الهدف ورابط الفيديو' : 'Please enter goal title and video URL');
       return;
     }
     setSubmitting(true);
     try {
       const newSub = {
-        title: goalTitle.trim(),
-        videoUrl: videoUrl.trim(),
-        pitchName: pitchName.trim() || (isArabic ? 'ملعب بالعبور' : 'Obour Turf Pitch'),
+        title: data.title.trim(),
+        videoUrl: data.videoUrl.trim(),
+        pitchName: data.pitchName.trim() || (isArabic ? 'ملعب بالعبور' : 'Obour Turf Pitch'),
         playerName: appUser?.name || firebaseUser.displayName || (isArabic ? 'لاعب' : 'Player'),
         votes: 0,
         votedUsers: [],
@@ -139,9 +126,6 @@ export default function GoalOfTheMonthPage() {
       setSubmissions((prev) => [{ id: ref.id, ...newSub } as GoalSubmission, ...prev]);
       toast.success(isArabic ? 'تم تقديم مقطع الهدف للمسابقة! 🎬' : 'Goal clip submitted to contest! 🎬');
       setIsSubmitOpen(false);
-      setGoalTitle('');
-      setVideoUrl('');
-      setPitchName('');
     } catch (err) {
       console.error(err);
       toast.error(isArabic ? 'فشل تقديم الهدف. يرجى المحاولة مرة أخرى.' : 'Failed to submit goal. Please try again.');
@@ -149,6 +133,7 @@ export default function GoalOfTheMonthPage() {
       setSubmitting(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-black py-10 px-4 md:px-8 max-w-6xl mx-auto space-y-8" dir={isArabic ? 'rtl' : 'ltr'}>
@@ -264,48 +249,15 @@ export default function GoalOfTheMonthPage() {
         </div>
       )}
 
-      {/* Modal */}
-      {isSubmitOpen && (
-        <Portal>
-          <div 
-            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-            onClick={() => setIsSubmitOpen(false)}
-          >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-4 bg-black relative" 
-              dir={isArabic ? 'rtl' : 'ltr'}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <h2 className="text-2xl font-black text-foreground">{isArabic ? 'تقديم فيديو الهدف للمسابقة' : 'Submit Goal Video Clip'}</h2>
-                <button onClick={() => setIsSubmitOpen(false)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <form onSubmit={handleSubmitGoal} className="space-y-4">
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'عنوان الهدف *' : 'Goal Title *'}</label>
-                  <input type="text" required value={goalTitle} onChange={(e) => setGoalTitle(e.target.value)} placeholder={isArabic ? 'مثال: تسديدة صاروخية في المقص' : 'e.g. Long-range Rocket Top Corner'} className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary" />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'رابط الفيديو (YouTube / MP4) *' : 'Video URL (YouTube / MP4) *'}</label>
-                  <input type="url" required value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://..." className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary font-mono text-xs" />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'اسم الملعب' : 'Pitch Name'}</label>
-                  <input type="text" value={pitchName} onChange={(e) => setPitchName(e.target.value)} placeholder={isArabic ? 'مثال: استاد الأهلي بالعبور' : 'e.g. Obour Eagles Arena'} className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary" />
-                </div>
-                <div className="flex gap-3 pt-2">
-                  <Button type="button" variant="outline" onClick={() => setIsSubmitOpen(false)} className="w-1/2 rounded-2xl">{isArabic ? 'إلغاء' : 'Cancel'}</Button>
-                  <Button type="submit" disabled={submitting} className="w-1/2 bg-primary text-black font-black rounded-2xl glow-primary">{submitting ? (isArabic ? 'جاري التقديم...' : 'Submitting...') : (isArabic ? 'ارفع المقطع 🚀' : 'Submit Clip 🚀')}</Button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        </Portal>
-      )}
+      {/* Clip Submission Modal */}
+      <GoalSubmissionModal
+        isOpen={isSubmitOpen}
+        onClose={() => setIsSubmitOpen(false)}
+        onSubmit={handleSubmitGoal}
+        submitting={submitting}
+        isArabic={isArabic}
+      />
     </div>
   );
+
 }

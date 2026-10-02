@@ -3,6 +3,8 @@
 import * as React from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
 import { CollarStyle, PatternType, BadgeType } from './types';
+import { JerseySvgDefs } from './JerseySvgDefs';
+import { JerseyBadgeIcon } from './JerseyBadgeIcon';
 
 interface JerseyPreview3DProps {
   svgRef: React.RefObject<SVGSVGElement | null>;
@@ -70,82 +72,7 @@ export function JerseyPreview3D({
             className="w-full h-full"
             style={{ filter: 'drop-shadow(0px 20px 40px rgba(0,0,0,0.95))' }}
           >
-            <defs>
-              {/* Rich Gradients */}
-              <linearGradient id="jerseyBaseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor={primaryColor} stopOpacity="1" />
-                <stop offset="65%" stopColor={primaryColor} stopOpacity="0.95" />
-                <stop offset="100%" stopColor="#000000" stopOpacity="0.35" />
-              </linearGradient>
-
-              <filter id="meshTexture" x="0%" y="0%" width="100%" height="100%">
-                <feTurbulence
-                  type="fractalNoise"
-                  baseFrequency="1.6"
-                  numOctaves="3"
-                  stitchTiles="stitch"
-                  result="noise"
-                />
-                <feColorMatrix
-                  type="matrix"
-                  values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.05 0"
-                  in="noise"
-                  result="tinted"
-                />
-                <feBlend mode="multiply" in="SourceGraphic" in2="tinted" />
-              </filter>
-
-              {/* 3D Realism Folds */}
-              <linearGradient id="shadowFolds" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#000" stopOpacity="0.45" />
-                <stop offset="12%" stopColor="#000" stopOpacity="0.08" />
-                <stop offset="28%" stopColor="#fff" stopOpacity="0.18" />
-                <stop offset="42%" stopColor="#000" stopOpacity="0.12" />
-                <stop offset="50%" stopColor="#fff" stopOpacity="0.22" />
-                <stop offset="62%" stopColor="#000" stopOpacity="0.10" />
-                <stop offset="78%" stopColor="#fff" stopOpacity="0.15" />
-                <stop offset="88%" stopColor="#000" stopOpacity="0.12" />
-                <stop offset="100%" stopColor="#000" stopOpacity="0.5" />
-              </linearGradient>
-
-              <radialGradient id="chestHighlight" cx="50%" cy="25%" r="55%">
-                <stop offset="0%" stopColor="#fff" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#fff" stopOpacity="0" />
-              </radialGradient>
-
-              {/* Real T-Shirt Shape */}
-              <clipPath id="jerseyClip">
-                <path
-                  d="M 140 25
-                     C 165 18, 235 18, 260 25
-                     C 295 32, 335 52, 365 75
-                     C 375 83, 385 95, 375 110
-                     C 365 125, 345 142, 325 155
-                     C 315 160, 305 150, 295 140
-                     C 290 135, 290 155, 290 190
-                     L 290 415
-                     C 280 430, 200 435, 110 415
-                     L 110 190
-                     C 110 155, 110 135, 105 140
-                     C 95 150, 85 160, 75 155
-                     C 55 142, 35 125, 25 110
-                     C 15 95, 25 83, 35 75
-                     C 65 52, 105 32, 140 25 Z"
-                />
-              </clipPath>
-
-              {/* Patterns */}
-              <pattern id="pat-stripes" width="50" height="50" patternUnits="userSpaceOnUse">
-                <rect width="25" height="50" fill={secondaryColor} opacity="0.88" />
-              </pattern>
-              <pattern id="pat-hoops" width="50" height="50" patternUnits="userSpaceOnUse">
-                <rect width="50" height="25" fill={secondaryColor} opacity="0.88" />
-              </pattern>
-              <pattern id="pat-checkerboard" width="50" height="50" patternUnits="userSpaceOnUse">
-                <rect width="25" height="25" fill={secondaryColor} opacity="0.88" />
-                <rect x="25" y="25" width="25" height="25" fill={secondaryColor} opacity="0.88" />
-              </pattern>
-            </defs>
+            <JerseySvgDefs primaryColor={primaryColor} secondaryColor={secondaryColor} />
 
             {/* Base */}
             <path d="M 0 0 h 400 v 450 h -400 z" clipPath="url(#jerseyClip)" fill="url(#jerseyBaseGrad)" />
@@ -206,49 +133,7 @@ export function JerseyPreview3D({
             />
 
             {/* Crest/Badge */}
-            <g
-              transform="translate(245, 95) scale(1.4)"
-              style={{ filter: 'drop-shadow(0px 3px 5px rgba(0,0,0,0.5))' }}
-            >
-              {badgeIcon === 'shield' && (
-                <>
-                  <path
-                    d="M 0 0 L 16 0 L 16 16 L 8 24 L 0 16 Z"
-                    fill={secondaryColor}
-                    stroke="#FFF"
-                    strokeWidth="1.5"
-                  />
-                  <circle cx="8" cy="10" r="3" fill="#FFF" />
-                </>
-              )}
-              {badgeIcon === 'crown' && (
-                <>
-                  <path
-                    d="M 0 4 L 4 16 L 8 8 L 12 16 L 16 4 L 14 20 L 2 20 Z"
-                    fill={secondaryColor}
-                    stroke="#FFF"
-                    strokeWidth="1.5"
-                  />
-                  <circle cx="8" cy="23" r="1.5" fill="#FFF" />
-                </>
-              )}
-              {badgeIcon === 'star' && (
-                <path
-                  d="M 8 0 L 10 5 L 16 6 L 11 10 L 13 16 L 8 13 L 3 16 L 5 10 L 0 6 L 6 5 Z"
-                  fill={secondaryColor}
-                  stroke="#FFF"
-                  strokeWidth="1.5"
-                />
-              )}
-              {badgeIcon === 'flame' && (
-                <path
-                  d="M 8 0 C 14 8 16 12 14 18 C 12 24 4 24 2 18 C 0 12 4 8 8 0 Z"
-                  fill={secondaryColor}
-                  stroke="#FFF"
-                  strokeWidth="1.5"
-                />
-              )}
-            </g>
+            <JerseyBadgeIcon badgeIcon={badgeIcon} secondaryColor={secondaryColor} />
 
             {/* Collar */}
             <g style={{ filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.5))' }}>

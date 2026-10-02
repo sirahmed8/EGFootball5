@@ -2,28 +2,16 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Camera, Play, Share2, Film, Upload, Plus, X } from 'lucide-react';
+import { Camera, Play, Share2, Film, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Portal } from '@/components/Portal';
 import { toast } from 'sonner';
 import { VarHighlightsPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { useAuthStore } from '@/store/useAuthStore';
-import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '@/lib/firebase/config';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 import { useLocale } from 'next-intl';
-
-interface VarClip {
-  id: string;
-  title: string;
-  player: string;
-  pitch: string;
-  time: string;
-  videoUrl?: string;
-  category?: string;
-  matchId?: string;
-}
+import { UploadVarClipModal, VarClip } from './components/UploadVarClipModal';
 
 export default function VarHighlightsPage() {
   const locale = useLocale();
@@ -37,13 +25,6 @@ export default function VarHighlightsPage() {
 
   // Upload modal state
   const [isUploadOpen, setIsUploadOpen] = React.useState(false);
-  const [newTitle, setNewTitle] = React.useState('');
-  const [newPlayer, setNewPlayer] = React.useState('');
-  const [newPitch, setNewPitch] = React.useState((appUser as any)?.pitchName || appUser?.city || 'Obour Main Stadium');
-  const [videoFile, setVideoFile] = React.useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = React.useState(0);
-  const [newMatchId, setNewMatchId] = React.useState('');
-  const [submitting, setSubmitting] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchClips() {
@@ -67,68 +48,11 @@ export default function VarHighlightsPage() {
     fetchClips();
   }, []);
 
-  const handleUploadClip = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTitle.trim()) {
-      toast.error(isArabic ? 'يرجى إدخال عنوان المقطع' : 'Please enter a clip title');
-      return;
-    }
-    if (!videoFile) {
-      toast.error(isArabic ? 'يرجى اختيار مقطع فيديو' : 'Please select a video file');
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const fileRef = ref(storage, `var_highlights/${Date.now()}_${videoFile.name}`);
-      const uploadTask = uploadBytesResumable(fileRef, videoFile);
-
-      uploadTask.on('state_changed', 
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress);
-        },
-        (error) => {
-          console.error(error);
-          toast.error(isArabic ? 'فشل رفع الفيديو' : 'Video upload failed');
-          setSubmitting(false);
-        },
-        async () => {
-          try {
-            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-            const clipDoc = {
-              title: newTitle.trim(),
-              player: newPlayer.trim() || appUser?.name || 'Featured Player',
-              pitch: newPitch.trim() || 'Obour Stadium',
-              time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-              videoUrl: downloadUrl,
-              matchId: newMatchId.trim() || undefined,
-              timestamp: Date.now(),
-            };
-            const docRef = await addDoc(collection(db, 'var_highlights'), clipDoc);
-            const added = { id: docRef.id, ...clipDoc };
-            setClips((prev) => [added, ...prev]);
-            setSelectedClip(added);
-            toast.success(isArabic ? 'تم نشر لقطة الفار بنجاح! 🎥' : 'VAR Highlight clip published live! 🎥');
-            setIsUploadOpen(false);
-            setNewTitle('');
-            setNewPlayer('');
-            setVideoFile(null);
-            setUploadProgress(0);
-            setNewMatchId('');
-          } catch (err) {
-            console.error(err);
-            toast.error(isArabic ? 'فشل نشر اللقطة' : 'Failed to publish VAR clip');
-          } finally {
-            setSubmitting(false);
-          }
-        }
-      );
-    } catch (err) {
-      console.error(err);
-      toast.error(isArabic ? 'فشل بدء الرفع' : 'Failed to start upload');
-      setSubmitting(false);
-    }
+  const handleClipUploaded = (clip: VarClip) => {
+    setClips((prev) => [clip, ...prev]);
+    setSelectedClip(clip);
   };
+
 
   const [isSlowMo, setIsSlowMo] = React.useState(false);
   const [upvotes, setUpvotes] = React.useState<Record<string, number>>({});
@@ -247,106 +171,14 @@ export default function VarHighlightsPage() {
       )}
 
       {/* Upload Modal */}
-      {isUploadOpen && (
-        <Portal>
-          <div 
-            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-            onClick={() => setIsUploadOpen(false)}
-          >
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }} 
-            animate={{ opacity: 1, scale: 1 }} 
-            className="global-box border-white/10 rounded-3xl p-6 max-w-md w-full space-y-4"
-            onClick={(e) => e.stopPropagation()}
-            dir={isArabic ? 'rtl' : 'ltr'}
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="text-lg font-black text-foreground flex items-center gap-2">
-                <Upload className="w-5 h-5 text-primary" /> {isArabic ? 'رفع مقطع فار جديد' : 'Upload Pitch VAR Clip'}
-              </h3>
-              <button onClick={() => setIsUploadOpen(false)} className="text-muted-foreground hover:text-foreground cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleUploadClip} className="space-y-4 text-xs font-bold">
-              <div>
-                <label className="text-muted-foreground uppercase block mb-1">{isArabic ? 'عنوان المقطع' : 'Highlight Title'}</label>
-                <input
-                  type="text"
-                  required
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder={isArabic ? "مثال: هدف خرافي دبل كيك" : "e.g. Insane Bicycle Kick Goal in 90'"}
-                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground"
-                />
-              </div>
-
-              <div>
-                <label className="text-muted-foreground uppercase block mb-1">{isArabic ? 'اللاعب (اختياري)' : 'Featured Player (Optional)'}</label>
-                <input
-                  type="text"
-                  value={newPlayer}
-                  onChange={(e) => setNewPlayer(e.target.value)}
-                  placeholder="e.g. Messi or leave empty"
-                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground"
-                />
-              </div>
-
-              <div>
-                <label className="text-muted-foreground uppercase block mb-1">{isArabic ? 'معرف المباراة (اختياري)' : 'Match ID (Optional)'}</label>
-                <input
-                  type="text"
-                  value={newMatchId}
-                  onChange={(e) => setNewMatchId(e.target.value)}
-                  placeholder="Link this clip to a specific match event"
-                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground"
-                />
-              </div>
-
-              <div>
-                <label className="text-muted-foreground uppercase block mb-1">{isArabic ? 'اسم الملعب' : 'Stadium / Pitch Name'}</label>
-                <input
-                  type="text"
-                  value={newPitch}
-                  onChange={(e) => setNewPitch(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground"
-                />
-              </div>
-
-              <div>
-                <label className="text-muted-foreground uppercase block mb-1">{isArabic ? 'ملف الفيديو (MP4)' : 'Video File (MP4)'}</label>
-                <input
-                  type="file"
-                  accept="video/mp4,video/x-m4v,video/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      setVideoFile(e.target.files[0]);
-                    }
-                  }}
-                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-primary file:text-black hover:file:bg-primary/90"
-                  dir="ltr"
-                />
-                {uploadProgress > 0 && uploadProgress < 100 && (
-                  <div className="w-full bg-white/10 rounded-full h-1.5 mt-3">
-                    <div className="bg-primary h-1.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={() => setIsUploadOpen(false)} className="flex-1 rounded-xl">
-                  {isArabic ? 'إلغاء' : 'Cancel'}
-                </Button>
-                <Button type="submit" disabled={submitting} className="flex-1 bg-primary text-black font-black rounded-xl">
-                  {submitting ? (isArabic ? 'جاري النشر...' : 'Publishing...') : (isArabic ? 'نشر المقطع' : 'Publish Clip')}
-                </Button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-        </Portal>
-      )}
+      <UploadVarClipModal
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+        onClipUploaded={handleClipUploaded}
+        defaultPitch={(appUser as any)?.pitchName || appUser?.city || 'Obour Main Stadium'}
+        isArabic={isArabic}
+      />
     </div>
   );
 }
+

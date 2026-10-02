@@ -40,6 +40,7 @@ const COMMAND_ITEMS: CommandItem[] = [
   { id: 'communities', labelEn: 'Football Communities & Clubs', labelAr: 'مجتمعات وفرق كرة القدم', categoryEn: 'Social', categoryAr: 'المجتمع', href: '/communities', icon: <Users className="w-4 h-4 text-cyan-400" /> },
   { id: 'leaderboard', labelEn: 'Leaderboard & Top Scorers', labelAr: 'لوحة الصدارة والهدافين', categoryEn: 'Social', categoryAr: 'المجتمع', href: '/leaderboard', icon: <Award className="w-4 h-4 text-amber-400" /> },
   { id: 'subscription', labelEn: 'Pitch Pass VIP Memberships', labelAr: 'اشتراكات وعضويات Pitch Pass', categoryEn: 'Store', categoryAr: 'المتجر', href: '/subscription', icon: <Crown className="w-4 h-4 text-amber-300" /> },
+  { id: 'pricing', labelEn: 'Pricing & Pass Comparison', labelAr: 'الأسعار ومقارنة الباقات', categoryEn: 'Store', categoryAr: 'المتجر', href: '/pricing', icon: <Crown className="w-4 h-4 text-emerald-400" /> },
   { id: 'jersey', labelEn: 'Custom Jersey Designer', labelAr: 'مصمم القمصان والأطقم', categoryEn: 'Store', categoryAr: 'المتجر', href: '/jersey-designer', icon: <Shirt className="w-4 h-4 text-blue-400" /> },
   { id: 'privacy', labelEn: 'Privacy Policy (Law 151 / GDPR)', labelAr: 'سياسة الخصوصية وقانون 151', categoryEn: 'Legal', categoryAr: 'القانونية', href: '/privacy', icon: <Shield className="w-4 h-4 text-muted-foreground" /> },
   { id: 'terms', labelEn: 'Terms of Service', labelAr: 'شروط الخدمة والاستخدام', categoryEn: 'Legal', categoryAr: 'القانونية', href: '/terms', icon: <FileText className="w-4 h-4 text-muted-foreground" /> },

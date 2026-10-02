@@ -5,6 +5,8 @@ export interface AIResponseResult {
   text: string;
   chips: string[];
   modelUsed: string;
+  quotaExceeded?: boolean;
+  upgradeCta?: string;
 }
 
 interface CacheEntry {
@@ -163,6 +165,17 @@ CHIPS: ["Chip 1", "Chip 2", "Chip 3"]`;
 
     if (response.ok) {
       const json = await response.json();
+      if (json.quotaExceeded) {
+        return {
+          text: isArabic ? json.message : (json.messageEn || json.message),
+          chips: isArabic
+            ? ['ترقية إلى Pro Pass', 'تصفح صفحة الأسعار', 'حجز ملعب']
+            : ['Upgrade to Pro Pass', 'View Pricing', 'Book a Pitch'],
+          modelUsed: 'quota-guard',
+          quotaExceeded: true,
+          upgradeCta: json.upgradeCta || '/pricing',
+        };
+      }
       if (json.success && json.text) {
         const result: AIResponseResult = {
           text: json.text,

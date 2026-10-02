@@ -15,6 +15,7 @@ import { ReadingProgressBar } from "@/components/ReadingProgressBar";
 import { MobileStickyCta } from "@/components/MobileStickyCta";
 import { ClientChatWidget } from '@/components/ClientChatWidget';
 import { CookieConsentBanner } from '@/components/CookieConsentBanner';
+import { OwnerOpToolbar } from '@/components/owner/OwnerOpToolbar';
 import { MainContainer } from '@/components/MainContainer';
 import { NextIntlClientProvider } from 'next-intl';
 
@@ -189,6 +190,7 @@ export default async function RootLayout({
                 <Toaster />
                 <ClientChatWidget />
                 <CookieConsentBanner />
+                <OwnerOpToolbar />
               </AuthProvider>
             </ThemeProvider>
           </ReactQueryProvider>

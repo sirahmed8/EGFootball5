@@ -4,10 +4,9 @@ import * as React from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
-import { Swords, MapPin, Clock, Plus, CheckCircle2, X, Inbox } from 'lucide-react';
+import { Swords, MapPin, Clock, Plus, CheckCircle2, Inbox, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Portal } from '@/components/Portal';
 import { toast } from 'sonner';
 import {
   collection,
@@ -22,6 +21,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { ChallengesPageSkeleton } from '@/components/skeletons/PageSkeletons';
+import { PostChallengeModal } from './components/PostChallengeModal';
 
 interface Challenge {
   id: string;
@@ -46,22 +46,8 @@ export default function SquadChallengesPage() {
   const [loading, setLoading] = React.useState(true);
   const [acceptingId, setAcceptingId] = React.useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [squadName, setSquadName] = React.useState(appUser?.name || '');
-  const [pitchName, setPitchName] = React.useState('');
-  const [wager, setWager] = React.useState('');
-  const [dateStr, setDateStr] = React.useState('');
-  const [timeStr, setTimeStr] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
 
-  // Fix #23 & #24: Close modal on Escape key
-  React.useEffect(() => {
-    if (!isModalOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsModalOpen(false);
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [isModalOpen]);
 
   // Load real challenges from Firestore
   React.useEffect(() => {
@@ -129,26 +115,31 @@ export default function SquadChallengesPage() {
     }
   };
 
-  const handleCreateChallenge = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateChallenge = async (data: {
+    squadName: string;
+    pitchName: string;
+    dateStr: string;
+    timeStr: string;
+    wager: string;
+  }) => {
     if (!firebaseUser) {
       toast.error(isArabic ? 'يرجى تسجيل الدخول لنشر التحدي' : 'Please sign in to post a challenge');
       return;
     }
-    if (!squadName.trim() || !pitchName.trim() || !wager.trim()) {
+    if (!data.squadName.trim() || !data.pitchName.trim() || !data.wager.trim()) {
       toast.error(isArabic ? 'يرجى ملء جميع الحقول المطلوبة' : 'Please fill in all required fields');
       return;
     }
     setSubmitting(true);
     try {
       const newC = {
-        challengerSquad: squadName.trim(),
+        challengerSquad: data.squadName.trim(),
         squadLogo: '🔥',
-        pitchName: pitchName.trim(),
+        pitchName: data.pitchName.trim(),
         city: appUser?.city || (isArabic ? 'العبور' : 'Obour'),
-        date: dateStr || (isArabic ? 'غير محدد' : 'TBD'),
-        time: timeStr || (isArabic ? 'غير محدد' : 'TBD'),
-        wagerTerms: wager.trim(),
+        date: data.dateStr || (isArabic ? 'غير محدد' : 'TBD'),
+        time: data.timeStr || (isArabic ? 'غير محدد' : 'TBD'),
+        wagerTerms: data.wager.trim(),
         accepted: false,
         postedBy: firebaseUser.uid,
         createdAt: serverTimestamp(),
@@ -157,11 +148,6 @@ export default function SquadChallengesPage() {
       setChallenges((prev) => [{ id: ref.id, ...newC } as Challenge, ...prev]);
       toast.success(isArabic ? 'تم نشر التحدي في ساحة المواجهات! ⚔️' : 'Squad Challenge posted to Arena! ⚔️');
       setIsModalOpen(false);
-      setSquadName('');
-      setPitchName('');
-      setWager('');
-      setDateStr('');
-      setTimeStr('');
     } catch (err) {
       console.error(err);
       toast.error(isArabic ? 'فشل نشر التحدي. يرجى المحاولة مرة أخرى.' : 'Failed to post challenge. Please try again.');
@@ -169,6 +155,7 @@ export default function SquadChallengesPage() {
       setSubmitting(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-black py-4 sm:py-8 px-2 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto space-y-6 w-full max-w-full overflow-x-hidden" dir={isArabic ? 'rtl' : 'ltr'}>
@@ -295,102 +282,15 @@ export default function SquadChallengesPage() {
       )}
 
       {/* Post Challenge Modal */}
-      {isModalOpen && (
-        <Portal>
-          <div
-            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-            onClick={() => setIsModalOpen(false)}
-          >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-4 shadow-2xl relative"
-            dir={isArabic ? 'rtl' : 'ltr'}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h2 className="text-2xl font-black text-foreground">{isArabic ? 'إضافة تحدي بين الفرق' : 'Post Squad Challenge'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <form onSubmit={handleCreateChallenge} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'اسم فريقك *' : 'Your Squad Name *'}</label>
-                <input
-                  type="text"
-                  required
-                  value={squadName}
-                  onChange={(e) => setSquadName(e.target.value)}
-                  placeholder={isArabic ? 'مثال: صقور العبور' : 'e.g. Obour Warriors'}
-                  className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'عنوان أو اسم الملعب *' : 'Pitch Location *'}</label>
-                <input
-                  type="text"
-                  required
-                  value={pitchName}
-                  onChange={(e) => setPitchName(e.target.value)}
-                  placeholder={isArabic ? 'مثال: استاد الأهلي بالعبور - ملعب 2' : 'e.g. Al Ahly Obour Stadium Pitch 2'}
-                  className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'اليوم' : 'Date'}</label>
-                  <input
-                    type="date"
-                    value={dateStr}
-                    onChange={(e) => setDateStr(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'الوقت' : 'Time'}</label>
-                  <input
-                    type="time"
-                    value={timeStr}
-                    onChange={(e) => setTimeStr(e.target.value)}
-                    className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{isArabic ? 'شرط التحدي والرهان *' : 'Wager Terms *'}</label>
-                <input
-                  type="text"
-                  required
-                  value={wager}
-                  onChange={(e) => setWager(e.target.value)}
-                  placeholder={isArabic ? 'مثال: الخاسر يدفع حجز الملعب كاملاً' : 'e.g. Loser Pays Pitch Fee'}
-                  className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm font-medium focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsModalOpen(false)}
-                  className="w-1/2 stadium-glass border-white/10 text-foreground rounded-2xl"
-                >
-                  {isArabic ? 'إلغاء' : 'Cancel'}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-1/2 bg-primary text-black font-black rounded-2xl glow-primary"
-                >
-                  {submitting ? (isArabic ? 'جاري النشر...' : 'Posting...') : (isArabic ? 'نشر التحدي 🚀' : 'Post Challenge 🚀')}
-                </Button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-        </Portal>
-      )}
+      <PostChallengeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        defaultSquadName={appUser?.name || ''}
+        onSubmit={handleCreateChallenge}
+        submitting={submitting}
+        isArabic={isArabic}
+      />
     </div>
   );
 }
+

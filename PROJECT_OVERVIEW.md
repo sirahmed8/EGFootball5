@@ -164,16 +164,29 @@ Every oversized file across the application has been decomposed into domain-spec
 - **`home/page.tsx`** (formerly 560 lines): Decomposed into `HomeFilterBar`, `PitchGridCard`, `PitchListCard`, and `PitchPreviewModal`.
 - **`owner/analytics/page.tsx`** (formerly 542 lines): Decomposed into `AnalyticsOverviewTab`, `SubscriptionsTab`, `VipGiftsTab`, `PitchesAnalyticsTab`, and `AiUsageTab`.
 - **`jersey-designer/page.tsx`** (formerly 541 lines): Decomposed into `JerseyPreview3D` and `JerseyCustomizerControls`.
-- **`communities/page.tsx`** (formerly 483 lines): Decomposed into `CommunityCard`, `CategoryFilterBar`, and `CreateCommunityModal`.
-- **`booking.ts`** (formerly 429 lines): Modularized into `booking.ts` and `booking-helpers.ts`.
+- **`SideMenu.tsx`** (formerly 310 lines): Modularized into `SideMenu.tsx` (111 lines) and `SidebarContent.tsx` (195 lines).
+- **`tournaments/page.tsx`** (formerly 308 lines): Modularized into `tournaments/page.tsx` (220 lines) and `TournamentBracketModal.tsx` (147 lines).
+- **`leaderboard/page.tsx`** (formerly 309 lines): Modularized into `leaderboard/page.tsx` (229 lines) and `LeaderboardPodium.tsx` (98 lines).
+- **`goal-of-the-month/page.tsx`** (formerly 312 lines): Modularized into `goal-of-the-month/page.tsx` (263 lines) and `GoalSubmissionModal.tsx` (143 lines).
+- **`admin/dashboard/page.tsx`** (formerly 325 lines): Modularized into `admin/dashboard/page.tsx` (289 lines), `ReceiptLightboxModal.tsx` (47 lines), and `adminHelpers.ts` (31 lines).
+- **`achievements/page.tsx`** (formerly 350 lines): Modularized into `achievements/page.tsx` (192 lines) and `achievementsData.ts` (178 lines).
+- **`challenges/page.tsx`** (formerly 397 lines): Modularized into `challenges/page.tsx` (296 lines) and `PostChallengeModal.tsx` (167 lines).
+- **`announcements/page.tsx`** (formerly 385 lines): Modularized into `announcements/page.tsx` (211 lines), `AnnouncementDetailsModal.tsx` (82 lines), and `PublishAnnouncementModal.tsx` (198 lines).
+- **`var-highlights/page.tsx`** (formerly 353 lines): Modularized into `var-highlights/page.tsx` (184 lines) and `UploadVarClipModal.tsx` (198 lines).
+- **`owner/users/page.tsx`** (formerly 365 lines): Modularized into `owner/users/page.tsx` (299 lines) and `UserMobileCard.tsx` (128 lines).
+- **`CustomDarkDatePicker.tsx`** (formerly 326 lines): Modularized into `CustomDarkDatePicker.tsx` (260 lines) and `CustomTimeDropdown.tsx` (86 lines).
+- **`JerseyPreview3D.tsx`** (formerly 343 lines): Modularized into `JerseyPreview3D.tsx` (208 lines), `JerseySvgDefs.tsx` (80 lines), and `JerseyBadgeIcon.tsx` (60 lines).
+- **`onboarding/page.tsx`** (formerly 415 lines): Modularized into `onboarding/page.tsx` (172 lines), `OnboardingPositionStep.tsx`, `OnboardingSkillStep.tsx`, `OnboardingClubStep.tsx`, and `OnboardingContactStep.tsx`.
 
 ---
 
 ## ⚡ 100% Route Loading Skeleton Coverage (`loading.tsx`)
-All 34 application routes feature dedicated, precision geometric skeleton loaders mirroring exact layout geometries:
+All 35 application routes feature dedicated, precision geometric skeleton loaders mirroring exact layout geometries:
 - Authentication & Onboarding: `login/loading.tsx`, `onboarding/loading.tsx`
 - Core & Booking: `home/loading.tsx`, `book/loading.tsx`, `checkout/loading.tsx`, `matches/loading.tsx`, `profile/loading.tsx`, `profile/[username]/loading.tsx`
 - Administration & Ownership: `admin/dashboard/loading.tsx`, `owner/loading.tsx`, `owner/dashboard/loading.tsx`, `owner/analytics/loading.tsx`, `owner/users/loading.tsx`
+- Subscriptions & Monetization: `pricing/loading.tsx`, `subscription/loading.tsx`
 - Social & Gaming: `communities/loading.tsx`, `community-chat/loading.tsx`, `leaderboard/loading.tsx`, `tournaments/loading.tsx`, `challenges/loading.tsx`, `achievements/loading.tsx`, `ceremony/loading.tsx`, `jersey-designer/loading.tsx`, `goal-of-the-month/loading.tsx`, `var-highlights/loading.tsx`, `live-stream/loading.tsx`
-- Informational & Legal: `guide/loading.tsx`, `notifications/loading.tsx`, `announcements/loading.tsx`, `support/loading.tsx`, `subscription/loading.tsx`, `privacy/loading.tsx`, `terms/loading.tsx`, `refund/loading.tsx`, `cookies/loading.tsx`.
+- Informational & Legal: `guide/loading.tsx`, `notifications/loading.tsx`, `announcements/loading.tsx`, `support/loading.tsx`, `privacy/loading.tsx`, `terms/loading.tsx`, `refund/loading.tsx`, `cookies/loading.tsx`.
+
 

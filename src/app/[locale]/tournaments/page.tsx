@@ -2,12 +2,11 @@
 
 import * as React from 'react';
 import { useLocale } from 'next-intl';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Trophy, Crown, Sparkles, Inbox, Users } from 'lucide-react';
 import { staggerContainer, cardItemVariant } from '@/lib/animations';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Portal } from '@/components/Portal';
 import { toast } from 'sonner';
 import { TournamentsPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import {
@@ -24,28 +23,7 @@ import { db } from '@/lib/firebase/config';
 import { useAuthStore } from '@/store/useAuthStore';
 import { isUserVip } from '@/lib/vip';
 
-interface TournamentMatch {
-  team1: string;
-  score1: string | number;
-  team2: string;
-  score2: string | number;
-  winner?: string;
-}
-
-interface TournamentRound {
-  name: string;
-  matches: TournamentMatch[];
-}
-
-interface Tournament {
-  id: string;
-  name: string;
-  subtitle?: string;
-  squadCount?: number;
-  status?: 'upcoming' | 'live' | 'completed';
-  rounds?: TournamentRound[];
-  createdAt?: number;
-}
+import { TournamentBracketModal, Tournament } from './components/TournamentBracketModal';
 
 export default function TournamentsPage() {
   const locale = useLocale();
@@ -56,16 +34,6 @@ export default function TournamentsPage() {
   const [loading, setLoading] = React.useState(true);
   const [selectedTournament, setSelectedTournament] = React.useState<Tournament | null>(null);
   const [registering, setRegistering] = React.useState(false);
-
-  // Fix #24: Close bracket modal on Escape key
-  React.useEffect(() => {
-    if (!selectedTournament) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedTournament(null);
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [selectedTournament]);
 
   // Load real tournaments from Firestore
   React.useEffect(() => {
@@ -240,68 +208,12 @@ export default function TournamentsPage() {
       )}
 
       {/* Bracket Viewer Modal */}
-      <AnimatePresence>
-        {selectedTournament && selectedTournament.rounds && (
-          <Portal>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-              onClick={() => setSelectedTournament(null)}
-            >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-4xl stadium-glass border-white/10 rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6"
-            dir={isArabic ? 'rtl' : 'ltr'}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <h2 className="text-xl font-black text-foreground flex items-center gap-2">
-                <Sparkles className="text-primary" /> {isArabic ? 'شجرة مواجهات' : ''} {selectedTournament.name}
-              </h2>
-              <button
-                onClick={() => setSelectedTournament(null)}
-                className="p-2 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-              {selectedTournament.rounds.map((round, rIdx) => (
-                <div key={rIdx} className="space-y-4">
-                  <h3 className="text-xs font-black text-center uppercase tracking-wider text-muted-foreground bg-white/5 py-1.5 rounded-xl border border-white/10">
-                    {round.name}
-                  </h3>
-                  <div className="space-y-4">
-                    {round.matches.map((m, mIdx) => (
-                      <Card
-                        key={mIdx}
-                        className="stadium-glass border-white/10 rounded-2xl p-4 shadow-md space-y-2 hover:border-emerald-500/40 transition-colors"
-                      >
-                        <div className={`flex justify-between items-center text-xs font-bold ${m.winner === m.team1 ? 'text-emerald-400 font-black' : 'text-foreground'}`}>
-                          <span>{m.team1}</span>
-                          <span className="font-mono">{m.score1}</span>
-                        </div>
-                        <div className="h-px bg-white/10" />
-                        <div className={`flex justify-between items-center text-xs font-bold ${m.winner === m.team2 ? 'text-emerald-400 font-black' : 'text-foreground'}`}>
-                          <span>{m.team2}</span>
-                          <span className="font-mono">{m.score2}</span>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </motion.div>
-        </Portal>
-      )}
-      </AnimatePresence>
+      <TournamentBracketModal
+        tournament={selectedTournament}
+        onClose={() => setSelectedTournament(null)}
+        isArabic={isArabic}
+      />
     </div>
   );
 }
+

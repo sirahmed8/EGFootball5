@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import { useRouter } from '@/i18n/routing';
 import { onSnapshot, doc, getDoc, updateDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
@@ -13,15 +12,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { confirmBooking, rejectBooking, cleanupExpiredBookings } from '@/lib/firebase/booking';
 import { toast } from 'sonner';
 import { useTranslations, useLocale } from 'next-intl';
-import { Button } from '@/components/ui/button';
 import { useToggleBlacklist } from '@/hooks/useUserRoles';
 import { AdminOverviewCards } from '../components/AdminOverviewCards';
+import { ReceiptLightboxModal } from '../components/ReceiptLightboxModal';
+import { createDefaultPitchData } from '../components/adminHelpers';
+
 
 const VerificationQueue = dynamic(() => import('../components/VerificationQueue').then(m => m.VerificationQueue), { ssr: false });
 const SubscriptionApprovals = dynamic(() => import('../components/SubscriptionApprovals').then(m => m.SubscriptionApprovals), { ssr: false });
 const LiveSchedule = dynamic(() => import('../components/LiveSchedule').then(m => m.LiveSchedule), { ssr: false });
 const PitchSettings = dynamic(() => import('../components/PitchSettings').then(m => m.PitchSettings), { ssr: false });
 const PlayersList = dynamic(() => import('../components/PlayersList').then(m => m.PlayersList), { ssr: false });
+
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -48,43 +50,27 @@ export default function AdminDashboard() {
   }, [appUser, loading, router]);
 
   useEffect(() => {
-    if ((appUser?.role !== 'admin' && appUser?.role !== 'owner') || !firebaseUser?.email) return;
+    const adminEmail = firebaseUser?.email;
+    if ((appUser?.role !== 'admin' && appUser?.role !== 'owner') || !adminEmail) return;
 
     const fetchPitchAndBookings = async () => {
       let pitchData: Pitch;
-      const pitchQ = query(collection(db, 'pitches'), where('adminEmail', '==', firebaseUser.email));
+      const pitchQ = query(collection(db, 'pitches'), where('adminEmail', '==', adminEmail));
       const pitchSnap = await getDocs(pitchQ);
       
       if (pitchSnap.empty) {
-        // Auto-create a default pitch for this admin user so they can test/manage immediately
-        const defaultPitchId = `pitch_${Date.now()}`;
-        pitchData = {
-          id: defaultPitchId,
-          name: 'ملعب أبطال العبور (El Obour Champions Arena)',
-          locationName: 'مدينة العبور - الحي التاسع',
-          mapLink: 'https://maps.google.com',
-          imagePreviewUrl: '/pitch_preview.jpg',
-          pricePerHour: 350,
-          recipient: '01012345678',
-          managerName: appUser?.name || 'مدير الملعب',
-          adminEmail: firebaseUser.email || '',
-          adminPhone: appUser?.phone || '01012345678',
-          createdAt: Date.now(),
-          capacity: '5v5',
-          surfaceType: 'نجيل صناعي ممتاز',
-          hasFloodlights: true,
-          hasParking: true,
-          hasCafeteria: true,
-          rating: 4.9,
-          reviewsCount: 142,
-          city: 'obour',
-        };
+        pitchData = createDefaultPitchData(
+          adminEmail,
+          appUser?.name,
+          appUser?.phone
+        );
         try {
-          await setDoc(doc(db, 'pitches', defaultPitchId), pitchData);
+          await setDoc(doc(db, 'pitches', pitchData.id), pitchData);
           toast.success(t('defaultAdminNotice'));
         } catch {
           // fallback in-memory pitch
         }
+
       } else {
         pitchData = pitchSnap.docs[0].data() as Pitch;
       }
@@ -295,30 +281,11 @@ export default function AdminDashboard() {
       </Tabs>
 
       {/* Receipt Lightbox Modal */}
-      {activeReceiptUrl && (
-        <div 
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-zoom-out"
-          onClick={() => setActiveReceiptUrl(null)}
-        >
-          <div className="relative max-w-3xl max-h-[85vh] w-full flex flex-col justify-center items-center">
-            <Image 
-              src={activeReceiptUrl} 
-              alt="Receipt Zoom" 
-              width={800}
-              height={600}
-              unoptimized
-              className="object-contain rounded-lg max-h-[75vh] max-w-full shadow-2xl border border-white/10" 
-              onClick={(e) => e.stopPropagation()} 
-            />
-            <Button 
-              className="mt-6 bg-primary text-black font-extrabold hover:bg-primary/90 rounded-full px-8 py-2 h-auto cursor-pointer"
-              onClick={() => setActiveReceiptUrl(null)}
-            >
-              Close
-            </Button>
-          </div>
-        </div>
-      )}
+      <ReceiptLightboxModal
+        receiptUrl={activeReceiptUrl}
+        onClose={() => setActiveReceiptUrl(null)}
+      />
     </div>
   );
+
 }

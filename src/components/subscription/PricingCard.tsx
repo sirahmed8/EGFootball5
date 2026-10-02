@@ -5,6 +5,7 @@ import { Check, Crown, Zap, Shield, Sparkles } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BillingCycle, SubscriptionTier, SUBSCRIPTION_PRICING } from '@/types/subscription';
+import { SupportedCurrency, formatCurrency, egpToUsd } from '@/lib/currency';
 
 interface PricingCardProps {
   tier: SubscriptionTier;
@@ -12,6 +13,7 @@ interface PricingCardProps {
   currentTier: SubscriptionTier;
   onSelect: (tier: 'pro' | 'vip') => void;
   isArabic: boolean;
+  currency?: SupportedCurrency;
 }
 
 export function PricingCard({
@@ -20,6 +22,7 @@ export function PricingCard({
   currentTier,
   onSelect,
   isArabic,
+  currency = 'EGP',
 }: PricingCardProps) {
   const isFree = tier === 'free';
   const isPro = tier === 'pro';
@@ -28,8 +31,23 @@ export function PricingCard({
 
   const pricing = SUBSCRIPTION_PRICING[tier];
   const isQuarterly = cycle === 'quarterly';
-  const price = isQuarterly ? pricing.quarterlyEgp : pricing.monthlyEgp;
-  const effectiveMonthly = isQuarterly ? Math.round(pricing.quarterlyEgp / 3) : pricing.monthlyEgp;
+  const isAnnual = cycle === 'annual';
+
+  const rawPriceEgp = isAnnual
+    ? pricing.annualEgp
+    : isQuarterly
+    ? pricing.quarterlyEgp
+    : pricing.monthlyEgp;
+
+  const effectiveMonthlyEgp = isAnnual
+    ? Math.round(pricing.annualEgp / 12)
+    : isQuarterly
+    ? Math.round(pricing.quarterlyEgp / 3)
+    : pricing.monthlyEgp;
+
+  const displayPrice = currency === 'USD' ? egpToUsd(rawPriceEgp) : rawPriceEgp;
+  const displayEffectiveMonthly =
+    currency === 'USD' ? egpToUsd(effectiveMonthlyEgp) : effectiveMonthlyEgp;
 
   const perks = React.useMemo(() => {
     if (isFree) {
@@ -125,29 +143,39 @@ export function PricingCard({
             </p>
           </div>
 
-          {/* Price display in Egyptian Pound */}
+          {/* Price display */}
           <div className="pt-2">
             <div className="flex items-baseline gap-1.5">
               <span className="text-4xl font-black font-mono tracking-tight text-foreground">
-                {price}
+                {currency === 'USD' ? `$${displayPrice}` : displayPrice}
               </span>
               <span className="text-sm font-black text-muted-foreground">
-                {isArabic ? 'ج.م' : 'EGP'}
+                {currency === 'USD' ? 'USD' : isArabic ? 'ج.م' : 'EGP'}
               </span>
               {!isFree && (
                 <span className="text-xs text-muted-foreground font-medium">
-                  {isQuarterly
-                    ? (isArabic ? '/ 3 أشهر' : '/ 3 months')
-                    : (isArabic ? '/ شهر' : '/ month')}
+                  {isAnnual
+                    ? isArabic ? '/ سنة' : '/ year'
+                    : isQuarterly
+                    ? isArabic ? '/ 3 أشهر' : '/ 3 months'
+                    : isArabic ? '/ شهر' : '/ month'}
                 </span>
               )}
             </div>
 
+            {!isFree && isAnnual && (
+              <p className="text-[11px] text-emerald-400 font-semibold mt-1">
+                {isArabic
+                  ? `يعادل ${displayEffectiveMonthly} ${currency === 'USD' ? '$' : 'ج.م'} شهرياً (وفرت شهرين مجاناً!)`
+                  : `Equivalent to ${currency === 'USD' ? '$' : ''}${displayEffectiveMonthly} ${currency === 'USD' ? '' : 'EGP'}/mo (2 Months Free!)`}
+              </p>
+            )}
+
             {!isFree && isQuarterly && (
               <p className="text-[11px] text-emerald-400 font-semibold mt-1">
                 {isArabic
-                  ? `يعادل ${effectiveMonthly} ج.م شهرياً (وفرت ${pricing.discountPercentQuarterly}%)`
-                  : `Equivalent to ${effectiveMonthly} EGP/mo (Save ${pricing.discountPercentQuarterly}%)`}
+                  ? `يعادل ${displayEffectiveMonthly} ${currency === 'USD' ? '$' : 'ج.م'} شهرياً (وفرت ${pricing.discountPercentQuarterly}%)`
+                  : `Equivalent to ${currency === 'USD' ? '$' : ''}${displayEffectiveMonthly} ${currency === 'USD' ? '' : 'EGP'}/mo (Save ${pricing.discountPercentQuarterly}%)`}
               </p>
             )}
           </div>

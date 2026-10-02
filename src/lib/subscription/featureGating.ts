@@ -103,3 +103,47 @@ export function getUserBadgeType(user: AppUser | null | undefined): 'none' | 'pr
   if (tier === 'pro') return 'pro';
   return 'none';
 }
+
+/**
+ * Centralized feature flag evaluation.
+ * Owners and Admins enjoy OP Mode (automatic access to all features).
+ */
+export type SubscriptionFeatureKey =
+  | 'AI_UNLIMITED_COACH'
+  | 'PRIVATE_MATCH_LOBBY'
+  | 'FREE_TOURNAMENT_VOUCHER'
+  | 'EXTENDED_BOOKING_LOCK'
+  | 'BOOKING_DISCOUNT'
+  | 'CUSTOM_JERSEY_EXPORT'
+  | 'PRIORITY_SUPPORT'
+  | 'GOLD_BADGE'
+  | 'ADVANCED_ANALYTICS';
+
+export function canAccessFeature(
+  user: AppUser | null | undefined,
+  feature: SubscriptionFeatureKey
+): boolean {
+  if (!user) return false;
+  // Super-Admin / Owner OP Mode: Total bypass
+  if (user.role === 'owner' || user.role === 'admin') return true;
+
+  const tier = getUserSubscriptionTier(user);
+  switch (feature) {
+    case 'AI_UNLIMITED_COACH':
+    case 'PRIVATE_MATCH_LOBBY':
+    case 'BOOKING_DISCOUNT':
+    case 'EXTENDED_BOOKING_LOCK':
+      return tier === 'pro' || tier === 'vip';
+
+    case 'FREE_TOURNAMENT_VOUCHER':
+    case 'CUSTOM_JERSEY_EXPORT':
+    case 'PRIORITY_SUPPORT':
+    case 'GOLD_BADGE':
+    case 'ADVANCED_ANALYTICS':
+      return tier === 'vip';
+
+    default:
+      return false;
+  }
+}
+

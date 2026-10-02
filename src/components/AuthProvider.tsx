@@ -24,13 +24,16 @@ const PUBLIC_PATHS = [
   '/leaderboard',
   '/jersey-designer',
   '/subscription',
+  '/pricing',
   '/goal-of-the-month',
   '/ceremony',
   '/announcements',
   '/guide',
   '/privacy',
   '/terms',
+  '/refund',
   '/cookies',
+  '/thank-you',
 ];
 
 const normalizePath = (p: string) => p.replace(/\/$/, '') || '/';

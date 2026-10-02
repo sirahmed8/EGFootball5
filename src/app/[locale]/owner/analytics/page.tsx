@@ -8,17 +8,8 @@ import { db } from '@/lib/firebase/config';
 import { useQuery } from '@tanstack/react-query';
 import { Booking, Pitch, User as AppUser, BookingStatus } from '@/types';
 import { useLocale } from 'next-intl';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  TrendingUp,
-  DollarSign,
-  Users,
-  Sparkles,
-  Download,
-  CreditCard,
-  CalendarCheck,
-} from 'lucide-react';
+import { Sparkles, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { DashboardPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import { AnalyticsOverviewTab } from './components/AnalyticsOverviewTab';
@@ -26,6 +17,8 @@ import { SubscriptionsTab } from './components/SubscriptionsTab';
 import { VipGiftsTab } from './components/VipGiftsTab';
 import { PitchesAnalyticsTab } from './components/PitchesAnalyticsTab';
 import { AiUsageTab } from './components/AiUsageTab';
+import { AnalyticsKpiStrip } from './components/AnalyticsKpiStrip';
+import { exportAnalyticsCSV } from './components/exportCsvHelper';
 
 const fmt = (n: number) => n.toLocaleString();
 
@@ -147,37 +140,26 @@ export default function MasterAnalyticsPage() {
   });
   const maxDay = Math.max(...last7.map((d) => d.count), 1);
 
-  const exportCSV = () => {
-    const rows = [
-      ['Metric', 'Value'],
-      ['Gross Booking Revenue', `EGP ${grossRevenue}`],
-      ['Paid VIP Subscribers', paidVipUsers.length],
-      ['Paid VIP MRR', `EGP ${paidMRR}`],
-      ['Gifted VIP Members', giftedVipUsers.length],
-      ['Gifted VIP Opportunity Cost / mo', `EGP ${giftedCostPerMonth}`],
-      ['Total VIP Discounts Granted', `EGP ${totalVipDiscounts}`],
-      ['Pending Pitch Reimbursements', `EGP ${pendingReimbursements}`],
-      ['Settled Pitch Reimbursements', `EGP ${settledReimbursements}`],
-      ['Net Platform Profit', `EGP ${netProfit}`],
-      ['Total Registered Players', users.length],
-      ['Active VIP Members (all)', allVip.length],
-      ['Confirmed Bookings', confirmed.length],
-      ['Cancelled Bookings', cancelled.length],
-      ['Total AI Requests', totalAiRequests],
-      ['Total AI Tokens Used', totalAiTokens],
-      ['Estimated AI API Cost', `$${estimatedAiCost.toFixed(4)}`],
-    ]
-      .map((r) => r.join(','))
-      .join('\n');
-    const blob = new Blob([rows], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `egfootball5_analytics_${Date.now()}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    toast.success(isArabic ? 'تم تصدير التقرير بنجاح' : 'Report exported successfully!');
+  const handleExportCSV = () => {
+    exportAnalyticsCSV({
+      grossRevenue,
+      paidVipUsersCount: paidVipUsers.length,
+      paidMRR,
+      giftedVipUsersCount: giftedVipUsers.length,
+      giftedCostPerMonth,
+      totalVipDiscounts,
+      pendingReimbursements,
+      settledReimbursements,
+      netProfit,
+      usersCount: users.length,
+      allVipCount: allVip.length,
+      confirmedCount: confirmed.length,
+      cancelledCount: cancelled.length,
+      totalAiRequests,
+      totalAiTokens,
+      estimatedAiCost,
+      isArabic,
+    });
   };
 
   const tabs = [
@@ -210,7 +192,7 @@ export default function MasterAnalyticsPage() {
           </p>
         </div>
         <Button
-          onClick={exportCSV}
+          onClick={handleExportCSV}
           className="bg-primary text-black font-black rounded-2xl cursor-pointer flex items-center gap-2 shrink-0"
         >
           <Download className="w-4 h-4" />
@@ -219,53 +201,15 @@ export default function MasterAnalyticsPage() {
       </div>
 
       {/* Top 5 KPI Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {[
-          {
-            label: isArabic ? 'إجمالي الإيرادات' : 'Gross Revenue',
-            value: `EGP ${fmt(grossRevenue)}`,
-            icon: <DollarSign className="w-4 h-4" />,
-            color: 'text-primary',
-            border: 'border-primary/20',
-          },
-          {
-            label: isArabic ? 'MRR (اشتراكات)' : 'Subscription MRR',
-            value: `EGP ${fmt(paidMRR)}`,
-            icon: <CreditCard className="w-4 h-4" />,
-            color: 'text-amber-400',
-            border: 'border-amber-500/20',
-          },
-          {
-            label: isArabic ? 'صافي الأرباح' : 'Net Profit',
-            value: `EGP ${fmt(netProfit)}`,
-            icon: <TrendingUp className="w-4 h-4" />,
-            color: 'text-emerald-400',
-            border: 'border-emerald-500/20',
-          },
-          {
-            label: isArabic ? 'إجمالي اللاعبين' : 'Total Players',
-            value: fmt(users.length),
-            icon: <Users className="w-4 h-4" />,
-            color: 'text-blue-400',
-            border: 'border-blue-500/20',
-          },
-          {
-            label: isArabic ? 'حجوزات مؤكدة' : 'Confirmed Bookings',
-            value: fmt(confirmed.length),
-            icon: <CalendarCheck className="w-4 h-4" />,
-            color: 'text-violet-400',
-            border: 'border-violet-500/20',
-          },
-        ].map((k, i) => (
-          <Card key={i} className={`stadium-glass ${k.border} rounded-2xl p-4 bg-black space-y-2`}>
-            <div className={`flex justify-between items-center ${k.color}`}>
-              <span className="text-[10px] font-extrabold uppercase text-muted-foreground">{k.label}</span>
-              {k.icon}
-            </div>
-            <div className={`text-xl font-black font-mono ${k.color}`}>{k.value}</div>
-          </Card>
-        ))}
-      </div>
+      <AnalyticsKpiStrip
+        isArabic={isArabic}
+        grossRevenue={grossRevenue}
+        paidMRR={paidMRR}
+        netProfit={netProfit}
+        totalUsers={users.length}
+        confirmedBookingsCount={confirmed.length}
+        fmt={fmt}
+      />
 
       {/* Tabs */}
       <div className="flex gap-2 flex-wrap border-b border-white/10 pb-1">

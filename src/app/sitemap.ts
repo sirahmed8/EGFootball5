@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/communities',
     '/leaderboard',
     '/subscription',
+    '/pricing',
     '/jersey-designer',
     '/var-highlights',
     '/live-stream',
