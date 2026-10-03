@@ -85,13 +85,16 @@ export function EmailPasswordForm({
     <form onSubmit={handleSubmit} className="space-y-4 pt-1">
       {isSignUp && (
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+          <label htmlFor="login-fullname" className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
             {t('fullName')}
           </label>
           <div className="relative">
             <User className="absolute start-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <input
+              id="login-fullname"
+              name="name"
               type="text"
+              autoComplete="name"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -103,13 +106,16 @@ export function EmailPasswordForm({
       )}
 
       <div className="space-y-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+        <label htmlFor="login-email" className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
           {t('email')}
         </label>
         <div className="relative">
           <Mail className="absolute start-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <input
+            id="login-email"
+            name="email"
             type="email"
+            autoComplete="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -120,13 +126,16 @@ export function EmailPasswordForm({
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+        <label htmlFor="login-password" className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
           {t('password')}
         </label>
         <div className="relative">
           <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <input
+            id="login-password"
+            name="password"
             type={showPassword ? 'text' : 'password'}
+            autoComplete={isSignUp ? 'new-password' : 'current-password'}
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
