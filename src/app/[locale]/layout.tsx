@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://egfootball5.web.app'),
     title: t('title') || (isArabic ? 'EGFootball5 - حجز ملاعب خماسي بالعبور' : 'EGFootball5 - Pitch Booking Platform'),
-    description: t('description') || (isArabic ? 'منصة حجز ملاعب الخماسي والمباريات العامة بمدينة العبور' : 'Premier 5-a-side football pitch booking and match lobbies in Obour City'),
+    description: t('description') || (isArabic ? 'منصة حجز ملاعب الخماسي والمباريات العامة بمدينة العبور' : '5-a-side football pitch booking, match lobbies, and squad management in Obour City'),
     manifest: '/manifest.json',
     icons: { icon: '/favicon.jpg' },
     alternates: {

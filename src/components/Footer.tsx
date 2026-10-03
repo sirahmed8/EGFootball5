@@ -32,7 +32,7 @@ export function Footer() {
                 EG<span className="text-gradient-primary">Football5</span>
               </span>
               <span className="text-xs text-muted-foreground font-medium">
-                Egypt Premier Football Booking & Match Lobby Platform
+                5-a-side Pitch Reservations & Match Lobbies • Obour & Cairo
               </span>
             </div>
           </div>

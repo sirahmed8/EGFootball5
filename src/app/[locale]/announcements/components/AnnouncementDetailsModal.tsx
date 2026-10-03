@@ -4,6 +4,7 @@ import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, User, X } from 'lucide-react';
 import { Portal } from '@/components/Portal';
+import { FormattedMarkdownText } from '@/components/FormattedMarkdownText';
 
 export type Category =
   | 'All'
@@ -83,7 +84,7 @@ export function AnnouncementDetailsModal({
               </span>
             </div>
             <div className="text-neutral-300 leading-relaxed space-y-4 text-sm sm:text-base">
-              {announcement.summary}
+              <FormattedMarkdownText content={announcement.content || announcement.summary} />
             </div>
           </div>
         </motion.div>

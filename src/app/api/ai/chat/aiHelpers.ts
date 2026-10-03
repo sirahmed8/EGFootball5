@@ -140,8 +140,8 @@ export function getSmartKnowledgeFallback(prompt: string, isArabic: boolean): { 
 
   return {
     text: isArabic
-      ? 'أهلاً بك في EGFootball5! المنصة الأولى لحجز ملاعب الخماسي وتنظيم المباريات العامة بالعبور والقاهرة الجديدة. كيف يمكنني مساعدتك بخصوص الملاعب، المباريات، أو الاشتراكات اليوم؟'
-      : 'Welcome to EGFootball5! The premier 5-a-side pitch booking and open match platform in Obour City and New Cairo. How can I assist you with pitches, matches, or membership passes today?',
+      ? 'أهلاً بك في EGFootball5. منصة حجز ملاعب الخماسي وتنظيم المباريات بالعبور والقاهرة. كيف يمكنني مساعدتك بخصوص الملاعب، المباريات، أو الاشتراكات اليوم؟'
+      : 'Welcome to EGFootball5. 5-a-side pitch reservations, match lobbies, and team management across Obour City and Cairo. How can I help you with pitches, matches, or membership passes today?',
     chips: isArabic
       ? ['كيف أحجز ملعباً؟', 'خطط الاشتراكات والأسعار', 'المباريات العامة المتاحة']
       : ['How to book a pitch?', 'Pricing and passes', 'Available public matches'],

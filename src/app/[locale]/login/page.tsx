@@ -17,13 +17,16 @@ import { toast } from 'sonner';
 import { User as AppUser } from '@/types';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, ShieldCheck, Zap, Trophy, MapPin } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Zap, Trophy, MapPin, Mail } from 'lucide-react';
+import { LoginCardHeader } from './components/LoginCardHeader';
+import { EmailPasswordForm } from './components/EmailPasswordForm';
 
 export default function LoginPage() {
   const router = useRouter();
   const t = useTranslations('Login');
   const tForm = useTranslations('FormConsent');
   const [agreedToLegal, setAgreedToLegal] = useState(false);
+  const [showEmailAuth, setShowEmailAuth] = useState(false);
 
   const processUserSignIn = useCallback(async (user: FirebaseUser) => {
     const userRef = doc(db, 'users', user.uid);
@@ -179,27 +182,7 @@ export default function LoginPage() {
         className="w-full max-w-lg z-10"
       >
         <Card className="w-full stadium-glass border-white/10 shadow-2xl relative rounded-[2rem] overflow-hidden backdrop-blur-2xl bg-black/40">
-          <CardHeader className="text-center space-y-6 pt-10 px-6 md:px-10">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 20 }}
-              className="mx-auto w-20 h-20 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 glow-primary group hover:scale-105 transition-transform duration-300"
-            >
-              <div className="w-12 h-12 rounded-xl bg-primary text-black flex items-center justify-center shadow-inner">
-                <Trophy className="w-6 h-6 text-black" />
-              </div>
-            </motion.div>
-            
-            <div className="space-y-2">
-              <CardTitle className="text-3xl md:text-5xl font-black text-foreground tracking-tighter">
-                EG<span className="text-gradient-primary">Football5</span>
-              </CardTitle>
-              <CardDescription className="text-muted-foreground text-base md:text-lg font-medium">
-                {t('welcomeBack')}
-              </CardDescription>
-            </div>
-          </CardHeader>
+          <LoginCardHeader welcomeBackText={t('welcomeBack')} />
 
           <CardContent className="flex flex-col gap-6 p-6 md:px-10 md:pb-10">
             {/* Features Pills */}
@@ -276,6 +259,32 @@ export default function LoginPage() {
                 <ArrowRight className="w-5 h-5 opacity-50" />
               </Button>
             </motion.div>
+
+            <div className="relative flex items-center justify-center my-0.5">
+              <div className="border-t border-white/10 w-full" />
+              <span className="bg-[#0e1217] px-3 text-[11px] text-muted-foreground uppercase font-mono tracking-wider absolute">
+                {t('email') || 'Or'}
+              </span>
+            </div>
+
+            {!showEmailAuth ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowEmailAuth(true)}
+                className="w-full h-12 rounded-xl border-white/15 bg-white/5 hover:bg-white/10 text-foreground font-bold cursor-pointer transition-all flex items-center justify-center gap-2"
+              >
+                <Mail className="w-4 h-4 text-primary" />
+                <span>{t('signIn')}: {t('email')} & {t('password')}</span>
+              </Button>
+            ) : (
+              <EmailPasswordForm
+                onSuccess={processUserSignIn}
+                agreedToLegal={agreedToLegal}
+                t={t}
+                tForm={tForm}
+              />
+            )}
           </CardContent>
         </Card>
       </motion.div>
