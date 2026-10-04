@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trophy, Star, Shield, Award, Zap, Crown, ShieldCheck } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { User as AppUser } from '@/types';
 import { isUserVip } from '@/lib/vip';
@@ -23,6 +23,8 @@ export function ProfileStatsHeader({
   confirmedMatches,
   preferredPitchName,
 }: ProfileStatsHeaderProps) {
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
   const t = useTranslations('Profile');
   const tAchieve = useTranslations('Achievements');
 
@@ -71,14 +73,14 @@ export function ProfileStatsHeader({
         {appUser.username && (
           <Button
             onClick={() => {
-              const url = `${window.location.origin}/profile/@${appUser.username}`;
+              const url = `${window.location.origin}/${locale}/profile/${appUser.username}`;
               navigator.clipboard.writeText(url);
-              toast.success('Public profile link copied to clipboard!');
+              toast.success(isArabic ? 'تم نسخ رابط الملف الشخصي!' : 'Public profile link copied to clipboard!');
             }}
             variant="outline"
             className="rounded-2xl border-white/10 hover:bg-white/10 font-bold text-xs shrink-0 cursor-pointer"
           >
-            📋 Copy Profile Link (@{appUser.username})
+            📋 {isArabic ? `نسخ رابط الحساب (@${appUser.username})` : `Copy Profile Link (@${appUser.username})`}
           </Button>
         )}
       </div>

@@ -181,33 +181,28 @@ function HomeContent() {
         t={t}
       />
 
-      {/* Empty State */}
-      {filteredPitches.length === 0 && (
+      {/* Empty State vs Pitch Grid / List */}
+      {filteredPitches.length === 0 ? (
         <div className="text-center py-20 space-y-4">
-          <div className="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl mx-auto">
+          <div className="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl mx-auto shadow-inner">
             🏟️
           </div>
           <h3 className="text-2xl font-black text-foreground">
-            {rawPitches.length === 0 ? 'No Pitches Available Yet' : 'No Pitches Found'}
+            {rawPitches.length === 0 ? t('noPitches') : t('noPitchesFound')}
           </h3>
-          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            {rawPitches.length === 0
-              ? 'Platform owners can add new pitches from the Owner Dashboard.'
-              : 'Try adjusting your filters or search for a different area.'}
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto font-medium">
+            {t('noPitchesDesc')}
           </p>
           {rawPitches.length > 0 && (
             <Button
               onClick={resetFilters}
-              className="bg-primary text-black font-extrabold rounded-xl px-6 cursor-pointer"
+              className="bg-primary text-black font-extrabold rounded-xl px-6 cursor-pointer active:scale-95 transition-transform"
             >
               {t('showAllPitches')}
             </Button>
           )}
         </div>
-      )}
-
-      {/* Pitch Grid / List Render */}
-      {viewMode === 'grid' ? (
+      ) : viewMode === 'grid' ? (
         <MotionDiv
           initial="hidden"
           animate="visible"

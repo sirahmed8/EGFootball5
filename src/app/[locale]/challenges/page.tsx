@@ -197,8 +197,8 @@ export default function SquadChallengesPage() {
         </div>
       ) : challenges.length === 0 ? (
         /* Empty state */
-        <Card className="global-box border-white/10 rounded-3xl p-6 sm:p-12 text-center space-y-4 bg-black max-w-full overflow-hidden">
-          <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-3xl mx-auto">
+        <Card className="global-box border-border rounded-3xl p-6 sm:p-12 text-center space-y-4 bg-card max-w-full overflow-hidden">
+          <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center text-3xl mx-auto">
             <Inbox className="w-8 h-8 text-muted-foreground" />
           </div>
           <h3 className="text-lg sm:text-xl font-black text-foreground">{isArabic ? 'لا توجد تحديات نشطة حالياً' : 'No Active Challenges Yet'}</h3>

@@ -193,6 +193,18 @@ export default function CommunitiesPage() {
           <Users className="w-12 h-12 text-muted-foreground/40 mx-auto" />
           <p className="text-muted-foreground font-bold">No communities found for your search.</p>
           <p className="text-xs text-muted-foreground">Try a different search term or category.</p>
+          {(search || category !== 'All') && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearch('');
+                setCategory('All');
+              }}
+              className="rounded-xl border-white/10 text-xs font-bold cursor-pointer active:scale-95 transition-transform"
+            >
+              Clear filters
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">

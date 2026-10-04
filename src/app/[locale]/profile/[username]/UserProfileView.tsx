@@ -8,12 +8,26 @@ import { Button } from '@/components/ui/button';
 import { Crown, Star, Shield, AtSign, ArrowLeft, Share2, ShieldCheck } from 'lucide-react';
 import { isUserVip } from '@/lib/vip';
 import { useLocale } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import { toast } from 'sonner';
 
 export function UserProfileView({ username }: { username: string }) {
   const locale = useLocale();
   const isArabic = locale === 'ar';
+  const routeParams = useParams();
+  const rawParamUsername = routeParams?.username as string | undefined;
+
+  const effectiveUsername = React.useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const pathSegments = window.location.pathname.split('/').filter(Boolean);
+      const lastSegment = pathSegments[pathSegments.length - 1];
+      if (lastSegment && lastSegment !== 'profile') {
+        return decodeURIComponent(lastSegment);
+      }
+    }
+    return rawParamUsername || username;
+  }, [rawParamUsername, username]);
 
   const [targetUser, setTargetUser] = React.useState<AppUser | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -21,7 +35,7 @@ export function UserProfileView({ username }: { username: string }) {
 
   React.useEffect(() => {
     async function loadUser() {
-      if (!username) {
+      if (!effectiveUsername) {
         setNotFound(true);
         setLoading(false);
         return;
@@ -29,7 +43,7 @@ export function UserProfileView({ username }: { username: string }) {
 
       setLoading(true);
       try {
-        const user = await getUserByUsername(username);
+        const user = await getUserByUsername(effectiveUsername);
         if (user) {
           setTargetUser(user);
         } else {
@@ -43,7 +57,7 @@ export function UserProfileView({ username }: { username: string }) {
       }
     }
     loadUser();
-  }, [username]);
+  }, [effectiveUsername]);
 
   const handleShareProfile = () => {
     const url = window.location.href;

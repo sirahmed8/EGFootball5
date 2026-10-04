@@ -166,7 +166,7 @@ export function CustomDarkDatePicker({ value, onChange, isArabic = false }: Cust
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: coords.placeAbove ? -8 : 8 }}
               transition={{ duration: 0.15 }}
-              className="bg-[#0b0f17] border border-white/20 rounded-2xl p-3.5 shadow-[0_20px_50px_rgba(0,0,0,0.95)] space-y-2.5 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"
+              className="bg-popover text-popover-foreground border border-border rounded-2xl p-3.5 shadow-2xl space-y-2.5 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"
             >
               {/* Month Navigation */}
               <div className="flex items-center justify-between">

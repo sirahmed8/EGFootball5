@@ -68,11 +68,11 @@ export function PostChallengeModal({
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="w-full max-w-lg stadium-glass border-white/10 rounded-3xl p-6 md:p-8 space-y-4 shadow-2xl relative bg-black"
+          className="w-full max-w-lg stadium-glass border-border rounded-3xl p-6 md:p-8 space-y-4 shadow-2xl relative bg-card"
           dir={isArabic ? 'rtl' : 'ltr'}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <div className="flex items-center justify-between border-b border-border pb-3">
             <h2 className="text-2xl font-black text-foreground">
               {isArabic ? 'إضافة تحدي بين الفرق' : 'Post Squad Challenge'}
             </h2>

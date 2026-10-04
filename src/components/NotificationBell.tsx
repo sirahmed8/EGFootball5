@@ -82,7 +82,7 @@ export function NotificationBell() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -4 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute top-full mt-2 w-[min(340px,calc(100vw-1.5rem))] bg-[#0B0F19] border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999] overflow-hidden end-0 global-outline-glow"
+            className="absolute top-full mt-2 w-[min(340px,calc(100vw-1.5rem))] bg-card border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999] overflow-hidden end-0 global-outline-glow"
           >
             {/* Header */}
             <div className="flex justify-between items-center px-4 py-3 border-b border-border">

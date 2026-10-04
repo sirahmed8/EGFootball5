@@ -160,14 +160,14 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning className="bg-background text-foreground dark" style={{ backgroundColor: '#0b0f17' }}>
+    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning className="bg-background text-foreground dark">
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${fontVariables} ${activeFontClass} antialiased bg-background text-foreground min-h-screen`}>
+      <body className={`${fontVariables} ${activeFontClass} antialiased bg-background text-foreground min-h-screen overflow-x-clip`}>
         <NextIntlClientProvider messages={messages}>
           <ReactQueryProvider>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>

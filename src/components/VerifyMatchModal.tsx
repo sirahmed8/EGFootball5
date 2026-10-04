@@ -83,7 +83,7 @@ export function VerifyMatchModal({ isOpen, onClose, match }: VerifyMatchModalPro
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md p-6 bg-[#0c1219] dark:bg-[#070b10] border border-border/80 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] space-y-6">
+      <DialogContent className="sm:max-w-md p-6 bg-card border border-border rounded-3xl shadow-2xl space-y-6">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black text-foreground flex items-center gap-2">
             <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />

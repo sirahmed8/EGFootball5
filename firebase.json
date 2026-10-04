@@ -17,6 +17,16 @@
         "type": 301
       }
     ],
+    "rewrites": [
+      {
+        "source": "/en/profile/**",
+        "destination": "/en/profile/player.html"
+      },
+      {
+        "source": "/ar/profile/**",
+        "destination": "/ar/profile/player.html"
+      }
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",

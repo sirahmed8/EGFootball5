@@ -110,8 +110,8 @@ export function FloatingChatWidget() {
       setAiMessages([welcomeMsg]);
     } catch {
       const fallbackText = isArabic
-        ? `أهلاً بك! أنا مساعد **EGFootball5** الذكي ⚽ كيف يمكنني مساعدتك اليوم في حجز الملاعب أو تنظيم المباريات؟`
-        : `Welcome! I am your **EGFootball5** AI Assistant ⚽ How can I help you today with pitches, bookings, or matches?`;
+        ? 'أهلاً بك! أنا منسق منصة EGFootball5 ⚽ كيف يمكنني مساعدتك اليوم في حجز الملاعب أو تنظيم المباريات؟'
+        : 'Welcome! I am your EGFootball5 coordinator ⚽ How can I help you today with pitches, bookings, or matches?';
       const fallbackChips = isArabic
         ? ['⚽ كيف أحجز ملعباً؟', '🏆 المباريات المتاحة', '📍 أماكن الملاعب']
         : ['⚽ How to book a pitch?', '🏆 Available matches', '📍 Find pitch locations'];

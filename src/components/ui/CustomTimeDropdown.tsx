@@ -55,7 +55,7 @@ export function CustomTimeDropdown({
             exit={{ opacity: 0, scale: 0.95, y: -4 }}
             transition={{ duration: 0.12 }}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            className="absolute z-[100] bottom-full mb-1 start-0 w-full bg-[#0b0f17] border border-emerald-500/40 rounded-2xl p-1 shadow-[0_10px_30px_rgba(0,0,0,0.9)] max-h-36 overflow-y-auto overflow-x-hidden space-y-0.5 [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"
+            className="absolute z-[100] bottom-full mb-1 start-0 w-full bg-popover text-popover-foreground border border-emerald-500/40 rounded-2xl p-1 shadow-2xl max-h-36 overflow-y-auto overflow-x-hidden space-y-0.5 [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar]:w-0 [&::-webkit-scrollbar]:h-0"
           >
             {options.map((opt) => (
               <button

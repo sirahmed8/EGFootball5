@@ -32,6 +32,7 @@ export default function MatchesPage() {
   const [selectedPosition, setSelectedPosition] = useState<'GK' | 'DEF' | 'MID' | 'STR'>('STR');
 
   const [pastMatches, setPastMatches] = useState<Booking[]>([]);
+  const [isCreateMatchOpen, setIsCreateMatchOpen] = useState(false);
   const [gkModal, setGkModal] = useState<{ isOpen: boolean; pitchName: string; timeSlot: string }>({
     isOpen: false,
     pitchName: '',
@@ -138,6 +139,8 @@ export default function MatchesPage() {
           pitches={availablePitchesList}
           isArabic={isArabic}
           firebaseUser={firebaseUser}
+          isOpen={isCreateMatchOpen}
+          onOpenChange={setIsCreateMatchOpen}
         />
       </div>
 
@@ -154,10 +157,7 @@ export default function MatchesPage() {
         <EmptyMatchesState
           filter={filter}
           isArabic={isArabic}
-          onHostClick={() => {
-            const btn = document.querySelector('button[aria-haspopup="dialog"]') as HTMLButtonElement;
-            btn?.click();
-          }}
+          onHostClick={() => setIsCreateMatchOpen(true)}
         />
       ) : (
         <MotionDiv

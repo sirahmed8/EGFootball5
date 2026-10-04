@@ -28,9 +28,10 @@ export function SetUsernameModal() {
   const [isAvailable, setIsAvailable] = React.useState<boolean | null>(null);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+  const [dismissed, setDismissed] = React.useState(false);
 
   // Show modal if user is logged in, appUser exists, but username is missing
-  const isOpen = Boolean(firebaseUser && appUser && !appUser.username);
+  const isOpen = Boolean(firebaseUser && appUser && !appUser.username && !dismissed);
 
   // Generate handle suggestions based on user name/email
   const suggestions = React.useMemo(() => {
@@ -114,9 +115,9 @@ export function SetUsernameModal() {
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && setDismissed(true)}>
       <DialogContent
-        className="sm:max-w-md p-6 bg-[#0c1219] dark:bg-[#070b10] border border-amber-500/30 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] space-y-5 backdrop-blur-2xl"
+        className="sm:max-w-md p-6 bg-card border border-amber-500/30 rounded-3xl shadow-2xl space-y-5 backdrop-blur-2xl"
         dir={isArabic ? 'rtl' : 'ltr'}
       >
         <DialogHeader className="text-center space-y-2">
@@ -215,6 +216,15 @@ export function SetUsernameModal() {
             ) : (
               <span>{isArabic ? 'تأكيد وحفظ اسم المستخدم' : 'Confirm & Claim Handle'}</span>
             )}
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setDismissed(true)}
+            className="w-full text-xs text-muted-foreground hover:text-foreground rounded-xl cursor-pointer"
+          >
+            {isArabic ? 'تذكيري لاحقاً' : 'Remind me later'}
           </Button>
         </form>
       </DialogContent>

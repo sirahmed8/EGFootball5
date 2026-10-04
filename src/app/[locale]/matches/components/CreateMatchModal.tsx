@@ -19,17 +19,31 @@ interface CreateMatchModalProps {
   pitches: Pitch[];
   isArabic?: boolean;
   firebaseUser: any;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function CreateMatchModal({
   pitches,
   isArabic,
   firebaseUser,
+  isOpen: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: CreateMatchModalProps) {
   const router = useRouter();
   const t = useTranslations('Matches');
   const [selectedPitchId, setSelectedPitchId] = useState<string>(pitches[0]?.id || '');
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const isControlled = externalOpen !== undefined;
+  const open = isControlled ? externalOpen : internalOpen;
+  const setOpen = (nextOpen: boolean) => {
+    if (isControlled) {
+      externalOnOpenChange?.(nextOpen);
+    } else {
+      setInternalOpen(nextOpen);
+    }
+  };
 
   const handleOpenModal = () => {
     if (!firebaseUser) {
@@ -64,7 +78,7 @@ export function CreateMatchModal({
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg p-6 bg-[#0c1219] dark:bg-[#070b10] border border-border/80 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] space-y-5 opacity-100">
+        <DialogContent className="sm:max-w-lg p-6 bg-card border border-border rounded-3xl shadow-2xl space-y-5">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-foreground flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-primary shrink-0" />

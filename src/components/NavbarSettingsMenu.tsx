@@ -138,7 +138,7 @@ export function NavbarSettingsMenu() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: -8 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full mt-2 end-0 w-84 sm:w-96 max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-5rem)] overflow-y-auto bg-[#0B0F19] border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999999] p-5 space-y-4 text-foreground global-outline-glow scrollbar-none"
+            className="absolute top-full mt-2 end-0 w-84 sm:w-96 max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-5rem)] overflow-y-auto bg-card border-2 border-emerald-500/30 rounded-3xl shadow-2xl z-[9999999] p-5 space-y-4 text-foreground global-outline-glow scrollbar-none"
           >
             {/* Header / User Info Card */}
             <div className="flex items-start justify-between pb-3 border-b border-white/10 gap-2">
