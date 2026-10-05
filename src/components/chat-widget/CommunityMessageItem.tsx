@@ -25,6 +25,14 @@ export function CommunityMessageItem({
 }: CommunityMessageItemProps) {
   const t = useTranslations('FloatingChat');
 
+  const [confirmDelete, setConfirmDelete] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!confirmDelete) return;
+    const timer = setTimeout(() => setConfirmDelete(false), 4000);
+    return () => clearTimeout(timer);
+  }, [confirmDelete]);
+
   return (
     <div className="p-3 rounded-2xl bg-muted/60 border border-border/50 space-y-2 relative group">
       <div className="flex items-center justify-between text-xs">
@@ -37,12 +45,32 @@ export function CommunityMessageItem({
           )}
         </div>
         {(msg.userId === firebaseUser?.uid || isAdmin) && (
-          <button
-            onClick={() => onDelete(msg.id)}
-            className="text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          <div>
+            {confirmDelete ? (
+              <span className="inline-flex items-center gap-1 text-[10px]">
+                <button
+                  onClick={() => onDelete(msg.id)}
+                  className="px-2 py-0.5 rounded-md bg-destructive text-destructive-foreground font-black hover:bg-destructive/90 transition-all cursor-pointer"
+                >
+                  Delete?
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="px-1.5 py-0.5 rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  ✕
+                </button>
+              </span>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                title="Delete message"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         )}
       </div>
 

@@ -217,7 +217,7 @@ function BookContent() {
   const { duration, totalAmount, depositAmount } = getBookingDetails();
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 animate-in fade-in zoom-in-95 duration-500 bg-black" dir={isArabic ? 'rtl' : 'ltr'}>
+    <div className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-8 animate-in fade-in zoom-in-95 duration-500" dir={isArabic ? 'rtl' : 'ltr'}>
       {/* Stadium Header Card */}
       <BookingPitchHeader pitch={pitch} isArabic={isArabic} />
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from '@/i18n/routing';
+import { useRouter, Link } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import { doc, onSnapshot, getDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner';
 import { submitReceipt } from '@/lib/firebase/booking';
 import { useTranslations, useLocale } from 'next-intl';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Lock } from 'lucide-react';
 import { CheckoutPageSkeleton } from '@/components/skeletons/PageSkeletons';
 import imageCompression from 'browser-image-compression';
 import { CountdownTimer } from '@/components/CountdownTimer';
@@ -187,22 +187,29 @@ function CheckoutForm() {
   return (
     <div className="w-full max-w-5xl space-y-8 animate-in fade-in duration-500">
       {/* Checkout Progress Stepper */}
-      <div className="p-4 rounded-3xl stadium-glass border-white/10 shadow-xl flex items-center justify-around text-xs font-bold">
-        <div className="flex items-center gap-2 text-emerald-400">
+      <div className="p-4 rounded-3xl bg-card border border-border shadow-xl flex items-center justify-around text-xs font-bold">
+        <Link
+          href={`/book?pitchId=${booking.pitchId}`}
+          className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer group"
+          title="Click to revisit pitch selection (releases current hold)"
+        >
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          <span>{t('lockPitchStep')}</span>
-        </div>
-        <span className="text-white/20">→</span>
+          <span className="group-hover:underline">{t('lockPitchStep')}</span>
+        </Link>
+        <span className="text-muted-foreground/40">→</span>
         <div className="flex items-center gap-2 text-primary font-black">
-          <span className="w-5 h-5 rounded-full bg-primary text-black flex items-center justify-center text-[10px] shadow-sm">
+          <span className="w-5 h-5 rounded-full bg-primary text-black flex items-center justify-center text-[10px] shadow-sm font-black">
             2
           </span>
           <span>{t('payDepositStep')}</span>
         </div>
-        <span className="text-white/20">→</span>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <span className="w-5 h-5 rounded-full bg-white/10 text-muted-foreground flex items-center justify-center text-[10px]">
-            3
+        <span className="text-muted-foreground/40">→</span>
+        <div
+          className="flex items-center gap-2 text-muted-foreground opacity-70 cursor-not-allowed"
+          title="Locked: Upload receipt to confirm"
+        >
+          <span className="w-5 h-5 rounded-full bg-muted border border-border text-muted-foreground flex items-center justify-center text-[10px]">
+            <Lock className="w-3 h-3 text-muted-foreground" />
           </span>
           <span>{t('instantConfirmStep')}</span>
         </div>
